@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Decoder - DevTools.fm</title>
+  <meta name="description" content="Decode and inspect JSON Web Tokens. View header, payload, claims, and expiration. Free, runs in your browser.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="/">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="/" class="back-link">&larr; All Tools</a>
+    <h1>JWT Decoder</h1>
+    <p class="description">Paste a JWT to decode its header and payload. No data leaves your browser.</p>
+
+    <div class="tool-panel" style="margin-bottom: 16px;">
+      <div class="panel-header">JWT Token</div>
+      <textarea class="tool-textarea" id="input" style="min-height: 120px;" placeholder="Paste your JWT token here... (eyJhbGciOi...)"></textarea>
+    </div>
+
+    <div id="error" class="status status-error" style="display:none;"></div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Header</div>
+        <textarea class="tool-textarea" id="header-out" readonly style="min-height: 200px;"></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">Payload</div>
+        <textarea class="tool-textarea" id="payload-out" readonly style="min-height: 200px;"></textarea>
+      </div>
+    </div>
+
+    <div id="claims" style="margin-top: 16px; display: none;">
+      <div class="tool-panel">
+        <div class="panel-header">Token Info</div>
+        <div id="claims-info" style="padding: 16px; font-family: var(--mono); font-size: 0.85rem;"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $header = document.getElementById('header-out');
+    const $payload = document.getElementById('payload-out');
+    const $error = document.getElementById('error');
+    const $claims = document.getElementById('claims');
+    const $claimsInfo = document.getElementById('claims-info');
+
+    function b64decode(str) {
+      str = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (str.length % 4) str += '=';
+      return decodeURIComponent(escape(atob(str)));
+    }
+
+    function decodeJWT() {
+      const token = $input.value.trim();
+      if (!token) { $header.value = ''; $payload.value = ''; $error.style.display = 'none'; $claims.style.display = 'none'; return; }
+
+      const parts = token.split('.');
+      if (parts.length < 2) {
+        $error.textContent = 'Invalid JWT: expected at least 2 parts separated by dots';
+        $error.style.display = 'block';
+        $header.value = ''; $payload.value = '';
+        return;
+      }
+
+      try {
+        const header = JSON.parse(b64decode(parts[0]));
+        const payload = JSON.parse(b64decode(parts[1]));
+
+        $header.value = JSON.stringify(header, null, 2);
+        $payload.value = JSON.stringify(payload, null, 2);
+        $error.style.display = 'none';
+
+        // Show token info
+        let info = [];
+        if (header.alg) info.push(`Algorithm: ${header.alg}`);
+        if (header.typ) info.push(`Type: ${header.typ}`);
+        if (payload.iss) info.push(`Issuer: ${payload.iss}`);
+        if (payload.sub) info.push(`Subject: ${payload.sub}`);
+        if (payload.aud) info.push(`Audience: ${Array.isArray(payload.aud) ? payload.aud.join(', ') : payload.aud}`);
+
+        if (payload.iat) {
+          const d = new Date(payload.iat * 1000);
+          info.push(`Issued: ${d.toISOString()}`);
+        }
+        if (payload.exp) {
+          const d = new Date(payload.exp * 1000);
+          const expired = d < new Date();
+          info.push(`Expires: ${d.toISOString()} ${expired ? '(EXPIRED)' : '(valid)'}`);
+        }
+        if (payload.nbf) {
+          const d = new Date(payload.nbf * 1000);
+          info.push(`Not Before: ${d.toISOString()}`);
+        }
+
+        if (info.length > 0) {
+          $claimsInfo.innerHTML = info.map(i =>
+            `<div style="padding: 4px 0; ${i.includes('EXPIRED') ? 'color: var(--error);' : ''}">${i}</div>`
+          ).join('');
+          $claims.style.display = 'block';
+        } else {
+          $claims.style.display = 'none';
+        }
+      } catch (e) {
+        $error.textContent = `Decode error: ${e.message}`;
+        $error.style.display = 'block';
+        $header.value = ''; $payload.value = '';
+      }
+    }
+
+    $input.addEventListener('input', decodeJWT);
+    $input.addEventListener('paste', () => setTimeout(decodeJWT, 50));
+  </script>
+</body>
+</html>

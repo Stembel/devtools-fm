@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Formatter & Validator - DevTools.fm</title>
+  <meta name="description" content="Format, validate, and minify JSON online. Free, fast, no signup. Syntax error detection with line numbers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="/">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="/" class="back-link">&larr; All Tools</a>
+    <h1>JSON Formatter & Validator</h1>
+    <p class="description">Paste your JSON to format, validate, or minify. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="formatJSON()">Format</button>
+        <button class="btn" onclick="minifyJSON()">Minify</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Indent:
+          <select id="indent">
+            <option value="2" selected>2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="tab">Tab</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste JSON here...\n\n{"example": "value", "count": 42}'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Formatted output will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $indent = document.getElementById('indent');
+
+    function getIndent() {
+      const v = $indent.value;
+      return v === 'tab' ? '\t' : Number(v);
+    }
+
+    function formatJSON() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+      try {
+        const obj = JSON.parse(raw);
+        $output.value = JSON.stringify(obj, null, getIndent());
+        showStatus('Valid JSON', true);
+      } catch (e) {
+        $output.value = '';
+        showStatus(e.message, false);
+      }
+    }
+
+    function minifyJSON() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+      try {
+        const obj = JSON.parse(raw);
+        $output.value = JSON.stringify(obj);
+        showStatus('Minified', true);
+      } catch (e) {
+        showStatus(e.message, false);
+      }
+    }
+
+    function copyOutput() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $status.textContent = '';
+      $status.className = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    // Auto-format on paste
+    $input.addEventListener('paste', () => setTimeout(formatJSON, 50));
+  </script>
+</body>
+</html>

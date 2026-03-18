@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Preview - DevTools.fm</title>
+  <meta name="description" content="Write Markdown and see rendered output in real-time. Supports GFM. Free online Markdown editor and previewer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    #preview {
+      padding: 20px;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      min-height: 400px;
+      overflow-y: auto;
+    }
+    #preview h1 { font-size: 1.8rem; margin: 0 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    #preview h2 { font-size: 1.4rem; margin: 24px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    #preview h3 { font-size: 1.15rem; margin: 20px 0 8px; }
+    #preview h4 { font-size: 1rem; margin: 16px 0 8px; }
+    #preview p { margin: 0 0 12px; }
+    #preview code {
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: var(--mono);
+      font-size: 0.85em;
+    }
+    #preview pre {
+      background: var(--surface-2);
+      padding: 16px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin: 0 0 16px;
+    }
+    #preview pre code { background: none; padding: 0; }
+    #preview blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 16px;
+      color: var(--text-muted);
+      margin: 0 0 12px;
+    }
+    #preview ul, #preview ol { padding-left: 24px; margin: 0 0 12px; }
+    #preview li { margin: 4px 0; }
+    #preview a { color: var(--accent); }
+    #preview hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    #preview table { border-collapse: collapse; width: 100%; margin: 0 0 16px; }
+    #preview th, #preview td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    #preview th { background: var(--surface-2); font-weight: 600; }
+    #preview img { max-width: 100%; border-radius: var(--radius); }
+    #preview strong { font-weight: 700; }
+    #preview em { font-style: italic; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="/">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="/" class="back-link">&larr; All Tools</a>
+    <h1>Markdown Preview</h1>
+    <p class="description">Write Markdown on the left, see rendered output on the right. Supports GitHub-Flavored Markdown.</p>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Markdown</div>
+        <textarea class="tool-textarea" id="input" placeholder="# Hello World&#10;&#10;Write some **markdown** here...">
+# Welcome to DevTools.fm
+
+A collection of **free developer tools** that run entirely in your browser.
+
+## Features
+
+- Fast and lightweight
+- No signup required
+- Privacy-first: nothing leaves your browser
+- Works offline
+
+## Code Example
+
+```javascript
+const greeting = "Hello, World!";
+console.log(greeting);
+```
+
+> "The best tools are the ones that get out of your way."
+
+| Tool | Description |
+|------|-------------|
+| JSON Formatter | Format & validate JSON |
+| Base64 | Encode & decode |
+| JWT Decoder | Inspect tokens |
+
+---
+
+Made with care. [Visit DevTools.fm](/)
+</textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">Preview</div>
+        <div id="preview"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // Lightweight markdown parser -- handles common GFM
+    function parseMarkdown(md) {
+      let html = md;
+
+      // Code blocks
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+        `<pre><code class="language-${lang}">${escapeHtml(code.trim())}</code></pre>`
+      );
+
+      // Inline code
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Tables
+      html = html.replace(/^(\|.+\|)\n(\|[-| :]+\|)\n((?:\|.+\|\n?)+)/gm, (_, header, sep, body) => {
+        const heads = header.split('|').filter(s => s.trim()).map(s => `<th>${s.trim()}</th>`).join('');
+        const rows = body.trim().split('\n').map(row => {
+          const cells = row.split('|').filter(s => s.trim()).map(s => `<td>${s.trim()}</td>`).join('');
+          return `<tr>${cells}</tr>`;
+        }).join('');
+        return `<table><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
+      });
+
+      // Headers
+      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+      // Blockquotes
+      html = html.replace(/^> (.+)$/gm, '<blockquote><p>$1</p></blockquote>');
+
+      // HR
+      html = html.replace(/^---$/gm, '<hr>');
+
+      // Bold & italic
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+      // Links & images
+      html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+      // Unordered lists
+      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+      // Paragraphs
+      html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
+
+      // Clean up
+      html = html.replace(/<\/blockquote>\n<blockquote>/g, '\n');
+
+      return html;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    const $input = document.getElementById('input');
+    const $preview = document.getElementById('preview');
+
+    function render() {
+      $preview.innerHTML = parseMarkdown($input.value);
+    }
+
+    $input.addEventListener('input', render);
+    render();
+  </script>
+</body>
+</html>

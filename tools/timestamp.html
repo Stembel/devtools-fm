@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unix Timestamp Converter - DevTools.fm</title>
+  <meta name="description" content="Convert Unix timestamps to dates and dates to timestamps. Live clock. Free online tool.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="/">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="/" class="back-link">&larr; All Tools</a>
+    <h1>Unix Timestamp Converter</h1>
+    <p class="description">Convert between Unix timestamps and human-readable dates.</p>
+
+    <div class="tool-panel" style="margin-bottom: 16px;">
+      <div class="panel-header">Current Time</div>
+      <div class="ts-current" id="live-clock">-</div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Timestamp to Date</div>
+        <div class="ts-grid">
+          <div class="ts-field" style="grid-column: 1 / -1;">
+            <label>Unix Timestamp</label>
+            <input type="text" id="ts-input" placeholder="e.g. 1700000000">
+          </div>
+          <div class="ts-field">
+            <label>UTC</label>
+            <input type="text" id="ts-utc" readonly>
+          </div>
+          <div class="ts-field">
+            <label>Local</label>
+            <input type="text" id="ts-local" readonly>
+          </div>
+          <div class="ts-field">
+            <label>ISO 8601</label>
+            <input type="text" id="ts-iso" readonly>
+          </div>
+          <div class="ts-field">
+            <label>Relative</label>
+            <input type="text" id="ts-relative" readonly>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-panel">
+        <div class="panel-header">Date to Timestamp</div>
+        <div class="ts-grid">
+          <div class="ts-field">
+            <label>Date</label>
+            <input type="date" id="dt-date">
+          </div>
+          <div class="ts-field">
+            <label>Time</label>
+            <input type="time" id="dt-time" step="1" value="00:00:00">
+          </div>
+          <div class="ts-field" style="grid-column: 1 / -1;">
+            <label>Unix Timestamp (seconds)</label>
+            <input type="text" id="dt-result" readonly>
+          </div>
+          <div class="ts-field" style="grid-column: 1 / -1;">
+            <label>Unix Timestamp (milliseconds)</label>
+            <input type="text" id="dt-result-ms" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    function relative(ts) {
+      const diff = Math.floor(Date.now() / 1000) - ts;
+      const abs = Math.abs(diff);
+      const suffix = diff > 0 ? 'ago' : 'from now';
+      if (abs < 60) return `${abs} seconds ${suffix}`;
+      if (abs < 3600) return `${Math.floor(abs / 60)} minutes ${suffix}`;
+      if (abs < 86400) return `${Math.floor(abs / 3600)} hours ${suffix}`;
+      if (abs < 2592000) return `${Math.floor(abs / 86400)} days ${suffix}`;
+      if (abs < 31536000) return `${Math.floor(abs / 2592000)} months ${suffix}`;
+      return `${Math.floor(abs / 31536000)} years ${suffix}`;
+    }
+
+    // Live clock
+    setInterval(() => {
+      const now = Math.floor(Date.now() / 1000);
+      document.getElementById('live-clock').textContent = now;
+    }, 1000);
+
+    // Timestamp -> Date
+    const $tsIn = document.getElementById('ts-input');
+    $tsIn.addEventListener('input', () => {
+      let val = $tsIn.value.trim();
+      if (!val) { ['ts-utc','ts-local','ts-iso','ts-relative'].forEach(id => document.getElementById(id).value = ''); return; }
+      let ts = Number(val);
+      // Auto-detect milliseconds
+      if (ts > 1e12) ts = Math.floor(ts / 1000);
+      const d = new Date(ts * 1000);
+      if (isNaN(d.getTime())) return;
+      document.getElementById('ts-utc').value = d.toUTCString();
+      document.getElementById('ts-local').value = d.toLocaleString();
+      document.getElementById('ts-iso').value = d.toISOString();
+      document.getElementById('ts-relative').value = relative(ts);
+    });
+
+    // Date -> Timestamp
+    function dateToTs() {
+      const date = document.getElementById('dt-date').value;
+      const time = document.getElementById('dt-time').value || '00:00:00';
+      if (!date) return;
+      const d = new Date(`${date}T${time}`);
+      const ts = Math.floor(d.getTime() / 1000);
+      document.getElementById('dt-result').value = ts;
+      document.getElementById('dt-result-ms').value = d.getTime();
+    }
+
+    document.getElementById('dt-date').addEventListener('input', dateToTs);
+    document.getElementById('dt-time').addEventListener('input', dateToTs);
+
+    // Init with current date
+    const now = new Date();
+    document.getElementById('dt-date').value = now.toISOString().split('T')[0];
+    document.getElementById('dt-time').value = now.toTimeString().split(' ')[0];
+    dateToTs();
+    document.getElementById('live-clock').textContent = Math.floor(Date.now() / 1000);
+  </script>
+</body>
+</html>

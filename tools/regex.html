@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regex Tester - DevTools.fm</title>
+  <meta name="description" content="Test regular expressions with real-time matching, capture groups, and flags. Free online regex tester.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .regex-input {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0;
+      margin-bottom: 16px;
+    }
+    .regex-input .slash {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      padding: 12px;
+      user-select: none;
+    }
+    .regex-input input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      padding: 12px 0;
+      outline: none;
+    }
+    .regex-input .flags {
+      width: 60px;
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--border);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      padding: 12px;
+      outline: none;
+    }
+    mark {
+      background: rgba(99, 102, 241, 0.3);
+      color: var(--text);
+      border-radius: 2px;
+      padding: 1px 0;
+    }
+    .match-list {
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+    .match-item {
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .match-item .idx { color: var(--accent); font-weight: 600; }
+    .match-item .groups { color: var(--text-muted); margin-top: 4px; font-size: 0.8rem; }
+    #highlighted {
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="/">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="/" class="back-link">&larr; All Tools</a>
+    <h1>Regex Tester</h1>
+    <p class="description">Test regular expressions with real-time highlighting and capture group display.</p>
+
+    <div class="regex-input">
+      <span class="slash">/</span>
+      <input type="text" id="pattern" placeholder="Enter regex pattern...">
+      <span class="slash">/</span>
+      <input type="text" id="flags" class="flags" value="g" placeholder="flags">
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Test String</div>
+        <textarea class="tool-textarea" id="input" placeholder="Enter text to test against..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Matches
+          <span id="match-count" style="font-weight: 400;"></span>
+        </div>
+        <div id="highlighted"></div>
+      </div>
+    </div>
+
+    <div id="groups-panel" class="tool-panel" style="margin-top: 16px; display: none;">
+      <div class="panel-header">Match Details</div>
+      <div class="match-list" id="match-list"></div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $pat = document.getElementById('pattern');
+    const $flags = document.getElementById('flags');
+    const $input = document.getElementById('input');
+    const $hl = document.getElementById('highlighted');
+    const $mc = document.getElementById('match-count');
+    const $gp = document.getElementById('groups-panel');
+    const $ml = document.getElementById('match-list');
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function test() {
+      const pattern = $pat.value;
+      const flags = $flags.value;
+      const text = $input.value;
+
+      if (!pattern || !text) {
+        $hl.textContent = text || '';
+        $mc.textContent = '';
+        $gp.style.display = 'none';
+        return;
+      }
+
+      let re;
+      try {
+        re = new RegExp(pattern, flags);
+      } catch (e) {
+        $hl.innerHTML = `<span style="color: var(--error);">${escapeHtml(e.message)}</span>`;
+        $mc.textContent = '';
+        $gp.style.display = 'none';
+        return;
+      }
+
+      // Find all matches
+      const matches = [];
+      if (flags.includes('g')) {
+        let m;
+        while ((m = re.exec(text)) !== null) {
+          matches.push({ index: m.index, length: m[0].length, match: m[0], groups: [...m].slice(1) });
+          if (m[0].length === 0) re.lastIndex++;
+        }
+      } else {
+        const m = re.exec(text);
+        if (m) matches.push({ index: m.index, length: m[0].length, match: m[0], groups: [...m].slice(1) });
+      }
+
+      $mc.textContent = `${matches.length} match${matches.length !== 1 ? 'es' : ''}`;
+
+      // Highlight text
+      let html = '';
+      let lastIdx = 0;
+      for (const m of matches) {
+        html += escapeHtml(text.slice(lastIdx, m.index));
+        html += `<mark>${escapeHtml(m.match)}</mark>`;
+        lastIdx = m.index + m.length;
+      }
+      html += escapeHtml(text.slice(lastIdx));
+      $hl.innerHTML = html || escapeHtml(text);
+
+      // Show match details
+      if (matches.length > 0 && matches.some(m => m.groups.length > 0)) {
+        $ml.innerHTML = matches.map((m, i) =>
+          `<div class="match-item">
+            <span class="idx">#${i + 1}</span> "${escapeHtml(m.match)}" at index ${m.index}
+            ${m.groups.length ? `<div class="groups">Groups: ${m.groups.map((g, j) => `$${j + 1}="${escapeHtml(g || '')}"`).join(', ')}</div>` : ''}
+          </div>`
+        ).join('');
+        $gp.style.display = 'block';
+      } else {
+        $gp.style.display = 'none';
+      }
+    }
+
+    $pat.addEventListener('input', test);
+    $flags.addEventListener('input', test);
+    $input.addEventListener('input', test);
+  </script>
+</body>
+</html>

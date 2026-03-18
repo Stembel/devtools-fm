@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 Encode / Decode - DevTools.fm</title>
+  <meta name="description" content="Encode and decode Base64 strings online. Free, fast, runs in your browser. Supports UTF-8 text.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="/">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="/" class="back-link">&larr; All Tools</a>
+    <h1>Base64 Encode / Decode</h1>
+    <p class="description">Encode text to Base64 or decode Base64 strings. Everything runs in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="encode()">Encode</button>
+        <button class="btn btn-primary" onclick="decode()">Decode</button>
+        <button class="btn" onclick="copyOutput()">Copy Output</button>
+        <button class="btn" onclick="swap()">Swap</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder="Enter text or Base64 string..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Result will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $i = document.getElementById('input');
+    const $o = document.getElementById('output');
+    const $s = document.getElementById('status');
+
+    function encode() {
+      try {
+        $o.value = btoa(unescape(encodeURIComponent($i.value)));
+        $s.textContent = 'Encoded'; $s.className = 'status status-success';
+      } catch (e) {
+        $s.textContent = e.message; $s.className = 'status status-error';
+      }
+    }
+
+    function decode() {
+      try {
+        $o.value = decodeURIComponent(escape(atob($i.value.trim())));
+        $s.textContent = 'Decoded'; $s.className = 'status status-success';
+      } catch (e) {
+        $s.textContent = 'Invalid Base64'; $s.className = 'status status-error';
+      }
+    }
+
+    function copyOutput() {
+      if ($o.value) { navigator.clipboard.writeText($o.value); $s.textContent = 'Copied!'; $s.className = 'status status-success'; }
+    }
+
+    function swap() { const t = $i.value; $i.value = $o.value; $o.value = t; }
+    function clearAll() { $i.value = ''; $o.value = ''; $s.textContent = ''; }
+  </script>
+</body>
+</html>

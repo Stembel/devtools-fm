@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Diff - DevTools.fm</title>
+  <meta name="description" content="Compare two texts and see the differences highlighted. Side-by-side diff view. Free online diff tool.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .diff-output {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 16px;
+      min-height: 300px;
+      line-height: 1.8;
+    }
+    .diff-add { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .diff-del { background: rgba(239, 68, 68, 0.15); color: #f87171; text-decoration: line-through; }
+    .diff-line { padding: 2px 8px; border-radius: 2px; display: block; }
+    .diff-stats { font-size: 0.85rem; color: var(--text-muted); padding: 8px 0; }
+    .diff-stats span { margin-right: 16px; }
+    .diff-stats .add-count { color: var(--success); }
+    .diff-stats .del-count { color: var(--error); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="/">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="/" class="back-link">&larr; All Tools</a>
+    <h1>Text Diff</h1>
+    <p class="description">Compare two texts and see the differences highlighted line by line.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="compare()">Compare</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+        <button class="btn" onclick="swapTexts()">Swap</button>
+      </div>
+      <div id="stats" class="diff-stats"></div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Original</div>
+        <textarea class="tool-textarea" id="text1" placeholder="Paste original text here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">Modified</div>
+        <textarea class="tool-textarea" id="text2" placeholder="Paste modified text here..."></textarea>
+      </div>
+    </div>
+
+    <div class="tool-panel" style="margin-top: 16px;" id="diff-panel">
+      <div class="panel-header">Diff Result</div>
+      <div class="diff-output" id="output"></div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // Simple LCS-based line diff
+    function lcs(a, b) {
+      const m = a.length, n = b.length;
+      const dp = Array.from({length: m + 1}, () => Array(n + 1).fill(0));
+      for (let i = 1; i <= m; i++)
+        for (let j = 1; j <= n; j++)
+          dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+
+      const result = [];
+      let i = m, j = n;
+      while (i > 0 && j > 0) {
+        if (a[i-1] === b[j-1]) {
+          result.unshift({type: 'same', line: a[i-1]});
+          i--; j--;
+        } else if (dp[i-1][j] > dp[i][j-1]) {
+          result.unshift({type: 'del', line: a[i-1]});
+          i--;
+        } else {
+          result.unshift({type: 'add', line: b[j-1]});
+          j--;
+        }
+      }
+      while (i > 0) { result.unshift({type: 'del', line: a[--i]}); }
+      while (j > 0) { result.unshift({type: 'add', line: b[--j]}); }
+      return result;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function compare() {
+      const a = document.getElementById('text1').value.split('\n');
+      const b = document.getElementById('text2').value.split('\n');
+      const diff = lcs(a, b);
+
+      let adds = 0, dels = 0;
+      const html = diff.map(d => {
+        if (d.type === 'add') { adds++; return `<span class="diff-line diff-add">+ ${escapeHtml(d.line)}</span>`; }
+        if (d.type === 'del') { dels++; return `<span class="diff-line diff-del">- ${escapeHtml(d.line)}</span>`; }
+        return `<span class="diff-line">&nbsp; ${escapeHtml(d.line)}</span>`;
+      }).join('');
+
+      document.getElementById('output').innerHTML = html || '<span style="color: var(--text-muted);">No differences found.</span>';
+      document.getElementById('stats').innerHTML =
+        `<span class="add-count">+${adds} added</span>` +
+        `<span class="del-count">-${dels} removed</span>` +
+        `<span>${diff.filter(d => d.type === 'same').length} unchanged</span>`;
+    }
+
+    function clearAll() {
+      document.getElementById('text1').value = '';
+      document.getElementById('text2').value = '';
+      document.getElementById('output').innerHTML = '';
+      document.getElementById('stats').innerHTML = '';
+    }
+
+    function swapTexts() {
+      const t = document.getElementById('text1').value;
+      document.getElementById('text1').value = document.getElementById('text2').value;
+      document.getElementById('text2').value = t;
+    }
+  </script>
+</body>
+</html>
