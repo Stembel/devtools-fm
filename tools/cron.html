@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cron Expression Generator & Parser - Crontab Guru | DevTools.fm</title>
+  <meta name="description" content="Build and parse cron expressions visually. See next run times, get human-readable descriptions. Free crontab helper.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/cron.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Cron Expression Generator</h1>
+    <p class="description">Build, parse, and understand cron expressions. See upcoming run times instantly.</p>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:24px;flex-wrap:wrap">
+      <input type="text" id="cronInput" value="*/5 * * * *" style="flex:1;min-width:260px;padding:12px 16px;font-family:var(--mono);font-size:1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);outline:none;text-align:center;letter-spacing:2px" spellcheck="false">
+      <button class="btn btn-primary" onclick="parse()">Parse</button>
+    </div>
+
+    <div id="description" style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;font-size:1rem;color:var(--accent)"></div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:24px" id="fieldGrid">
+      <div class="cron-field">
+        <label>Minute</label>
+        <select id="f0" onchange="buildFromFields()">
+          <option value="*">Every (*)</option>
+          <option value="*/5" selected>Every 5</option>
+          <option value="*/10">Every 10</option>
+          <option value="*/15">Every 15</option>
+          <option value="*/30">Every 30</option>
+          <option value="0">0 (top of hour)</option>
+        </select>
+      </div>
+      <div class="cron-field">
+        <label>Hour</label>
+        <select id="f1" onchange="buildFromFields()">
+          <option value="*" selected>Every (*)</option>
+          <option value="*/2">Every 2</option>
+          <option value="*/6">Every 6</option>
+          <option value="*/12">Every 12</option>
+          <option value="0">0 (midnight)</option>
+          <option value="9">9 AM</option>
+          <option value="12">12 PM</option>
+          <option value="18">6 PM</option>
+        </select>
+      </div>
+      <div class="cron-field">
+        <label>Day (Month)</label>
+        <select id="f2" onchange="buildFromFields()">
+          <option value="*" selected>Every (*)</option>
+          <option value="1">1st</option>
+          <option value="15">15th</option>
+          <option value="1,15">1st & 15th</option>
+        </select>
+      </div>
+      <div class="cron-field">
+        <label>Month</label>
+        <select id="f3" onchange="buildFromFields()">
+          <option value="*" selected>Every (*)</option>
+          <option value="1">January</option>
+          <option value="*/3">Quarterly</option>
+          <option value="6">June</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+      <div class="cron-field">
+        <label>Day (Week)</label>
+        <select id="f4" onchange="buildFromFields()">
+          <option value="*" selected>Every (*)</option>
+          <option value="1-5">Weekdays</option>
+          <option value="0,6">Weekends</option>
+          <option value="1">Monday</option>
+          <option value="5">Friday</option>
+        </select>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:12px;color:var(--text-muted);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Presets</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+      <button class="btn" onclick="setExpr('* * * * *')">Every minute</button>
+      <button class="btn" onclick="setExpr('*/5 * * * *')">Every 5 min</button>
+      <button class="btn" onclick="setExpr('0 * * * *')">Every hour</button>
+      <button class="btn" onclick="setExpr('0 0 * * *')">Daily midnight</button>
+      <button class="btn" onclick="setExpr('0 9 * * 1-5')">Weekdays 9 AM</button>
+      <button class="btn" onclick="setExpr('0 0 * * 0')">Weekly Sunday</button>
+      <button class="btn" onclick="setExpr('0 0 1 * *')">Monthly 1st</button>
+      <button class="btn" onclick="setExpr('0 0 1 1 *')">Yearly Jan 1</button>
+    </div>
+
+    <h3 style="margin-bottom:12px;color:var(--text-muted);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Next 5 Run Times</h3>
+    <div id="nextRuns" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:var(--mono);font-size:0.85rem;line-height:2"></div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <style>
+    .cron-field { display:flex; flex-direction:column; gap:4px; }
+    .cron-field label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .cron-field select { background:var(--surface); border:1px solid var(--border); color:var(--text); padding:8px; border-radius:4px; font-size:0.8rem; }
+    @media(max-width:768px) { #fieldGrid { grid-template-columns:repeat(2,1fr); } }
+  </style>
+
+  <script>
+    const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    function describeCron(expr) {
+      const parts = expr.trim().split(/\s+/);
+      if (parts.length !== 5) return 'Invalid: need exactly 5 fields';
+      const [min, hr, dom, mon, dow] = parts;
+      let desc = [];
+
+      if (min === '*' && hr === '*') desc.push('Every minute');
+      else if (min.startsWith('*/')) desc.push(`Every ${min.slice(2)} minutes`);
+      else if (hr === '*') desc.push(`At minute ${min} of every hour`);
+      else if (min.startsWith('*/') === false && hr.startsWith('*/') === false) {
+        const h = parseInt(hr), m = parseInt(min);
+        if (!isNaN(h) && !isNaN(m)) desc.push(`At ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+        else desc.push(`At minute ${min}, hour ${hr}`);
+      }
+
+      if (hr.startsWith('*/')) desc.push(`every ${hr.slice(2)} hours`);
+
+      if (dom !== '*') {
+        if (dom.includes(',')) desc.push(`on day ${dom} of the month`);
+        else desc.push(`on day ${dom} of the month`);
+      }
+      if (mon !== '*') {
+        if (mon.startsWith('*/')) desc.push(`every ${mon.slice(2)} months`);
+        else {
+          const m = parseInt(mon);
+          desc.push(`in ${MONTHS[m] || 'month ' + mon}`);
+        }
+      }
+      if (dow !== '*') {
+        if (dow === '1-5') desc.push('on weekdays');
+        else if (dow === '0,6') desc.push('on weekends');
+        else {
+          const d = parseInt(dow);
+          if (!isNaN(d)) desc.push(`on ${DAYS[d] || dow}`);
+          else desc.push(`on day-of-week ${dow}`);
+        }
+      }
+      return desc.join(', ') || expr;
+    }
+
+    function getNextRuns(expr, count = 5) {
+      const parts = expr.trim().split(/\s+/);
+      if (parts.length !== 5) return [];
+      const [minF, hrF, domF, monF, dowF] = parts;
+
+      function matches(val, field, max) {
+        if (field === '*') return true;
+        if (field.startsWith('*/')) return val % parseInt(field.slice(2)) === 0;
+        if (field.includes(',')) return field.split(',').map(Number).includes(val);
+        if (field.includes('-')) { const [a,b] = field.split('-').map(Number); return val >= a && val <= b; }
+        return val === parseInt(field);
+      }
+
+      const runs = [];
+      const d = new Date();
+      d.setSeconds(0, 0);
+      d.setMinutes(d.getMinutes() + 1);
+
+      for (let i = 0; i < 525600 && runs.length < count; i++) {
+        if (matches(d.getMinutes(), minF, 59) &&
+            matches(d.getHours(), hrF, 23) &&
+            matches(d.getDate(), domF, 31) &&
+            matches(d.getMonth() + 1, monF, 12) &&
+            matches(d.getDay(), dowF, 6)) {
+          runs.push(new Date(d));
+        }
+        d.setMinutes(d.getMinutes() + 1);
+      }
+      return runs;
+    }
+
+    function parse() {
+      const expr = document.getElementById('cronInput').value.trim();
+      document.getElementById('description').textContent = describeCron(expr);
+      const runs = getNextRuns(expr);
+      document.getElementById('nextRuns').innerHTML = runs.length
+        ? runs.map(d => d.toLocaleString('en-US', {weekday:'short', year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})).join('<br>')
+        : 'Could not calculate next runs';
+    }
+
+    function setExpr(expr) {
+      document.getElementById('cronInput').value = expr;
+      parse();
+    }
+
+    function buildFromFields() {
+      const expr = [0,1,2,3,4].map(i => document.getElementById('f'+i).value).join(' ');
+      document.getElementById('cronInput').value = expr;
+      parse();
+    }
+
+    parse();
+  </script>
+</body>
+</html>

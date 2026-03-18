@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Entity Encoder & Decoder - Escape HTML Online | DevTools.fm</title>
+  <meta name="description" content="Encode and decode HTML entities. Escape special characters for safe HTML. Convert &amp; &lt; &gt; and more.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/htmlentity.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>HTML Entity Encoder / Decoder</h1>
+    <p class="description">Encode special characters to HTML entities or decode them back. Prevent XSS and display HTML safely.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="encode()">Encode</button>
+        <button class="btn btn-primary" onclick="decode()">Decode</button>
+        <button class="btn" onclick="encodeAll()">Encode All</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Mode:
+          <select id="mode">
+            <option value="named">Named (&amp;amp;)</option>
+            <option value="numeric">Numeric (&amp;#38;)</option>
+            <option value="hex">Hex (&amp;#x26;)</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder='<div class="hello">Toms & Jerry\'s "place" &mdash; 100% fun</div>'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Encoded or decoded output will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <h3 style="color:var(--text-muted);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">Common HTML Entities</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px" id="refTable"></div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $i = document.getElementById('input');
+    const $o = document.getElementById('output');
+    const $s = document.getElementById('status');
+
+    const ENTITIES = {
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      '\u00a0': '&nbsp;', '\u00a9': '&copy;', '\u00ae': '&reg;', '\u2122': '&trade;',
+      '\u2014': '&mdash;', '\u2013': '&ndash;', '\u2018': '&lsquo;', '\u2019': '&rsquo;',
+      '\u201c': '&ldquo;', '\u201d': '&rdquo;', '\u2026': '&hellip;', '\u00b7': '&middot;',
+      '\u00d7': '&times;', '\u00f7': '&divide;', '\u2260': '&ne;', '\u2264': '&le;',
+      '\u2265': '&ge;', '\u00b0': '&deg;', '\u00b1': '&plusmn;'
+    };
+
+    const REVERSE = {};
+    for (const [ch, ent] of Object.entries(ENTITIES)) REVERSE[ent] = ch;
+
+    function encode() {
+      const raw = $i.value;
+      if (!raw) return;
+      const mode = document.getElementById('mode').value;
+      let result;
+      if (mode === 'named') {
+        result = raw.replace(/[&<>"']/g, ch => ENTITIES[ch] || ch);
+      } else if (mode === 'numeric') {
+        result = raw.replace(/[&<>"']/g, ch => '&#' + ch.charCodeAt(0) + ';');
+      } else {
+        result = raw.replace(/[&<>"']/g, ch => '&#x' + ch.charCodeAt(0).toString(16) + ';');
+      }
+      $o.value = result;
+      $s.textContent = 'Encoded'; $s.className = 'status status-success';
+    }
+
+    function encodeAll() {
+      const raw = $i.value;
+      if (!raw) return;
+      const mode = document.getElementById('mode').value;
+      let result = '';
+      for (const ch of raw) {
+        const code = ch.charCodeAt(0);
+        if (code > 127 || '&<>"\'/'.includes(ch)) {
+          if (mode === 'named' && ENTITIES[ch]) result += ENTITIES[ch];
+          else if (mode === 'numeric') result += '&#' + code + ';';
+          else result += '&#x' + code.toString(16) + ';';
+        } else {
+          result += ch;
+        }
+      }
+      $o.value = result;
+      $s.textContent = 'All special chars encoded'; $s.className = 'status status-success';
+    }
+
+    function decode() {
+      const raw = $i.value;
+      if (!raw) return;
+      const el = document.createElement('textarea');
+      el.innerHTML = raw;
+      $o.value = el.value;
+      $s.textContent = 'Decoded'; $s.className = 'status status-success';
+    }
+
+    function copyOutput() {
+      if ($o.value) { navigator.clipboard.writeText($o.value); $s.textContent = 'Copied!'; $s.className = 'status status-success'; }
+    }
+
+    function clearAll() { $i.value = ''; $o.value = ''; $s.textContent = ''; $s.className = ''; }
+
+    // Render reference table
+    const ref = [
+      ['&amp;', '&', 'Ampersand'], ['&lt;', '<', 'Less than'], ['&gt;', '>', 'Greater than'],
+      ['&quot;', '"', 'Quote'], ['&#39;', "'", 'Apostrophe'], ['&nbsp;', ' ', 'Non-breaking space'],
+      ['&copy;', '\u00a9', 'Copyright'], ['&reg;', '\u00ae', 'Registered'], ['&trade;', '\u2122', 'Trademark'],
+      ['&mdash;', '\u2014', 'Em dash'], ['&ndash;', '\u2013', 'En dash'], ['&hellip;', '\u2026', 'Ellipsis'],
+      ['&times;', '\u00d7', 'Multiply'], ['&divide;', '\u00f7', 'Divide'], ['&deg;', '\u00b0', 'Degree'],
+    ];
+    const table = document.getElementById('refTable');
+    ref.forEach(([ent, ch, name]) => {
+      const d = document.createElement('div');
+      d.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:0.8rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono)';
+      d.innerHTML = `<span style="color:var(--accent)">${ent}</span> <span>${ch}</span> <span style="color:var(--text-muted);font-family:var(--font);font-size:0.7rem">${name}</span>`;
+      table.appendChild(d);
+    });
+  </script>
+</body>
+</html>

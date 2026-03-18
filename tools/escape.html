@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>String Escape / Unescape - Escape Strings Online | DevTools.fm</title>
+  <meta name="description" content="Escape and unescape strings for JSON, HTML, URL, SQL, CSV, and more. Handle special characters safely. Free online tool.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/escape.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>String Escape / Unescape</h1>
+    <p class="description">Escape or unescape strings for different programming contexts. Handles JSON, Java, C, Python, and more.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="escapeStr()">Escape</button>
+        <button class="btn btn-primary" onclick="unescapeStr()">Unescape</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Format:
+          <select id="format">
+            <option value="json">JSON String</option>
+            <option value="java">Java / C / C++</option>
+            <option value="python">Python</option>
+            <option value="xml">XML / HTML</option>
+            <option value="sql">SQL (single quotes)</option>
+            <option value="csv">CSV</option>
+            <option value="shell">Shell / Bash</option>
+            <option value="unicode">Unicode (\uXXXX)</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder='Hello "World"
+Line 2 with tab:	and backslash: \
+Special: &lt;script&gt;alert("xss")&lt;/script&gt;'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Escaped output will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $i = document.getElementById('input');
+    const $o = document.getElementById('output');
+    const $s = document.getElementById('status');
+
+    const escapers = {
+      json(s) {
+        return JSON.stringify(s).slice(1, -1);
+      },
+      java(s) {
+        return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'")
+          .replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')
+          .replace(/\0/g, '\\0');
+      },
+      python(s) {
+        return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'")
+          .replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+      },
+      xml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      },
+      sql(s) {
+        return s.replace(/'/g, "''");
+      },
+      csv(s) {
+        if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+      },
+      shell(s) {
+        return s.replace(/([\\'"$`!#&|;()\s])/g, '\\$1');
+      },
+      unicode(s) {
+        return Array.from(s).map(c => {
+          const code = c.charCodeAt(0);
+          return code > 127 ? '\\u' + code.toString(16).padStart(4, '0') : c;
+        }).join('');
+      }
+    };
+
+    const unescapers = {
+      json(s) {
+        try { return JSON.parse('"' + s + '"'); } catch(e) { return s.replace(/\\n/g,'\n').replace(/\\t/g,'\t').replace(/\\r/g,'\r').replace(/\\"/g,'"').replace(/\\\\/g,'\\'); }
+      },
+      java(s) {
+        return s.replace(/\\n/g,'\n').replace(/\\r/g,'\r').replace(/\\t/g,'\t')
+          .replace(/\\"/g,'"').replace(/\\'/g,"'").replace(/\\0/g,'\0').replace(/\\\\/g,'\\');
+      },
+      python(s) {
+        return s.replace(/\\n/g,'\n').replace(/\\r/g,'\r').replace(/\\t/g,'\t')
+          .replace(/\\"/g,'"').replace(/\\'/g,"'").replace(/\\\\/g,'\\');
+      },
+      xml(s) {
+        return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+          .replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&#(\d+);/g, (m,n) => String.fromCharCode(n));
+      },
+      sql(s) {
+        return s.replace(/''/g, "'");
+      },
+      csv(s) {
+        if (s.startsWith('"') && s.endsWith('"')) return s.slice(1,-1).replace(/""/g,'"');
+        return s;
+      },
+      shell(s) {
+        return s.replace(/\\(.)/g, '$1');
+      },
+      unicode(s) {
+        return s.replace(/\\u([0-9a-fA-F]{4})/g, (m,h) => String.fromCharCode(parseInt(h,16)));
+      }
+    };
+
+    function escapeStr() {
+      const raw = $i.value;
+      if (!raw) return;
+      const fmt = document.getElementById('format').value;
+      $o.value = escapers[fmt](raw);
+      $s.textContent = `Escaped (${fmt})`; $s.className = 'status status-success';
+    }
+
+    function unescapeStr() {
+      const raw = $i.value;
+      if (!raw) return;
+      const fmt = document.getElementById('format').value;
+      $o.value = unescapers[fmt](raw);
+      $s.textContent = `Unescaped (${fmt})`; $s.className = 'status status-success';
+    }
+
+    function copyOutput() {
+      if ($o.value) { navigator.clipboard.writeText($o.value); $s.textContent = 'Copied!'; $s.className = 'status status-success'; }
+    }
+
+    function clearAll() { $i.value = ''; $o.value = ''; $s.textContent = ''; $s.className = ''; }
+  </script>
+</body>
+</html>

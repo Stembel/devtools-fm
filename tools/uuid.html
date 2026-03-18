@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID Generator - Generate UUID v4 Online | DevTools.fm</title>
+  <meta name="description" content="Generate random UUID v4 instantly. Bulk generate multiple UUIDs. Free, fast, no signup required.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/uuid.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>UUID Generator</h1>
+    <p class="description">Generate random UUID v4 identifiers. Cryptographically secure, generated in your browser.</p>
+
+    <div class="tool-controls">
+      <label>Count: <input type="number" id="count" value="1" min="1" max="100" style="width:80px;padding:8px;border-radius:6px;border:1px solid #333;background:#1a1a2e;color:#e0e0e0;font-family:'JetBrains Mono',monospace"></label>
+      <div class="button-group">
+        <button onclick="generate()" class="btn primary">Generate</button>
+        <button onclick="copyAll()" class="btn">Copy All</button>
+        <button onclick="clear()" class="btn">Clear</button>
+      </div>
+    </div>
+
+    <div id="output" class="output-area" style="min-height:120px;white-space:pre-line;cursor:text;user-select:all"></div>
+    <div id="status" class="status"></div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    function uuidv4() {
+      return crypto.randomUUID ? crypto.randomUUID() :
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+          const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
+          return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
+
+    function generate() {
+      const n = Math.min(Math.max(parseInt(document.getElementById('count').value) || 1, 1), 100);
+      const uuids = Array.from({length: n}, uuidv4);
+      document.getElementById('output').textContent = uuids.join('\n');
+      document.getElementById('status').textContent = `Generated ${n} UUID${n > 1 ? 's' : ''}`;
+    }
+
+    function copyAll() {
+      const text = document.getElementById('output').textContent;
+      if (!text) return;
+      navigator.clipboard.writeText(text);
+      document.getElementById('status').textContent = 'Copied to clipboard!';
+    }
+
+    function clear() {
+      document.getElementById('output').textContent = '';
+      document.getElementById('status').textContent = '';
+    }
+
+    generate();
+  </script>
+</body>
+</html>

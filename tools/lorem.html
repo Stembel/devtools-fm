@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorem Ipsum Generator - Placeholder Text | DevTools.fm</title>
+  <meta name="description" content="Generate Lorem Ipsum placeholder text. Choose paragraphs, sentences, or words. Copy with one click.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/lorem.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Lorem Ipsum Generator</h1>
+    <p class="description">Generate placeholder text for your designs and layouts.</p>
+
+    <div class="tool-controls" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+      <label>Amount: <input type="number" id="amount" value="3" min="1" max="50" style="width:70px;padding:8px;border-radius:6px;border:1px solid #333;background:#1a1a2e;color:#e0e0e0;font-family:'JetBrains Mono',monospace"></label>
+      <select id="unit" style="padding:8px 12px;border-radius:6px;border:1px solid #333;background:#1a1a2e;color:#e0e0e0" onchange="generate()">
+        <option value="paragraphs">Paragraphs</option>
+        <option value="sentences">Sentences</option>
+        <option value="words">Words</option>
+      </select>
+      <label><input type="checkbox" id="startClassic" checked> Start with "Lorem ipsum..."</label>
+    </div>
+
+    <div class="button-group" style="margin-bottom:16px">
+      <button onclick="generate()" class="btn primary">Generate</button>
+      <button onclick="copy()" class="btn">Copy</button>
+    </div>
+
+    <div id="output" class="output-area" style="min-height:200px;white-space:pre-wrap;line-height:1.8"></div>
+    <div id="status" class="status"></div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    const WORDS = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum perspiciatis unde omnis iste natus error voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis quasi architecto beatae vitae dicta explicabo nemo ipsam quia voluptas aspernatur aut odit fugit consequuntur magni dolores eos ratione sequi nesciunt neque porro quisquam dolorem adipisci numquam eius modi tempora corporis suscipit laboriosam nisi aliquid commodi consequatur quis autem vel eum iure quam nihil molestiae illum quo maxime placeat facere possimus omnis assumenda repudiandae'.split(' ');
+
+    const CLASSIC = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+
+    function randWord() { return WORDS[Math.floor(Math.random() * WORDS.length)]; }
+
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function genSentence() {
+      const len = 8 + Math.floor(Math.random() * 12);
+      const words = Array.from({length: len}, randWord);
+      words[0] = capitalize(words[0]);
+      return words.join(' ') + '.';
+    }
+
+    function genParagraph() {
+      const count = 4 + Math.floor(Math.random() * 4);
+      return Array.from({length: count}, genSentence).join(' ');
+    }
+
+    function generate() {
+      const amount = Math.min(Math.max(parseInt(document.getElementById('amount').value) || 1, 1), 50);
+      const unit = document.getElementById('unit').value;
+      const classic = document.getElementById('startClassic').checked;
+      let result;
+
+      if (unit === 'paragraphs') {
+        const paras = Array.from({length: amount}, genParagraph);
+        if (classic) paras[0] = CLASSIC + ' ' + paras[0];
+        result = paras.join('\n\n');
+      } else if (unit === 'sentences') {
+        const sents = Array.from({length: amount}, genSentence);
+        if (classic) sents[0] = CLASSIC;
+        result = sents.join(' ');
+      } else {
+        const words = Array.from({length: amount}, randWord);
+        if (classic) { words[0] = 'lorem'; if (amount > 1) words[1] = 'ipsum'; }
+        result = words.join(' ');
+      }
+
+      document.getElementById('output').textContent = result;
+      const wc = result.split(/\s+/).length;
+      document.getElementById('status').textContent = `${wc} words, ${result.length} characters`;
+    }
+
+    function copy() {
+      navigator.clipboard.writeText(document.getElementById('output').textContent);
+      document.getElementById('status').textContent = 'Copied to clipboard!';
+    }
+
+    generate();
+  </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS & JavaScript Minifier - Minify Code Online | DevTools.fm</title>
+  <meta name="description" content="Minify CSS and JavaScript code online. Reduce file size instantly. Free, fast, runs in your browser.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/minifier.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS & JavaScript Minifier</h1>
+    <p class="description">Minify CSS or JavaScript to reduce file size. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="minify()">Minify</button>
+        <button class="btn" onclick="beautify()">Beautify</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Language:
+          <select id="lang" onchange="updatePlaceholder()">
+            <option value="css">CSS</option>
+            <option value="js">JavaScript</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder="Paste your CSS here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="stats" style="font-family:var(--mono);font-size:0.75rem"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Minified output will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $i = document.getElementById('input');
+    const $o = document.getElementById('output');
+    const $s = document.getElementById('stats');
+
+    function updatePlaceholder() {
+      const lang = document.getElementById('lang').value;
+      $i.placeholder = lang === 'css' ? 'Paste your CSS here...' : 'Paste your JavaScript here...';
+    }
+
+    function minifyCSS(code) {
+      return code
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\s*([{}:;,>~+])\s*/g, '$1')
+        .replace(/;\}/g, '}')
+        .replace(/\s+/g, ' ')
+        .replace(/^\s+|\s+$/g, '')
+        .trim();
+    }
+
+    function minifyJS(code) {
+      let result = code;
+      result = result.replace(/\/\*[\s\S]*?\*\//g, '');
+      result = result.replace(/(?<!:)\/\/[^\n]*/g, '');
+      result = result.replace(/\n\s*\n/g, '\n');
+      result = result.split('\n').map(l => l.trim()).filter(l => l).join('\n');
+      result = result.replace(/\s*([{}()=;,:<>!&|+\-*/?:])\s*/g, '$1');
+      result = result.replace(/\n/g, ';').replace(/;+/g, ';').replace(/;}/g, '}').replace(/{;/g, '{');
+      return result.trim();
+    }
+
+    function beautifyCSS(code) {
+      let indent = 0;
+      let result = code.replace(/\s+/g, ' ').trim();
+      result = result.replace(/\{/g, ' {\n').replace(/\}/g, '\n}\n').replace(/;/g, ';\n');
+      const lines = result.split('\n').map(l => l.trim()).filter(l => l);
+      return lines.map(line => {
+        if (line === '}') indent = Math.max(0, indent - 1);
+        const out = '  '.repeat(indent) + line;
+        if (line.endsWith('{')) indent++;
+        return out;
+      }).join('\n');
+    }
+
+    function beautifyJS(code) {
+      let indent = 0;
+      let result = code;
+      result = result.replace(/([{])/g, '$1\n').replace(/([}])/g, '\n$1\n').replace(/;/g, ';\n');
+      const lines = result.split('\n').map(l => l.trim()).filter(l => l);
+      return lines.map(line => {
+        if (line.startsWith('}')) indent = Math.max(0, indent - 1);
+        const out = '  '.repeat(indent) + line;
+        if (line.endsWith('{')) indent++;
+        return out;
+      }).join('\n');
+    }
+
+    function minify() {
+      const raw = $i.value;
+      if (!raw.trim()) return;
+      const lang = document.getElementById('lang').value;
+      const result = lang === 'css' ? minifyCSS(raw) : minifyJS(raw);
+      $o.value = result;
+      showStats(raw, result);
+    }
+
+    function beautify() {
+      const raw = $i.value;
+      if (!raw.trim()) return;
+      const lang = document.getElementById('lang').value;
+      $o.value = lang === 'css' ? beautifyCSS(raw) : beautifyJS(raw);
+      $s.textContent = '';
+    }
+
+    function showStats(original, minified) {
+      const origSize = new Blob([original]).size;
+      const minSize = new Blob([minified]).size;
+      const saved = origSize - minSize;
+      const pct = origSize > 0 ? Math.round((saved / origSize) * 100) : 0;
+      $s.textContent = `${origSize}B -> ${minSize}B (${pct}% saved)`;
+      $s.style.color = pct > 0 ? 'var(--success)' : 'var(--text-muted)';
+    }
+
+    function copyOutput() {
+      if ($o.value) navigator.clipboard.writeText($o.value);
+    }
+
+    function clearAll() { $i.value = ''; $o.value = ''; $s.textContent = ''; }
+
+    $i.addEventListener('paste', () => setTimeout(minify, 50));
+  </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Gradient Generator - Linear & Radial | DevTools.fm</title>
+  <meta name="description" content="Create beautiful CSS gradients visually. Linear and radial gradient generator with live preview. Copy CSS code instantly. Free online tool.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .gradient-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .gradient-preview { min-height: 300px; border-radius: var(--radius); border: 1px solid var(--border); }
+    .gradient-controls { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .control-group { display: flex; flex-direction: column; gap: 6px; }
+    .control-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .control-group select, .control-group input[type="number"] { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 4px; font-family: var(--font); font-size: 0.85rem; outline: none; }
+    .control-group select:focus, .control-group input:focus { border-color: var(--accent); }
+    .color-stop { display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--surface-2); border-radius: 4px; }
+    .color-stop input[type="color"] { width: 36px; height: 30px; border: none; padding: 0; cursor: pointer; border-radius: 4px; }
+    .color-stop input[type="number"] { width: 60px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 4px 8px; border-radius: 4px; font-family: var(--mono); font-size: 0.85rem; text-align: center; outline: none; }
+    .color-stop .remove-btn { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1.2rem; padding: 0 4px; }
+    .color-stops-list { display: flex; flex-direction: column; gap: 6px; }
+    .css-output { padding: 16px; }
+    .css-output pre { background: var(--surface-2); padding: 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; color: var(--text); overflow-x: auto; white-space: pre-wrap; word-break: break-all; cursor: pointer; }
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; }
+    .preset { width: 36px; height: 36px; border-radius: 4px; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; }
+    .preset:hover { border-color: var(--accent); }
+    .angle-control { display: flex; align-items: center; gap: 12px; }
+    .angle-control input[type="range"] { flex: 1; accent-color: var(--accent); }
+    @media (max-width: 768px) { .gradient-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Gradient Generator</h1>
+    <p class="description">Create beautiful CSS gradients visually. Copy the code with one click.</p>
+
+    <div class="gradient-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Controls</div>
+        <div class="gradient-controls">
+          <div class="control-group">
+            <label>Type</label>
+            <select id="gradientType" onchange="updateGradient()">
+              <option value="linear">Linear</option>
+              <option value="radial">Radial</option>
+              <option value="conic">Conic</option>
+            </select>
+          </div>
+
+          <div class="control-group" id="angleGroup">
+            <label>Angle: <span id="angleValue">135</span>&deg;</label>
+            <div class="angle-control">
+              <input type="range" id="angle" min="0" max="360" value="135" oninput="document.getElementById('angleValue').textContent=this.value; updateGradient()">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Color Stops</label>
+            <div class="color-stops-list" id="colorStops"></div>
+            <button class="btn" onclick="addStop()" style="align-self: flex-start; margin-top: 4px;">+ Add Stop</button>
+          </div>
+
+          <div class="control-group">
+            <label>Presets</label>
+            <div class="presets" id="presets"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-panel" style="display:flex; flex-direction:column;">
+        <div class="panel-header">Preview</div>
+        <div class="gradient-preview" id="preview" style="flex:1;"></div>
+        <div class="css-output">
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">CSS (click to copy)</div>
+          <pre id="cssOutput" onclick="copyCSS()"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    let stops = [
+      { color: '#6366f1', position: 0 },
+      { color: '#ec4899', position: 50 },
+      { color: '#f59e0b', position: 100 }
+    ];
+
+    const presets = [
+      [['#667eea',0],['#764ba2',100]],
+      [['#f093fb',0],['#f5576c',100]],
+      [['#4facfe',0],['#00f2fe',100]],
+      [['#43e97b',0],['#38f9d7',100]],
+      [['#fa709a',0],['#fee140',100]],
+      [['#a18cd1',0],['#fbc2eb',100]],
+      [['#fccb90',0],['#d57eeb',100]],
+      [['#e0c3fc',0],['#8ec5fc',100]],
+      [['#f5576c',0],['#ff6f91',50],['#ff9671',100]],
+      [['#0c0c0c',0],['#6366f1',50],['#0c0c0c',100]],
+    ];
+
+    function renderStops() {
+      const container = document.getElementById('colorStops');
+      container.innerHTML = '';
+      stops.forEach((stop, i) => {
+        const div = document.createElement('div');
+        div.className = 'color-stop';
+        div.innerHTML = `
+          <input type="color" value="${stop.color}" onchange="stops[${i}].color=this.value; updateGradient()">
+          <input type="number" value="${stop.position}" min="0" max="100" onchange="stops[${i}].position=parseInt(this.value); updateGradient()">
+          <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
+          ${stops.length > 2 ? `<button class="remove-btn" onclick="stops.splice(${i},1); renderStops(); updateGradient()">x</button>` : ''}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addStop() {
+      const lastColor = stops[stops.length - 1].color;
+      stops.push({ color: lastColor, position: 100 });
+      // Redistribute positions evenly
+      stops.forEach((s, i) => s.position = Math.round(i / (stops.length - 1) * 100));
+      renderStops();
+      updateGradient();
+    }
+
+    function updateGradient() {
+      const type = document.getElementById('gradientType').value;
+      const angle = document.getElementById('angle').value;
+      const angleGroup = document.getElementById('angleGroup');
+      angleGroup.style.display = type === 'radial' ? 'none' : '';
+
+      const colorStr = stops.map(s => `${s.color} ${s.position}%`).join(', ');
+      let css;
+      if (type === 'linear') css = `linear-gradient(${angle}deg, ${colorStr})`;
+      else if (type === 'radial') css = `radial-gradient(circle, ${colorStr})`;
+      else css = `conic-gradient(from ${angle}deg, ${colorStr})`;
+
+      document.getElementById('preview').style.background = css;
+      document.getElementById('cssOutput').textContent = `background: ${css};`;
+    }
+
+    function copyCSS() {
+      const text = document.getElementById('cssOutput').textContent;
+      navigator.clipboard.writeText(text);
+      const el = document.getElementById('cssOutput');
+      const orig = el.textContent;
+      el.textContent = 'Copied!';
+      setTimeout(() => el.textContent = orig, 1000);
+    }
+
+    function renderPresets() {
+      const container = document.getElementById('presets');
+      presets.forEach((preset, i) => {
+        const div = document.createElement('div');
+        div.className = 'preset';
+        const colorStr = preset.map(s => `${s[0]} ${s[1]}%`).join(', ');
+        div.style.background = `linear-gradient(135deg, ${colorStr})`;
+        div.onclick = () => {
+          stops = preset.map(s => ({ color: s[0], position: s[1] }));
+          renderStops();
+          updateGradient();
+        };
+        container.appendChild(div);
+      });
+    }
+
+    renderPresets();
+    renderStops();
+    updateGradient();
+  </script>
+</body>
+</html>

@@ -3,13 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DevTools.fm - Free Developer Tools</title>
-  <meta name="description" content="Fast, free developer tools. JSON formatter, Base64 encoder, JWT decoder, hash generator, and more. No signup, no tracking, no BS.">
-  <meta name="keywords" content="developer tools, JSON formatter, Base64, JWT decoder, hash generator, regex tester">
+  <title>DevTools.fm - 23 Free Developer Tools | JSON, SQL, Regex, Hash, QR Code & More</title>
+  <meta name="description" content="23 free developer tools: JSON formatter, SQL beautifier, regex tester, hash generator, QR code generator, CSS gradient builder, chmod calculator, Base64, JWT decoder & more. No signup, no tracking.">
+  <meta name="keywords" content="developer tools, JSON formatter, Base64 encoder, JWT decoder, hash generator, regex tester, SQL formatter, cron expression, YAML converter, CSS minifier, password generator, UUID generator, QR code generator, chmod calculator, CSS gradient generator, box shadow generator, image to base64">
   <link rel="canonical" href="https://stembel.github.io/devtools-fm/">
-  <meta property="og:title" content="DevTools.fm - Free Developer Tools">
-  <meta property="og:description" content="Fast, free developer tools that respect your privacy. No signup required.">
+  <meta property="og:title" content="DevTools.fm - 23 Free Developer Tools">
+  <meta property="og:description" content="Fast, free developer tools that respect your privacy. JSON, SQL, regex, hashing, encoding, QR codes, CSS generators & more. No signup required.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://stembel.github.io/devtools-fm/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="DevTools.fm - 23 Free Developer Tools">
+  <meta name="twitter:description" content="Fast, free developer tools. JSON, SQL, regex, hashing, QR codes, CSS generators & more. No signup, no tracking.">
+  <meta name="robots" content="index, follow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -20,11 +25,11 @@
     "@type": "WebApplication",
     "name": "DevTools.fm",
     "url": "https://stembel.github.io/devtools-fm/",
-    "description": "Free online developer tools. JSON formatter, Base64 encoder/decoder, JWT decoder, hash generator, regex tester, and more.",
+    "description": "23 free online developer tools. JSON formatter, SQL beautifier, regex tester, hash generator, QR code generator, CSS gradient builder, chmod calculator, Base64, JWT decoder, and more.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
     "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-    "featureList": ["JSON Formatter", "Base64 Encoder/Decoder", "JWT Decoder", "Hash Generator", "URL Encoder/Decoder", "Regex Tester", "Unix Timestamp Converter", "Color Converter", "Text Diff", "Markdown Preview"]
+    "featureList": ["JSON Formatter","Base64 Encoder/Decoder","JWT Decoder","Hash Generator","URL Encoder/Decoder","Regex Tester","Unix Timestamp Converter","Color Converter","Text Diff","Markdown Preview","UUID Generator","Password Generator","Lorem Ipsum Generator","Cron Expression Generator","CSS/JS Minifier","SQL Formatter","YAML/JSON Converter","HTML Entity Encoder","String Escape/Unescape","Chmod Calculator","QR Code Generator","CSS Gradient Generator","Box Shadow Generator","Image to Base64"]
   }
   </script>
 </head>
@@ -44,16 +49,42 @@
   <main class="container">
     <section class="hero">
       <h1>Developer Tools That Just Work</h1>
-      <p>Fast, free, private. No signup, no tracking. Everything runs in your browser.</p>
+      <p>23 free tools. No signup, no tracking, no cookies. Everything runs in your browser.</p>
     </section>
 
     <section class="tools-grid">
+      <!-- Formatters & Validators -->
       <a href="tools/json.html" class="tool-card">
         <div class="tool-icon">{ }</div>
         <h3>JSON Formatter & Validator</h3>
         <p>Format, validate, and minify JSON. Syntax highlighting and error detection.</p>
       </a>
 
+      <a href="tools/sql.html" class="tool-card">
+        <div class="tool-icon">SQL</div>
+        <h3>SQL Formatter</h3>
+        <p>Format and beautify SQL queries. Auto-uppercase keywords, indent subqueries.</p>
+      </a>
+
+      <a href="tools/yaml.html" class="tool-card">
+        <div class="tool-icon">YML</div>
+        <h3>YAML &harr; JSON Converter</h3>
+        <p>Convert between YAML and JSON formats instantly. Validate and format.</p>
+      </a>
+
+      <a href="tools/markdown.html" class="tool-card">
+        <div class="tool-icon">MD</div>
+        <h3>Markdown Preview</h3>
+        <p>Write Markdown and see the rendered output in real-time.</p>
+      </a>
+
+      <a href="tools/minifier.html" class="tool-card">
+        <div class="tool-icon">Min</div>
+        <h3>CSS & JS Minifier</h3>
+        <p>Minify CSS and JavaScript to reduce file size. See compression stats.</p>
+      </a>
+
+      <!-- Encoders & Decoders -->
       <a href="tools/base64.html" class="tool-card">
         <div class="tool-icon">B64</div>
         <h3>Base64 Encode / Decode</h3>
@@ -66,16 +97,29 @@
         <p>Decode and inspect JSON Web Tokens. View header, payload, and expiration.</p>
       </a>
 
-      <a href="tools/hash.html" class="tool-card">
-        <div class="tool-icon">#</div>
-        <h3>Hash Generator</h3>
-        <p>Generate MD5, SHA-1, SHA-256, and SHA-512 hashes from any input.</p>
-      </a>
-
       <a href="tools/url.html" class="tool-card">
         <div class="tool-icon">%</div>
         <h3>URL Encode / Decode</h3>
         <p>Encode and decode URL components. Handle special characters safely.</p>
+      </a>
+
+      <a href="tools/htmlentity.html" class="tool-card">
+        <div class="tool-icon">&amp;</div>
+        <h3>HTML Entity Encoder</h3>
+        <p>Encode and decode HTML entities. Named, numeric, and hex modes.</p>
+      </a>
+
+      <a href="tools/escape.html" class="tool-card">
+        <div class="tool-icon">\\</div>
+        <h3>String Escape / Unescape</h3>
+        <p>Escape strings for JSON, Java, Python, SQL, Shell, XML, CSV, and Unicode.</p>
+      </a>
+
+      <!-- Generators & Testers -->
+      <a href="tools/hash.html" class="tool-card">
+        <div class="tool-icon">#</div>
+        <h3>Hash Generator</h3>
+        <p>Generate MD5, SHA-1, SHA-256, and SHA-512 hashes from any input.</p>
       </a>
 
       <a href="tools/regex.html" class="tool-card">
@@ -84,6 +128,25 @@
         <p>Test regular expressions with real-time matching and capture group display.</p>
       </a>
 
+      <a href="tools/cron.html" class="tool-card">
+        <div class="tool-icon">@</div>
+        <h3>Cron Expression Generator</h3>
+        <p>Build and parse cron expressions visually. See next run times instantly.</p>
+      </a>
+
+      <a href="tools/uuid.html" class="tool-card">
+        <div class="tool-icon">ID</div>
+        <h3>UUID Generator</h3>
+        <p>Generate random UUID v4 identifiers. Bulk generate up to 100 at once.</p>
+      </a>
+
+      <a href="tools/password.html" class="tool-card">
+        <div class="tool-icon">***</div>
+        <h3>Password Generator</h3>
+        <p>Generate strong random passwords. Customize length, characters, see entropy.</p>
+      </a>
+
+      <!-- Converters & Utilities -->
       <a href="tools/timestamp.html" class="tool-card">
         <div class="tool-icon">T</div>
         <h3>Unix Timestamp Converter</h3>
@@ -102,17 +165,54 @@
         <p>Compare two texts side by side. Highlight additions, deletions, and changes.</p>
       </a>
 
-      <a href="tools/markdown.html" class="tool-card">
-        <div class="tool-icon">MD</div>
-        <h3>Markdown Preview</h3>
-        <p>Write Markdown and see the rendered output in real-time.</p>
+      <a href="tools/lorem.html" class="tool-card">
+        <div class="tool-icon">Aa</div>
+        <h3>Lorem Ipsum Generator</h3>
+        <p>Generate placeholder text. Choose paragraphs, sentences, or words.</p>
+      </a>
+
+      <!-- CSS & Visual Tools -->
+      <a href="tools/gradient.html" class="tool-card">
+        <div class="tool-icon">G</div>
+        <h3>CSS Gradient Generator</h3>
+        <p>Create beautiful linear, radial, and conic gradients visually. Copy CSS instantly.</p>
+      </a>
+
+      <a href="tools/boxshadow.html" class="tool-card">
+        <div class="tool-icon">S</div>
+        <h3>Box Shadow Generator</h3>
+        <p>Design CSS box-shadow effects with live preview. Presets and full customization.</p>
+      </a>
+
+      <!-- System & DevOps Tools -->
+      <a href="tools/chmod.html" class="tool-card">
+        <div class="tool-icon">7</div>
+        <h3>Chmod Calculator</h3>
+        <p>Calculate Unix file permissions visually. Convert between symbolic and numeric notation.</p>
+      </a>
+
+      <a href="tools/qrcode.html" class="tool-card">
+        <div class="tool-icon">QR</div>
+        <h3>QR Code Generator</h3>
+        <p>Generate QR codes from any text or URL. Customize colors, size, error correction.</p>
+      </a>
+
+      <a href="tools/imagebase64.html" class="tool-card">
+        <div class="tool-icon">IMG</div>
+        <h3>Image to Base64</h3>
+        <p>Convert images to Base64 strings. Get data URI, CSS background, and HTML embed code.</p>
       </a>
     </section>
+
+    <!-- Ad Slot - ready for Google AdSense -->
+    <div id="ad-slot-bottom" class="ad-container" style="text-align:center; padding: 24px 0; min-height: 90px;">
+      <!-- AdSense code will be inserted here once account is approved -->
+    </div>
   </main>
 
   <footer>
     <div class="container">
-      DevTools.fm &mdash; Free developer tools. All processing happens in your browser.
+      DevTools.fm &mdash; 23 free developer tools. All processing happens in your browser. No data leaves your machine.
     </div>
   </footer>
 </body>

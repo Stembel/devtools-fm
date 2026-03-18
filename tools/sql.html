@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Formatter & Beautifier - Format SQL Online | DevTools.fm</title>
+  <meta name="description" content="Format and beautify SQL queries online. Supports SELECT, INSERT, UPDATE, CREATE statements. Free SQL beautifier.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/sql.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>SQL Formatter & Beautifier</h1>
+    <p class="description">Format messy SQL queries into clean, readable code. Runs entirely in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="formatSQL()">Format</button>
+        <button class="btn" onclick="compactSQL()">Compact</button>
+        <button class="btn" onclick="upperKeywords()">UPPERCASE Keywords</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Indent:
+          <select id="indent">
+            <option value="2" selected>2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="tab">Tab</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder="SELECT u.id, u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id WHERE o.total > 100 ORDER BY o.total DESC LIMIT 10;"></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Formatted SQL will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $i = document.getElementById('input');
+    const $o = document.getElementById('output');
+    const $s = document.getElementById('status');
+
+    const MAJOR_KW = ['SELECT','FROM','WHERE','JOIN','LEFT JOIN','RIGHT JOIN','INNER JOIN','OUTER JOIN','FULL JOIN','CROSS JOIN','ON','AND','OR','ORDER BY','GROUP BY','HAVING','LIMIT','OFFSET','UNION','UNION ALL','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','CREATE INDEX','CASE','WHEN','THEN','ELSE','END','WITH','AS'];
+
+    function getIndent() {
+      const v = document.getElementById('indent').value;
+      return v === 'tab' ? '\t' : ' '.repeat(Number(v));
+    }
+
+    function formatSQL() {
+      let sql = $i.value.trim();
+      if (!sql) return;
+
+      const indent = getIndent();
+      sql = sql.replace(/\s+/g, ' ').trim();
+
+      // Uppercase keywords
+      const kwPattern = MAJOR_KW.sort((a,b) => b.length - a.length)
+        .map(k => k.replace(/\s+/g, '\\s+'))
+        .join('|');
+      const kwRegex = new RegExp('\\b(' + kwPattern + ')\\b', 'gi');
+      sql = sql.replace(kwRegex, m => m.toUpperCase());
+
+      // Add newlines before major keywords
+      const lineKw = ['SELECT','FROM','WHERE','JOIN','LEFT JOIN','RIGHT JOIN','INNER JOIN','OUTER JOIN','FULL JOIN','CROSS JOIN','ORDER BY','GROUP BY','HAVING','LIMIT','OFFSET','UNION','UNION ALL','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','WITH'];
+      for (const kw of lineKw.sort((a,b) => b.length - a.length)) {
+        const r = new RegExp('\\b' + kw.replace(/\s+/g, '\\s+') + '\\b', 'g');
+        sql = sql.replace(r, '\n' + kw);
+      }
+
+      // AND / OR on new line with indent
+      sql = sql.replace(/\b(AND|OR)\b/g, '\n' + indent + '$1');
+
+      // ON with indent
+      sql = sql.replace(/\n\s*(LEFT |RIGHT |INNER |OUTER |FULL |CROSS )?(JOIN)\b/g, '\n$1$2');
+      sql = sql.replace(/\bON\b/g, '\n' + indent + 'ON');
+
+      // Indent SELECT columns
+      const lines = sql.split('\n').map(l => l.trim()).filter(l => l);
+      const formatted = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith('SELECT ')) {
+          const cols = line.slice(7).split(',').map(c => c.trim());
+          if (cols.length > 1) {
+            formatted.push('SELECT');
+            cols.forEach((col, j) => {
+              formatted.push(indent + col + (j < cols.length - 1 ? ',' : ''));
+            });
+          } else {
+            formatted.push(line);
+          }
+        } else {
+          formatted.push(line);
+        }
+      }
+
+      $o.value = formatted.join('\n').trim();
+      $s.textContent = 'Formatted';
+      $s.className = 'status status-success';
+    }
+
+    function compactSQL() {
+      let sql = $i.value.trim();
+      if (!sql) return;
+      $o.value = sql.replace(/\s+/g, ' ').replace(/\s*([(),])\s*/g, '$1 ').trim();
+      $s.textContent = 'Compacted';
+      $s.className = 'status status-success';
+    }
+
+    function upperKeywords() {
+      let sql = $i.value.trim();
+      if (!sql) return;
+      const kwPattern = MAJOR_KW.sort((a,b) => b.length - a.length)
+        .map(k => k.replace(/\s+/g, '\\s+'))
+        .join('|');
+      const kwRegex = new RegExp('\\b(' + kwPattern + ')\\b', 'gi');
+      $o.value = sql.replace(kwRegex, m => m.toUpperCase());
+      $s.textContent = 'Keywords uppercased';
+      $s.className = 'status status-success';
+    }
+
+    function copyOutput() {
+      if ($o.value) {
+        navigator.clipboard.writeText($o.value);
+        $s.textContent = 'Copied!';
+        $s.className = 'status status-success';
+      }
+    }
+
+    function clearAll() { $i.value = ''; $o.value = ''; $s.textContent = ''; $s.className = ''; }
+    $i.addEventListener('paste', () => setTimeout(formatSQL, 50));
+  </script>
+</body>
+</html>

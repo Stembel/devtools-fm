@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image to Base64 Converter | DevTools.fm</title>
+  <meta name="description" content="Convert images to Base64 encoded strings. Supports PNG, JPG, GIF, SVG, WebP. Generate data URIs and CSS background-image code. Free online tool.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 48px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(99,102,241,0.05); }
+    .drop-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px; }
+    .drop-zone .hint { font-size: 0.8rem; color: var(--text-muted); opacity: 0.6; }
+    .img-preview { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+    .img-preview img { max-width: 200px; max-height: 200px; border-radius: var(--radius); border: 1px solid var(--border); object-fit: contain; background: repeating-conic-gradient(#1c1c20 0% 25%, #141416 0% 50%) 50% / 16px 16px; }
+    .img-info { display: flex; flex-direction: column; gap: 4px; }
+    .img-info .info-row { font-size: 0.8rem; color: var(--text-muted); }
+    .img-info .info-row span { color: var(--text); font-family: var(--mono); }
+    .output-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+    .output-tab { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font); }
+    .output-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .output-content { position: relative; }
+    .output-content textarea { width: 100%; min-height: 200px; padding: 16px; background: var(--surface-2); border: none; color: var(--text); font-family: var(--mono); font-size: 0.75rem; resize: vertical; outline: none; line-height: 1.5; word-break: break-all; }
+    .copy-btn-float { position: absolute; top: 8px; right: 8px; }
+    #fileInput { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Image to Base64 Converter</h1>
+    <p class="description">Convert any image to a Base64 encoded string. Everything stays in your browser.</p>
+
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <p>Drop an image here or click to upload</p>
+      <div class="hint">Supports PNG, JPG, GIF, SVG, WebP (max 5MB)</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])">
+
+    <div id="resultSection" style="display:none;">
+      <div class="img-preview">
+        <img id="previewImg">
+        <div class="img-info">
+          <div class="info-row">Name: <span id="fileName">-</span></div>
+          <div class="info-row">Type: <span id="fileType">-</span></div>
+          <div class="info-row">Size: <span id="fileSize">-</span></div>
+          <div class="info-row">Dimensions: <span id="fileDims">-</span></div>
+          <div class="info-row">Base64 Size: <span id="b64Size">-</span></div>
+        </div>
+      </div>
+
+      <div class="tool-panel">
+        <div class="output-tabs">
+          <button class="output-tab active" onclick="showTab('datauri')">Data URI</button>
+          <button class="output-tab" onclick="showTab('raw')">Raw Base64</button>
+          <button class="output-tab" onclick="showTab('css')">CSS</button>
+          <button class="output-tab" onclick="showTab('html')">HTML &lt;img&gt;</button>
+        </div>
+        <div class="output-content">
+          <textarea id="output" readonly></textarea>
+          <button class="btn copy-btn-float" onclick="copyOutput()">Copy</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    let currentDataUri = '';
+    let currentRaw = '';
+    let currentTab = 'datauri';
+
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      if (file.size > 5 * 1024 * 1024) { alert('File too large (max 5MB)'); return; }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        currentDataUri = e.target.result;
+        currentRaw = currentDataUri.split(',')[1];
+
+        document.getElementById('previewImg').src = currentDataUri;
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileType').textContent = file.type;
+        document.getElementById('fileSize').textContent = formatSize(file.size);
+        document.getElementById('b64Size').textContent = formatSize(currentRaw.length);
+
+        const img = new Image();
+        img.onload = () => { document.getElementById('fileDims').textContent = `${img.width} x ${img.height}`; };
+        img.src = currentDataUri;
+
+        document.getElementById('resultSection').style.display = '';
+        showTab(currentTab);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.output-tab[onclick="showTab('${tab}')"]`).classList.add('active');
+
+      const output = document.getElementById('output');
+      switch (tab) {
+        case 'datauri': output.value = currentDataUri; break;
+        case 'raw': output.value = currentRaw; break;
+        case 'css': output.value = `background-image: url(${currentDataUri});`; break;
+        case 'html': output.value = `<img src="${currentDataUri}" alt="">`; break;
+      }
+    }
+
+    function copyOutput() {
+      const output = document.getElementById('output');
+      navigator.clipboard.writeText(output.value);
+      const btn = document.querySelector('.copy-btn-float');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1000);
+    }
+  </script>
+</body>
+</html>

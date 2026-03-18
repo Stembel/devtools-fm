@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chmod Calculator - Unix File Permissions | DevTools.fm</title>
+  <meta name="description" content="Calculate Unix file permissions (chmod) visually. Convert between symbolic and numeric notation. Free online chmod calculator.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .chmod-grid { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 0; padding: 16px; }
+    .chmod-grid .header { font-size: 0.75rem; font-weight: 600; color: var(--accent); text-transform: uppercase; padding: 8px 16px; border-bottom: 1px solid var(--border); }
+    .chmod-grid .row-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding: 12px 16px; display: flex; align-items: center; }
+    .chmod-cell { display: flex; gap: 12px; padding: 12px 16px; align-items: center; }
+    .chmod-cell label { font-size: 0.85rem; color: var(--text); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .chmod-cell input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+    .chmod-result { display: flex; gap: 24px; padding: 24px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .chmod-value { text-align: center; }
+    .chmod-value .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .chmod-value .value { font-family: var(--mono); font-size: 1.5rem; color: var(--accent); background: var(--surface-2); padding: 12px 24px; border-radius: var(--radius); cursor: pointer; transition: background 0.15s; }
+    .chmod-value .value:hover { background: var(--border); }
+    .chmod-input-row { display: flex; gap: 12px; padding: 16px; align-items: center; }
+    .chmod-input-row input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 4px; font-family: var(--mono); font-size: 1rem; width: 80px; text-align: center; outline: none; }
+    .chmod-input-row input:focus { border-color: var(--accent); }
+    .chmod-input-row span { color: var(--text-muted); font-size: 0.85rem; }
+    .common-perms { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px; }
+    .common-perms button { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: var(--mono); font-size: 0.8rem; transition: all 0.15s; }
+    .common-perms button:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Chmod Calculator</h1>
+    <p class="description">Calculate Unix file permissions visually. Toggle checkboxes or enter a numeric value.</p>
+
+    <div class="tool-panel" style="margin-bottom: 16px;">
+      <div class="panel-header">Numeric Input</div>
+      <div class="chmod-input-row">
+        <span>chmod</span>
+        <input type="text" id="numericInput" value="755" maxlength="4" oninput="fromNumeric()">
+        <span>filename</span>
+      </div>
+    </div>
+
+    <div class="tool-panel" style="margin-bottom: 16px;">
+      <div class="panel-header">Permission Matrix</div>
+      <div class="chmod-grid">
+        <div class="header"></div>
+        <div class="header">Read (4)</div>
+        <div class="header">Write (2)</div>
+        <div class="header">Execute (1)</div>
+
+        <div class="row-label">Owner</div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="owner" data-perm="read" onchange="fromCheckboxes()"> r</label></div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="owner" data-perm="write" onchange="fromCheckboxes()"> w</label></div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="owner" data-perm="exec" onchange="fromCheckboxes()"> x</label></div>
+
+        <div class="row-label">Group</div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="group" data-perm="read" onchange="fromCheckboxes()"> r</label></div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="group" data-perm="write" onchange="fromCheckboxes()"> w</label></div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="group" data-perm="exec" onchange="fromCheckboxes()"> x</label></div>
+
+        <div class="row-label">Others</div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="others" data-perm="read" onchange="fromCheckboxes()"> r</label></div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="others" data-perm="write" onchange="fromCheckboxes()"> w</label></div>
+        <div class="chmod-cell"><label><input type="checkbox" data-who="others" data-perm="exec" onchange="fromCheckboxes()"> x</label></div>
+      </div>
+    </div>
+
+    <div class="tool-panel" style="margin-bottom: 16px;">
+      <div class="panel-header">Result <span style="font-weight:400; font-size:0.75rem; color: var(--text-muted);">(click to copy)</span></div>
+      <div class="chmod-result">
+        <div class="chmod-value">
+          <div class="label">Numeric</div>
+          <div class="value" id="numericResult" onclick="copy(this)">755</div>
+        </div>
+        <div class="chmod-value">
+          <div class="label">Symbolic</div>
+          <div class="value" id="symbolicResult" onclick="copy(this)">rwxr-xr-x</div>
+        </div>
+        <div class="chmod-value">
+          <div class="label">Command</div>
+          <div class="value" id="commandResult" onclick="copy(this)">chmod 755</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-panel">
+      <div class="panel-header">Common Permissions</div>
+      <div class="common-perms">
+        <button onclick="setPerms('777')">777 (rwxrwxrwx)</button>
+        <button onclick="setPerms('755')">755 (rwxr-xr-x)</button>
+        <button onclick="setPerms('750')">750 (rwxr-x---)</button>
+        <button onclick="setPerms('700')">700 (rwx------)</button>
+        <button onclick="setPerms('666')">666 (rw-rw-rw-)</button>
+        <button onclick="setPerms('644')">644 (rw-r--r--)</button>
+        <button onclick="setPerms('600')">600 (rw-------)</button>
+        <button onclick="setPerms('555')">555 (r-xr-xr-x)</button>
+        <button onclick="setPerms('444')">444 (r--r--r--)</button>
+        <button onclick="setPerms('400')">400 (r--------)</button>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const permMap = { read: 4, write: 2, exec: 1 };
+    const whoOrder = ['owner', 'group', 'others'];
+
+    function getCheckbox(who, perm) {
+      return document.querySelector(`input[data-who="${who}"][data-perm="${perm}"]`);
+    }
+
+    function fromCheckboxes() {
+      let numeric = '';
+      for (const who of whoOrder) {
+        let val = 0;
+        for (const [perm, bit] of Object.entries(permMap)) {
+          if (getCheckbox(who, perm).checked) val += bit;
+        }
+        numeric += val;
+      }
+      document.getElementById('numericInput').value = numeric;
+      updateDisplay(numeric);
+    }
+
+    function fromNumeric() {
+      const val = document.getElementById('numericInput').value.replace(/[^0-7]/g, '').slice(0, 3);
+      if (val.length === 3) {
+        const digits = val.split('').map(Number);
+        whoOrder.forEach((who, i) => {
+          getCheckbox(who, 'read').checked = !!(digits[i] & 4);
+          getCheckbox(who, 'write').checked = !!(digits[i] & 2);
+          getCheckbox(who, 'exec').checked = !!(digits[i] & 1);
+        });
+        updateDisplay(val);
+      }
+    }
+
+    function updateDisplay(numeric) {
+      const symbolic = numeric.split('').map(d => {
+        const n = parseInt(d);
+        return (n & 4 ? 'r' : '-') + (n & 2 ? 'w' : '-') + (n & 1 ? 'x' : '-');
+      }).join('');
+      document.getElementById('numericResult').textContent = numeric;
+      document.getElementById('symbolicResult').textContent = symbolic;
+      document.getElementById('commandResult').textContent = `chmod ${numeric}`;
+    }
+
+    function setPerms(val) {
+      document.getElementById('numericInput').value = val;
+      fromNumeric();
+    }
+
+    function copy(el) {
+      navigator.clipboard.writeText(el.textContent);
+      const orig = el.textContent;
+      el.textContent = 'Copied!';
+      setTimeout(() => el.textContent = orig, 1000);
+    }
+
+    // Initialize
+    fromNumeric();
+  </script>
+</body>
+</html>
