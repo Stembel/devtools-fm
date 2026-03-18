@@ -178,8 +178,71 @@
     footer.parentNode.insertBefore(section, footer);
   }
 
+  // === FAVICON ===
+  function injectFavicon() {
+    // Don't add if already present
+    if (document.querySelector('link[rel="icon"]')) return;
+
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/svg+xml';
+
+    // Determine correct relative path based on directory depth
+    const path = location.pathname;
+    const inSubdir = path.includes('/tools/') || (path.split('/').filter(Boolean).length > 1 && !path.endsWith('/'));
+    link.href = inSubdir ? '../favicon.svg' : 'favicon.svg';
+
+    document.head.appendChild(link);
+  }
+
+  // === OPEN GRAPH TAGS ===
+  function injectOGTags() {
+    // Only for tool pages
+    if (!document.querySelector('.tool-page')) return;
+
+    // Don't add if OG tags already exist
+    if (document.querySelector('meta[property="og:title"]')) return;
+
+    const title = document.title;
+    const descMeta = document.querySelector('meta[name="description"]');
+    const description = descMeta ? descMeta.getAttribute('content') : '';
+    const canonical = document.querySelector('link[rel="canonical"]');
+    const url = canonical ? canonical.getAttribute('href') : location.href;
+
+    const ogTags = [
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: url },
+    ];
+
+    const twitterTags = [
+      { name: 'twitter:card', content: 'summary' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+    ];
+
+    ogTags.forEach(function(tag) {
+      const meta = document.createElement('meta');
+      meta.setAttribute('property', tag.property);
+      meta.setAttribute('content', tag.content);
+      document.head.appendChild(meta);
+    });
+
+    twitterTags.forEach(function(tag) {
+      // Don't add if already exists
+      if (document.querySelector('meta[name="' + tag.name + '"]')) return;
+      const meta = document.createElement('meta');
+      meta.setAttribute('name', tag.name);
+      meta.setAttribute('content', tag.content);
+      document.head.appendChild(meta);
+    });
+  }
+
   // === INIT ===
   document.addEventListener('DOMContentLoaded', function() {
+    injectFavicon();
+    injectOGTags();
     trackPageView();
     injectRelatedTools();
     injectSupportBanner();
