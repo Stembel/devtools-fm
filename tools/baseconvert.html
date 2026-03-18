@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Base Converter (Binary, Hex, Octal, Decimal) - DevTools.fm</title>
+  <meta name="description" content="Convert numbers between binary, hexadecimal, octal, and decimal. Free online base converter with BigInt support for large numbers.">
+  <meta name="keywords" content="number base converter, binary to decimal, hex to decimal, octal converter, base converter, binary converter, hexadecimal converter">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/baseconvert.html">
+  <meta property="og:title" content="Number Base Converter - DevTools.fm">
+  <meta property="og:description" content="Convert numbers between binary, hex, octal, and decimal instantly.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --surface: #141416;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --text-muted: #8b8b94;
+      --accent: #6366f1;
+      --radius: 8px;
+      --font: 'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tool-page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 0;
+    }
+
+    .tool-header {
+      margin-bottom: 36px;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tool-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 540px;
+    }
+
+    /* Input Section */
+    .input-section {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      align-items: stretch;
+    }
+
+    .input-section input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-section input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .input-section input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .base-selector {
+      position: relative;
+      min-width: 130px;
+    }
+
+    .base-selector select {
+      width: 100%;
+      height: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 36px 14px 16px;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+
+    .base-selector select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .base-selector::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--text-muted);
+      pointer-events: none;
+    }
+
+    .custom-base-input {
+      display: none;
+      width: 70px;
+    }
+
+    .custom-base-input.visible {
+      display: block;
+    }
+
+    .custom-base-input input {
+      width: 100%;
+      height: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      color: var(--text);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .custom-base-input input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    /* Error message */
+    .error-msg {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      margin-bottom: 20px;
+      color: #f87171;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    /* Output Grid */
+    .output-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .output-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      transition: border-color 0.2s;
+    }
+
+    .output-card:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .output-card .label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .output-card .label span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .output-card .label .base-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .output-card .value-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .output-card .value {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      word-break: break-all;
+      line-height: 1.5;
+      min-height: 24px;
+    }
+
+    .output-card .value.placeholder {
+      color: var(--text-muted);
+      opacity: 0.4;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 8px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .copy-btn.copied {
+      border-color: #22c55e;
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .copy-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Bit Visualization */
+    .bit-viz {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .bit-viz-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .bit-groups {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+    }
+
+    .bit-group {
+      background: rgba(99, 102, 241, 0.06);
+      border: 1px solid rgba(99, 102, 241, 0.12);
+      border-radius: 4px;
+      padding: 3px 6px;
+      letter-spacing: 0.1em;
+      color: var(--text);
+    }
+
+    .bit-group .zero {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Hex Color Preview */
+    .color-preview-section {
+      margin-bottom: 28px;
+      display: none;
+    }
+
+    .color-preview-section.visible {
+      display: block;
+    }
+
+    .color-preview-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .color-swatch {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .color-info {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+    }
+
+    .color-info .color-hex {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .color-info .color-rgb {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Quick Values */
+    .quick-values {
+      margin-bottom: 36px;
+    }
+
+    .quick-values-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .quick-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .quick-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .quick-btn .btn-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-left: 6px;
+    }
+
+    /* Binary card spans full width */
+    .output-card.binary-card {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 600px) {
+      .tool-page { padding: 32px 16px 0; }
+      .tool-header h1 { font-size: 1.5rem; }
+      .input-section { flex-direction: column; }
+      .base-selector { min-width: unset; }
+      .output-grid { grid-template-columns: 1fr; }
+      .output-card.binary-card { grid-column: auto; }
+      .quick-btns { gap: 6px; }
+      .quick-btn { padding: 6px 12px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="tool-page">
+    <div class="tool-header">
+      <h1>Number Base Converter</h1>
+      <p>Convert numbers between binary, octal, decimal, and hexadecimal instantly. Supports arbitrarily large numbers via BigInt.</p>
+    </div>
+
+    <div class="input-section">
+      <input type="text" id="numberInput" placeholder="Enter a number..." autocomplete="off" spellcheck="false">
+      <div class="base-selector">
+        <select id="baseSelect">
+          <option value="2">Binary (2)</option>
+          <option value="8">Octal (8)</option>
+          <option value="10" selected>Decimal (10)</option>
+          <option value="16">Hex (16)</option>
+          <option value="custom">Custom...</option>
+        </select>
+      </div>
+      <div class="custom-base-input" id="customBaseWrap">
+        <input type="number" id="customBaseInput" min="2" max="36" value="12" placeholder="2-36">
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="color-preview-section" id="colorPreview">
+      <div class="color-preview-card">
+        <div class="color-swatch" id="colorSwatch"></div>
+        <div class="color-info">
+          <div class="color-hex" id="colorHex">#000000</div>
+          <div class="color-rgb" id="colorRgb">rgb(0, 0, 0)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-grid">
+      <div class="output-card binary-card">
+        <div class="label">
+          <span>Binary</span>
+          <span class="base-tag">base 2</span>
+        </div>
+        <div class="value-row">
+          <div class="value placeholder" id="outBin">0</div>
+          <button class="copy-btn" onclick="copyValue('outBin')" title="Copy binary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+        <div class="bit-viz" id="bitViz" style="display:none;">
+          <div class="bit-viz-label">Bit Groups (4-bit)</div>
+          <div class="bit-groups" id="bitGroups"></div>
+        </div>
+      </div>
+
+      <div class="output-card">
+        <div class="label">
+          <span>Octal</span>
+          <span class="base-tag">base 8</span>
+        </div>
+        <div class="value-row">
+          <div class="value placeholder" id="outOct">0</div>
+          <button class="copy-btn" onclick="copyValue('outOct')" title="Copy octal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="output-card">
+        <div class="label">
+          <span>Decimal</span>
+          <span class="base-tag">base 10</span>
+        </div>
+        <div class="value-row">
+          <div class="value placeholder" id="outDec">0</div>
+          <button class="copy-btn" onclick="copyValue('outDec')" title="Copy decimal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="output-card">
+        <div class="label">
+          <span>Hexadecimal</span>
+          <span class="base-tag">base 16</span>
+        </div>
+        <div class="value-row">
+          <div class="value placeholder" id="outHex">0</div>
+          <button class="copy-btn" onclick="copyValue('outHex')" title="Copy hex">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-values">
+      <div class="quick-values-label">Quick Values</div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="setQuick('255')">255 <span class="btn-label">0xFF</span></button>
+        <button class="quick-btn" onclick="setQuick('1024')">1024 <span class="btn-label">2^10</span></button>
+        <button class="quick-btn" onclick="setQuick('65535')">65535 <span class="btn-label">0xFFFF</span></button>
+        <button class="quick-btn" onclick="setQuick('4294967295')">4294967295 <span class="btn-label">2^32-1</span></button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center;padding:32px 24px;color:var(--text-muted);font-size:0.8rem;">
+    <a href="../" style="color:var(--accent);text-decoration:none;">&larr; Back to all tools</a> &middot; DevTools.fm
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    const numberInput = document.getElementById('numberInput');
+    const baseSelect = document.getElementById('baseSelect');
+    const customBaseWrap = document.getElementById('customBaseWrap');
+    const customBaseInput = document.getElementById('customBaseInput');
+    const errorMsg = document.getElementById('errorMsg');
+    const outBin = document.getElementById('outBin');
+    const outOct = document.getElementById('outOct');
+    const outDec = document.getElementById('outDec');
+    const outHex = document.getElementById('outHex');
+    const bitViz = document.getElementById('bitViz');
+    const bitGroups = document.getElementById('bitGroups');
+    const colorPreview = document.getElementById('colorPreview');
+    const colorSwatch = document.getElementById('colorSwatch');
+    const colorHex = document.getElementById('colorHex');
+    const colorRgb = document.getElementById('colorRgb');
+
+    function getBase() {
+      const val = baseSelect.value;
+      if (val === 'custom') {
+        const c = parseInt(customBaseInput.value, 10);
+        return (c >= 2 && c <= 36) ? c : null;
+      }
+      return parseInt(val, 10);
+    }
+
+    // BigInt-based conversion from any base string to BigInt
+    function parseBigInt(str, base) {
+      str = str.trim().toLowerCase();
+      if (str === '') return null;
+
+      // Strip common prefixes
+      if (base === 16 && str.startsWith('0x')) str = str.slice(2);
+      if (base === 2 && str.startsWith('0b')) str = str.slice(2);
+      if (base === 8 && str.startsWith('0o')) str = str.slice(2);
+
+      // Strip leading # for hex color input
+      if (base === 16 && str.startsWith('#')) str = str.slice(1);
+
+      if (str === '') return null;
+
+      const digits = '0123456789abcdefghijklmnopqrstuvwxyz';
+      let result = 0n;
+      const bigBase = BigInt(base);
+
+      for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        if (ch === '_' || ch === ' ') continue; // allow separators
+        const d = digits.indexOf(ch);
+        if (d === -1 || d >= base) {
+          throw new Error(`Invalid digit "${ch}" for base ${base}`);
+        }
+        result = result * bigBase + BigInt(d);
+      }
+      return result;
+    }
+
+    // BigInt to string in given base
+    function bigIntToBase(n, base) {
+      if (n === 0n) return '0';
+      const digits = '0123456789abcdefghijklmnopqrstuvwxyz';
+      let result = '';
+      let val = n < 0n ? -n : n;
+      const bigBase = BigInt(base);
+      while (val > 0n) {
+        result = digits[Number(val % bigBase)] + result;
+        val = val / bigBase;
+      }
+      return (n < 0n ? '-' : '') + result;
+    }
+
+    // Format binary with grouping of 4
+    function formatBinary(bin) {
+      // Pad to multiple of 4
+      const padLen = (4 - (bin.length % 4)) % 4;
+      const padded = '0'.repeat(padLen) + bin;
+      const groups = [];
+      for (let i = 0; i < padded.length; i += 4) {
+        groups.push(padded.slice(i, i + 4));
+      }
+      return groups;
+    }
+
+    // Check if value could be a hex color (3 or 6 hex digits, value fits in 0-0xFFFFFF)
+    function checkHexColor(decimalValue) {
+      if (decimalValue < 0n || decimalValue > 0xFFFFFFn) return null;
+      const hex = bigIntToBase(decimalValue, 16).toUpperCase();
+      const padded = hex.padStart(6, '0');
+      return '#' + padded;
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('visible');
+    }
+
+    function hideError() {
+      errorMsg.classList.remove('visible');
+    }
+
+    function setOutputPlaceholder() {
+      outBin.textContent = '0';
+      outBin.classList.add('placeholder');
+      outOct.textContent = '0';
+      outOct.classList.add('placeholder');
+      outDec.textContent = '0';
+      outDec.classList.add('placeholder');
+      outHex.textContent = '0';
+      outHex.classList.add('placeholder');
+      bitViz.style.display = 'none';
+      colorPreview.classList.remove('visible');
+    }
+
+    function convert() {
+      hideError();
+      const raw = numberInput.value.trim();
+
+      if (!raw) {
+        setOutputPlaceholder();
+        return;
+      }
+
+      const base = getBase();
+      if (!base) {
+        showError('Custom base must be between 2 and 36.');
+        setOutputPlaceholder();
+        return;
+      }
+
+      let decValue;
+      try {
+        decValue = parseBigInt(raw, base);
+      } catch (e) {
+        showError(e.message);
+        setOutputPlaceholder();
+        return;
+      }
+
+      if (decValue === null) {
+        setOutputPlaceholder();
+        return;
+      }
+
+      const binStr = bigIntToBase(decValue, 2);
+      const octStr = bigIntToBase(decValue, 8);
+      const decStr = bigIntToBase(decValue, 10);
+      const hexStr = bigIntToBase(decValue, 16).toUpperCase();
+
+      outBin.textContent = binStr;
+      outBin.classList.remove('placeholder');
+      outOct.textContent = octStr;
+      outOct.classList.remove('placeholder');
+      outDec.textContent = decStr;
+      outDec.classList.remove('placeholder');
+      outHex.textContent = hexStr;
+      outHex.classList.remove('placeholder');
+
+      // Bit visualization
+      if (decValue >= 0n) {
+        const groups = formatBinary(binStr);
+        bitGroups.innerHTML = '';
+        groups.forEach(g => {
+          const span = document.createElement('span');
+          span.className = 'bit-group';
+          span.innerHTML = g.split('').map(c => c === '0' ? '<span class="zero">0</span>' : '1').join('');
+          bitGroups.appendChild(span);
+        });
+        bitViz.style.display = 'block';
+      } else {
+        bitViz.style.display = 'none';
+      }
+
+      // Hex color preview
+      if (decValue >= 0n) {
+        const colorVal = checkHexColor(decValue);
+        if (colorVal) {
+          const hex6 = colorVal.slice(1);
+          const r = parseInt(hex6.slice(0, 2), 16);
+          const g = parseInt(hex6.slice(2, 4), 16);
+          const b = parseInt(hex6.slice(4, 6), 16);
+          colorSwatch.style.backgroundColor = colorVal;
+          colorHex.textContent = colorVal;
+          colorRgb.textContent = `rgb(${r}, ${g}, ${b})`;
+          colorPreview.classList.add('visible');
+        } else {
+          colorPreview.classList.remove('visible');
+        }
+      } else {
+        colorPreview.classList.remove('visible');
+      }
+    }
+
+    function copyValue(id) {
+      const el = document.getElementById(id);
+      const text = el.textContent;
+      if (!text || el.classList.contains('placeholder')) return;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = el.closest('.value-row').querySelector('.copy-btn');
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+        }, 1500);
+      });
+    }
+
+    function setQuick(val) {
+      baseSelect.value = '10';
+      customBaseWrap.classList.remove('visible');
+      numberInput.value = val;
+      numberInput.focus();
+      convert();
+    }
+
+    // Event listeners
+    numberInput.addEventListener('input', convert);
+    baseSelect.addEventListener('change', () => {
+      if (baseSelect.value === 'custom') {
+        customBaseWrap.classList.add('visible');
+        customBaseInput.focus();
+      } else {
+        customBaseWrap.classList.remove('visible');
+      }
+      convert();
+    });
+    customBaseInput.addEventListener('input', convert);
+
+    // Initialize
+    setOutputPlaceholder();
+    numberInput.focus();
+  </script>
+</body>
+</html>

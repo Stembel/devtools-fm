@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Contrast Checker (WCAG 2.1) - DevTools.fm</title>
+  <meta name="description" content="Check color contrast ratio for WCAG 2.1 accessibility compliance. Test foreground and background color combinations for AA and AAA standards.">
+  <meta name="keywords" content="color contrast checker, WCAG contrast, accessibility checker, contrast ratio, WCAG 2.1, color accessibility, a11y contrast">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/contrast.html">
+  <meta property="og:title" content="Color Contrast Checker (WCAG 2.1) - DevTools.fm">
+  <meta property="og:description" content="Check color contrast ratio for WCAG accessibility. Test AA and AAA compliance instantly.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --surface: #141416;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --text-muted: #8b8b94;
+      --accent: #6366f1;
+      --radius: 8px;
+      --font: 'Inter', sans-serif;
+      --pass: #22c55e;
+      --fail: #ef4444;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tool-page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 0;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .tool-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* Color Input Section */
+    .color-inputs-section {
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .color-input-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .color-input-card label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .color-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-picker-wrapper {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .color-picker-wrapper input[type="color"] {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: calc(100% + 12px);
+      height: calc(100% + 12px);
+      border: none;
+      cursor: pointer;
+      background: none;
+    }
+
+    .color-text-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .color-text-input:focus {
+      border-color: var(--accent);
+    }
+
+    .color-swatch {
+      width: 100%;
+      height: 32px;
+      border-radius: 4px;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      transition: background-color 0.2s;
+    }
+
+    .color-format-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Swap Button */
+    .swap-btn-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .swap-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+
+    .swap-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: rotate(180deg);
+    }
+
+    /* Ratio Display */
+    .ratio-display {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .ratio-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .ratio-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* WCAG Grid */
+    .wcag-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .wcag-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .wcag-card .level {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .wcag-card .text-type {
+      font-size: 0.8rem;
+      color: var(--text);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .wcag-card .ratio-required {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .wcag-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .wcag-badge.pass {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--pass);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .wcag-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--fail);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Preview Panel */
+    .preview-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+
+    .preview-panel-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .preview-content {
+      padding: 32px;
+      transition: background-color 0.2s;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .preview-large {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.4;
+      transition: color 0.2s;
+    }
+
+    .preview-normal {
+      font-size: 1rem;
+      line-height: 1.6;
+      transition: color 0.2s;
+    }
+
+    .preview-small {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      transition: color 0.2s;
+      opacity: 0.9;
+    }
+
+    /* Suggestions */
+    .suggestions-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 32px;
+      display: none;
+    }
+
+    .suggestions-section.visible {
+      display: block;
+    }
+
+    .suggestions-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .suggestion-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .suggestion-row:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .suggestion-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .suggestion-hex {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .suggestion-ratio {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .suggestion-apply {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      color: var(--accent);
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .suggestion-apply:hover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .color-inputs-section {
+        flex-direction: column;
+      }
+
+      .swap-btn-wrapper {
+        align-self: center;
+      }
+
+      .swap-btn {
+        transform: rotate(90deg);
+      }
+
+      .swap-btn:hover {
+        transform: rotate(270deg);
+      }
+
+      .wcag-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .ratio-value {
+        font-size: 3rem;
+      }
+
+      .tool-header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tool-page">
+    <div class="tool-header">
+      <h1>Color Contrast Checker</h1>
+      <p>Test foreground and background color combinations against WCAG 2.1 accessibility standards for AA and AAA compliance.</p>
+    </div>
+
+    <!-- Color Inputs -->
+    <div class="color-inputs-section">
+      <div class="color-input-card">
+        <label>Foreground Color</label>
+        <div class="color-input-row">
+          <div class="color-picker-wrapper">
+            <input type="color" id="fgPicker" value="#6366f1">
+          </div>
+          <input type="text" class="color-text-input" id="fgText" value="#6366f1" spellcheck="false" autocomplete="off">
+        </div>
+        <div class="color-swatch" id="fgSwatch"></div>
+        <div class="color-format-hint">HEX, RGB(r,g,b), HSL(h,s%,l%)</div>
+      </div>
+
+      <div class="swap-btn-wrapper">
+        <button class="swap-btn" id="swapBtn" title="Swap foreground and background colors" aria-label="Swap colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 16l-4-4 4-4"/>
+            <path d="M17 8l4 4-4 4"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="color-input-card">
+        <label>Background Color</label>
+        <div class="color-input-row">
+          <div class="color-picker-wrapper">
+            <input type="color" id="bgPicker" value="#0a0a0c">
+          </div>
+          <input type="text" class="color-text-input" id="bgText" value="#0a0a0c" spellcheck="false" autocomplete="off">
+        </div>
+        <div class="color-swatch" id="bgSwatch"></div>
+        <div class="color-format-hint">HEX, RGB(r,g,b), HSL(h,s%,l%)</div>
+      </div>
+    </div>
+
+    <!-- Contrast Ratio Display -->
+    <div class="ratio-display">
+      <div class="ratio-value" id="ratioValue">--</div>
+      <div class="ratio-label">Contrast Ratio</div>
+    </div>
+
+    <!-- WCAG Compliance Grid -->
+    <div class="wcag-grid">
+      <div class="wcag-card">
+        <div class="level">AA</div>
+        <div class="text-type">Normal Text</div>
+        <div class="ratio-required">&ge; 4.5 : 1</div>
+        <span class="wcag-badge" id="aaNormal">--</span>
+      </div>
+      <div class="wcag-card">
+        <div class="level">AA</div>
+        <div class="text-type">Large Text</div>
+        <div class="ratio-required">&ge; 3 : 1</div>
+        <span class="wcag-badge" id="aaLarge">--</span>
+      </div>
+      <div class="wcag-card">
+        <div class="level">AAA</div>
+        <div class="text-type">Normal Text</div>
+        <div class="ratio-required">&ge; 7 : 1</div>
+        <span class="wcag-badge" id="aaaNormal">--</span>
+      </div>
+      <div class="wcag-card">
+        <div class="level">AAA</div>
+        <div class="text-type">Large Text</div>
+        <div class="ratio-required">&ge; 4.5 : 1</div>
+        <span class="wcag-badge" id="aaaLarge">--</span>
+      </div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="preview-panel">
+      <div class="preview-panel-header">Live Preview</div>
+      <div class="preview-content" id="previewContent">
+        <div class="preview-large" id="previewLarge">Large Text Sample (18pt+)</div>
+        <div class="preview-normal" id="previewNormal">Normal body text looks like this. Check readability at standard font sizes to ensure content is accessible to all users, including those with visual impairments.</div>
+        <div class="preview-small" id="previewSmall">Small text &middot; UI labels &middot; Captions &middot; Fine print details</div>
+      </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="suggestions-section" id="suggestionsSection">
+      <div class="suggestions-header">Suggested Colors for AA Normal (4.5:1)</div>
+      <div id="suggestionsList"></div>
+    </div>
+  </div>
+
+  <footer style="text-align:center;padding:32px 24px;color:var(--text-muted);font-size:0.8rem;">
+    <a href="../" style="color:var(--accent);text-decoration:none;">&larr; Back to all tools</a> &middot; DevTools.fm
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    // ---- Color Parsing Utilities ----
+
+    function parseColor(str) {
+      str = str.trim();
+
+      // HEX
+      const hexMatch = str.match(/^#?([0-9a-f]{3,8})$/i);
+      if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) {
+          hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        } else if (hex.length === 4) {
+          hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        } else if (hex.length === 6 || hex.length === 8) {
+          hex = hex.substring(0, 6);
+        } else {
+          return null;
+        }
+        return {
+          r: parseInt(hex.substring(0, 2), 16),
+          g: parseInt(hex.substring(2, 4), 16),
+          b: parseInt(hex.substring(4, 6), 16)
+        };
+      }
+
+      // RGB
+      const rgbMatch = str.match(/^rgba?\s*\(\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})/i);
+      if (rgbMatch) {
+        return {
+          r: Math.min(255, parseInt(rgbMatch[1])),
+          g: Math.min(255, parseInt(rgbMatch[2])),
+          b: Math.min(255, parseInt(rgbMatch[3]))
+        };
+      }
+
+      // HSL
+      const hslMatch = str.match(/^hsla?\s*\(\s*(\d{1,3}(?:\.\d+)?)\s*[,\s]\s*(\d{1,3}(?:\.\d+)?)%?\s*[,\s]\s*(\d{1,3}(?:\.\d+)?)%?/i);
+      if (hslMatch) {
+        return hslToRgb(
+          parseFloat(hslMatch[1]),
+          parseFloat(hslMatch[2]),
+          parseFloat(hslMatch[3])
+        );
+      }
+
+      return null;
+    }
+
+    function hslToRgb(h, s, l) {
+      h = ((h % 360) + 360) % 360;
+      s = Math.max(0, Math.min(100, s)) / 100;
+      l = Math.max(0, Math.min(100, l)) / 100;
+
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+
+      let r, g, b;
+      if (h < 60) { r = c; g = x; b = 0; }
+      else if (h < 120) { r = x; g = c; b = 0; }
+      else if (h < 180) { r = 0; g = c; b = x; }
+      else if (h < 240) { r = 0; g = x; b = c; }
+      else if (h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+
+      return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(v => {
+        const hex = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('');
+    }
+
+    // ---- WCAG Luminance & Contrast ----
+
+    function linearize(srgb) {
+      const v = srgb / 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    }
+
+    function relativeLuminance(rgb) {
+      return 0.2126 * linearize(rgb.r) + 0.7152 * linearize(rgb.g) + 0.0722 * linearize(rgb.b);
+    }
+
+    function contrastRatio(rgb1, rgb2) {
+      const l1 = relativeLuminance(rgb1);
+      const l2 = relativeLuminance(rgb2);
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    // ---- Suggestion Engine ----
+
+    function findClosestPassingColors(fgRgb, bgRgb, targetRatio) {
+      const suggestions = [];
+      const fgLum = relativeLuminance(fgRgb);
+      const bgLum = relativeLuminance(bgRgb);
+
+      // Try adjusting foreground lighter
+      const fgLighter = adjustColorForContrast(fgRgb, bgRgb, targetRatio, true);
+      if (fgLighter) {
+        suggestions.push({ type: 'fg', color: fgLighter, label: 'Lighter Foreground' });
+      }
+
+      // Try adjusting foreground darker
+      const fgDarker = adjustColorForContrast(fgRgb, bgRgb, targetRatio, false);
+      if (fgDarker) {
+        suggestions.push({ type: 'fg', color: fgDarker, label: 'Darker Foreground' });
+      }
+
+      // Try adjusting background lighter
+      const bgLighter = adjustColorForContrast(bgRgb, fgRgb, targetRatio, true);
+      if (bgLighter) {
+        suggestions.push({ type: 'bg', color: bgLighter, label: 'Lighter Background' });
+      }
+
+      // Try adjusting background darker
+      const bgDarker = adjustColorForContrast(bgRgb, fgRgb, targetRatio, false);
+      if (bgDarker) {
+        suggestions.push({ type: 'bg', color: bgDarker, label: 'Darker Background' });
+      }
+
+      // Deduplicate and sort by closeness to original
+      const unique = [];
+      const seen = new Set();
+      for (const s of suggestions) {
+        const hex = rgbToHex(s.color.r, s.color.g, s.color.b);
+        const key = s.type + hex;
+        if (!seen.has(key)) {
+          seen.add(key);
+          const origColor = s.type === 'fg' ? fgRgb : bgRgb;
+          s.hex = hex;
+          s.distance = Math.sqrt(
+            Math.pow(s.color.r - origColor.r, 2) +
+            Math.pow(s.color.g - origColor.g, 2) +
+            Math.pow(s.color.b - origColor.b, 2)
+          );
+          s.ratio = s.type === 'fg'
+            ? contrastRatio(s.color, bgRgb)
+            : contrastRatio(fgRgb, s.color);
+          unique.push(s);
+        }
+      }
+
+      unique.sort((a, b) => a.distance - b.distance);
+      return unique.slice(0, 4);
+    }
+
+    function adjustColorForContrast(colorToAdjust, fixedColor, targetRatio, lighten) {
+      const rgb = { ...colorToAdjust };
+      const step = lighten ? 1 : -1;
+
+      for (let i = 0; i < 256; i++) {
+        rgb.r = Math.max(0, Math.min(255, rgb.r + step));
+        rgb.g = Math.max(0, Math.min(255, rgb.g + step));
+        rgb.b = Math.max(0, Math.min(255, rgb.b + step));
+
+        const ratio = contrastRatio(rgb, fixedColor);
+        if (ratio >= targetRatio) {
+          return { ...rgb };
+        }
+
+        if ((lighten && rgb.r >= 255 && rgb.g >= 255 && rgb.b >= 255) ||
+            (!lighten && rgb.r <= 0 && rgb.g <= 0 && rgb.b <= 0)) {
+          break;
+        }
+      }
+
+      return null;
+    }
+
+    // ---- DOM References ----
+
+    const fgPicker = document.getElementById('fgPicker');
+    const fgText = document.getElementById('fgText');
+    const fgSwatch = document.getElementById('fgSwatch');
+    const bgPicker = document.getElementById('bgPicker');
+    const bgText = document.getElementById('bgText');
+    const bgSwatch = document.getElementById('bgSwatch');
+    const swapBtn = document.getElementById('swapBtn');
+    const ratioValue = document.getElementById('ratioValue');
+    const aaNormal = document.getElementById('aaNormal');
+    const aaLarge = document.getElementById('aaLarge');
+    const aaaNormal = document.getElementById('aaaNormal');
+    const aaaLarge = document.getElementById('aaaLarge');
+    const previewContent = document.getElementById('previewContent');
+    const previewLarge = document.getElementById('previewLarge');
+    const previewNormal = document.getElementById('previewNormal');
+    const previewSmall = document.getElementById('previewSmall');
+    const suggestionsSection = document.getElementById('suggestionsSection');
+    const suggestionsList = document.getElementById('suggestionsList');
+
+    // ---- State ----
+
+    let currentFg = { r: 99, g: 102, b: 241 };
+    let currentBg = { r: 10, g: 10, b: 12 };
+
+    // ---- Update Logic ----
+
+    function updateAll() {
+      const fgHex = rgbToHex(currentFg.r, currentFg.g, currentFg.b);
+      const bgHex = rgbToHex(currentBg.r, currentBg.g, currentBg.b);
+
+      // Update swatches
+      fgSwatch.style.backgroundColor = fgHex;
+      bgSwatch.style.backgroundColor = bgHex;
+
+      // Update pickers
+      fgPicker.value = fgHex;
+      bgPicker.value = bgHex;
+
+      // Calculate ratio
+      const ratio = contrastRatio(currentFg, currentBg);
+      const ratioRounded = Math.round(ratio * 100) / 100;
+      ratioValue.textContent = ratioRounded.toFixed(2) + ' : 1';
+
+      // Color the ratio based on overall pass/fail
+      if (ratio >= 7) {
+        ratioValue.style.color = '#22c55e';
+      } else if (ratio >= 4.5) {
+        ratioValue.style.color = '#eab308';
+      } else if (ratio >= 3) {
+        ratioValue.style.color = '#f97316';
+      } else {
+        ratioValue.style.color = '#ef4444';
+      }
+
+      // WCAG badges
+      setBadge(aaNormal, ratio >= 4.5);
+      setBadge(aaLarge, ratio >= 3);
+      setBadge(aaaNormal, ratio >= 7);
+      setBadge(aaaLarge, ratio >= 4.5);
+
+      // Preview
+      previewContent.style.backgroundColor = bgHex;
+      previewLarge.style.color = fgHex;
+      previewNormal.style.color = fgHex;
+      previewSmall.style.color = fgHex;
+
+      // Suggestions
+      if (ratio < 4.5) {
+        const suggestions = findClosestPassingColors(currentFg, currentBg, 4.5);
+        if (suggestions.length > 0) {
+          suggestionsSection.classList.add('visible');
+          renderSuggestions(suggestions);
+        } else {
+          suggestionsSection.classList.remove('visible');
+        }
+      } else {
+        suggestionsSection.classList.remove('visible');
+      }
+    }
+
+    function setBadge(el, pass) {
+      el.textContent = pass ? 'Pass' : 'Fail';
+      el.className = 'wcag-badge ' + (pass ? 'pass' : 'fail');
+    }
+
+    function renderSuggestions(suggestions) {
+      suggestionsList.innerHTML = '';
+      for (const s of suggestions) {
+        const row = document.createElement('div');
+        row.className = 'suggestion-row';
+
+        const swatch = document.createElement('div');
+        swatch.className = 'suggestion-swatch';
+        swatch.style.backgroundColor = s.hex;
+
+        const info = document.createElement('div');
+        info.className = 'suggestion-info';
+
+        const hexSpan = document.createElement('span');
+        hexSpan.className = 'suggestion-hex';
+        hexSpan.textContent = s.hex + ' (' + s.label + ')';
+
+        const ratioSpan = document.createElement('span');
+        ratioSpan.className = 'suggestion-ratio';
+        ratioSpan.textContent = s.ratio.toFixed(2) + ':1';
+
+        info.appendChild(hexSpan);
+        info.appendChild(ratioSpan);
+
+        const applyBtn = document.createElement('button');
+        applyBtn.className = 'suggestion-apply';
+        applyBtn.textContent = 'Apply';
+        applyBtn.addEventListener('click', () => {
+          if (s.type === 'fg') {
+            currentFg = { ...s.color };
+            fgText.value = s.hex;
+          } else {
+            currentBg = { ...s.color };
+            bgText.value = s.hex;
+          }
+          updateAll();
+        });
+
+        row.appendChild(swatch);
+        row.appendChild(info);
+        row.appendChild(applyBtn);
+        suggestionsList.appendChild(row);
+      }
+    }
+
+    // ---- Event Handlers ----
+
+    fgPicker.addEventListener('input', () => {
+      const rgb = parseColor(fgPicker.value);
+      if (rgb) {
+        currentFg = rgb;
+        fgText.value = fgPicker.value;
+        updateAll();
+      }
+    });
+
+    bgPicker.addEventListener('input', () => {
+      const rgb = parseColor(bgPicker.value);
+      if (rgb) {
+        currentBg = rgb;
+        bgText.value = bgPicker.value;
+        updateAll();
+      }
+    });
+
+    fgText.addEventListener('input', () => {
+      const rgb = parseColor(fgText.value);
+      if (rgb) {
+        currentFg = rgb;
+        updateAll();
+      }
+    });
+
+    bgText.addEventListener('input', () => {
+      const rgb = parseColor(bgText.value);
+      if (rgb) {
+        currentBg = rgb;
+        updateAll();
+      }
+    });
+
+    swapBtn.addEventListener('click', () => {
+      const tmpColor = { ...currentFg };
+      currentFg = { ...currentBg };
+      currentBg = tmpColor;
+      fgText.value = rgbToHex(currentFg.r, currentFg.g, currentFg.b);
+      bgText.value = rgbToHex(currentBg.r, currentBg.g, currentBg.b);
+      updateAll();
+    });
+
+    // ---- Initialize ----
+    updateAll();
+  </script>
+</body>
+</html>

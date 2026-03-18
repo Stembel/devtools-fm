@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML to Markdown Converter - DevTools.fm</title>
+  <meta name="description" content="Convert HTML to Markdown and Markdown to HTML. Free online converter with live preview. Supports tables, code blocks, lists, and more.">
+  <meta name="keywords" content="html to markdown, markdown to html, html converter, markdown converter, html2md, md2html">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/html2md.html">
+  <meta property="og:title" content="HTML to Markdown Converter - DevTools.fm">
+  <meta property="og:description" content="Convert HTML to Markdown and back. Free online tool with live preview.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .direction-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 0;
+    }
+    .direction-toggle .dir-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      min-width: 80px;
+      transition: color 0.2s;
+    }
+    .direction-toggle .dir-label.active {
+      color: var(--accent);
+    }
+    .direction-toggle .dir-label:first-child { text-align: right; }
+    .direction-toggle .dir-label:last-child { text-align: left; }
+    .toggle-switch {
+      position: relative;
+      width: 56px;
+      height: 30px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.25s;
+      flex-shrink: 0;
+    }
+    .toggle-switch:hover { border-color: var(--accent); }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      transition: transform 0.25s;
+    }
+    .toggle-switch.reversed::after {
+      transform: translateX(26px);
+    }
+    .toggle-switch .arrow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .status-bar .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>HTML to Markdown Converter</h1>
+    <p class="description">Convert between HTML and Markdown with live preview. Handles headings, lists, tables, code blocks, and more. Everything runs locally in your browser.</p>
+
+    <div class="direction-toggle">
+      <span class="dir-label active" id="dirLeft">HTML</span>
+      <div class="toggle-switch" id="toggleDir" onclick="toggleDirection()" title="Switch conversion direction">
+        <span class="arrow">&harr;</span>
+      </div>
+      <span class="dir-label" id="dirRight">Markdown</span>
+    </div>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="copyOutput()">Copy Output</button>
+        <button class="btn" onclick="pasteInput()">Paste</button>
+        <button class="btn" onclick="loadSample()">Sample</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="status-bar">
+        <span class="dot"></span>
+        <span id="status">Live conversion active</span>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">
+          <span id="inputLabel">HTML Input</span>
+        </div>
+        <textarea class="tool-textarea" id="input" placeholder="Paste or type HTML here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          <span id="outputLabel">Markdown Output</span>
+          <span id="charCount" style="font-size:0.75rem;font-weight:400;"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Converted output will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer style="text-align:center;padding:32px 24px;color:var(--text-muted);font-size:0.8rem;"><a href="../" style="color:var(--accent);text-decoration:none;">&larr; Back to all tools</a> &middot; DevTools.fm</footer>
+
+  <script>
+    // State
+    let mode = 'html2md'; // or 'md2html'
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $inputLabel = document.getElementById('inputLabel');
+    const $outputLabel = document.getElementById('outputLabel');
+    const $charCount = document.getElementById('charCount');
+    const $dirLeft = document.getElementById('dirLeft');
+    const $dirRight = document.getElementById('dirRight');
+    const $toggleDir = document.getElementById('toggleDir');
+
+    // ─── Direction Toggle ───────────────────────────────────
+    function toggleDirection() {
+      mode = mode === 'html2md' ? 'md2html' : 'html2md';
+      $toggleDir.classList.toggle('reversed', mode === 'md2html');
+
+      if (mode === 'html2md') {
+        $inputLabel.textContent = 'HTML Input';
+        $outputLabel.textContent = 'Markdown Output';
+        $input.placeholder = 'Paste or type HTML here...';
+        $dirLeft.classList.add('active');
+        $dirRight.classList.remove('active');
+      } else {
+        $inputLabel.textContent = 'Markdown Input';
+        $outputLabel.textContent = 'HTML Output';
+        $input.placeholder = 'Paste or type Markdown here...';
+        $dirLeft.classList.remove('active');
+        $dirRight.classList.add('active');
+      }
+
+      // Swap content
+      const tmp = $input.value;
+      $input.value = $output.value;
+      $output.value = tmp;
+      convert();
+    }
+
+    // ─── HTML to Markdown Converter ─────────────────────────
+    function htmlToMarkdown(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html.trim();
+      return walkNodes(div).replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function walkNodes(parent) {
+      let result = '';
+      for (const node of parent.childNodes) {
+        result += processNode(node);
+      }
+      return result;
+    }
+
+    function processNode(node) {
+      // Text node
+      if (node.nodeType === 3) {
+        const text = node.textContent;
+        // If inside a <pre>, preserve whitespace
+        if (isInsidePre(node)) return text;
+        // Collapse whitespace for normal text
+        return text.replace(/\s+/g, ' ');
+      }
+
+      // Not an element
+      if (node.nodeType !== 1) return '';
+
+      const tag = node.tagName.toLowerCase();
+
+      switch (tag) {
+        case 'h1': return '\n\n# ' + getInlineContent(node) + '\n\n';
+        case 'h2': return '\n\n## ' + getInlineContent(node) + '\n\n';
+        case 'h3': return '\n\n### ' + getInlineContent(node) + '\n\n';
+        case 'h4': return '\n\n#### ' + getInlineContent(node) + '\n\n';
+        case 'h5': return '\n\n##### ' + getInlineContent(node) + '\n\n';
+        case 'h6': return '\n\n###### ' + getInlineContent(node) + '\n\n';
+
+        case 'p': return '\n\n' + getInlineContent(node) + '\n\n';
+
+        case 'br': return '\n';
+
+        case 'strong':
+        case 'b':
+          return '**' + getInlineContent(node) + '**';
+
+        case 'em':
+        case 'i':
+          return '*' + getInlineContent(node) + '*';
+
+        case 'code':
+          if (isInsidePre(node)) {
+            return node.textContent;
+          }
+          return '`' + node.textContent + '`';
+
+        case 'pre': {
+          const codeEl = node.querySelector('code');
+          const content = codeEl ? codeEl.textContent : node.textContent;
+          let lang = '';
+          if (codeEl) {
+            const cls = codeEl.className || '';
+            const match = cls.match(/language-(\w+)/);
+            if (match) lang = match[1];
+          }
+          return '\n\n```' + lang + '\n' + content.replace(/\n$/, '') + '\n```\n\n';
+        }
+
+        case 'a': {
+          const href = node.getAttribute('href') || '';
+          const text = getInlineContent(node);
+          return '[' + text + '](' + href + ')';
+        }
+
+        case 'img': {
+          const src = node.getAttribute('src') || '';
+          const alt = node.getAttribute('alt') || '';
+          return '![' + alt + '](' + src + ')';
+        }
+
+        case 'ul': return '\n\n' + convertList(node, 'ul', 0) + '\n\n';
+        case 'ol': return '\n\n' + convertList(node, 'ol', 0) + '\n\n';
+
+        case 'li': {
+          // Handled by convertList, but if encountered standalone:
+          return getInlineContent(node);
+        }
+
+        case 'blockquote': {
+          const inner = walkNodes(node).trim();
+          return '\n\n' + inner.split('\n').map(line => '> ' + line).join('\n') + '\n\n';
+        }
+
+        case 'hr': return '\n\n---\n\n';
+
+        case 'table': return '\n\n' + convertTable(node) + '\n\n';
+
+        case 'div':
+        case 'section':
+        case 'article':
+        case 'main':
+        case 'span':
+        case 'header':
+        case 'footer':
+        case 'nav':
+          return walkNodes(node);
+
+        case 'del':
+        case 's':
+          return '~~' + getInlineContent(node) + '~~';
+
+        case 'sup':
+          return '<sup>' + getInlineContent(node) + '</sup>';
+
+        case 'sub':
+          return '<sub>' + getInlineContent(node) + '</sub>';
+
+        default:
+          return walkNodes(node);
+      }
+    }
+
+    function isInsidePre(node) {
+      let current = node.parentNode;
+      while (current) {
+        if (current.tagName && current.tagName.toLowerCase() === 'pre') return true;
+        current = current.parentNode;
+      }
+      return false;
+    }
+
+    function getInlineContent(node) {
+      let result = '';
+      for (const child of node.childNodes) {
+        result += processNode(child);
+      }
+      return result.trim();
+    }
+
+    function convertList(listNode, type, depth) {
+      const items = [];
+      let counter = 1;
+      const indent = '  '.repeat(depth);
+
+      for (const child of listNode.children) {
+        if (child.tagName.toLowerCase() !== 'li') continue;
+
+        let text = '';
+        let sublist = '';
+
+        for (const liChild of child.childNodes) {
+          if (liChild.nodeType === 1) {
+            const liTag = liChild.tagName.toLowerCase();
+            if (liTag === 'ul') {
+              sublist += '\n' + convertList(liChild, 'ul', depth + 1);
+            } else if (liTag === 'ol') {
+              sublist += '\n' + convertList(liChild, 'ol', depth + 1);
+            } else {
+              text += processNode(liChild);
+            }
+          } else {
+            text += processNode(liChild);
+          }
+        }
+
+        const prefix = type === 'ol' ? (counter++) + '. ' : '- ';
+        items.push(indent + prefix + text.trim() + sublist);
+      }
+
+      return items.join('\n');
+    }
+
+    function convertTable(tableNode) {
+      const rows = [];
+      const allRows = tableNode.querySelectorAll('tr');
+
+      if (allRows.length === 0) return '';
+
+      allRows.forEach((tr, idx) => {
+        const cells = [];
+        tr.querySelectorAll('th, td').forEach(cell => {
+          cells.push(getInlineContent(cell).replace(/\|/g, '\\|'));
+        });
+        rows.push('| ' + cells.join(' | ') + ' |');
+
+        // Add separator after header row
+        if (idx === 0) {
+          const sep = cells.map(() => '---').join(' | ');
+          rows.push('| ' + sep + ' |');
+        }
+      });
+
+      return rows.join('\n');
+    }
+
+    // ─── Markdown to HTML Converter ─────────────────────────
+    function markdownToHtml(md) {
+      let html = md;
+
+      // Code blocks (fenced)
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+        const cls = lang ? ' class="language-' + lang + '"' : '';
+        return '<pre><code' + cls + '>' + escapeHtml(code.replace(/\n$/, '')) + '</code></pre>';
+      });
+
+      // Inline code (before other inline processing)
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Tables
+      html = html.replace(/^(\|.+\|)\n(\|[-| :]+\|)\n((?:\|.+\|\n?)+)/gm, function(_, header, sep, body) {
+        const heads = header.split('|').filter(function(s) { return s.trim(); }).map(function(s) {
+          return '<th>' + s.trim() + '</th>';
+        }).join('');
+        const bodyRows = body.trim().split('\n').map(function(row) {
+          const cells = row.split('|').filter(function(s) { return s.trim(); }).map(function(s) {
+            return '<td>' + s.trim() + '</td>';
+          }).join('');
+          return '<tr>' + cells + '</tr>';
+        }).join('\n');
+        return '<table>\n<thead><tr>' + heads + '</tr></thead>\n<tbody>' + bodyRows + '</tbody>\n</table>';
+      });
+
+      // Headings
+      html = html.replace(/^###### (.+)$/gm, '<h6>$1</h6>');
+      html = html.replace(/^##### (.+)$/gm, '<h5>$1</h5>');
+      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+      // Blockquotes
+      html = html.replace(/^(?:> (.+)\n?)+/gm, function(match) {
+        const lines = match.trim().split('\n').map(function(l) { return l.replace(/^>\s?/, ''); });
+        return '<blockquote><p>' + lines.join('<br>') + '</p></blockquote>';
+      });
+
+      // HR
+      html = html.replace(/^---$/gm, '<hr>');
+      html = html.replace(/^\*\*\*$/gm, '<hr>');
+      html = html.replace(/^___$/gm, '<hr>');
+
+      // Unordered lists
+      html = html.replace(/^(?:[-*+] .+\n?)+/gm, function(match) {
+        const items = match.trim().split('\n').map(function(line) {
+          return '<li>' + line.replace(/^[-*+] /, '') + '</li>';
+        }).join('\n');
+        return '<ul>\n' + items + '\n</ul>';
+      });
+
+      // Ordered lists
+      html = html.replace(/^(?:\d+\. .+\n?)+/gm, function(match) {
+        const items = match.trim().split('\n').map(function(line) {
+          return '<li>' + line.replace(/^\d+\. /, '') + '</li>';
+        }).join('\n');
+        return '<ol>\n' + items + '\n</ol>';
+      });
+
+      // Bold & italic (order matters)
+      html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+      // Images (before links)
+      html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+
+      // Links
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+      // Paragraphs: wrap lines not already in block elements
+      html = html.split('\n\n').map(function(block) {
+        block = block.trim();
+        if (!block) return '';
+        if (/^<(h[1-6]|ul|ol|li|pre|blockquote|table|hr|div|p)[\s>]/i.test(block)) return block;
+        if (block === '<hr>') return block;
+        return '<p>' + block.replace(/\n/g, '<br>') + '</p>';
+      }).join('\n');
+
+      // Clean up excessive newlines
+      html = html.replace(/\n{3,}/g, '\n\n').trim();
+
+      return html;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ─── Conversion Dispatcher ──────────────────────────────
+    function convert() {
+      const input = $input.value;
+      if (!input.trim()) {
+        $output.value = '';
+        $charCount.textContent = '';
+        return;
+      }
+
+      try {
+        if (mode === 'html2md') {
+          $output.value = htmlToMarkdown(input);
+        } else {
+          $output.value = markdownToHtml(input);
+        }
+        $charCount.textContent = $output.value.length + ' chars';
+        $status.textContent = 'Live conversion active';
+      } catch (e) {
+        $output.value = 'Error: ' + e.message;
+        $status.textContent = 'Conversion error';
+      }
+    }
+
+    // ─── Action Buttons ─────────────────────────────────────
+    function copyOutput() {
+      if (!$output.value) return;
+      navigator.clipboard.writeText($output.value).then(function() {
+        showToast('Copied to clipboard!');
+      });
+    }
+
+    function pasteInput() {
+      navigator.clipboard.readText().then(function(text) {
+        $input.value = text;
+        convert();
+        showToast('Pasted from clipboard');
+      }).catch(function() {
+        showToast('Could not access clipboard');
+      });
+    }
+
+    function loadSample() {
+      if (mode === 'html2md') {
+        $input.value = '<h1>Hello World</h1>\n<p>This is a <strong>bold</strong> and <em>italic</em> paragraph with a <a href="https://example.com">link</a>.</p>\n\n<h2>Features</h2>\n<ul>\n  <li>Fast conversion</li>\n  <li>Supports <code>inline code</code></li>\n  <li>Nested lists:\n    <ul>\n      <li>Sub-item one</li>\n      <li>Sub-item two</li>\n    </ul>\n  </li>\n</ul>\n\n<h2>Ordered List</h2>\n<ol>\n  <li>First item</li>\n  <li>Second item</li>\n  <li>Third item</li>\n</ol>\n\n<h2>Code Block</h2>\n<pre><code class="language-javascript">function greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet("World"));</code></pre>\n\n<blockquote>\n  <p>This is a blockquote with <strong>bold</strong> text.</p>\n</blockquote>\n\n<h2>Table</h2>\n<table>\n  <thead>\n    <tr><th>Name</th><th>Type</th><th>Description</th></tr>\n  </thead>\n  <tbody>\n    <tr><td>html2md</td><td>converter</td><td>Converts HTML to Markdown</td></tr>\n    <tr><td>md2html</td><td>converter</td><td>Converts Markdown to HTML</td></tr>\n  </tbody>\n</table>\n\n<hr>\n\n<p>Image example: <img src="https://via.placeholder.com/150" alt="Placeholder"></p>';
+      } else {
+        $input.value = '# Hello World\n\nThis is a **bold** and *italic* paragraph with a [link](https://example.com).\n\n## Features\n\n- Fast conversion\n- Supports `inline code`\n- Handles nested elements\n\n## Ordered List\n\n1. First item\n2. Second item\n3. Third item\n\n## Code Block\n\n```javascript\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet("World"));\n```\n\n> This is a blockquote with **bold** text.\n\n## Table\n\n| Name | Type | Description |\n| --- | --- | --- |\n| html2md | converter | Converts HTML to Markdown |\n| md2html | converter | Converts Markdown to HTML |\n\n---\n\nImage example: ![Placeholder](https://via.placeholder.com/150)';
+      }
+      convert();
+      showToast('Sample loaded');
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $charCount.textContent = '';
+      $status.textContent = 'Live conversion active';
+    }
+
+    function showToast(msg) {
+      $status.textContent = msg;
+      setTimeout(function() {
+        $status.textContent = 'Live conversion active';
+      }, 2000);
+    }
+
+    // ─── Live Conversion ────────────────────────────────────
+    $input.addEventListener('input', convert);
+    $input.addEventListener('paste', function() { setTimeout(convert, 50); });
+
+    // Initial render
+    convert();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

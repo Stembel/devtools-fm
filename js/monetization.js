@@ -138,6 +138,14 @@
       { id: 'palette', name: 'Color Palette', icon: 'P' },
       { id: 'url', name: 'URL Encoder', icon: '%' },
       { id: 'chmod', name: 'Chmod Calculator', icon: '7' },
+      { id: 'ipinfo', name: 'IP & Device Info', icon: 'IP' },
+      { id: 'html2md', name: 'HTML to Markdown', icon: 'H2M' },
+      { id: 'baseconvert', name: 'Base Converter', icon: '0x' },
+      { id: 'contrast', name: 'Contrast Checker', icon: 'AA' },
+      { id: 'imagecompress', name: 'Image Compressor', icon: 'IMG' },
+      { id: 'flexbox', name: 'Flexbox Generator', icon: 'F' },
+      { id: 'metatags', name: 'Meta Tag Generator', icon: 'SEO' },
+      { id: 'httpstatus', name: 'HTTP Status Codes', icon: 'HTTP' },
     ];
 
     const others = allTools.filter(t => t.id !== currentTool);

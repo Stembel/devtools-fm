@@ -635,6 +635,20 @@
         fix: ["Use a coffee pot instead of a teapot", "This is typically a humorous response -- check if the server has real documentation", "If an API returns this, it may indicate the endpoint is not meant to be used"]
       },
       {
+        code: 419, name: "Page Expired", cat: "4xx",
+        short: "Session or CSRF token has expired (non-standard, Laravel).",
+        description: "A non-standard status code most commonly associated with the Laravel PHP framework. It indicates that the CSRF token included in the request has expired or is missing. While not part of the official HTTP specification, it is widely encountered in Laravel applications when form submissions take too long or when the session expires.",
+        causes: ["CSRF token has expired (form was open too long)", "Session timeout while filling out a form", "Missing CSRF token in the request", "Browser back button resubmitting an expired form"],
+        fix: ["Refresh the page to get a new CSRF token", "Reduce the time between loading a form and submitting it", "Implement auto-refresh of CSRF tokens via JavaScript", "Increase session and token lifetime if appropriate"]
+      },
+      {
+        code: 420, name: "Enhance Your Calm", cat: "4xx",
+        short: "Rate limited (non-standard, originally Twitter).",
+        description: "A non-standard status code originally used by the Twitter API (version 1) to indicate that the client was being rate limited. It is a reference to the movie Demolition Man. Twitter later adopted the standard 429 Too Many Requests code. Some other services still use this humorously.",
+        causes: ["Rate limiting on legacy APIs", "Too many requests in a short time period", "Originally used by Twitter API v1"],
+        fix: ["Slow down your request rate", "Implement rate limiting and backoff in your client", "Use the standard 429 status code instead if you control the server", "Check API documentation for rate limit details"]
+      },
+      {
         code: 421, name: "Misdirected Request", cat: "4xx",
         short: "Request was directed to a server unable to produce a response.",
         description: "The request was directed at a server that is not able to produce a response. This can be sent by a server that is not configured to produce responses for the combination of scheme and authority that are included in the request URI. This is related to HTTP/2 connection coalescing.",
@@ -677,6 +691,13 @@
         fix: ["Switch to the protocol specified in the Upgrade header", "Use HTTPS instead of HTTP", "Implement the required protocol upgrade in your client"]
       },
       {
+        code: 427, name: "Unassigned", cat: "4xx",
+        short: "This status code is currently unassigned by IANA.",
+        description: "Status code 427 is currently unassigned in the IANA HTTP Status Code Registry. It has no defined meaning in any HTTP specification or widely-used extension. It is included here for completeness in the 400-431 range.",
+        causes: ["No standard causes -- this code is unassigned", "If encountered, the server is using a non-standard status code"],
+        fix: ["If you receive this code, the server may be using a custom status code", "Check the server's documentation for custom status code definitions", "Report to the server maintainer if unexpected"]
+      },
+      {
         code: 428, name: "Precondition Required", cat: "4xx",
         short: "Server requires the request to be conditional.",
         description: "The origin server requires the request to be conditional (e.g., include an If-Match header). This is intended to prevent the 'lost update' problem, where a client GETs a resource, modifies it, and PUTs it back while a third party has modified the resource in the meantime.",
@@ -696,6 +717,13 @@
         description: "The server is unwilling to process the request because its header fields are too large. The request may be resubmitted after reducing the size of the request header fields. This can refer to a single header that is too large or the total size of all headers.",
         causes: ["Extremely large cookies (common cause)", "Too many cookies accumulated for the domain", "Large Authorization tokens", "Custom headers with excessive data"],
         fix: ["Clear cookies for the affected domain", "Reduce cookie sizes and number of cookies", "Move large data from headers to the request body", "Increase server header size limits if appropriate (nginx: large_client_header_buffers)", "Use shorter token formats"]
+      },
+      {
+        code: 430, name: "Request Header Fields Too Large", cat: "4xx",
+        short: "Request header fields too large (non-standard, Shopify).",
+        description: "A non-standard status code used by some servers (notably Shopify) as an alternative to 431. It indicates that the server is unwilling to process the request because an individual header field, or all the header fields collectively, are too large. While 431 is the official IANA-registered code for this condition, some implementations use 430.",
+        causes: ["Oversized request headers", "Too many or too large cookies", "Large Authorization or custom headers", "Server-specific implementation choosing 430 over 431"],
+        fix: ["Clear cookies for the affected domain", "Reduce the size of request headers", "Use the same approaches as for 431", "Check if the server documentation specifies 430 vs 431 usage"]
       },
       {
         code: 451, name: "Unavailable For Legal Reasons", cat: "4xx",
@@ -768,6 +796,13 @@
         description: "The server terminated an operation because it encountered an infinite loop while processing a request with 'Depth: infinity'. This is a WebDAV extension. The server detected that the request would result in an infinite recursion, typically due to circular references in the resource structure.",
         causes: ["Circular references in WebDAV collections", "Symbolic link loops on the filesystem", "Recursive binding in DAV resources", "Misconfigured resource hierarchy"],
         fix: ["Remove circular references in the resource structure", "Fix symbolic link loops on the server", "Avoid using Depth: infinity with circular structures", "Audit the resource hierarchy for loops"]
+      },
+      {
+        code: 509, name: "Bandwidth Limit Exceeded", cat: "5xx",
+        short: "Server has exceeded its bandwidth allocation (non-standard, Apache/cPanel).",
+        description: "A non-standard status code used by some web hosting providers (notably Apache with cPanel/WHM) to indicate that the website has exceeded its allocated bandwidth limit for the billing period. While not part of the official HTTP specification, it is commonly encountered on shared hosting platforms.",
+        causes: ["Website exceeded monthly bandwidth allocation", "Spike in traffic consumed all available bandwidth", "Large file downloads depleted bandwidth quota", "DDoS attack consuming bandwidth rapidly"],
+        fix: ["Upgrade your hosting plan for more bandwidth", "Optimize assets (compress images, enable gzip, use CDN)", "Wait for the bandwidth to reset at the next billing cycle", "Contact your hosting provider to purchase additional bandwidth", "Implement caching and CDN to reduce origin bandwidth usage"]
       },
       {
         code: 510, name: "Not Extended", cat: "5xx",
