@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Header Checker - DevTools.fm</title>
+  <meta name="description" content="Inspect HTTP response headers for any URL. Check security headers, caching policies, CORS settings, and more. Free online tool for developers.">
+  <meta name="keywords" content="http headers, response headers, security headers, CSP, HSTS, X-Frame-Options, CORS headers, header checker, http inspector">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/http-headers.html">
+  <meta property="og:title" content="HTTP Header Checker - DevTools.fm">
+  <meta property="og:description" content="Inspect HTTP response headers for any URL. Check security headers, caching policies, and more.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* URL Input */
+    .url-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .url-bar input {
+      flex: 1;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .url-bar input:focus {
+      border-color: var(--accent);
+    }
+
+    .url-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .url-bar button {
+      padding: 12px 28px;
+      white-space: nowrap;
+    }
+
+    /* Status Hero */
+    .status-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 24px;
+      display: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .status-hero.status-2xx::before { background: linear-gradient(90deg, transparent, #22c55e, transparent); }
+    .status-hero.status-3xx::before { background: linear-gradient(90deg, transparent, #f59e0b, transparent); }
+    .status-hero.status-4xx::before { background: linear-gradient(90deg, transparent, #ef4444, transparent); }
+    .status-hero.status-5xx::before { background: linear-gradient(90deg, transparent, #ef4444, transparent); }
+
+    .status-code {
+      font-family: var(--mono);
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .status-code.code-2xx { color: #22c55e; }
+    .status-code.code-3xx { color: #f59e0b; }
+    .status-code.code-4xx { color: #ef4444; }
+    .status-code.code-5xx { color: #ef4444; }
+    .status-code.code-1xx { color: #38bdf8; }
+
+    .status-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .status-url {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      word-break: break-all;
+      opacity: 0.7;
+    }
+
+    /* Loading Spinner */
+    .loading-indicator {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .loading-indicator.active { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Results Container */
+    .results { display: none; }
+    .results.active { display: block; }
+
+    /* Section Cards */
+    .header-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .header-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      padding: 14px 16px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-section-title .count-badge {
+      font-size: 0.7rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1px 8px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Header Row */
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      padding: 10px 16px;
+      gap: 16px;
+      transition: background 0.15s;
+      border-top: 1px solid rgba(42, 42, 48, 0.5);
+    }
+
+    .header-row:first-of-type { border-top: none; }
+    .header-row:hover { background: rgba(99, 102, 241, 0.04); }
+    .header-row:last-child { padding-bottom: 14px; }
+
+    .header-name {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--accent);
+      min-width: 200px;
+      flex-shrink: 0;
+      word-break: break-all;
+    }
+
+    .header-value {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      word-break: break-all;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-badge {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-security {
+      background: rgba(34, 197, 94, 0.12);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .badge-missing {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* Security Summary */
+    .security-summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .security-summary.active { display: block; }
+
+    .security-summary h3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .security-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border-radius: 6px;
+      font-size: 0.82rem;
+    }
+
+    .security-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .security-icon.present {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+    }
+
+    .security-icon.absent {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .security-item-name {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+
+    /* Error / Fallback Message */
+    .error-message {
+      display: none;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      color: #ef4444;
+      font-size: 0.9rem;
+    }
+
+    .error-message.active { display: block; }
+
+    .error-message strong { display: block; margin-bottom: 4px; }
+
+    .error-message p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin-top: 8px;
+    }
+
+    /* Copy All Button */
+    .copy-all-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    /* Educational Content */
+    .edu-section {
+      margin-top: 56px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .edu-section h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .edu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .edu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .edu-card h3 {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .edu-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .edu-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    .edu-card .example {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      line-height: 1.6;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .url-bar { flex-direction: column; }
+      .url-bar button { width: 100%; }
+      .header-row { flex-direction: column; gap: 4px; }
+      .header-name { min-width: unset; }
+      .security-grid { grid-template-columns: 1fr; }
+      .edu-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>HTTP Header Checker</h1>
+    <p class="description">Inspect HTTP response headers for any URL. Analyze security headers, caching policies, CORS settings, and server configuration.</p>
+
+    <!-- URL Input -->
+    <div class="url-bar">
+      <input type="url" id="url-input" placeholder="https://example.com" spellcheck="false" autofocus>
+      <button class="btn btn-primary" id="check-btn" onclick="checkHeaders()">Check Headers</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-indicator" id="loading">
+      <div class="spinner"></div>
+      <div>Fetching headers...</div>
+    </div>
+
+    <!-- Error / Fallback -->
+    <div class="error-message" id="error-msg">
+      <strong id="error-title">Unable to fetch headers</strong>
+      <span id="error-detail"></span>
+      <p>The header inspection API may be temporarily unreachable. Please check your URL and try again. Make sure the URL includes the protocol (https:// or http://).</p>
+    </div>
+
+    <!-- Status Hero -->
+    <div class="status-hero" id="status-hero">
+      <div class="status-code" id="status-code"></div>
+      <div class="status-text" id="status-text"></div>
+      <div class="status-url" id="status-url"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="results" id="results">
+
+      <!-- Security Summary -->
+      <div class="security-summary" id="security-summary">
+        <h3>Security Header Audit</h3>
+        <div class="security-grid" id="security-grid"></div>
+      </div>
+
+      <!-- Copy All -->
+      <div class="copy-all-bar">
+        <button class="btn" onclick="copyAllHeaders()">Copy All Headers</button>
+        <button class="btn" onclick="copyAsJson()">Copy as JSON</button>
+      </div>
+
+      <!-- All Headers -->
+      <div class="header-section" id="headers-table">
+        <div class="header-section-title">
+          Response Headers
+          <span class="count-badge" id="header-count">0</span>
+        </div>
+        <div id="headers-body"></div>
+      </div>
+
+    </div>
+
+    <!-- Educational Content -->
+    <div class="edu-section">
+      <h2>Understanding HTTP Response Headers</h2>
+      <p class="description" style="margin-bottom: 24px;">HTTP headers carry metadata about requests and responses. Security headers are especially important -- they instruct browsers how to handle your content and protect users from attacks.</p>
+
+      <div class="edu-grid">
+        <div class="edu-card">
+          <h3>Content-Security-Policy (CSP)</h3>
+          <p>Controls which resources the browser is allowed to load. A strong CSP mitigates cross-site scripting (XSS), clickjacking, and data injection attacks by whitelisting trusted sources.</p>
+          <div class="example">Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.example.com</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>Strict-Transport-Security (HSTS)</h3>
+          <p>Forces browsers to only connect via HTTPS for a specified duration. The <code>includeSubDomains</code> directive extends this to all subdomains. <code>preload</code> allows inclusion in browser preload lists.</p>
+          <div class="example">Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>X-Frame-Options</h3>
+          <p>Prevents your page from being embedded in iframes on other sites, protecting against clickjacking attacks. Use <code>DENY</code> to block all framing or <code>SAMEORIGIN</code> to allow same-origin only.</p>
+          <div class="example">X-Frame-Options: DENY</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>X-Content-Type-Options</h3>
+          <p>When set to <code>nosniff</code>, prevents browsers from MIME-type sniffing. This stops the browser from interpreting files as a different content type than declared, reducing attack surface.</p>
+          <div class="example">X-Content-Type-Options: nosniff</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>Referrer-Policy</h3>
+          <p>Controls how much referrer information is sent with requests. <code>strict-origin-when-cross-origin</code> is a good default -- it sends the origin for cross-origin requests but full URL for same-origin.</p>
+          <div class="example">Referrer-Policy: strict-origin-when-cross-origin</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>Permissions-Policy</h3>
+          <p>Restricts which browser features (camera, microphone, geolocation, etc.) your page can use. This limits the capabilities available to embedded content and your own scripts.</p>
+          <div class="example">Permissions-Policy: camera=(), microphone=(), geolocation=(self)</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>Cache-Control</h3>
+          <p>Directs how browsers and CDNs cache responses. <code>no-store</code> prevents caching entirely. <code>max-age</code> sets how long (in seconds) a response is considered fresh.</p>
+          <div class="example">Cache-Control: public, max-age=86400, stale-while-revalidate=3600</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>Access-Control-Allow-Origin (CORS)</h3>
+          <p>Specifies which origins can access the resource. A wildcard <code>*</code> allows any origin. For credentialed requests, you must specify the exact origin instead of a wildcard.</p>
+          <div class="example">Access-Control-Allow-Origin: https://app.example.com</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ---- Configuration ----
+      var HETZNER_IP = '65.109.129.230';
+      var API_BASE;
+
+      // Detect if served from Hetzner -- use relative path; otherwise absolute
+      (function detectApi() {
+        try {
+          var host = window.location.hostname;
+          // Check if we're on the Hetzner IP directly or resolved to it
+          if (host === HETZNER_IP) {
+            API_BASE = '/api/headers';
+          } else {
+            // Try a DNS-based heuristic: if we can't tell, default to absolute
+            API_BASE = 'http://' + HETZNER_IP + '/api/headers';
+          }
+        } catch(e) {
+          API_BASE = 'http://' + HETZNER_IP + '/api/headers';
+        }
+      })();
+
+      // ---- Security headers we audit ----
+      var SECURITY_HEADERS = [
+        { name: 'content-security-policy', label: 'Content-Security-Policy' },
+        { name: 'strict-transport-security', label: 'Strict-Transport-Security' },
+        { name: 'x-frame-options', label: 'X-Frame-Options' },
+        { name: 'x-content-type-options', label: 'X-Content-Type-Options' },
+        { name: 'referrer-policy', label: 'Referrer-Policy' },
+        { name: 'permissions-policy', label: 'Permissions-Policy' },
+        { name: 'x-xss-protection', label: 'X-XSS-Protection' },
+        { name: 'cross-origin-opener-policy', label: 'Cross-Origin-Opener-Policy' },
+        { name: 'cross-origin-resource-policy', label: 'Cross-Origin-Resource-Policy' },
+        { name: 'cross-origin-embedder-policy', label: 'Cross-Origin-Embedder-Policy' }
+      ];
+
+      // Store last fetched headers for copy
+      var lastHeaders = {};
+      var lastRawText = '';
+
+      // ---- DOM refs ----
+      var $urlInput = document.getElementById('url-input');
+      var $checkBtn = document.getElementById('check-btn');
+      var $loading = document.getElementById('loading');
+      var $error = document.getElementById('error-msg');
+      var $errorTitle = document.getElementById('error-title');
+      var $errorDetail = document.getElementById('error-detail');
+      var $statusHero = document.getElementById('status-hero');
+      var $statusCode = document.getElementById('status-code');
+      var $statusText = document.getElementById('status-text');
+      var $statusUrl = document.getElementById('status-url');
+      var $results = document.getElementById('results');
+      var $secSummary = document.getElementById('security-summary');
+      var $secGrid = document.getElementById('security-grid');
+      var $headersBody = document.getElementById('headers-body');
+      var $headerCount = document.getElementById('header-count');
+
+      // ---- Enter key support ----
+      $urlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') checkHeaders();
+      });
+
+      // ---- Main function ----
+      window.checkHeaders = function() {
+        var url = $urlInput.value.trim();
+        if (!url) {
+          $urlInput.focus();
+          return;
+        }
+
+        // Auto-add protocol if missing
+        if (!/^https?:\/\//i.test(url)) {
+          url = 'https://' + url;
+          $urlInput.value = url;
+        }
+
+        // Reset UI
+        hideAll();
+        $loading.classList.add('active');
+        $checkBtn.disabled = true;
+        $checkBtn.textContent = 'Checking...';
+
+        var apiUrl = API_BASE + '?url=' + encodeURIComponent(url);
+
+        fetch(apiUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('API returned status ' + response.status);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            $loading.classList.remove('active');
+            $checkBtn.disabled = false;
+            $checkBtn.textContent = 'Check Headers';
+            renderResults(data, url);
+          })
+          .catch(function(err) {
+            $loading.classList.remove('active');
+            $checkBtn.disabled = false;
+            $checkBtn.textContent = 'Check Headers';
+            showError(err.message || 'Unknown error');
+          });
+      };
+
+      function hideAll() {
+        $error.classList.remove('active');
+        $statusHero.style.display = 'none';
+        $statusHero.className = 'status-hero';
+        $results.classList.remove('active');
+        $secSummary.classList.remove('active');
+      }
+
+      function showError(msg) {
+        $errorTitle.textContent = 'Unable to fetch headers';
+        $errorDetail.textContent = msg;
+        $error.classList.add('active');
+      }
+
+      // ---- Render Results ----
+      function renderResults(data, url) {
+        var statusCode = data.status || data.statusCode || 0;
+        var statusMessage = data.statusText || data.statusMessage || '';
+        var headers = data.headers || {};
+
+        // Normalize header keys to lowercase for lookup, keep originals for display
+        var headerMap = {};        // lowercase -> value
+        var headerDisplay = [];    // [{name, value}] in original casing
+        var secHeaderLookup = {};  // lowercase -> true
+
+        if (Array.isArray(headers)) {
+          // Handle array-of-arrays format: [[name, value], ...]
+          headers.forEach(function(pair) {
+            var n = pair[0] || '';
+            var v = pair[1] || '';
+            headerMap[n.toLowerCase()] = v;
+            headerDisplay.push({ name: n, value: v });
+          });
+        } else {
+          // Object format
+          Object.keys(headers).forEach(function(key) {
+            headerMap[key.toLowerCase()] = headers[key];
+            headerDisplay.push({ name: key, value: headers[key] });
+          });
+        }
+
+        lastHeaders = headerMap;
+
+        // Build raw text
+        var lines = [];
+        headerDisplay.forEach(function(h) {
+          lines.push(h.name + ': ' + h.value);
+        });
+        lastRawText = lines.join('\n');
+
+        // ---- Status Code ----
+        if (statusCode) {
+          $statusCode.textContent = statusCode;
+          $statusText.textContent = statusMessage;
+          $statusUrl.textContent = url;
+
+          // Color class
+          $statusCode.className = 'status-code';
+          $statusHero.className = 'status-hero';
+          if (statusCode >= 200 && statusCode < 300) {
+            $statusCode.classList.add('code-2xx');
+            $statusHero.classList.add('status-2xx');
+          } else if (statusCode >= 300 && statusCode < 400) {
+            $statusCode.classList.add('code-3xx');
+            $statusHero.classList.add('status-3xx');
+          } else if (statusCode >= 400 && statusCode < 500) {
+            $statusCode.classList.add('code-4xx');
+            $statusHero.classList.add('status-4xx');
+          } else if (statusCode >= 500) {
+            $statusCode.classList.add('code-5xx');
+            $statusHero.classList.add('status-5xx');
+          } else if (statusCode >= 100 && statusCode < 200) {
+            $statusCode.classList.add('code-1xx');
+          }
+
+          $statusHero.style.display = 'block';
+        }
+
+        // ---- Security Audit ----
+        $secGrid.innerHTML = '';
+        SECURITY_HEADERS.forEach(function(sh) {
+          var present = headerMap.hasOwnProperty(sh.name);
+          secHeaderLookup[sh.name] = present;
+
+          var item = document.createElement('div');
+          item.className = 'security-item';
+
+          var icon = document.createElement('div');
+          icon.className = 'security-icon ' + (present ? 'present' : 'absent');
+          icon.textContent = present ? '\u2713' : '\u2717';
+
+          var nameSpan = document.createElement('span');
+          nameSpan.className = 'security-item-name';
+          nameSpan.textContent = sh.label;
+
+          item.appendChild(icon);
+          item.appendChild(nameSpan);
+          $secGrid.appendChild(item);
+        });
+        $secSummary.classList.add('active');
+
+        // ---- Headers Table ----
+        $headersBody.innerHTML = '';
+        $headerCount.textContent = headerDisplay.length;
+
+        headerDisplay.forEach(function(h) {
+          var row = document.createElement('div');
+          row.className = 'header-row';
+
+          var nameEl = document.createElement('div');
+          nameEl.className = 'header-name';
+          nameEl.textContent = h.name;
+
+          var valueEl = document.createElement('div');
+          valueEl.className = 'header-value';
+          valueEl.textContent = h.value;
+
+          row.appendChild(nameEl);
+
+          // Badge for security headers
+          var lowerName = h.name.toLowerCase();
+          var isSecHeader = SECURITY_HEADERS.some(function(sh) { return sh.name === lowerName; });
+          if (isSecHeader) {
+            var badge = document.createElement('span');
+            badge.className = 'header-badge badge-security';
+            badge.textContent = 'Security';
+            row.appendChild(badge);
+          }
+
+          row.appendChild(valueEl);
+          $headersBody.appendChild(row);
+        });
+
+        // Show missing security headers at the end
+        SECURITY_HEADERS.forEach(function(sh) {
+          if (!secHeaderLookup[sh.name]) {
+            var row = document.createElement('div');
+            row.className = 'header-row';
+            row.style.opacity = '0.6';
+
+            var nameEl = document.createElement('div');
+            nameEl.className = 'header-name';
+            nameEl.style.color = '#ef4444';
+            nameEl.textContent = sh.label;
+
+            var badge = document.createElement('span');
+            badge.className = 'header-badge badge-missing';
+            badge.textContent = 'Missing';
+
+            var valueEl = document.createElement('div');
+            valueEl.className = 'header-value';
+            valueEl.style.color = 'var(--text-muted)';
+            valueEl.textContent = 'Not set -- consider adding this header';
+
+            row.appendChild(nameEl);
+            row.appendChild(badge);
+            row.appendChild(valueEl);
+            $headersBody.appendChild(row);
+          }
+        });
+
+        $results.classList.add('active');
+      }
+
+      // ---- Copy helpers ----
+      window.copyAllHeaders = function() {
+        if (!lastRawText) return;
+        navigator.clipboard.writeText(lastRawText).then(function() {
+          showToast('Headers copied to clipboard');
+        }).catch(fallbackCopy.bind(null, lastRawText));
+      };
+
+      window.copyAsJson = function() {
+        if (!Object.keys(lastHeaders).length) return;
+        var json = JSON.stringify(lastHeaders, null, 2);
+        navigator.clipboard.writeText(json).then(function() {
+          showToast('JSON copied to clipboard');
+        }).catch(fallbackCopy.bind(null, json));
+      };
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Copied to clipboard');
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

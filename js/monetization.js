@@ -146,6 +146,9 @@
       { id: 'flexbox', name: 'Flexbox Generator', icon: 'F' },
       { id: 'metatags', name: 'Meta Tag Generator', icon: 'SEO' },
       { id: 'httpstatus', name: 'HTTP Status Codes', icon: 'HTTP' },
+      { id: 'dns-lookup', name: 'DNS Lookup', icon: 'DNS' },
+      { id: 'ssl-checker', name: 'SSL Checker', icon: 'SSL' },
+      { id: 'http-headers', name: 'HTTP Headers', icon: 'HDR' },
     ];
 
     const others = allTools.filter(t => t.id !== currentTool);

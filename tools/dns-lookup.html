@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNS Lookup Tool - DevTools.fm</title>
+  <meta name="description" content="Look up DNS records for any domain. Get A, AAAA, and PTR records instantly. Free online DNS lookup tool for developers.">
+  <meta name="keywords" content="dns lookup, dns records, A record, AAAA record, PTR record, domain lookup, dns query, dns checker">
+  <meta property="og:title" content="DNS Lookup Tool - DevTools.fm">
+  <meta property="og:description" content="Look up DNS records for any domain. Get A, AAAA, and PTR records instantly.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .dns-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .dns-input-group input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .dns-input-group input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .dns-input-group input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Record type checkboxes */
+    .record-types {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .record-types label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .record-types label:hover {
+      color: var(--text);
+    }
+
+    .record-types input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .record-types .label-text {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-right: 16px;
+      color: var(--text);
+    }
+
+    /* Results area */
+    .dns-results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 32px;
+      min-height: 200px;
+    }
+
+    .dns-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .dns-results-header .query-time {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .dns-results-body {
+      padding: 16px;
+    }
+
+    /* Loading spinner */
+    .dns-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      gap: 16px;
+    }
+
+    .dns-loading .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .dns-loading .spinner-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Empty / placeholder state */
+    .dns-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .dns-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* Error state */
+    .dns-error {
+      padding: 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .dns-error strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .dns-error .fallback-hint {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Record section */
+    .record-section {
+      margin-bottom: 20px;
+    }
+
+    .record-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .record-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* DNS table */
+    .dns-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .dns-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      background: var(--surface-2);
+      border-radius: 4px;
+    }
+
+    .dns-table td {
+      padding: 8px 12px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      border-bottom: 1px solid rgba(42, 42, 48, 0.5);
+    }
+
+    .dns-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .dns-table tr:hover td {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .dns-table .record-type-badge {
+      display: inline-block;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--accent);
+    }
+
+    .no-records {
+      padding: 12px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-style: italic;
+    }
+
+    /* Educational content */
+    .dns-education {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+
+    .dns-education h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .dns-education-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .dns-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .dns-info-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dns-info-card h3 .badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .dns-info-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .dns-info-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .dns-input-group {
+        flex-direction: column;
+      }
+
+      .dns-education-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dns-table {
+        font-size: 0.75rem;
+      }
+
+      .dns-table th, .dns-table td {
+        padding: 6px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>DNS Lookup</h1>
+    <p class="description">Query DNS records for any domain. Returns A (IPv4), AAAA (IPv6), and PTR (reverse DNS) records.</p>
+
+    <div class="dns-input-group">
+      <input type="text" id="domain-input" placeholder="example.com" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" id="lookup-btn" onclick="performLookup()">Lookup</button>
+    </div>
+
+    <div class="record-types">
+      <span class="label-text">Record Types:</span>
+      <label><input type="checkbox" id="type-a" checked> A (IPv4)</label>
+      <label><input type="checkbox" id="type-aaaa" checked> AAAA (IPv6)</label>
+      <label><input type="checkbox" id="type-ptr" checked> PTR (Reverse)</label>
+    </div>
+
+    <div class="dns-results" id="results-container">
+      <div class="dns-results-header">
+        <span>Results</span>
+        <span class="query-time" id="query-time"></span>
+      </div>
+      <div class="dns-results-body" id="results-body">
+        <div class="dns-placeholder">
+          <div class="placeholder-icon">&#x1F50D;</div>
+          Enter a domain name above and click Lookup to query DNS records.
+        </div>
+      </div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="dns-education">
+      <h2>Understanding DNS Record Types</h2>
+      <div class="dns-education-grid">
+        <div class="dns-info-card">
+          <h3>A Record <span class="badge">A</span></h3>
+          <p>
+            An <strong>A record</strong> (Address record) maps a domain name to an IPv4 address.
+            This is the most fundamental DNS record type -- when you type a URL in your browser,
+            the A record is what resolves the domain to the server's IP address (e.g.
+            <code>example.com</code> &rarr; <code>93.184.216.34</code>). A domain can have
+            multiple A records for load balancing or redundancy.
+          </p>
+        </div>
+        <div class="dns-info-card">
+          <h3>AAAA Record <span class="badge">AAAA</span></h3>
+          <p>
+            An <strong>AAAA record</strong> (quad-A record) is the IPv6 equivalent of the A record.
+            It maps a domain name to a 128-bit IPv6 address (e.g.
+            <code>example.com</code> &rarr; <code>2606:2800:220:1:248:1893:25c8:1946</code>).
+            As the internet transitions to IPv6, AAAA records are becoming increasingly important.
+            Not all domains have AAAA records yet.
+          </p>
+        </div>
+        <div class="dns-info-card">
+          <h3>PTR Record <span class="badge">PTR</span></h3>
+          <p>
+            A <strong>PTR record</strong> (Pointer record) performs reverse DNS lookup -- it maps
+            an IP address back to a hostname. PTR records are commonly used for email server
+            verification (reverse DNS check), network diagnostics, and logging. They are stored
+            in special <code>in-addr.arpa</code> (IPv4) or <code>ip6.arpa</code> (IPv6) zones.
+          </p>
+        </div>
+        <div class="dns-info-card">
+          <h3>How DNS Works</h3>
+          <p>
+            The Domain Name System (DNS) is the internet's phonebook. When you visit a website,
+            your device queries a chain of DNS servers: first the <strong>recursive resolver</strong>
+            (usually your ISP or a service like <code>8.8.8.8</code>), then the <strong>root
+            nameservers</strong>, the <strong>TLD nameservers</strong> (.com, .org, etc.), and
+            finally the domain's <strong>authoritative nameserver</strong> which holds the actual
+            records. Results are cached at each level using TTL (Time To Live) values.
+          </p>
+        </div>
+        <div class="dns-info-card">
+          <h3>TTL (Time To Live)</h3>
+          <p>
+            Every DNS record includes a <strong>TTL value</strong> in seconds that tells resolvers
+            how long to cache the result. A TTL of <code>3600</code> means the record is cached
+            for one hour. Lower TTL values (e.g. <code>300</code>) allow faster propagation of
+            changes but increase query load. Higher values (e.g. <code>86400</code>) reduce
+            load but mean changes take longer to propagate globally.
+          </p>
+        </div>
+        <div class="dns-info-card">
+          <h3>Common Use Cases</h3>
+          <p>
+            DNS lookups are essential for <strong>debugging connectivity issues</strong>,
+            <strong>verifying DNS propagation</strong> after making changes,
+            <strong>checking mail server configuration</strong> (MX + PTR records),
+            and <strong>investigating domain infrastructure</strong>.
+            Developers frequently use DNS lookups when setting up new services, migrating
+            servers, or troubleshooting deployment issues.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      var domainInput = document.getElementById('domain-input');
+      var resultsBody = document.getElementById('results-body');
+      var queryTimeEl = document.getElementById('query-time');
+      var lookupBtn = document.getElementById('lookup-btn');
+
+      // Determine API base URL
+      var HETZNER_IP = '65.109.129.230';
+      var apiBase;
+      if (window.location.hostname === HETZNER_IP || window.location.hostname === 'localhost') {
+        apiBase = '/api/dns';
+      } else {
+        apiBase = 'http://' + HETZNER_IP + '/api/dns';
+      }
+
+      // Enter key triggers lookup
+      domainInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          performLookup();
+        }
+      });
+
+      // Focus input on load
+      domainInput.focus();
+
+      function performLookup() {
+        var domain = domainInput.value.trim();
+
+        // Basic validation
+        if (!domain) {
+          showError('Please enter a domain name.', '');
+          return;
+        }
+
+        // Strip protocol if user pasted a URL
+        domain = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/:\d+$/, '');
+        domainInput.value = domain;
+
+        // Simple domain format check
+        if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(domain) && !/^\d{1,3}(\.\d{1,3}){3}$/.test(domain)) {
+          showError('Invalid domain format.', 'Enter a valid domain like example.com or an IP address like 8.8.8.8');
+          return;
+        }
+
+        // Get selected record types
+        var types = [];
+        if (document.getElementById('type-a').checked) types.push('A');
+        if (document.getElementById('type-aaaa').checked) types.push('AAAA');
+        if (document.getElementById('type-ptr').checked) types.push('PTR');
+
+        if (types.length === 0) {
+          showError('No record types selected.', 'Please select at least one DNS record type.');
+          return;
+        }
+
+        // Show loading
+        showLoading(domain);
+        lookupBtn.disabled = true;
+        lookupBtn.textContent = 'Looking up...';
+
+        var startTime = performance.now();
+
+        var url = apiBase + '?domain=' + encodeURIComponent(domain);
+        if (types.length < 3) {
+          url += '&types=' + types.join(',');
+        }
+
+        fetch(url, { mode: 'cors' })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Query time: ' + elapsed + 's';
+            renderResults(data, domain, types);
+          })
+          .catch(function(err) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Failed after ' + elapsed + 's';
+            showError(
+              'Could not reach the DNS lookup API.',
+              'Error: ' + err.message + '. The API server at ' + HETZNER_IP + ' may be unreachable or the endpoint /api/dns may not be configured. Try again later or use a command-line tool: dig ' + domain + ' A'
+            );
+          })
+          .finally(function() {
+            lookupBtn.disabled = false;
+            lookupBtn.textContent = 'Lookup';
+          });
+      }
+      window.performLookup = performLookup;
+
+      function showLoading(domain) {
+        resultsBody.innerHTML =
+          '<div class="dns-loading">' +
+            '<div class="spinner"></div>' +
+            '<div class="spinner-text">Querying DNS records for <strong>' + escapeHtml(domain) + '</strong>...</div>' +
+          '</div>';
+      }
+
+      function showError(title, detail) {
+        resultsBody.innerHTML =
+          '<div class="dns-error">' +
+            '<strong>' + escapeHtml(title) + '</strong>' +
+            (detail ? '<div class="fallback-hint">' + escapeHtml(detail) + '</div>' : '') +
+          '</div>';
+      }
+
+      function renderResults(data, domain, requestedTypes) {
+        // Handle API error responses
+        if (data.error) {
+          showError('API Error: ' + data.error, data.detail || '');
+          return;
+        }
+
+        var html = '';
+
+        // Group records by type
+        var records = data.records || data.results || data;
+        var grouped = {};
+
+        if (Array.isArray(records)) {
+          records.forEach(function(r) {
+            var type = (r.type || r.record_type || 'UNKNOWN').toUpperCase();
+            if (!grouped[type]) grouped[type] = [];
+            grouped[type].push(r);
+          });
+        } else if (typeof records === 'object' && records !== null) {
+          // Handle object-style response: { A: [...], AAAA: [...], PTR: [...] }
+          Object.keys(records).forEach(function(type) {
+            var recs = records[type];
+            if (Array.isArray(recs)) {
+              grouped[type.toUpperCase()] = recs.map(function(item) {
+                if (typeof item === 'string') {
+                  return { type: type.toUpperCase(), value: item };
+                }
+                return item;
+              });
+            }
+          });
+        }
+
+        var hasRecords = false;
+
+        // Render each requested type
+        requestedTypes.forEach(function(type) {
+          var typeRecords = grouped[type];
+          html += '<div class="record-section">';
+          html += '<div class="record-section-title">' + escapeHtml(type) + ' Records</div>';
+
+          if (typeRecords && typeRecords.length > 0) {
+            hasRecords = true;
+            html += '<table class="dns-table">';
+            html += '<thead><tr>';
+            html += '<th>Type</th><th>Name</th><th>Value</th><th>TTL</th>';
+            html += '</tr></thead><tbody>';
+
+            typeRecords.forEach(function(rec) {
+              var name = rec.name || rec.hostname || domain;
+              var value = rec.value || rec.address || rec.data || rec.ip || rec.target || rec.ptrdname || '—';
+              var ttl = rec.ttl || rec.TTL || '—';
+              var recType = rec.type || rec.record_type || type;
+
+              html += '<tr>';
+              html += '<td><span class="record-type-badge">' + escapeHtml(String(recType)) + '</span></td>';
+              html += '<td>' + escapeHtml(String(name)) + '</td>';
+              html += '<td>' + escapeHtml(String(value)) + '</td>';
+              html += '<td>' + escapeHtml(String(ttl)) + '</td>';
+              html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+          } else {
+            html += '<div class="no-records">No ' + escapeHtml(type) + ' records found for ' + escapeHtml(domain) + '</div>';
+          }
+
+          html += '</div>';
+        });
+
+        if (!hasRecords && Object.keys(grouped).length === 0) {
+          html = '<div class="dns-placeholder">' +
+            '<div class="placeholder-icon">&#x2139;</div>' +
+            'No DNS records found for <strong>' + escapeHtml(domain) + '</strong>. ' +
+            'The domain may not exist or the queried record types are not configured.' +
+          '</div>';
+        }
+
+        resultsBody.innerHTML = html;
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
