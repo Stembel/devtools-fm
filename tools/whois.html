@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WHOIS Lookup Tool - DevTools.fm</title>
+  <meta name="description" content="Look up WHOIS registration data for any domain. Find registrar, creation date, expiry, nameservers, and registrant info. Free online WHOIS lookup tool for developers.">
+  <meta name="keywords" content="whois lookup, domain whois, domain registration, domain expiry, registrar lookup, nameserver lookup, domain owner, whois query">
+  <meta property="og:title" content="WHOIS Lookup Tool - DevTools.fm">
+  <meta property="og:description" content="Look up WHOIS registration data for any domain. Find registrar, creation date, expiry, nameservers, and registrant info.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .whois-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .whois-input-group input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .whois-input-group input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .whois-input-group input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .whois-input-group .btn-primary {
+      padding: 12px 28px;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    /* Results container */
+    .whois-results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .whois-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .whois-results-header .query-time {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    /* Parsed data table */
+    .whois-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .whois-table tr:hover {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .whois-table td {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(42, 42, 48, 0.5);
+      vertical-align: top;
+    }
+
+    .whois-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .whois-table .whois-label {
+      color: var(--text-muted);
+      font-weight: 600;
+      white-space: nowrap;
+      width: 180px;
+    }
+
+    .whois-table .whois-value {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .whois-table .whois-value .ns-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* Loading spinner */
+    .whois-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      gap: 16px;
+    }
+
+    .whois-loading .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .whois-loading .spinner-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Placeholder state */
+    .whois-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .whois-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* Error state */
+    .whois-error {
+      padding: 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .whois-error strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .whois-error .fallback-hint {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Raw WHOIS section */
+    .whois-raw-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 32px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .whois-raw-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .whois-raw-header:hover {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .whois-raw-header .raw-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .whois-raw-header .raw-title .chevron {
+      display: inline-block;
+      transition: transform 0.2s;
+      font-size: 0.75rem;
+    }
+
+    .whois-raw-header .raw-title .chevron.open {
+      transform: rotate(90deg);
+    }
+
+    .whois-raw-header .copy-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+
+    .whois-raw-header .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .whois-raw-body {
+      display: none;
+      padding: 0;
+    }
+
+    .whois-raw-body.open {
+      display: block;
+    }
+
+    .whois-raw-body pre {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    /* Educational content */
+    .whois-education {
+      margin-top: 48px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .whois-education h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .whois-education h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 24px 0 8px;
+      color: var(--text);
+    }
+
+    .whois-education p, .whois-education li {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .whois-education ul {
+      padding-left: 20px;
+      margin-bottom: 16px;
+    }
+
+    .whois-education li {
+      margin-bottom: 6px;
+    }
+
+    .whois-education code {
+      font-family: var(--mono);
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+
+    .edu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .edu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .edu-card h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .edu-card p {
+      font-size: 0.82rem;
+      margin-bottom: 0;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .whois-input-group {
+        flex-direction: column;
+      }
+
+      .whois-table .whois-label {
+        width: auto;
+      }
+
+      .whois-table td {
+        display: block;
+        padding: 4px 16px;
+      }
+
+      .whois-table tr {
+        display: block;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(42, 42, 48, 0.5);
+      }
+
+      .whois-table tr:last-child {
+        border-bottom: none;
+      }
+
+      .whois-table td {
+        border-bottom: none;
+      }
+
+      .whois-table .whois-label {
+        font-size: 0.75rem;
+        padding-bottom: 0;
+      }
+
+      .whois-table .whois-value {
+        padding-top: 2px;
+      }
+
+      .edu-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>WHOIS Lookup</h1>
+    <p class="description">Query WHOIS registration data for any domain. Find registrar, creation date, expiry, nameservers, and registrant information.</p>
+
+    <div class="whois-input-group">
+      <input type="text" id="domain-input" placeholder="example.com" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" id="lookup-btn" onclick="performLookup()">Lookup</button>
+    </div>
+
+    <!-- Parsed Results -->
+    <div class="whois-results" id="results-container">
+      <div class="whois-results-header">
+        <span>Registration Data</span>
+        <span class="query-time" id="query-time"></span>
+      </div>
+      <div id="results-body">
+        <div class="whois-placeholder">
+          <div class="placeholder-icon">&#x1F310;</div>
+          Enter a domain name above and click Lookup to query WHOIS data.
+        </div>
+      </div>
+    </div>
+
+    <!-- Raw WHOIS output -->
+    <div class="whois-raw-section" id="raw-section">
+      <div class="whois-raw-header" id="raw-header" onclick="toggleRaw()">
+        <span class="raw-title"><span class="chevron" id="raw-chevron">&#9654;</span> Raw WHOIS Output</span>
+        <button class="copy-btn" id="copy-raw-btn" onclick="event.stopPropagation(); copyRaw()">Copy</button>
+      </div>
+      <div class="whois-raw-body" id="raw-body">
+        <pre id="raw-output"></pre>
+      </div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="whois-education">
+      <h2>Understanding WHOIS</h2>
+
+      <p>WHOIS is a query-response protocol used to look up information about domain name registrations. When a domain is registered, the registrar collects contact and administrative data and makes it available through the WHOIS system. This data is stored in distributed databases maintained by registries and registrars worldwide.</p>
+
+      <h3>What Data Does WHOIS Contain?</h3>
+      <p>A typical WHOIS record includes the domain name, registrar name, registration and expiry dates, nameserver information, and registrant contact details. Due to privacy regulations like GDPR, many registrars now redact personal contact information and offer privacy protection services that replace the registrant's details with proxy data.</p>
+
+      <div class="edu-grid">
+        <div class="edu-card">
+          <h4>Registrar Information</h4>
+          <p>The registrar is the company through which the domain was registered (e.g., GoDaddy, Namecheap, Cloudflare). The WHOIS record shows the registrar's name, IANA ID, and abuse contact information.</p>
+        </div>
+        <div class="edu-card">
+          <h4>Registration Dates</h4>
+          <p>WHOIS records include the <code>Created Date</code> (when the domain was first registered), <code>Updated Date</code> (last modification), and <code>Expiry Date</code> (when the registration expires). These help determine domain age and renewal status.</p>
+        </div>
+        <div class="edu-card">
+          <h4>Nameservers</h4>
+          <p>The authoritative nameservers listed in the WHOIS record indicate which DNS servers are responsible for resolving the domain. Changes to nameservers can take up to 48 hours to propagate globally.</p>
+        </div>
+        <div class="edu-card">
+          <h4>DNSSEC</h4>
+          <p>DNSSEC (DNS Security Extensions) adds a layer of authentication to DNS responses. The WHOIS record indicates whether DNSSEC is enabled (<code>signed</code>) or not (<code>unsigned</code>), helping verify that DNS responses haven't been tampered with.</p>
+        </div>
+      </div>
+
+      <h3>Common Use Cases</h3>
+      <ul>
+        <li><strong>Domain availability research</strong> -- Check if a domain is registered and when it might expire for potential acquisition.</li>
+        <li><strong>Security investigations</strong> -- Identify the owner or hosting provider behind a suspicious domain used in phishing or malware campaigns.</li>
+        <li><strong>Brand protection</strong> -- Monitor registrations of domains similar to your brand to detect potential trademark infringement or typosquatting.</li>
+        <li><strong>Due diligence</strong> -- Verify domain ownership before purchasing a domain or entering into a business relationship with a website operator.</li>
+        <li><strong>Technical troubleshooting</strong> -- Confirm nameserver configuration and registration status when debugging DNS or domain transfer issues.</li>
+        <li><strong>Competitive analysis</strong> -- Research when competitor domains were registered and which infrastructure they use.</li>
+      </ul>
+
+      <h3>WHOIS Privacy and GDPR</h3>
+      <p>Since the implementation of GDPR in 2018, many registrars redact personal information from public WHOIS records for domains registered by individuals in the EU. This means fields like registrant name, email, phone number, and address may show as "REDACTED FOR PRIVACY" or display proxy service information instead. ICANN's Registration Data Access Protocol (RDAP) is gradually replacing traditional WHOIS and provides a more structured, privacy-aware approach to accessing registration data.</p>
+    </div>
+
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      var domainInput = document.getElementById('domain-input');
+      var resultsBody = document.getElementById('results-body');
+      var queryTimeEl = document.getElementById('query-time');
+      var lookupBtn = document.getElementById('lookup-btn');
+      var rawSection = document.getElementById('raw-section');
+      var rawBody = document.getElementById('raw-body');
+      var rawOutput = document.getElementById('raw-output');
+      var rawChevron = document.getElementById('raw-chevron');
+
+      // Determine API base URL
+      var API_DOMAIN = '65-109-129-230.sslip.io';
+      var HETZNER_IP = '65.109.129.230';
+      var apiBase;
+      if (window.location.hostname === HETZNER_IP || window.location.hostname === API_DOMAIN || window.location.hostname === 'localhost') {
+        apiBase = '/api/whois';
+      } else {
+        apiBase = 'https://' + API_DOMAIN + '/api/whois';
+      }
+
+      // Store raw text for copy
+      var rawWhoisText = '';
+
+      // Enter key triggers lookup
+      domainInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          performLookup();
+        }
+      });
+
+      // Auto-focus input on load
+      domainInput.focus();
+
+      function performLookup() {
+        var domain = domainInput.value.trim();
+
+        // Basic validation
+        if (!domain) {
+          showError('Please enter a domain name.', '');
+          return;
+        }
+
+        // Strip protocol if user pasted a URL
+        domain = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/:\d+$/, '');
+        domainInput.value = domain;
+
+        // Simple domain format check
+        if (!/^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(domain)) {
+          showError('Invalid domain format.', 'Enter a valid domain like example.com');
+          return;
+        }
+
+        // Show loading
+        showLoading(domain);
+        rawSection.style.display = 'none';
+        lookupBtn.disabled = true;
+        lookupBtn.textContent = 'Looking up...';
+
+        var startTime = performance.now();
+        var url = apiBase + '?domain=' + encodeURIComponent(domain);
+
+        fetch(url, { mode: 'cors' })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Query time: ' + elapsed + 's';
+            renderResults(data, domain);
+          })
+          .catch(function(err) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Failed after ' + elapsed + 's';
+            showError(
+              'Could not reach the WHOIS lookup API.',
+              'Error: ' + err.message + '. The API server at ' + HETZNER_IP + ' may be unreachable. Try again later or use a command-line tool: whois ' + domain
+            );
+          })
+          .finally(function() {
+            lookupBtn.disabled = false;
+            lookupBtn.textContent = 'Lookup';
+          });
+      }
+      window.performLookup = performLookup;
+
+      function showLoading(domain) {
+        resultsBody.innerHTML =
+          '<div class="whois-loading">' +
+            '<div class="spinner"></div>' +
+            '<div class="spinner-text">Querying WHOIS data for <strong>' + escapeHtml(domain) + '</strong>...</div>' +
+          '</div>';
+      }
+
+      function showError(title, detail) {
+        resultsBody.innerHTML =
+          '<div class="whois-error">' +
+            '<strong>' + escapeHtml(title) + '</strong>' +
+            (detail ? '<div class="fallback-hint">' + escapeHtml(detail) + '</div>' : '') +
+          '</div>';
+      }
+
+      function renderResults(data, domain) {
+        // Handle API error responses
+        if (data.error) {
+          showError('API Error: ' + data.error, data.detail || '');
+          return;
+        }
+
+        // Extract parsed fields -- flexible key lookup
+        var parsed = data.parsed || data;
+
+        var domainName = parsed.domain_name || parsed.domainName || parsed.domain || domain;
+        var registrar = parsed.registrar || parsed.Registrar || '';
+        var created = parsed.creation_date || parsed.creationDate || parsed.created || parsed.Created || parsed.creation || '';
+        var updated = parsed.updated_date || parsed.updatedDate || parsed.updated || parsed.Updated || parsed.last_updated || '';
+        var expires = parsed.expiration_date || parsed.expirationDate || parsed.expires || parsed.Expires || parsed.expiry || parsed.expiry_date || '';
+        var nameservers = parsed.nameservers || parsed.name_servers || parsed.Nameservers || parsed.ns || [];
+        var registrantOrg = parsed.registrant_org || parsed.registrantOrg || parsed.registrant_organization || parsed.registrant || parsed.Registrant || '';
+        var registrantCountry = parsed.registrant_country || parsed.registrantCountry || parsed.country || parsed.Country || '';
+        var dnssec = parsed.dnssec || parsed.DNSSEC || parsed.dnsSec || '';
+        var rawText = data.raw || data.raw_whois || data.rawWhois || data.whois_raw || '';
+
+        // Normalize arrays
+        if (typeof nameservers === 'string') {
+          nameservers = nameservers.split(/[,\n]/).map(function(s) { return s.trim(); }).filter(Boolean);
+        }
+        if (typeof domainName === 'object' && Array.isArray(domainName)) {
+          domainName = domainName[0] || domain;
+        }
+
+        // Normalize date arrays (some WHOIS parsers return arrays)
+        if (Array.isArray(created)) created = created[0] || '';
+        if (Array.isArray(updated)) updated = updated[0] || '';
+        if (Array.isArray(expires)) expires = expires[0] || '';
+
+        // Build the table
+        var rows = [
+          { label: 'Domain Name', value: String(domainName).toUpperCase() },
+          { label: 'Registrar', value: registrar },
+          { label: 'Created', value: formatDate(created) },
+          { label: 'Updated', value: formatDate(updated) },
+          { label: 'Expires', value: formatDate(expires) },
+          { label: 'Nameservers', value: nameservers.length > 0 ? '<div class="ns-list">' + nameservers.map(function(ns) { return escapeHtml(String(ns).toLowerCase()); }).join('<br>') + '</div>' : '--', isHtml: true },
+          { label: 'Registrant Org', value: registrantOrg },
+          { label: 'Registrant Country', value: registrantCountry },
+          { label: 'DNSSEC', value: dnssec }
+        ];
+
+        var html = '<table class="whois-table"><tbody>';
+        rows.forEach(function(row) {
+          var val = row.value || '--';
+          html += '<tr>';
+          html += '<td class="whois-label">' + escapeHtml(row.label) + '</td>';
+          if (row.isHtml) {
+            html += '<td class="whois-value">' + val + '</td>';
+          } else {
+            html += '<td class="whois-value">' + escapeHtml(String(val)) + '</td>';
+          }
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+
+        resultsBody.innerHTML = html;
+
+        // Show raw output if available
+        if (rawText) {
+          rawWhoisText = rawText;
+          rawOutput.textContent = rawText;
+          rawSection.style.display = 'block';
+          // Reset to collapsed state
+          rawBody.classList.remove('open');
+          rawChevron.classList.remove('open');
+        } else {
+          rawSection.style.display = 'none';
+        }
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '--';
+        try {
+          var d = new Date(dateStr);
+          if (isNaN(d.getTime())) return String(dateStr);
+          return d.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        } catch (e) {
+          return String(dateStr);
+        }
+      }
+
+      function toggleRaw() {
+        var isOpen = rawBody.classList.contains('open');
+        if (isOpen) {
+          rawBody.classList.remove('open');
+          rawChevron.classList.remove('open');
+        } else {
+          rawBody.classList.add('open');
+          rawChevron.classList.add('open');
+        }
+      }
+      window.toggleRaw = toggleRaw;
+
+      function copyRaw() {
+        if (!rawWhoisText) return;
+        navigator.clipboard.writeText(rawWhoisText).then(function() {
+          showToast('Copied to clipboard!');
+        }).catch(function() {
+          // Fallback for older browsers
+          var textarea = document.createElement('textarea');
+          textarea.value = rawWhoisText;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          showToast('Copied to clipboard!');
+        });
+      }
+      window.copyRaw = copyRaw;
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

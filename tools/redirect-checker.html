@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirect Checker - DevTools.fm</title>
+  <meta name="description" content="Trace HTTP redirect chains for any URL. See every 301, 302, 307 redirect hop, final destination, and status codes. Free online redirect chain checker for developers and SEO.">
+  <meta name="keywords" content="redirect checker, redirect chain, 301 redirect, 302 redirect, 307 redirect, http redirect, redirect trace, SEO redirect, redirect loop, url redirect">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/redirect-checker.html">
+  <meta property="og:title" content="Redirect Checker - DevTools.fm">
+  <meta property="og:description" content="Trace HTTP redirect chains for any URL. See every redirect hop, status codes, and final destination.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* URL Input Bar */
+    .url-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .url-bar input {
+      flex: 1;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .url-bar input:focus {
+      border-color: var(--accent);
+    }
+
+    .url-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .url-bar button {
+      padding: 12px 28px;
+      white-space: nowrap;
+    }
+
+    /* Loading Spinner */
+    .loading-indicator {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .loading-indicator.active { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error Message */
+    .error-message {
+      display: none;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      color: #ef4444;
+      font-size: 0.9rem;
+    }
+
+    .error-message.active { display: block; }
+    .error-message strong { display: block; margin-bottom: 4px; }
+
+    .error-message p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin-top: 8px;
+    }
+
+    /* Summary Card */
+    .summary-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .summary-card.active { display: block; }
+
+    .summary-card.no-redirects::before {
+      background: linear-gradient(90deg, transparent, #22c55e, transparent);
+    }
+
+    .summary-card.has-redirects::before {
+      background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+    }
+
+    .summary-card.has-error::before {
+      background: linear-gradient(90deg, transparent, #ef4444, transparent);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .summary-item {
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .summary-value {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .summary-value.count-zero { color: #22c55e; }
+    .summary-value.count-some { color: #f59e0b; }
+    .summary-value.status-2xx { color: #22c55e; }
+    .summary-value.status-3xx { color: #f59e0b; }
+    .summary-value.status-4xx { color: #ef4444; }
+    .summary-value.status-5xx { color: #ef4444; }
+
+    .summary-final-url {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .summary-final-url .final-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .summary-final-url .final-url-text {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      word-break: break-all;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .summary-final-url .copy-btn {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      font-size: 0.75rem;
+    }
+
+    /* Redirect Chain */
+    .chain-container {
+      display: none;
+      margin-bottom: 32px;
+    }
+
+    .chain-container.active { display: block; }
+
+    .chain-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    /* Chain Step */
+    .chain-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      position: relative;
+    }
+
+    .chain-step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .step-status {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .step-status.status-2xx {
+      background: rgba(34, 197, 94, 0.12);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .step-status.status-3xx {
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .step-status.status-4xx {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .step-status.status-5xx {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .step-status.status-unknown {
+      background: var(--surface-2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .step-type-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .step-url {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .step-location {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(42, 42, 48, 0.5);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .step-location .loc-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+
+    .step-location .loc-value {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--accent);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    /* Arrow Connector */
+    .chain-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 0;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .chain-arrow svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Educational Content */
+    .edu-section {
+      margin-top: 56px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .edu-section h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .edu-intro {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .edu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .edu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .edu-card h3 {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .edu-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .edu-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    .edu-card .example {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .url-bar { flex-direction: column; }
+      .url-bar button { width: 100%; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .summary-final-url { flex-direction: column; align-items: flex-start; }
+      .chain-step-header { flex-wrap: wrap; }
+      .edu-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Redirect Chain Checker</h1>
+    <p class="description">Trace the full HTTP redirect chain for any URL. See every hop, status code, and the final destination.</p>
+
+    <!-- URL Input -->
+    <div class="url-bar">
+      <input type="url" id="url-input" placeholder="https://example.com" spellcheck="false" autofocus>
+      <button class="btn btn-primary" id="check-btn" onclick="checkRedirects()">Check Redirects</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-indicator" id="loading">
+      <div class="spinner"></div>
+      <div>Tracing redirect chain...</div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-message" id="error-msg">
+      <strong id="error-title">Unable to trace redirects</strong>
+      <span id="error-detail"></span>
+      <p>The redirect API may be temporarily unreachable. Please check your URL and try again. Make sure the URL includes the protocol (https:// or http://).</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-card" id="summary">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">Total Redirects</div>
+          <div class="summary-value" id="summary-count">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Final Status</div>
+          <div class="summary-value" id="summary-status">200</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Total Hops</div>
+          <div class="summary-value" id="summary-hops">1</div>
+        </div>
+      </div>
+      <div class="summary-final-url">
+        <span class="final-label">Final URL</span>
+        <span class="final-url-text" id="summary-final-url"></span>
+        <button class="btn copy-btn" onclick="copyFinalUrl()">Copy URL</button>
+      </div>
+    </div>
+
+    <!-- Redirect Chain -->
+    <div class="chain-container" id="chain">
+      <div class="chain-title">Redirect Chain</div>
+      <div id="chain-body"></div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="edu-section">
+      <h2>Understanding HTTP Redirects</h2>
+      <p class="edu-intro">HTTP redirects tell browsers and search engines that a URL has moved to a different location. When a server responds with a 3xx status code and a <code>Location</code> header, the client follows the redirect to the new URL. Redirect chains occur when multiple redirects are chained together -- each hop adds latency and can cause issues for SEO and performance.</p>
+
+      <div class="edu-grid">
+        <div class="edu-card">
+          <h3>301 Moved Permanently</h3>
+          <p>A <code>301</code> redirect indicates that the resource has permanently moved to a new URL. Search engines transfer link equity (ranking power) to the new URL and update their index. This is the recommended redirect type for permanent URL changes, domain migrations, and enforcing canonical URLs.</p>
+          <div class="example">HTTP/1.1 301 Moved Permanently<br>Location: https://www.example.com/new-page</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>302 Found (Temporary)</h3>
+          <p>A <code>302</code> redirect signals that the resource is temporarily located at a different URL. Search engines typically keep the original URL in their index. Use 302 for A/B testing, temporary maintenance pages, or geo-based redirects where the original URL should be preserved.</p>
+          <div class="example">HTTP/1.1 302 Found<br>Location: https://www.example.com/temp-page</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>307 Temporary Redirect</h3>
+          <p>A <code>307</code> redirect is the HTTP/1.1 strict equivalent of 302. The key difference: the client <strong>must not change the request method</strong>. A POST request redirected with 307 will remain a POST. This is important for form submissions and API endpoints.</p>
+          <div class="example">HTTP/1.1 307 Temporary Redirect<br>Location: https://api.example.com/v2/submit</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>308 Permanent Redirect</h3>
+          <p>A <code>308</code> redirect is the strict permanent equivalent of 301. Like 307, it preserves the HTTP method. A POST redirected with 308 stays a POST. Use this when you need a permanent redirect that must preserve the request method.</p>
+          <div class="example">HTTP/1.1 308 Permanent Redirect<br>Location: https://api.example.com/v2/resource</div>
+        </div>
+
+        <div class="edu-card">
+          <h3>Redirect Chains &amp; SEO</h3>
+          <p>Redirect chains occur when URL A redirects to B, which redirects to C, and so on. Each hop dilutes link equity and adds latency. Google recommends keeping redirect chains to a minimum -- ideally one hop. Long chains (3+) can cause crawl budget waste, slower page loads, and incomplete link equity transfer. Audit your redirects regularly.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>Common Redirect Issues</h3>
+          <p><strong>Redirect loops:</strong> A redirects to B and B redirects back to A, causing infinite loops. <strong>Mixed protocols:</strong> HTTP to HTTPS chains with extra hops. <strong>Trailing slashes:</strong> Redirects between /path and /path/ adding unnecessary hops. <strong>WWW/non-WWW:</strong> Not canonicalizing creates duplicate content and extra redirects.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ---- Configuration ----
+      var HETZNER_IP = '65.109.129.230';
+      var API_DOMAIN = '65-109-129-230.sslip.io';
+      var API_BASE;
+
+      (function detectApi() {
+        try {
+          var host = window.location.hostname;
+          if (host === HETZNER_IP || host === API_DOMAIN || host === 'localhost') {
+            API_BASE = '/api/redirect';
+          } else {
+            API_BASE = 'https://' + API_DOMAIN + '/api/redirect';
+          }
+        } catch(e) {
+          API_BASE = 'https://' + API_DOMAIN + '/api/redirect';
+        }
+      })();
+
+      // ---- State ----
+      var lastFinalUrl = '';
+
+      // ---- DOM refs ----
+      var $urlInput = document.getElementById('url-input');
+      var $checkBtn = document.getElementById('check-btn');
+      var $loading = document.getElementById('loading');
+      var $error = document.getElementById('error-msg');
+      var $errorTitle = document.getElementById('error-title');
+      var $errorDetail = document.getElementById('error-detail');
+      var $summary = document.getElementById('summary');
+      var $summaryCount = document.getElementById('summary-count');
+      var $summaryStatus = document.getElementById('summary-status');
+      var $summaryHops = document.getElementById('summary-hops');
+      var $summaryFinalUrl = document.getElementById('summary-final-url');
+      var $chain = document.getElementById('chain');
+      var $chainBody = document.getElementById('chain-body');
+
+      // ---- Enter key + auto-focus ----
+      $urlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') checkRedirects();
+      });
+
+      $urlInput.focus();
+
+      // ---- Main function ----
+      window.checkRedirects = function() {
+        var url = $urlInput.value.trim();
+        if (!url) {
+          $urlInput.focus();
+          return;
+        }
+
+        // Auto-add protocol
+        if (!/^https?:\/\//i.test(url)) {
+          url = 'https://' + url;
+          $urlInput.value = url;
+        }
+
+        // Reset UI
+        hideAll();
+        $loading.classList.add('active');
+        $checkBtn.disabled = true;
+        $checkBtn.textContent = 'Checking...';
+
+        var apiUrl = API_BASE + '?url=' + encodeURIComponent(url);
+
+        fetch(apiUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('API returned status ' + response.status);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            $loading.classList.remove('active');
+            $checkBtn.disabled = false;
+            $checkBtn.textContent = 'Check Redirects';
+            renderResults(data, url);
+          })
+          .catch(function(err) {
+            $loading.classList.remove('active');
+            $checkBtn.disabled = false;
+            $checkBtn.textContent = 'Check Redirects';
+            showError(err.message || 'Unknown error');
+          });
+      };
+
+      function hideAll() {
+        $error.classList.remove('active');
+        $summary.style.display = 'none';
+        $summary.className = 'summary-card';
+        $chain.classList.remove('active');
+        $chainBody.innerHTML = '';
+        lastFinalUrl = '';
+      }
+
+      function showError(msg) {
+        $errorTitle.textContent = 'Unable to trace redirects';
+        $errorDetail.textContent = msg;
+        $error.classList.add('active');
+      }
+
+      // ---- Render Results ----
+      function renderResults(data, originalUrl) {
+        // Handle API error
+        if (data.error) {
+          showError(data.error);
+          return;
+        }
+
+        // Normalize the chain data
+        // Expected: { chain: [{url, status, statusText, location}, ...], finalUrl, totalRedirects }
+        var chain = data.chain || data.redirects || data.hops || [];
+        var finalUrl = data.finalUrl || data.final_url || data.destination || '';
+        var totalRedirects = data.totalRedirects || data.total_redirects || 0;
+
+        // If chain is empty but we got data, build a minimal chain
+        if (chain.length === 0 && data.status) {
+          chain = [{ url: originalUrl, status: data.status, statusText: data.statusText || '' }];
+          if (!finalUrl) finalUrl = originalUrl;
+        }
+
+        // Calculate stats from chain if not provided
+        if (!totalRedirects && chain.length > 0) {
+          totalRedirects = 0;
+          chain.forEach(function(step) {
+            var code = step.status || step.statusCode || 0;
+            if (code >= 300 && code < 400) totalRedirects++;
+          });
+        }
+
+        if (!finalUrl && chain.length > 0) {
+          var lastStep = chain[chain.length - 1];
+          finalUrl = lastStep.url || lastStep.location || originalUrl;
+        }
+
+        lastFinalUrl = finalUrl;
+
+        // Determine final status
+        var finalStatus = 0;
+        if (chain.length > 0) {
+          var last = chain[chain.length - 1];
+          finalStatus = last.status || last.statusCode || 0;
+        }
+
+        // ---- Summary ----
+        $summaryCount.textContent = totalRedirects;
+        $summaryCount.className = 'summary-value ' + (totalRedirects === 0 ? 'count-zero' : 'count-some');
+
+        $summaryStatus.textContent = finalStatus || '--';
+        $summaryStatus.className = 'summary-value ' + getStatusColorClass(finalStatus);
+
+        $summaryHops.textContent = chain.length;
+        $summaryFinalUrl.textContent = finalUrl;
+
+        $summary.className = 'summary-card active';
+        if (totalRedirects === 0) {
+          $summary.classList.add('no-redirects');
+        } else if (finalStatus >= 400) {
+          $summary.classList.add('has-error');
+        } else {
+          $summary.classList.add('has-redirects');
+        }
+        $summary.style.display = 'block';
+
+        // ---- Chain ----
+        $chainBody.innerHTML = '';
+
+        chain.forEach(function(step, index) {
+          var stepUrl = step.url || step.request_url || '';
+          var statusCode = step.status || step.statusCode || 0;
+          var statusText = step.statusText || step.status_text || getDefaultStatusText(statusCode);
+          var location = step.location || step.redirect_url || step.Location || '';
+
+          // Arrow connector (before each step except the first)
+          if (index > 0) {
+            var arrow = document.createElement('div');
+            arrow.className = 'chain-arrow';
+            arrow.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
+            $chainBody.appendChild(arrow);
+          }
+
+          // Step card
+          var card = document.createElement('div');
+          card.className = 'chain-step';
+
+          // Header row
+          var header = document.createElement('div');
+          header.className = 'chain-step-header';
+
+          var numEl = document.createElement('div');
+          numEl.className = 'step-number';
+          numEl.textContent = index + 1;
+
+          var statusEl = document.createElement('div');
+          statusEl.className = 'step-status ' + getStatusColorClass(statusCode);
+          statusEl.textContent = statusCode ? statusCode + ' ' + statusText : 'Unknown';
+
+          var typeLabel = document.createElement('span');
+          typeLabel.className = 'step-type-label';
+          if (statusCode >= 300 && statusCode < 400) {
+            typeLabel.textContent = 'Redirect';
+          } else if (statusCode >= 200 && statusCode < 300) {
+            typeLabel.textContent = 'Final';
+          } else if (statusCode >= 400) {
+            typeLabel.textContent = 'Error';
+          }
+
+          header.appendChild(numEl);
+          header.appendChild(statusEl);
+          header.appendChild(typeLabel);
+
+          // URL
+          var urlEl = document.createElement('div');
+          urlEl.className = 'step-url';
+          urlEl.textContent = stepUrl;
+
+          card.appendChild(header);
+          card.appendChild(urlEl);
+
+          // Location header (for redirects)
+          if (location) {
+            var locDiv = document.createElement('div');
+            locDiv.className = 'step-location';
+
+            var locLabel = document.createElement('span');
+            locLabel.className = 'loc-label';
+            locLabel.textContent = 'Location:';
+
+            var locValue = document.createElement('span');
+            locValue.className = 'loc-value';
+            locValue.textContent = location;
+
+            locDiv.appendChild(locLabel);
+            locDiv.appendChild(locValue);
+            card.appendChild(locDiv);
+          }
+
+          $chainBody.appendChild(card);
+        });
+
+        $chain.classList.add('active');
+      }
+
+      // ---- Helpers ----
+      function getStatusColorClass(code) {
+        if (code >= 200 && code < 300) return 'status-2xx';
+        if (code >= 300 && code < 400) return 'status-3xx';
+        if (code >= 400 && code < 500) return 'status-4xx';
+        if (code >= 500) return 'status-5xx';
+        return 'status-unknown';
+      }
+
+      function getDefaultStatusText(code) {
+        var map = {
+          200: 'OK', 201: 'Created', 204: 'No Content',
+          301: 'Moved Permanently', 302: 'Found', 303: 'See Other',
+          304: 'Not Modified', 307: 'Temporary Redirect', 308: 'Permanent Redirect',
+          400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found',
+          405: 'Method Not Allowed', 408: 'Request Timeout', 410: 'Gone',
+          429: 'Too Many Requests',
+          500: 'Internal Server Error', 502: 'Bad Gateway', 503: 'Service Unavailable',
+          504: 'Gateway Timeout'
+        };
+        return map[code] || '';
+      }
+
+      // ---- Copy final URL ----
+      window.copyFinalUrl = function() {
+        if (!lastFinalUrl) return;
+        navigator.clipboard.writeText(lastFinalUrl).then(function() {
+          showToast('Final URL copied to clipboard');
+        }).catch(function() {
+          fallbackCopy(lastFinalUrl);
+        });
+      };
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Copied to clipboard');
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

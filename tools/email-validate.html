@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Validator - DevTools.fm</title>
+  <meta name="description" content="Validate any email address instantly. Check syntax, domain, and MX records. Free online email validator and address checker for developers.">
+  <meta name="keywords" content="email validator, email address checker, verify email, MX record check, email validation tool, email syntax check, domain verification">
+  <meta property="og:title" content="Email Validator - DevTools.fm">
+  <meta property="og:description" content="Validate any email address instantly. Check syntax, domain, and MX records.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .email-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .email-input-group input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .email-input-group input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .email-input-group input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Results area */
+    .email-results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 32px;
+      min-height: 200px;
+    }
+
+    .email-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .email-results-header .query-time {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .email-results-body {
+      padding: 16px;
+    }
+
+    /* Loading spinner */
+    .email-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      gap: 16px;
+    }
+
+    .email-loading .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .email-loading .spinner-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Empty / placeholder state */
+    .email-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .email-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* Error state */
+    .email-error {
+      padding: 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .email-error strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .email-error .fallback-hint {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Validation badge */
+    .validation-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .validation-badge.valid {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #22c55e;
+    }
+
+    .validation-badge.invalid {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .validation-badge .badge-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    /* Result details */
+    .result-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .result-detail-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+    }
+
+    .result-detail-item .detail-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .result-detail-item .detail-value {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    /* MX Records section */
+    .mx-section {
+      margin-top: 20px;
+    }
+
+    .mx-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .mx-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .mx-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      background: var(--surface-2);
+      border-radius: 4px;
+    }
+
+    .mx-table td {
+      padding: 8px 12px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      border-bottom: 1px solid rgba(42, 42, 48, 0.5);
+    }
+
+    .mx-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .mx-table tr:hover td {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .mx-table .priority-badge {
+      display: inline-block;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--accent);
+    }
+
+    .no-mx-records {
+      padding: 12px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-style: italic;
+    }
+
+    /* Notes/reason */
+    .result-note {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(99, 102, 241, 0.06);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .result-note strong {
+      color: var(--text);
+    }
+
+    /* Educational content */
+    .email-education {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+
+    .email-education h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .email-education-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .email-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .email-info-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .email-info-card h3 .badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .email-info-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .email-info-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .email-input-group {
+        flex-direction: column;
+      }
+
+      .result-details {
+        grid-template-columns: 1fr;
+      }
+
+      .email-education-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mx-table {
+        font-size: 0.75rem;
+      }
+
+      .mx-table th, .mx-table td {
+        padding: 6px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Email Validator</h1>
+    <p class="description">Validate any email address. Checks syntax, domain existence, and MX records to determine deliverability.</p>
+
+    <div class="email-input-group">
+      <input type="text" id="email-input" placeholder="user@example.com" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" id="validate-btn" onclick="performValidation()">Validate</button>
+    </div>
+
+    <div class="email-results" id="results-container">
+      <div class="email-results-header">
+        <span>Results</span>
+        <span class="query-time" id="query-time"></span>
+      </div>
+      <div class="email-results-body" id="results-body">
+        <div class="email-placeholder">
+          <div class="placeholder-icon">&#x2709;</div>
+          Enter an email address above and click Validate to check it.
+        </div>
+      </div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="email-education">
+      <h2>How Email Validation Works</h2>
+      <div class="email-education-grid">
+        <div class="email-info-card">
+          <h3>Syntax Check <span class="badge">RFC 5322</span></h3>
+          <p>
+            The first step in email validation is verifying the <strong>syntax</strong> conforms to
+            RFC 5322. A valid email has a local part (before <code>@</code>) and a domain part
+            (after <code>@</code>). The local part can contain letters, numbers, and certain special
+            characters like <code>.</code>, <code>+</code>, and <code>-</code>. The domain must be
+            a valid hostname with at least one dot and a recognized TLD.
+          </p>
+        </div>
+        <div class="email-info-card">
+          <h3>MX Records <span class="badge">MX</span></h3>
+          <p>
+            <strong>MX (Mail Exchanger) records</strong> tell the internet which servers accept
+            email for a domain. When you send an email to <code>user@example.com</code>, your mail
+            server looks up the MX records for <code>example.com</code> to find where to deliver it.
+            Each MX record has a <strong>priority</strong> value -- lower numbers are tried first.
+            A domain without MX records usually cannot receive email.
+          </p>
+        </div>
+        <div class="email-info-card">
+          <h3>Domain Verification <span class="badge">DNS</span></h3>
+          <p>
+            Beyond MX records, validation checks whether the <strong>domain actually exists</strong>
+            in DNS. A domain must have valid DNS records (A, AAAA, or MX) to be considered
+            deliverable. Some domains exist but have no mail infrastructure configured, meaning
+            emails sent there would bounce. Domain verification catches typos like
+            <code>gmial.com</code> or <code>hotmial.com</code>.
+          </p>
+        </div>
+        <div class="email-info-card">
+          <h3>Common Issues <span class="badge">Tips</span></h3>
+          <p>
+            Common validation failures include: <strong>typos in popular domains</strong>
+            (e.g. <code>@gmal.com</code>), <strong>missing TLD</strong> (e.g. <code>@gmail</code>),
+            <strong>spaces or invalid characters</strong> in the local part, and
+            <strong>disposable email providers</strong> that may reject mail later. Note that
+            passing validation does not guarantee delivery -- the mailbox itself may not exist
+            or the server may reject the message for other reasons.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      var emailInput = document.getElementById('email-input');
+      var resultsBody = document.getElementById('results-body');
+      var queryTimeEl = document.getElementById('query-time');
+      var validateBtn = document.getElementById('validate-btn');
+
+      // Determine API base URL
+      var API_DOMAIN = '65-109-129-230.sslip.io';
+      var HETZNER_IP = '65.109.129.230';
+      var apiBase;
+      if (window.location.hostname === HETZNER_IP || window.location.hostname === API_DOMAIN || window.location.hostname === 'localhost') {
+        apiBase = '/api/email-validate';
+      } else {
+        apiBase = 'https://' + API_DOMAIN + '/api/email-validate';
+      }
+
+      // Enter key triggers validation
+      emailInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          performValidation();
+        }
+      });
+
+      // Focus input on load
+      emailInput.focus();
+
+      function performValidation() {
+        var email = emailInput.value.trim();
+
+        // Basic validation
+        if (!email) {
+          showError('Please enter an email address.', '');
+          return;
+        }
+
+        // Basic email format check
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showError('Invalid email format.', 'Enter a valid email address like user@example.com');
+          return;
+        }
+
+        // Show loading
+        showLoading(email);
+        validateBtn.disabled = true;
+        validateBtn.textContent = 'Validating...';
+
+        var startTime = performance.now();
+
+        var url = apiBase + '?email=' + encodeURIComponent(email);
+
+        fetch(url, { mode: 'cors' })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Query time: ' + elapsed + 's';
+            renderResults(data);
+          })
+          .catch(function(err) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Failed after ' + elapsed + 's';
+            showError(
+              'Could not reach the email validation API.',
+              'Error: ' + err.message + '. The API server at ' + HETZNER_IP + ' may be unreachable or the endpoint /api/email-validate may not be configured. Try again later.'
+            );
+          })
+          .finally(function() {
+            validateBtn.disabled = false;
+            validateBtn.textContent = 'Validate';
+          });
+      }
+      window.performValidation = performValidation;
+
+      function showLoading(email) {
+        resultsBody.innerHTML =
+          '<div class="email-loading">' +
+            '<div class="spinner"></div>' +
+            '<div class="spinner-text">Validating <strong>' + escapeHtml(email) + '</strong>...</div>' +
+          '</div>';
+      }
+
+      function showError(title, detail) {
+        resultsBody.innerHTML =
+          '<div class="email-error">' +
+            '<strong>' + escapeHtml(title) + '</strong>' +
+            (detail ? '<div class="fallback-hint">' + escapeHtml(detail) + '</div>' : '') +
+          '</div>';
+      }
+
+      function renderResults(data) {
+        // Handle API error responses
+        if (data.error) {
+          showError('API Error: ' + data.error, data.detail || '');
+          return;
+        }
+
+        var html = '';
+        var isValid = data.valid === true;
+
+        // Validation badge
+        if (isValid) {
+          html += '<div class="validation-badge valid">' +
+            '<span class="badge-icon">&#x2705;</span>' +
+            '<span>Valid Email Address</span>' +
+          '</div>';
+        } else {
+          html += '<div class="validation-badge invalid">' +
+            '<span class="badge-icon">&#x274C;</span>' +
+            '<span>Invalid Email Address</span>' +
+          '</div>';
+        }
+
+        // Detail items
+        html += '<div class="result-details">';
+
+        // Email
+        html += '<div class="result-detail-item">' +
+          '<div class="detail-label">Email</div>' +
+          '<div class="detail-value">' + escapeHtml(data.email || '') + '</div>' +
+        '</div>';
+
+        // Domain
+        html += '<div class="result-detail-item">' +
+          '<div class="detail-label">Domain</div>' +
+          '<div class="detail-value">' + escapeHtml(data.domain || '') + '</div>' +
+        '</div>';
+
+        html += '</div>';
+
+        // MX Records
+        var mxRecords = data.mx_records || [];
+        html += '<div class="mx-section">';
+        html += '<div class="mx-section-title">MX Records</div>';
+
+        if (mxRecords.length > 0) {
+          html += '<table class="mx-table">';
+          html += '<thead><tr>';
+          html += '<th>Priority</th><th>Mail Server</th>';
+          html += '</tr></thead><tbody>';
+
+          mxRecords.forEach(function(mx) {
+            var priority = mx.priority !== undefined ? mx.priority : '—';
+            var server = mx.server || mx.host || mx.exchange || '—';
+
+            html += '<tr>';
+            html += '<td><span class="priority-badge">' + escapeHtml(String(priority)) + '</span></td>';
+            html += '<td>' + escapeHtml(String(server)) + '</td>';
+            html += '</tr>';
+          });
+
+          html += '</tbody></table>';
+        } else {
+          html += '<div class="no-mx-records">No MX records found for this domain.</div>';
+        }
+
+        html += '</div>';
+
+        // Reason
+        if (data.reason) {
+          html += '<div class="result-note">' +
+            '<strong>Reason: </strong>' + escapeHtml(data.reason) +
+          '</div>';
+        }
+
+        // Note
+        if (data.note) {
+          html += '<div class="result-note">' +
+            '<strong>Note: </strong>' + escapeHtml(data.note) +
+          '</div>';
+        }
+
+        resultsBody.innerHTML = html;
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

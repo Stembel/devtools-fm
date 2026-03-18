@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Schema Validator - DevTools.fm</title>
+  <meta name="description" content="Validate JSON data against a JSON Schema. Supports type checking, required fields, patterns, enums, and more. Free, client-side, no signup.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+    .status-bar.idle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .status-bar.valid {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+    .status-bar.invalid {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    .status-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .errors-list {
+      margin-top: 16px;
+      padding: 0;
+      list-style: none;
+    }
+    .errors-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .errors-list li .error-path {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .errors-list li .error-msg {
+      color: #f87171;
+    }
+    .errors-panel {
+      margin-top: 16px;
+    }
+    .errors-panel .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .error-count {
+      font-size: 0.8rem;
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .educational {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .educational h2 {
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+    }
+    .educational h3 {
+      font-size: 1.05rem;
+      margin: 24px 0 10px;
+      color: var(--text);
+    }
+    .educational p, .educational li {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .educational ul {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    .educational code {
+      font-family: var(--mono);
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+    .schema-keywords {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .keyword-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+    .keyword-card .kw-name {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .keyword-card .kw-desc {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>JSON Schema Validator</h1>
+    <p class="description">Validate JSON data against a JSON Schema. Everything runs locally in your browser &mdash; no data sent anywhere.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="validate()">Validate</button>
+        <button class="btn" onclick="loadExample()">Load Example</button>
+        <button class="btn" onclick="swapPanels()">Swap</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div id="statusBar" class="status-bar idle">
+      <span class="status-icon">&#9679;</span>
+      <span id="statusText">Paste JSON data and a schema, then click Validate.</span>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">JSON Data</div>
+        <textarea class="tool-textarea" id="jsonData" placeholder='Paste your JSON data here...
+
+{
+  "name": "Alice",
+  "age": 30
+}'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">JSON Schema</div>
+        <textarea class="tool-textarea" id="jsonSchema" placeholder='Paste your JSON Schema here...
+
+{
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string" },
+    "age": { "type": "integer", "minimum": 0 }
+  }
+}'></textarea>
+      </div>
+    </div>
+
+    <div id="errorsPanel" class="errors-panel tool-panel" style="display:none; margin-top:16px;">
+      <div class="panel-header">
+        Validation Errors
+        <span id="errorCount" class="error-count"></span>
+      </div>
+      <ul id="errorsList" class="errors-list"></ul>
+    </div>
+
+    <!-- Educational Section -->
+    <div class="educational">
+      <h2>About JSON Schema</h2>
+      <p>JSON Schema is a declarative language for describing and validating the structure of JSON data. It lets you define what shape your data should take, what fields are required, what types values must be, and many other constraints.</p>
+
+      <h3>What is JSON Schema used for?</h3>
+      <ul>
+        <li><strong>API validation</strong> &mdash; Ensure request and response bodies match expected formats</li>
+        <li><strong>Configuration files</strong> &mdash; Validate config files before deployment</li>
+        <li><strong>Data interchange</strong> &mdash; Define contracts between services</li>
+        <li><strong>Form generation</strong> &mdash; Auto-generate forms from schema definitions</li>
+        <li><strong>Documentation</strong> &mdash; Schema serves as living documentation for data structures</li>
+      </ul>
+
+      <h3>Supported Keywords</h3>
+      <div class="schema-keywords">
+        <div class="keyword-card">
+          <div class="kw-name">type</div>
+          <div class="kw-desc">Specifies the data type: <code>string</code>, <code>number</code>, <code>integer</code>, <code>boolean</code>, <code>array</code>, <code>object</code>, or <code>null</code>.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">required</div>
+          <div class="kw-desc">An array of property names that must be present in an object.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">properties</div>
+          <div class="kw-desc">Defines schemas for individual properties of an object.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">items</div>
+          <div class="kw-desc">Defines the schema for items in an array.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">minimum / maximum</div>
+          <div class="kw-desc">Sets the allowed range for numeric values (inclusive).</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">minLength / maxLength</div>
+          <div class="kw-desc">Constrains the length of string values.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">enum</div>
+          <div class="kw-desc">Restricts a value to a fixed set of allowed values.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">pattern</div>
+          <div class="kw-desc">Validates a string against a regular expression pattern.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">minItems / maxItems</div>
+          <div class="kw-desc">Constrains the number of items in an array.</div>
+        </div>
+        <div class="keyword-card">
+          <div class="kw-name">format</div>
+          <div class="kw-desc">Semantic validation for strings: <code>email</code> and <code>uri</code> are supported.</div>
+        </div>
+      </div>
+
+      <h3>Common Patterns</h3>
+      <p>Here are some useful schema patterns you can use as starting points:</p>
+      <ul>
+        <li><strong>Optional with default:</strong> Omit the field from <code>required</code> and handle defaults in your application.</li>
+        <li><strong>Nullable fields:</strong> Use <code>"type": ["string", "null"]</code> to allow null values (array type not validated in this tool; use separate checks).</li>
+        <li><strong>Nested objects:</strong> Put a full schema inside <code>properties</code> to validate deeply nested structures.</li>
+        <li><strong>Typed arrays:</strong> Use <code>"items": { "type": "string" }</code> to ensure all array elements match.</li>
+        <li><strong>String formats:</strong> Use <code>"format": "email"</code> or <code>"format": "uri"</code> for common validations.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $data = document.getElementById('jsonData');
+    const $schema = document.getElementById('jsonSchema');
+    const $statusBar = document.getElementById('statusBar');
+    const $statusText = document.getElementById('statusText');
+    const $errorsPanel = document.getElementById('errorsPanel');
+    const $errorsList = document.getElementById('errorsList');
+    const $errorCount = document.getElementById('errorCount');
+
+    // --- Lightweight JSON Schema Validator ---
+
+    function validateSchema(data, schema, path) {
+      const errors = [];
+      if (!schema || typeof schema !== 'object') return errors;
+
+      // type check
+      if (schema.type) {
+        if (!checkType(data, schema.type)) {
+          errors.push({ path, message: `Expected type "${schema.type}" but got "${getType(data)}"` });
+          return errors; // no point checking further if type is wrong
+        }
+      }
+
+      // enum
+      if (schema.enum) {
+        if (!schema.enum.some(v => JSON.stringify(v) === JSON.stringify(data))) {
+          errors.push({ path, message: `Value must be one of: ${schema.enum.map(v => JSON.stringify(v)).join(', ')}` });
+        }
+      }
+
+      // string validations
+      if (typeof data === 'string') {
+        if (schema.minLength !== undefined && data.length < schema.minLength) {
+          errors.push({ path, message: `String length ${data.length} is less than minLength ${schema.minLength}` });
+        }
+        if (schema.maxLength !== undefined && data.length > schema.maxLength) {
+          errors.push({ path, message: `String length ${data.length} exceeds maxLength ${schema.maxLength}` });
+        }
+        if (schema.pattern) {
+          try {
+            const regex = new RegExp(schema.pattern);
+            if (!regex.test(data)) {
+              errors.push({ path, message: `String does not match pattern "${schema.pattern}"` });
+            }
+          } catch (e) {
+            errors.push({ path, message: `Invalid regex pattern: "${schema.pattern}"` });
+          }
+        }
+        if (schema.format) {
+          const formatError = checkFormat(data, schema.format);
+          if (formatError) {
+            errors.push({ path, message: formatError });
+          }
+        }
+      }
+
+      // number validations
+      if (typeof data === 'number') {
+        if (schema.minimum !== undefined && data < schema.minimum) {
+          errors.push({ path, message: `Value ${data} is less than minimum ${schema.minimum}` });
+        }
+        if (schema.maximum !== undefined && data > schema.maximum) {
+          errors.push({ path, message: `Value ${data} exceeds maximum ${schema.maximum}` });
+        }
+      }
+
+      // object validations
+      if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
+        // required
+        if (schema.required && Array.isArray(schema.required)) {
+          for (const key of schema.required) {
+            if (!(key in data)) {
+              errors.push({ path: path ? `${path}.${key}` : key, message: `Required property "${key}" is missing` });
+            }
+          }
+        }
+        // properties
+        if (schema.properties && typeof schema.properties === 'object') {
+          for (const [key, propSchema] of Object.entries(schema.properties)) {
+            if (key in data) {
+              const propPath = path ? `${path}.${key}` : key;
+              errors.push(...validateSchema(data[key], propSchema, propPath));
+            }
+          }
+        }
+      }
+
+      // array validations
+      if (Array.isArray(data)) {
+        if (schema.minItems !== undefined && data.length < schema.minItems) {
+          errors.push({ path, message: `Array has ${data.length} items, fewer than minItems ${schema.minItems}` });
+        }
+        if (schema.maxItems !== undefined && data.length > schema.maxItems) {
+          errors.push({ path, message: `Array has ${data.length} items, more than maxItems ${schema.maxItems}` });
+        }
+        if (schema.items && typeof schema.items === 'object') {
+          data.forEach((item, i) => {
+            const itemPath = `${path || ''}[${i}]`;
+            errors.push(...validateSchema(item, schema.items, itemPath));
+          });
+        }
+      }
+
+      return errors;
+    }
+
+    function getType(value) {
+      if (value === null) return 'null';
+      if (Array.isArray(value)) return 'array';
+      return typeof value;
+    }
+
+    function checkType(value, expected) {
+      const actual = getType(value);
+      if (expected === 'integer') {
+        return typeof value === 'number' && Number.isInteger(value);
+      }
+      return actual === expected;
+    }
+
+    function checkFormat(value, format) {
+      switch (format) {
+        case 'email': {
+          // Basic email: something@something.something
+          const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRe.test(value)) return `String "${value}" is not a valid email address`;
+          return null;
+        }
+        case 'uri': {
+          // Basic URI: starts with scheme://
+          const uriRe = /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\/.+/;
+          if (!uriRe.test(value)) return `String "${value}" is not a valid URI`;
+          return null;
+        }
+        default:
+          return null; // unknown formats pass
+      }
+    }
+
+    // --- UI Functions ---
+
+    function validate() {
+      const dataStr = $data.value.trim();
+      const schemaStr = $schema.value.trim();
+
+      if (!dataStr) {
+        showStatus('idle', 'Please enter JSON data to validate.');
+        hideErrors();
+        return;
+      }
+      if (!schemaStr) {
+        showStatus('idle', 'Please enter a JSON Schema to validate against.');
+        hideErrors();
+        return;
+      }
+
+      let data, schema;
+      try {
+        data = JSON.parse(dataStr);
+      } catch (e) {
+        showStatus('invalid', 'JSON Data parse error: ' + e.message);
+        hideErrors();
+        return;
+      }
+      try {
+        schema = JSON.parse(schemaStr);
+      } catch (e) {
+        showStatus('invalid', 'JSON Schema parse error: ' + e.message);
+        hideErrors();
+        return;
+      }
+
+      const errors = validateSchema(data, schema, '');
+
+      if (errors.length === 0) {
+        showStatus('valid', 'Valid! JSON data conforms to the schema.');
+        hideErrors();
+      } else {
+        showStatus('invalid', `Invalid. Found ${errors.length} validation error${errors.length > 1 ? 's' : ''}.`);
+        showErrors(errors);
+      }
+    }
+
+    function showStatus(type, message) {
+      $statusBar.className = 'status-bar ' + type;
+      const icons = { idle: '\u25CF', valid: '\u2714', invalid: '\u2718' };
+      $statusBar.querySelector('.status-icon').textContent = icons[type] || '\u25CF';
+      $statusText.textContent = message;
+    }
+
+    function showErrors(errors) {
+      $errorsPanel.style.display = 'block';
+      $errorCount.textContent = errors.length + ' error' + (errors.length > 1 ? 's' : '');
+      $errorsList.innerHTML = errors.map(err => {
+        const pathDisplay = err.path || '(root)';
+        return `<li><span class="error-path">${escapeHtml(pathDisplay)}</span> <span class="error-msg">${escapeHtml(err.message)}</span></li>`;
+      }).join('');
+    }
+
+    function hideErrors() {
+      $errorsPanel.style.display = 'none';
+      $errorsList.innerHTML = '';
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function loadExample() {
+      $data.value = JSON.stringify({
+        "name": "Alice Johnson",
+        "email": "alice@example.com",
+        "age": 29,
+        "role": "admin",
+        "tags": ["developer", "team-lead"],
+        "address": {
+          "street": "123 Main St",
+          "city": "Springfield",
+          "zip": "62701"
+        }
+      }, null, 2);
+
+      $schema.value = JSON.stringify({
+        "type": "object",
+        "required": ["name", "email", "age", "role"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 150
+          },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "editor", "viewer"]
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1,
+            "maxItems": 10
+          },
+          "address": {
+            "type": "object",
+            "required": ["street", "city"],
+            "properties": {
+              "street": { "type": "string" },
+              "city": { "type": "string" },
+              "zip": { "type": "string", "pattern": "^[0-9]{5}$" }
+            }
+          }
+        }
+      }, null, 2);
+
+      showStatus('idle', 'Example loaded. Click Validate to check.');
+      hideErrors();
+    }
+
+    function swapPanels() {
+      const tmp = $data.value;
+      $data.value = $schema.value;
+      $schema.value = tmp;
+      showStatus('idle', 'Swapped. Click Validate to check.');
+      hideErrors();
+    }
+
+    function clearAll() {
+      $data.value = '';
+      $schema.value = '';
+      showStatus('idle', 'Paste JSON data and a schema, then click Validate.');
+      hideErrors();
+    }
+
+    // Auto-format on paste
+    function autoFormat(textarea) {
+      textarea.addEventListener('paste', () => {
+        setTimeout(() => {
+          try {
+            const parsed = JSON.parse(textarea.value);
+            textarea.value = JSON.stringify(parsed, null, 2);
+          } catch (e) {
+            // Not valid JSON yet, leave as is
+          }
+        }, 50);
+      });
+    }
+
+    autoFormat($data);
+    autoFormat($schema);
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

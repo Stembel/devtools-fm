@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Status Checker - Is It Down? | DevTools.fm</title>
+  <meta name="description" content="Check if a website is up or down right now. Get response time, status code, server info, and IP address. Free online website status checker for developers.">
+  <meta name="keywords" content="is website down, website status checker, check if site is up, is it down, site down checker, website uptime checker, website monitor, http status check">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/status-checker.html">
+  <meta property="og:title" content="Website Status Checker - Is It Down? | DevTools.fm">
+  <meta property="og:description" content="Check if a website is up or down right now. Get response time, status code, server info, and IP address instantly.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .status-input-group input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .status-input-group input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .status-input-group input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Results area */
+    .status-results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 32px;
+      min-height: 200px;
+    }
+
+    .status-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .status-results-header .query-time {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .status-results-body {
+      padding: 16px;
+    }
+
+    /* Loading spinner */
+    .status-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      gap: 16px;
+    }
+
+    .status-loading .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-loading .spinner-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Placeholder state */
+    .status-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .status-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* Error state */
+    .status-error {
+      padding: 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .status-error strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .status-error .fallback-hint {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 32px 16px;
+      margin-bottom: 24px;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .status-badge.up {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .status-badge.down {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .status-badge.error {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .status-badge .badge-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+
+    .status-badge.up .badge-icon {
+      color: #22c55e;
+    }
+
+    .status-badge.down .badge-icon {
+      color: #ef4444;
+    }
+
+    .status-badge.error .badge-icon {
+      color: #f59e0b;
+    }
+
+    .status-badge .badge-label {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .status-badge.up .badge-label {
+      color: #22c55e;
+    }
+
+    .status-badge.down .badge-label {
+      color: #ef4444;
+    }
+
+    .status-badge.error .badge-label {
+      color: #f59e0b;
+    }
+
+    .status-badge .badge-url {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    /* Detail cards */
+    .status-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .detail-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .detail-card .detail-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .detail-card .detail-value {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .detail-card .detail-value.code-ok {
+      color: #22c55e;
+    }
+
+    .detail-card .detail-value.code-redirect {
+      color: #f59e0b;
+    }
+
+    .detail-card .detail-value.code-error {
+      color: #ef4444;
+    }
+
+    /* Educational content */
+    .status-education {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+
+    .status-education h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .status-education-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .status-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .status-info-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-info-card h3 .badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .status-info-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .status-info-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .status-input-group {
+        flex-direction: column;
+      }
+
+      .status-details {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .status-education-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-badge .badge-label {
+        font-size: 1.2rem;
+      }
+
+      .status-badge .badge-icon {
+        font-size: 2.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .status-details {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Website Status Checker</h1>
+    <p class="description">Check if a website is up or down. Get response time, HTTP status code, server info, and IP address.</p>
+
+    <div class="status-input-group">
+      <input type="text" id="url-input" placeholder="example.com" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" id="check-btn" onclick="performCheck()">Check</button>
+    </div>
+
+    <div class="status-results" id="results-container">
+      <div class="status-results-header">
+        <span>Results</span>
+        <span class="query-time" id="query-time"></span>
+      </div>
+      <div class="status-results-body" id="results-body">
+        <div class="status-placeholder">
+          <div class="placeholder-icon">&#x1F310;</div>
+          Enter a URL above and click Check to see if the website is up or down.
+        </div>
+      </div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="status-education">
+      <h2>What is Website Uptime Monitoring?</h2>
+      <div class="status-education-grid">
+        <div class="status-info-card">
+          <h3>Why Check Website Status? <span class="badge">UPTIME</span></h3>
+          <p>
+            Website uptime monitoring ensures your site is accessible to users around the clock.
+            Downtime can lead to lost revenue, damaged reputation, and poor search engine rankings.
+            By regularly checking your website's status, you can detect outages early and respond
+            quickly. Even a few minutes of downtime during peak traffic can result in significant
+            business impact.
+          </p>
+        </div>
+        <div class="status-info-card">
+          <h3>HTTP Status Codes <span class="badge">HTTP</span></h3>
+          <p>
+            HTTP status codes tell you how a server responded to your request.
+            <code>200</code> means success, <code>301</code>/<code>302</code> indicate redirects,
+            <code>403</code> means forbidden, <code>404</code> is not found, and
+            <code>500</code>-<code>503</code> signal server errors. Understanding these codes
+            helps you diagnose why a site might appear down or behave unexpectedly.
+          </p>
+        </div>
+        <div class="status-info-card">
+          <h3>Response Time <span class="badge">LATENCY</span></h3>
+          <p>
+            Response time measures how long it takes for a server to respond to a request in
+            milliseconds. A good response time is typically under <code>200ms</code>, while
+            anything over <code>1000ms</code> may indicate performance issues. Factors affecting
+            response time include server load, geographic distance, network congestion, and
+            application complexity. Slow response times often precede full outages.
+          </p>
+        </div>
+        <div class="status-info-card">
+          <h3>Common Causes of Downtime</h3>
+          <p>
+            Websites go down for many reasons: <strong>server overload</strong> from traffic spikes,
+            <strong>DNS issues</strong> preventing domain resolution, <strong>expired SSL certificates</strong>
+            blocking HTTPS connections, <strong>hosting provider outages</strong>, <strong>DDoS attacks</strong>,
+            or <strong>deployment errors</strong> in code updates. Regular monitoring helps identify
+            patterns and prevent recurring issues before they affect users.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      var urlInput = document.getElementById('url-input');
+      var resultsBody = document.getElementById('results-body');
+      var queryTimeEl = document.getElementById('query-time');
+      var checkBtn = document.getElementById('check-btn');
+
+      // Determine API base URL
+      var API_DOMAIN = '65-109-129-230.sslip.io';
+      var HETZNER_IP = '65.109.129.230';
+      var apiBase;
+      if (window.location.hostname === HETZNER_IP || window.location.hostname === API_DOMAIN || window.location.hostname === 'localhost') {
+        apiBase = '/api/status';
+      } else {
+        apiBase = 'https://' + API_DOMAIN + '/api/status';
+      }
+
+      // Enter key triggers check
+      urlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          performCheck();
+        }
+      });
+
+      // Focus input on load
+      urlInput.focus();
+
+      function performCheck() {
+        var url = urlInput.value.trim();
+
+        // Basic validation
+        if (!url) {
+          showError('Please enter a URL or domain name.', '');
+          return;
+        }
+
+        // Strip protocol for display but keep it for the query
+        var cleanUrl = url.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+        urlInput.value = cleanUrl;
+
+        // Simple format check
+        if (!/^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}(\/.*)?$/.test(cleanUrl) && !/^\d{1,3}(\.\d{1,3}){3}(\/.*)?$/.test(cleanUrl)) {
+          showError('Invalid URL format.', 'Enter a valid domain like example.com or an IP address like 93.184.216.34');
+          return;
+        }
+
+        // Show loading
+        showLoading(cleanUrl);
+        checkBtn.disabled = true;
+        checkBtn.textContent = 'Checking...';
+
+        var startTime = performance.now();
+
+        var fetchUrl = apiBase + '?url=' + encodeURIComponent(cleanUrl);
+
+        fetch(fetchUrl, { mode: 'cors' })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Checked in ' + elapsed + 's';
+            renderResults(data, cleanUrl);
+          })
+          .catch(function(err) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Failed after ' + elapsed + 's';
+            showError(
+              'Could not reach the status check API.',
+              'Error: ' + err.message + '. The API server at ' + HETZNER_IP + ' may be unreachable or the endpoint /api/status may not be configured. Try again later.'
+            );
+          })
+          .finally(function() {
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check';
+          });
+      }
+      window.performCheck = performCheck;
+
+      function showLoading(url) {
+        resultsBody.innerHTML =
+          '<div class="status-loading">' +
+            '<div class="spinner"></div>' +
+            '<div class="spinner-text">Checking status of <strong>' + escapeHtml(url) + '</strong>...</div>' +
+          '</div>';
+      }
+
+      function showError(title, detail) {
+        resultsBody.innerHTML =
+          '<div class="status-error">' +
+            '<strong>' + escapeHtml(title) + '</strong>' +
+            (detail ? '<div class="fallback-hint">' + escapeHtml(detail) + '</div>' : '') +
+          '</div>';
+      }
+
+      function renderResults(data, url) {
+        // Handle API error responses
+        if (data.error) {
+          showError('API Error: ' + data.error, data.detail || '');
+          return;
+        }
+
+        var status = (data.status || 'error').toLowerCase();
+        var statusCode = data.status_code || null;
+        var responseTime = data.response_time_ms !== undefined ? data.response_time_ms : null;
+        var ip = data.ip || null;
+        var server = data.server || null;
+        var contentType = data.content_type || null;
+        var displayUrl = data.url || url;
+
+        var html = '';
+
+        // Big status badge
+        var badgeClass = 'status-badge ';
+        var badgeIcon = '';
+        var badgeLabel = '';
+
+        if (status === 'up') {
+          badgeClass += 'up';
+          badgeIcon = '&#x2705;';
+          badgeLabel = 'Website is UP';
+        } else if (status === 'down') {
+          badgeClass += 'down';
+          badgeIcon = '&#x274C;';
+          badgeLabel = 'Website is DOWN';
+        } else {
+          badgeClass += 'error';
+          badgeIcon = '&#x26A0;';
+          badgeLabel = 'Error Checking';
+        }
+
+        html += '<div class="' + badgeClass + '">';
+        html += '<div class="badge-icon">' + badgeIcon + '</div>';
+        html += '<div class="badge-label">' + badgeLabel + '</div>';
+        html += '<div class="badge-url">' + escapeHtml(displayUrl) + '</div>';
+        html += '</div>';
+
+        // Detail cards
+        html += '<div class="status-details">';
+
+        // Status Code
+        if (statusCode !== null) {
+          var codeClass = 'detail-value';
+          if (statusCode >= 200 && statusCode < 300) {
+            codeClass += ' code-ok';
+          } else if (statusCode >= 300 && statusCode < 400) {
+            codeClass += ' code-redirect';
+          } else {
+            codeClass += ' code-error';
+          }
+          html += '<div class="detail-card">';
+          html += '<div class="detail-label">Status Code</div>';
+          html += '<div class="' + codeClass + '">' + escapeHtml(String(statusCode)) + ' ' + escapeHtml(getStatusText(statusCode)) + '</div>';
+          html += '</div>';
+        }
+
+        // Response Time
+        if (responseTime !== null) {
+          html += '<div class="detail-card">';
+          html += '<div class="detail-label">Response Time</div>';
+          html += '<div class="detail-value">' + escapeHtml(String(responseTime)) + ' ms</div>';
+          html += '</div>';
+        }
+
+        // IP Address
+        if (ip) {
+          html += '<div class="detail-card">';
+          html += '<div class="detail-label">IP Address</div>';
+          html += '<div class="detail-value">' + escapeHtml(ip) + '</div>';
+          html += '</div>';
+        }
+
+        // Server
+        if (server) {
+          html += '<div class="detail-card">';
+          html += '<div class="detail-label">Server</div>';
+          html += '<div class="detail-value">' + escapeHtml(server) + '</div>';
+          html += '</div>';
+        }
+
+        // Content Type
+        if (contentType) {
+          html += '<div class="detail-card">';
+          html += '<div class="detail-label">Content Type</div>';
+          html += '<div class="detail-value">' + escapeHtml(contentType) + '</div>';
+          html += '</div>';
+        }
+
+        html += '</div>';
+
+        resultsBody.innerHTML = html;
+      }
+
+      function getStatusText(code) {
+        var codes = {
+          200: 'OK', 201: 'Created', 204: 'No Content',
+          301: 'Moved Permanently', 302: 'Found', 304: 'Not Modified', 307: 'Temporary Redirect', 308: 'Permanent Redirect',
+          400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found', 405: 'Method Not Allowed',
+          408: 'Request Timeout', 429: 'Too Many Requests',
+          500: 'Internal Server Error', 502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout'
+        };
+        return codes[code] || '';
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
