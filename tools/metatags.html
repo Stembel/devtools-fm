@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meta Tag Generator - SEO & Open Graph Tags | DevTools.fm</title>
+  <meta name="description" content="Generate HTML meta tags for SEO, Open Graph, and Twitter Cards. Live previews for Google search results and social media sharing. Free, no signup.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/metatags.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .meta-form {
+      display: grid;
+      gap: 24px;
+    }
+    .form-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .section-header:hover {
+      background: var(--surface-2);
+    }
+    .section-header .badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+    }
+    .section-header .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .section-header.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+    .section-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      overflow: hidden;
+    }
+    .section-body.collapsed {
+      max-height: 0;
+      padding: 0 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .form-group label .char-count {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+    }
+    .char-count.warn {
+      color: #eab308;
+    }
+    .char-count.over {
+      color: var(--error);
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.5;
+    }
+    .form-group select {
+      cursor: pointer;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Previews */
+    .previews {
+      display: grid;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .preview-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .preview-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .preview-body {
+      padding: 20px;
+    }
+
+    /* Google Preview */
+    .google-preview {
+      max-width: 600px;
+      font-family: Arial, sans-serif;
+    }
+    .google-preview .gp-url {
+      font-size: 13px;
+      color: #bdc1c6;
+      margin-bottom: 4px;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .google-preview .gp-url .gp-favicon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .google-preview .gp-title {
+      font-size: 20px;
+      color: #8ab4f8;
+      line-height: 1.3;
+      margin-bottom: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .google-preview .gp-title:hover {
+      text-decoration: underline;
+    }
+    .google-preview .gp-desc {
+      font-size: 14px;
+      color: #bdc1c6;
+      line-height: 1.5;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    /* Social Preview */
+    .social-preview {
+      max-width: 500px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .social-preview .sp-image {
+      width: 100%;
+      height: 260px;
+      background: linear-gradient(135deg, #1c1c20 0%, #2a2a30 50%, #1c1c20 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      overflow: hidden;
+    }
+    .social-preview .sp-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .social-preview .sp-content {
+      padding: 12px 16px;
+    }
+    .social-preview .sp-domain {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+    .social-preview .sp-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .social-preview .sp-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    /* Output */
+    .output-section {
+      margin-top: 24px;
+    }
+    .output-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .output-header span {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .output-code {
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--text);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 120px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .output-code .tag-bracket { color: var(--text-muted); }
+    .output-code .tag-name { color: #ef4444; }
+    .output-code .tag-attr { color: #f59e0b; }
+    .output-code .tag-value { color: #22c55e; }
+
+    /* Copy notification */
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Meta Tag Generator</h1>
+    <p class="description">Generate HTML meta tags for SEO, Open Graph, and Twitter Cards with live previews. Everything runs locally in your browser.</p>
+
+    <div class="two-col">
+      <div class="meta-form">
+        <!-- Basic SEO -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Basic SEO <span class="badge">Required</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body" id="seo-section">
+            <div class="form-group">
+              <label>
+                Title
+                <span class="char-count" id="title-count">0 / 60</span>
+              </label>
+              <input type="text" id="meta-title" placeholder="Your page title" maxlength="200" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>
+                Description
+                <span class="char-count" id="desc-count">0 / 160</span>
+              </label>
+              <textarea id="meta-description" placeholder="A concise description of your page content" maxlength="500" oninput="update()"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Keywords</label>
+              <input type="text" id="meta-keywords" placeholder="keyword1, keyword2, keyword3" oninput="update()">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Author</label>
+                <input type="text" id="meta-author" placeholder="Author name" oninput="update()">
+              </div>
+              <div class="form-group">
+                <label>Robots</label>
+                <select id="meta-robots" onchange="update()">
+                  <option value="index, follow">index, follow</option>
+                  <option value="noindex, follow">noindex, follow</option>
+                  <option value="index, nofollow">index, nofollow</option>
+                  <option value="noindex, nofollow">noindex, nofollow</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Canonical URL</label>
+              <input type="url" id="meta-canonical" placeholder="https://example.com/page" oninput="update()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Open Graph -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Open Graph <span class="badge">Facebook / LinkedIn</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body" id="og-section">
+            <div class="form-group">
+              <label>og:title</label>
+              <input type="text" id="og-title" placeholder="Defaults to page title if empty" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>og:description</label>
+              <textarea id="og-description" placeholder="Defaults to meta description if empty" oninput="update()"></textarea>
+            </div>
+            <div class="form-group">
+              <label>og:image</label>
+              <input type="url" id="og-image" placeholder="https://example.com/image.jpg (1200x630px recommended)" oninput="update()">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>og:url</label>
+                <input type="url" id="og-url" placeholder="https://example.com/page" oninput="update()">
+              </div>
+              <div class="form-group">
+                <label>og:type</label>
+                <select id="og-type" onchange="update()">
+                  <option value="website">website</option>
+                  <option value="article">article</option>
+                  <option value="product">product</option>
+                  <option value="profile">profile</option>
+                  <option value="video.other">video</option>
+                  <option value="music.song">music</option>
+                  <option value="book">book</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>og:site_name</label>
+              <input type="text" id="og-sitename" placeholder="Your Site Name" oninput="update()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Twitter Card -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Twitter Card <span class="badge">X / Twitter</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body" id="twitter-section">
+            <div class="form-group">
+              <label>twitter:card</label>
+              <select id="tw-card" onchange="update()">
+                <option value="summary_large_image">summary_large_image</option>
+                <option value="summary">summary</option>
+                <option value="app">app</option>
+                <option value="player">player</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>twitter:title</label>
+              <input type="text" id="tw-title" placeholder="Defaults to og:title if empty" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>twitter:description</label>
+              <textarea id="tw-description" placeholder="Defaults to og:description if empty" oninput="update()"></textarea>
+            </div>
+            <div class="form-group">
+              <label>twitter:image</label>
+              <input type="url" id="tw-image" placeholder="Defaults to og:image if empty" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>twitter:site</label>
+              <input type="text" id="tw-site" placeholder="@yourusername" oninput="update()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: Previews -->
+      <div class="previews">
+        <!-- Google Preview -->
+        <div class="preview-section">
+          <div class="preview-header">Google Search Preview</div>
+          <div class="preview-body">
+            <div class="google-preview">
+              <div class="gp-url">
+                <span class="gp-favicon">&gt;_</span>
+                <span id="gp-url-text">example.com</span>
+              </div>
+              <div class="gp-title" id="gp-title">Your Page Title</div>
+              <div class="gp-desc" id="gp-desc">Your page description will appear here. Make it compelling to improve click-through rates from search results.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Preview -->
+        <div class="preview-section">
+          <div class="preview-header">Social Media Preview (Open Graph)</div>
+          <div class="preview-body">
+            <div class="social-preview">
+              <div class="sp-image" id="sp-image">
+                <span id="sp-image-placeholder">1200 x 630 &mdash; No image set</span>
+                <img id="sp-image-img" src="" alt="" style="display:none">
+              </div>
+              <div class="sp-content">
+                <div class="sp-domain" id="sp-domain">example.com</div>
+                <div class="sp-title" id="sp-title">Your Page Title</div>
+                <div class="sp-desc" id="sp-desc">Your page description will appear here when shared on social media.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated Output -->
+    <div class="output-section">
+      <div class="output-panel">
+        <div class="output-header">
+          <span>Generated Meta Tags</span>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="copyTags()">Copy All Tags</button>
+            <button class="btn" onclick="copyAsJSON()">Copy as JSON</button>
+          </div>
+        </div>
+        <div class="output-code" id="output"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <div class="copy-toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    // DOM references
+    const fields = {
+      title: document.getElementById('meta-title'),
+      description: document.getElementById('meta-description'),
+      keywords: document.getElementById('meta-keywords'),
+      author: document.getElementById('meta-author'),
+      robots: document.getElementById('meta-robots'),
+      canonical: document.getElementById('meta-canonical'),
+      ogTitle: document.getElementById('og-title'),
+      ogDescription: document.getElementById('og-description'),
+      ogImage: document.getElementById('og-image'),
+      ogUrl: document.getElementById('og-url'),
+      ogType: document.getElementById('og-type'),
+      ogSiteName: document.getElementById('og-sitename'),
+      twCard: document.getElementById('tw-card'),
+      twTitle: document.getElementById('tw-title'),
+      twDescription: document.getElementById('tw-description'),
+      twImage: document.getElementById('tw-image'),
+      twSite: document.getElementById('tw-site'),
+    };
+
+    const titleCount = document.getElementById('title-count');
+    const descCount = document.getElementById('desc-count');
+    const output = document.getElementById('output');
+
+    // Preview elements
+    const gpUrlText = document.getElementById('gp-url-text');
+    const gpTitle = document.getElementById('gp-title');
+    const gpDesc = document.getElementById('gp-desc');
+    const spImage = document.getElementById('sp-image');
+    const spImageImg = document.getElementById('sp-image-img');
+    const spImagePlaceholder = document.getElementById('sp-image-placeholder');
+    const spDomain = document.getElementById('sp-domain');
+    const spTitle = document.getElementById('sp-title');
+    const spDesc = document.getElementById('sp-desc');
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function extractDomain(url) {
+      try {
+        return new URL(url).hostname;
+      } catch {
+        return 'example.com';
+      }
+    }
+
+    function formatTag(tag, attrs) {
+      const parts = Object.entries(attrs)
+        .filter(([, v]) => v)
+        .map(([k, v]) => `<span class="tag-attr">${k}</span>=<span class="tag-value">"${escapeHtml(v)}"</span>`)
+        .join(' ');
+      return `<span class="tag-bracket">&lt;</span><span class="tag-name">${tag}</span> ${parts}<span class="tag-bracket">&gt;</span>`;
+    }
+
+    function formatLinkTag(rel, href) {
+      return `<span class="tag-bracket">&lt;</span><span class="tag-name">link</span> <span class="tag-attr">rel</span>=<span class="tag-value">"${escapeHtml(rel)}"</span> <span class="tag-attr">href</span>=<span class="tag-value">"${escapeHtml(href)}"</span><span class="tag-bracket">&gt;</span>`;
+    }
+
+    function updateCharCount(el, countEl, max) {
+      const len = el.value.length;
+      countEl.textContent = `${len} / ${max}`;
+      countEl.className = 'char-count';
+      if (len > max) {
+        countEl.classList.add('over');
+      } else if (len > max * 0.85) {
+        countEl.classList.add('warn');
+      }
+    }
+
+    function getResolvedValues() {
+      const title = fields.title.value.trim();
+      const description = fields.description.value.trim();
+      const ogTitleVal = fields.ogTitle.value.trim() || title;
+      const ogDescVal = fields.ogDescription.value.trim() || description;
+      const ogImageVal = fields.ogImage.value.trim();
+      const ogUrlVal = fields.ogUrl.value.trim() || fields.canonical.value.trim();
+      const twTitleVal = fields.twTitle.value.trim() || ogTitleVal;
+      const twDescVal = fields.twDescription.value.trim() || ogDescVal;
+      const twImageVal = fields.twImage.value.trim() || ogImageVal;
+
+      return {
+        title,
+        description,
+        keywords: fields.keywords.value.trim(),
+        author: fields.author.value.trim(),
+        robots: fields.robots.value,
+        canonical: fields.canonical.value.trim(),
+        ogTitle: ogTitleVal,
+        ogDescription: ogDescVal,
+        ogImage: ogImageVal,
+        ogUrl: ogUrlVal,
+        ogType: fields.ogType.value,
+        ogSiteName: fields.ogSiteName.value.trim(),
+        twCard: fields.twCard.value,
+        twTitle: twTitleVal,
+        twDescription: twDescVal,
+        twImage: twImageVal,
+        twSite: fields.twSite.value.trim(),
+      };
+    }
+
+    function updatePreviews(v) {
+      // Google Preview
+      const displayUrl = v.canonical || v.ogUrl || 'https://example.com';
+      gpUrlText.textContent = displayUrl;
+      gpTitle.textContent = v.title || 'Your Page Title';
+      gpDesc.textContent = v.description || 'Your page description will appear here. Make it compelling to improve click-through rates from search results.';
+
+      // Social Preview
+      const domain = extractDomain(v.ogUrl || v.canonical || '');
+      spDomain.textContent = domain;
+      spTitle.textContent = v.ogTitle || 'Your Page Title';
+      spDesc.textContent = v.ogDescription || 'Your page description will appear here when shared on social media.';
+
+      if (v.ogImage) {
+        spImageImg.src = v.ogImage;
+        spImageImg.style.display = 'block';
+        spImagePlaceholder.style.display = 'none';
+        spImageImg.onerror = function() {
+          spImageImg.style.display = 'none';
+          spImagePlaceholder.style.display = '';
+          spImagePlaceholder.textContent = 'Image failed to load';
+        };
+        spImageImg.onload = function() {
+          spImageImg.style.display = 'block';
+          spImagePlaceholder.style.display = 'none';
+        };
+      } else {
+        spImageImg.style.display = 'none';
+        spImagePlaceholder.style.display = '';
+        spImagePlaceholder.innerHTML = '1200 &times; 630 &mdash; No image set';
+      }
+    }
+
+    function generatePlainTags(v) {
+      const lines = [];
+      lines.push('<!-- Basic SEO -->');
+      if (v.title) lines.push(`<meta name="title" content="${escapeAttr(v.title)}">`);
+      if (v.description) lines.push(`<meta name="description" content="${escapeAttr(v.description)}">`);
+      if (v.keywords) lines.push(`<meta name="keywords" content="${escapeAttr(v.keywords)}">`);
+      if (v.author) lines.push(`<meta name="author" content="${escapeAttr(v.author)}">`);
+      lines.push(`<meta name="robots" content="${escapeAttr(v.robots)}">`);
+      if (v.canonical) lines.push(`<link rel="canonical" href="${escapeAttr(v.canonical)}">`);
+
+      lines.push('');
+      lines.push('<!-- Open Graph / Facebook -->');
+      lines.push(`<meta property="og:type" content="${escapeAttr(v.ogType)}">`);
+      if (v.ogUrl) lines.push(`<meta property="og:url" content="${escapeAttr(v.ogUrl)}">`);
+      if (v.ogTitle) lines.push(`<meta property="og:title" content="${escapeAttr(v.ogTitle)}">`);
+      if (v.ogDescription) lines.push(`<meta property="og:description" content="${escapeAttr(v.ogDescription)}">`);
+      if (v.ogImage) lines.push(`<meta property="og:image" content="${escapeAttr(v.ogImage)}">`);
+      if (v.ogSiteName) lines.push(`<meta property="og:site_name" content="${escapeAttr(v.ogSiteName)}">`);
+
+      lines.push('');
+      lines.push('<!-- Twitter Card -->');
+      lines.push(`<meta name="twitter:card" content="${escapeAttr(v.twCard)}">`);
+      if (v.twTitle) lines.push(`<meta name="twitter:title" content="${escapeAttr(v.twTitle)}">`);
+      if (v.twDescription) lines.push(`<meta name="twitter:description" content="${escapeAttr(v.twDescription)}">`);
+      if (v.twImage) lines.push(`<meta name="twitter:image" content="${escapeAttr(v.twImage)}">`);
+      if (v.twSite) lines.push(`<meta name="twitter:site" content="${escapeAttr(v.twSite)}">`);
+
+      return lines.join('\n');
+    }
+
+    function generateHighlightedTags(v) {
+      const lines = [];
+
+      lines.push('<span class="tag-bracket">&lt;!-- Basic SEO --&gt;</span>');
+      if (v.title) lines.push(formatTag('meta', { name: 'title', content: v.title }));
+      if (v.description) lines.push(formatTag('meta', { name: 'description', content: v.description }));
+      if (v.keywords) lines.push(formatTag('meta', { name: 'keywords', content: v.keywords }));
+      if (v.author) lines.push(formatTag('meta', { name: 'author', content: v.author }));
+      lines.push(formatTag('meta', { name: 'robots', content: v.robots }));
+      if (v.canonical) lines.push(formatLinkTag('canonical', v.canonical));
+
+      lines.push('');
+      lines.push('<span class="tag-bracket">&lt;!-- Open Graph / Facebook --&gt;</span>');
+      lines.push(formatTag('meta', { property: 'og:type', content: v.ogType }));
+      if (v.ogUrl) lines.push(formatTag('meta', { property: 'og:url', content: v.ogUrl }));
+      if (v.ogTitle) lines.push(formatTag('meta', { property: 'og:title', content: v.ogTitle }));
+      if (v.ogDescription) lines.push(formatTag('meta', { property: 'og:description', content: v.ogDescription }));
+      if (v.ogImage) lines.push(formatTag('meta', { property: 'og:image', content: v.ogImage }));
+      if (v.ogSiteName) lines.push(formatTag('meta', { property: 'og:site_name', content: v.ogSiteName }));
+
+      lines.push('');
+      lines.push('<span class="tag-bracket">&lt;!-- Twitter Card --&gt;</span>');
+      lines.push(formatTag('meta', { name: 'twitter:card', content: v.twCard }));
+      if (v.twTitle) lines.push(formatTag('meta', { name: 'twitter:title', content: v.twTitle }));
+      if (v.twDescription) lines.push(formatTag('meta', { name: 'twitter:description', content: v.twDescription }));
+      if (v.twImage) lines.push(formatTag('meta', { name: 'twitter:image', content: v.twImage }));
+      if (v.twSite) lines.push(formatTag('meta', { name: 'twitter:site', content: v.twSite }));
+
+      return lines.join('\n');
+    }
+
+    function update() {
+      // Character counts
+      updateCharCount(fields.title, titleCount, 60);
+      updateCharCount(fields.description, descCount, 160);
+
+      const v = getResolvedValues();
+
+      // Previews
+      updatePreviews(v);
+
+      // Highlighted output
+      output.innerHTML = generateHighlightedTags(v);
+    }
+
+    function copyTags() {
+      const v = getResolvedValues();
+      const plain = generatePlainTags(v);
+      navigator.clipboard.writeText(plain).then(() => {
+        showToast('Meta tags copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy(plain);
+      });
+    }
+
+    function copyAsJSON() {
+      const v = getResolvedValues();
+      const json = {};
+      if (v.title) json.title = v.title;
+      if (v.description) json.description = v.description;
+      if (v.keywords) json.keywords = v.keywords;
+      if (v.author) json.author = v.author;
+      json.robots = v.robots;
+      if (v.canonical) json.canonical = v.canonical;
+      json.og = {};
+      json.og.type = v.ogType;
+      if (v.ogUrl) json.og.url = v.ogUrl;
+      if (v.ogTitle) json.og.title = v.ogTitle;
+      if (v.ogDescription) json.og.description = v.ogDescription;
+      if (v.ogImage) json.og.image = v.ogImage;
+      if (v.ogSiteName) json.og.site_name = v.ogSiteName;
+      json.twitter = {};
+      json.twitter.card = v.twCard;
+      if (v.twTitle) json.twitter.title = v.twTitle;
+      if (v.twDescription) json.twitter.description = v.twDescription;
+      if (v.twImage) json.twitter.image = v.twImage;
+      if (v.twSite) json.twitter.site = v.twSite;
+
+      const text = JSON.stringify(json, null, 2);
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('JSON copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch {
+        showToast('Copy failed. Please select and copy manually.');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function toggleSection(header) {
+      const body = header.nextElementSibling;
+      const isCollapsed = body.classList.toggle('collapsed');
+      header.classList.toggle('collapsed', isCollapsed);
+    }
+
+    // Initialize
+    update();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

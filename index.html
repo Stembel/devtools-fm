@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DevTools.fm - 27 Free Developer Tools | JSON, SQL, Regex, Hash, QR Code & More</title>
-  <meta name="description" content="27 free developer tools: JSON formatter, word counter, text case converter, color palette generator, JSON to CSV, SQL beautifier, regex tester, hash generator, QR code generator & more. No signup, no tracking.">
+  <title>DevTools.fm - 32 Free Developer Tools | JSON, SQL, Regex, Hash, QR Code & More</title>
+  <meta name="description" content="32 free developer tools: JSON formatter, word counter, text case converter, color palette generator, JSON to CSV, SQL beautifier, regex tester, hash generator, QR code generator & more. No signup, no tracking.">
   <meta name="keywords" content="developer tools, JSON formatter, Base64 encoder, JWT decoder, hash generator, regex tester, SQL formatter, word counter, text case converter, color palette generator, JSON to CSV, cron expression, YAML converter, CSS minifier, password generator, UUID generator, QR code generator, chmod calculator, CSS gradient generator, box shadow generator, image to base64">
   <link rel="canonical" href="https://stembel.github.io/devtools-fm/">
-  <meta property="og:title" content="DevTools.fm - 27 Free Developer Tools">
+  <meta property="og:title" content="DevTools.fm - 32 Free Developer Tools">
   <meta property="og:description" content="Fast, free developer tools that respect your privacy. JSON, SQL, regex, hashing, encoding, QR codes, CSS generators & more. No signup required.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://stembel.github.io/devtools-fm/">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="DevTools.fm - 27 Free Developer Tools">
+  <meta name="twitter:title" content="DevTools.fm - 32 Free Developer Tools">
   <meta name="twitter:description" content="Fast, free developer tools. JSON, SQL, regex, hashing, QR codes, CSS generators & more. No signup, no tracking.">
   <meta name="robots" content="index, follow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -100,11 +100,11 @@
     "@type": "WebApplication",
     "name": "DevTools.fm",
     "url": "https://stembel.github.io/devtools-fm/",
-    "description": "27 free online developer tools. JSON formatter, word counter, text case converter, color palette generator, JSON to CSV converter, SQL beautifier, regex tester, hash generator, QR code generator, CSS gradient builder, chmod calculator, Base64, JWT decoder, and more.",
+    "description": "32 free online developer tools. JSON formatter, word counter, text case converter, color palette generator, JSON to CSV converter, SQL beautifier, regex tester, hash generator, QR code generator, CSS gradient builder, chmod calculator, Base64, JWT decoder, and more.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
     "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-    "featureList": ["JSON Formatter","Base64 Encoder/Decoder","JWT Decoder","Hash Generator","URL Encoder/Decoder","Regex Tester","Unix Timestamp Converter","Color Converter","Text Diff","Markdown Preview","UUID Generator","Password Generator","Lorem Ipsum Generator","Cron Expression Generator","CSS/JS Minifier","SQL Formatter","YAML/JSON Converter","HTML Entity Encoder","String Escape/Unescape","Chmod Calculator","QR Code Generator","CSS Gradient Generator","Box Shadow Generator","Image to Base64","Word Counter","JSON to CSV Converter","Text Case Converter","Color Palette Generator"]
+    "featureList": ["JSON Formatter","Base64 Encoder/Decoder","JWT Decoder","Hash Generator","URL Encoder/Decoder","Regex Tester","Unix Timestamp Converter","Color Converter","Text Diff","Markdown Preview","UUID Generator","Password Generator","Lorem Ipsum Generator","Cron Expression Generator","CSS/JS Minifier","SQL Formatter","YAML/JSON Converter","HTML Entity Encoder","String Escape/Unescape","Chmod Calculator","QR Code Generator","CSS Gradient Generator","Box Shadow Generator","Image to Base64","Word Counter","JSON to CSV Converter","Text Case Converter","Color Palette Generator","Image Compressor","CSS Flexbox Generator","Meta Tag Generator","HTTP Status Codes Reference"]
   }
   </script>
 </head>
@@ -124,7 +124,7 @@
   <main class="container">
     <section class="hero">
       <h1>Developer Tools That Just Work</h1>
-      <p><span class="tool-count">27</span> free tools. No signup, no tracking, no cookies. Everything runs in your browser.</p>
+      <p><span class="tool-count">32</span> free tools. No signup, no tracking, no cookies. Everything runs in your browser.</p>
       <div class="search-box">
         <span class="search-icon">&#128269;</span>
         <input type="text" id="search" placeholder="Search tools... (e.g. JSON, color, hash)" autocomplete="off">
@@ -139,9 +139,36 @@
       <button class="category-tab" data-category="convert">Converters</button>
       <button class="category-tab" data-category="css">CSS & Visual</button>
       <button class="category-tab" data-category="text">Text</button>
+      <button class="category-tab" data-category="image">Images</button>
+      <button class="category-tab" data-category="reference">Reference</button>
     </div>
 
     <section class="tools-grid" id="tools-grid">
+      <!-- New Tools -->
+      <a href="tools/imagecompress.html" class="tool-card" data-category="image" data-keywords="image compressor compress resize jpeg png webp optimize">
+        <div class="tool-icon">IMG</div>
+        <h3>Image Compressor<span class="badge-new">New</span></h3>
+        <p>Compress JPEG, PNG, WebP images. Resize, adjust quality, batch processing. All client-side.</p>
+      </a>
+
+      <a href="tools/flexbox.html" class="tool-card" data-category="css" data-keywords="css flexbox generator layout playground visual">
+        <div class="tool-icon">F</div>
+        <h3>Flexbox Generator<span class="badge-new">New</span></h3>
+        <p>Visual CSS Flexbox playground. Build layouts with presets, customize all properties, copy CSS.</p>
+      </a>
+
+      <a href="tools/metatags.html" class="tool-card" data-category="generate" data-keywords="meta tag generator seo open graph twitter card social media">
+        <div class="tool-icon">SEO</div>
+        <h3>Meta Tag Generator<span class="badge-new">New</span></h3>
+        <p>Generate SEO meta tags, Open Graph, and Twitter Cards. Preview Google and social media appearance.</p>
+      </a>
+
+      <a href="tools/httpstatus.html" class="tool-card" data-category="reference" data-keywords="http status codes 200 301 404 500 reference api rest">
+        <div class="tool-icon">HTTP</div>
+        <h3>HTTP Status Codes<span class="badge-new">New</span></h3>
+        <p>Complete HTTP status code reference. Search, filter by category, detailed explanations and fixes.</p>
+      </a>
+
       <!-- Text Tools -->
       <a href="tools/wordcount.html" class="tool-card" data-category="text" data-keywords="word counter character count text statistics reading time">
         <div class="tool-icon">Wc</div>
@@ -330,7 +357,7 @@
 
   <footer>
     <div class="container">
-      DevTools.fm &mdash; 27 free developer tools. All processing happens in your browser. No data leaves your machine.
+      DevTools.fm &mdash; 32 free developer tools. All processing happens in your browser. No data leaves your machine.
     </div>
   </footer>
 
@@ -378,5 +405,6 @@
       });
     });
   </script>
+  <script src="js/monetization.js"></script>
 </body>
 </html>

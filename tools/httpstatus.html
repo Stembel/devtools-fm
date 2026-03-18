@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Status Codes - Complete Reference Guide | DevTools.fm</title>
+  <meta name="description" content="Complete HTTP status codes reference. Look up any status code instantly: 1xx informational, 2xx success, 3xx redirection, 4xx client error, 5xx server error. Detailed explanations, common causes, and fixes.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/httpstatus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .category-tab .tab-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .category-section {
+      margin-bottom: 32px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .cat-1xx .category-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .cat-2xx .category-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-3xx .category-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .cat-4xx .category-badge { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .cat-5xx .category-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    .cat-1xx .category-header { border-bottom-color: rgba(59, 130, 246, 0.2); }
+    .cat-2xx .category-header { border-bottom-color: rgba(34, 197, 94, 0.2); }
+    .cat-3xx .category-header { border-bottom-color: rgba(234, 179, 8, 0.2); }
+    .cat-4xx .category-header { border-bottom-color: rgba(249, 115, 22, 0.2); }
+    .cat-5xx .category-header { border-bottom-color: rgba(239, 68, 68, 0.2); }
+
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .status-card:hover {
+      border-color: var(--text-muted);
+    }
+    .status-card.expanded {
+      border-color: var(--accent);
+    }
+
+    .status-card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .status-code {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      min-width: 44px;
+    }
+    .cat-1xx .status-code { color: #60a5fa; }
+    .cat-2xx .status-code { color: #4ade80; }
+    .cat-3xx .status-code { color: #facc15; }
+    .cat-4xx .status-code { color: #fb923c; }
+    .cat-5xx .status-code { color: #f87171; }
+
+    .status-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .status-short {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .status-chevron {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .status-card.expanded .status-chevron {
+      transform: rotate(90deg);
+    }
+
+    .status-detail {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .status-card.expanded .status-detail {
+      display: block;
+    }
+    .detail-section {
+      margin-top: 16px;
+    }
+    .detail-section h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .detail-section p {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .detail-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .detail-section ul li {
+      font-size: 0.85rem;
+      color: var(--text);
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+      line-height: 1.6;
+    }
+    .detail-section ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-code {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    .quick-jump {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .quick-jump:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+    .quick-jump.visible {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .status-card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+      }
+      .status-short {
+        flex-basis: 100%;
+        order: 3;
+        white-space: normal;
+      }
+      .status-detail {
+        padding: 0 16px 16px;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>HTTP Status Codes</h1>
+    <p class="description">Complete reference for all HTTP status codes. Search by number or name, click to expand for detailed explanations, common causes, and how to fix them.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by code or name... (e.g. 404, not found)" autofocus spellcheck="false">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs">
+      <button class="category-tab active" data-cat="all">All <span class="tab-count" id="countAll"></span></button>
+      <button class="category-tab" data-cat="1xx">1xx Informational <span class="tab-count" id="count1xx"></span></button>
+      <button class="category-tab" data-cat="2xx">2xx Success <span class="tab-count" id="count2xx"></span></button>
+      <button class="category-tab" data-cat="3xx">3xx Redirection <span class="tab-count" id="count3xx"></span></button>
+      <button class="category-tab" data-cat="4xx">4xx Client Error <span class="tab-count" id="count4xx"></span></button>
+      <button class="category-tab" data-cat="5xx">5xx Server Error <span class="tab-count" id="count5xx"></span></button>
+    </div>
+
+    <div id="statusList"></div>
+    <div id="noResults" class="no-results" style="display:none">
+      <div class="nr-code">?_?</div>
+      <p>No status codes match your search.</p>
+    </div>
+
+    <button class="quick-jump" id="quickJump" title="Click to jump to this code"></button>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    const STATUS_CODES = [
+      // 1xx Informational
+      {
+        code: 100, name: "Continue", cat: "1xx",
+        short: "Initial part of the request received; client should continue.",
+        description: "The server has received the request headers, and the client should proceed to send the request body. This is typically used when a client sends an Expect: 100-continue header to check whether the server is willing to accept the request body before actually sending it. This avoids wasting bandwidth by sending a large body that the server would reject.",
+        causes: ["Client sends Expect: 100-continue header", "Server acknowledges it is ready to receive the request body", "Used with large POST/PUT requests to verify server willingness"],
+        fix: ["This is a normal intermediate response, not an error", "The client should proceed to send the request body", "If you keep receiving 100 without a final response, check server-side request handling"]
+      },
+      {
+        code: 101, name: "Switching Protocols", cat: "1xx",
+        short: "Server is switching to the protocol the client requested.",
+        description: "The server understands and is willing to comply with the client's request to switch protocols via the Upgrade header. This is most commonly seen when upgrading an HTTP connection to WebSocket. After this response, the server switches to the new protocol.",
+        causes: ["Client requested a protocol switch via the Upgrade header", "WebSocket handshake (HTTP to WebSocket)", "Upgrading from HTTP/1.1 to HTTP/2"],
+        fix: ["This is a normal response during protocol negotiation", "If WebSocket connections fail after this, check firewall or proxy settings", "Ensure the server supports the requested protocol"]
+      },
+      {
+        code: 102, name: "Processing", cat: "1xx",
+        short: "Server has received the request and is processing it (WebDAV).",
+        description: "An interim response used to inform the client that the server has accepted the complete request but has not yet completed it. This is a WebDAV-specific status code that prevents the client from timing out when the server needs a long time to process the request. The server should send a final response after the request has been completed.",
+        causes: ["WebDAV operations that take a long time", "Server actively processing a complex request", "Prevents client-side timeout during lengthy operations"],
+        fix: ["Wait for the final response from the server", "If processing takes too long, consider optimizing the server-side operation", "Increase client timeout settings if needed"]
+      },
+      {
+        code: 103, name: "Early Hints", cat: "1xx",
+        short: "Server sends preliminary headers before the final response.",
+        description: "Used to return some response headers before the final HTTP message. This allows the browser to start preloading resources (like stylesheets and scripts) while the server is still preparing the main response. Primarily used with the Link header to enable preloading, which can significantly improve page load performance.",
+        causes: ["Server wants the client to start loading resources early", "Used with Link headers for resource preloading", "Server still preparing the final response"],
+        fix: ["This is a performance optimization, not an error", "Ensure Link headers point to valid resources", "Check browser developer tools to verify preloading works correctly"]
+      },
+
+      // 2xx Success
+      {
+        code: 200, name: "OK", cat: "2xx",
+        short: "Request succeeded. The standard success response.",
+        description: "The request has succeeded. The meaning of the success depends on the HTTP method: GET returns the requested resource, HEAD returns only headers, POST returns the result of the action, TRACE returns the request message as received. This is the most common HTTP status code.",
+        causes: ["Request was processed successfully", "Resource was found and returned", "Action was completed as requested"],
+        fix: ["This is a success response -- no fix needed", "If you expected different data, verify the request URL and parameters", "Check Content-Type header to ensure the response format matches expectations"]
+      },
+      {
+        code: 201, name: "Created", cat: "2xx",
+        short: "Request fulfilled and a new resource was created.",
+        description: "The request has been fulfilled and has resulted in one or more new resources being created. The newly created resource can be referenced by the URI(s) returned in the response, with the most specific URI given by a Location header field. Commonly returned after successful POST requests.",
+        causes: ["A new resource was successfully created via POST", "Database record was inserted", "File or object was created on the server"],
+        fix: ["This is a success response -- no fix needed", "Check the Location header for the URI of the new resource", "Verify the created resource matches your expectations"]
+      },
+      {
+        code: 202, name: "Accepted", cat: "2xx",
+        short: "Request accepted for processing, but not yet completed.",
+        description: "The request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place. This is typically used for asynchronous operations where the server queues the request for later processing.",
+        causes: ["Asynchronous processing -- request is queued", "Batch processing job has been scheduled", "Long-running task has been initiated"],
+        fix: ["Poll the provided status URL for completion", "Check for a Location header pointing to a status endpoint", "Implement webhook callbacks for completion notification"]
+      },
+      {
+        code: 203, name: "Non-Authoritative Information", cat: "2xx",
+        short: "Response from a transforming proxy, not from the origin server.",
+        description: "The request was successful but the enclosed payload has been modified from the origin server's 200 OK response by a transforming proxy. This lets the client know that the response is not identical to what the origin server sent. The proxy might have modified headers or the body.",
+        causes: ["A proxy or CDN modified the response", "Content transformation by an intermediary", "Metadata was changed by a middleware layer"],
+        fix: ["This is typically informational", "If you need the original response, connect directly to the origin", "Check proxy/CDN configuration if modifications are unexpected"]
+      },
+      {
+        code: 204, name: "No Content", cat: "2xx",
+        short: "Request succeeded but there is no content to return.",
+        description: "The server has successfully fulfilled the request and there is no additional content to send in the response body. This is commonly used for successful DELETE requests, or for PUT/PATCH requests where the server does not need to return the updated resource. The client should not navigate away from the current page.",
+        causes: ["Successful DELETE operation", "Successful PUT/PATCH that does not return the updated resource", "Form submission that requires no response body", "Preflight OPTIONS request response"],
+        fix: ["This is a success response -- no fix needed", "If you expected a response body, use 200 OK instead on the server", "Check that your client handles empty responses correctly"]
+      },
+      {
+        code: 205, name: "Reset Content", cat: "2xx",
+        short: "Request succeeded; client should reset the document view.",
+        description: "The server has fulfilled the request and the client should reset the document view that caused the request. This is useful for clearing forms after submission -- the server tells the client to reset the input fields to their original state. Like 204, this response must not include a body.",
+        causes: ["Successful form submission where the form should be cleared", "Server wants the client to reset its view"],
+        fix: ["This is a success response", "Ensure your client resets the form/view as instructed", "If the form is not clearing, check your client-side handling of 205 responses"]
+      },
+      {
+        code: 206, name: "Partial Content", cat: "2xx",
+        short: "Server is delivering only part of the resource (Range request).",
+        description: "The server is successfully fulfilling a range request for the target resource by transferring one or more parts of the selected representation. This is used when the client requests only a portion of a resource via the Range header, commonly seen in video/audio streaming, resumable downloads, and PDF viewers.",
+        causes: ["Client sent a Range header requesting specific bytes", "Video or audio streaming", "Resumable file download", "PDF viewer requesting specific pages"],
+        fix: ["This is a normal response for range requests", "If you want the full resource, remove the Range header", "Check Content-Range header for the byte range returned"]
+      },
+      {
+        code: 207, name: "Multi-Status", cat: "2xx",
+        short: "Response contains status for multiple independent operations (WebDAV).",
+        description: "A Multi-Status response conveys information about multiple resources in situations where multiple status codes might be appropriate. The response body is an XML document containing individual response elements for each sub-request. This is a WebDAV extension used when a single request affects multiple resources.",
+        causes: ["WebDAV batch operations affecting multiple resources", "PROPFIND requests returning properties of multiple files", "Batch API operations returning mixed results"],
+        fix: ["Parse the XML response body to check individual operation results", "Handle partial failures -- some sub-operations may have failed", "Check each individual status code in the multi-status response"]
+      },
+      {
+        code: 208, name: "Already Reported", cat: "2xx",
+        short: "Members of a DAV binding have already been enumerated (WebDAV).",
+        description: "Used inside a DAV: propstat response element to avoid enumerating the internal members of multiple bindings to the same collection repeatedly. This prevents infinite loops in responses when resources are bound to multiple locations in a WebDAV tree.",
+        causes: ["WebDAV collection with multiple bindings", "Prevents duplicate enumeration in PROPFIND responses", "DAV binding loop prevention"],
+        fix: ["This is a normal WebDAV response", "The resource was already included in a previous part of the response", "No action needed -- this prevents redundant data"]
+      },
+      {
+        code: 226, name: "IM Used", cat: "2xx",
+        short: "Server fulfilled a GET request using instance-manipulation.",
+        description: "The server has fulfilled a GET request for the resource, and the response is a representation of the result of one or more instance-manipulations applied to the current instance. This is part of the HTTP Delta Encoding specification, where the server returns the differences (delta) between the current and previous versions rather than the full content.",
+        causes: ["HTTP Delta Encoding is in use", "Server applied instance-manipulations to the response", "Efficient transfer of resource changes"],
+        fix: ["This is a success response for delta-encoded content", "Ensure your client supports delta encoding", "If you need the full resource, remove the A-IM header from requests"]
+      },
+
+      // 3xx Redirection
+      {
+        code: 300, name: "Multiple Choices", cat: "3xx",
+        short: "Multiple possible responses; user or agent should choose one.",
+        description: "The request has more than one possible response. The user agent or user should choose one of them. There is no standardized way of choosing one of the responses, but HTML links to the possibilities are recommended so the user can pick. This is rarely used in practice.",
+        causes: ["Resource available in multiple formats (e.g., different languages, content types)", "Server cannot determine the best representation", "Content negotiation resulted in multiple options"],
+        fix: ["Specify an Accept header to indicate preferred format", "Choose the appropriate URL from the response body", "Implement content negotiation on the server to auto-select"]
+      },
+      {
+        code: 301, name: "Moved Permanently", cat: "3xx",
+        short: "Resource has been permanently moved to a new URL.",
+        description: "The requested resource has been assigned a new permanent URI and any future references to this resource should use one of the enclosed URIs. The new URI is given in the Location header. Browsers and search engines will update their bookmarks and links. This redirect is cached by browsers by default. Note: some clients may change POST to GET on redirect.",
+        causes: ["URL structure changed permanently", "Domain migration", "HTTP to HTTPS redirect", "Website restructuring with new URL paths"],
+        fix: ["Update your links and bookmarks to the new URL", "Follow the Location header to the new resource", "If you control the server, ensure the Location header is correct", "For SEO, this is the correct redirect for permanent moves"]
+      },
+      {
+        code: 302, name: "Found", cat: "3xx",
+        short: "Resource temporarily at a different URL.",
+        description: "The target resource resides temporarily under a different URI. Since the redirection might be altered on occasion, the client should continue to use the original URI for future requests. Unlike 301, this indicates a temporary redirect. Note: many user agents change POST to GET on redirect, which is technically incorrect; use 307 to preserve the method.",
+        causes: ["Temporary URL redirect", "A/B testing redirects", "Load balancing", "Maintenance mode redirect"],
+        fix: ["Follow the redirect to the temporary URL", "Continue using the original URL for future requests", "If method must be preserved, use 307 instead on the server", "Check if the redirect should be permanent (301) instead"]
+      },
+      {
+        code: 303, name: "See Other", cat: "3xx",
+        short: "Response can be found at another URL using GET.",
+        description: "The server is redirecting the user agent to a different resource, as indicated by a URI in the Location header, which is intended to provide an indirect response to the original request. The client should use GET to retrieve the resource at the new URI. This is commonly used after a POST request to redirect to a confirmation page.",
+        causes: ["POST/PUT/DELETE processing complete, redirecting to result page", "Post-Redirect-Get (PRG) pattern implementation", "Redirecting to a status or confirmation page after form submission"],
+        fix: ["Follow the redirect using GET method", "This is standard PRG pattern behavior", "If you need the direct response, check the API documentation"]
+      },
+      {
+        code: 304, name: "Not Modified", cat: "3xx",
+        short: "Cached version is still valid; no need to retransmit.",
+        description: "Indicates that the resource has not been modified since the version specified by the request headers If-Modified-Since or If-None-Match. The server does not return a body, and the client should use the cached version. This saves bandwidth and improves performance by avoiding unnecessary data transfer.",
+        causes: ["Client sent conditional request with If-Modified-Since or If-None-Match", "Resource has not changed since last request", "Browser cache validation succeeded"],
+        fix: ["This is a normal caching response -- not an error", "The client should use its cached copy of the resource", "To force a fresh copy, clear cache or remove conditional headers", "Check Cache-Control and ETag headers for caching policy"]
+      },
+      {
+        code: 305, name: "Use Proxy", cat: "3xx",
+        short: "Resource must be accessed through the specified proxy (deprecated).",
+        description: "Defined in a previous version of the HTTP specification to indicate that a requested response must be accessed by a proxy. It has been deprecated due to security concerns regarding in-band configuration of a proxy. Most modern clients do not support this status code.",
+        causes: ["Legacy proxy requirement (deprecated)", "Old server software sending outdated responses"],
+        fix: ["This status code is deprecated and should not be used", "If you encounter it, the server configuration needs updating", "Configure proxy settings on the client side instead"]
+      },
+      {
+        code: 306, name: "(Unused)", cat: "3xx",
+        short: "Previously 'Switch Proxy'; no longer used and reserved.",
+        description: "This status code was defined in a previous version of the HTTP specification as 'Switch Proxy', meaning that subsequent requests should use the specified proxy. It is no longer used and the code is reserved. Current HTTP specifications do not assign any meaning to this status code.",
+        causes: ["This code is not actively used by any current implementation", "Historical artifact from early HTTP specifications"],
+        fix: ["This code should not be encountered in practice", "If a server returns this, its HTTP implementation may be non-standard", "No action is required -- this code is reserved and unused"]
+      },
+      {
+        code: 307, name: "Temporary Redirect", cat: "3xx",
+        short: "Temporary redirect that preserves the HTTP method.",
+        description: "The target resource resides temporarily under a different URI and the user agent must not change the request method if it performs an automatic redirection to that URI. This is the same as 302, but with the guarantee that the method and body will not be changed. Use this when you need to redirect a POST request to a temporary URL.",
+        causes: ["Temporary URL redirect that must preserve HTTP method", "HTTPS redirect preserving POST body", "API endpoint temporarily moved"],
+        fix: ["Follow the redirect using the same HTTP method", "Continue using the original URL for future requests", "If the move is permanent, use 308 instead on the server"]
+      },
+      {
+        code: 308, name: "Permanent Redirect", cat: "3xx",
+        short: "Permanent redirect that preserves the HTTP method.",
+        description: "The target resource has been assigned a new permanent URI and any future references to this resource should use one of the enclosed URIs. This is similar to 301, but the request method and body must not change. Use this when permanently redirecting POST requests or when method preservation is important.",
+        causes: ["Permanent URL change that must preserve HTTP method", "API versioning redirects", "Permanent HTTPS redirect for non-GET requests"],
+        fix: ["Update links and bookmarks to the new URL", "Follow the redirect using the same HTTP method", "For SEO and permanent changes, this is the correct choice when method must be preserved"]
+      },
+
+      // 4xx Client Error
+      {
+        code: 400, name: "Bad Request", cat: "4xx",
+        short: "Server cannot process the request due to client error.",
+        description: "The server cannot or will not process the request due to something that is perceived to be a client error. This could be malformed request syntax, invalid request message framing, deceptive request routing, or invalid content. This is the generic client error response when no other 4xx code is applicable.",
+        causes: ["Malformed JSON or XML in request body", "Invalid query parameters or URL encoding", "Missing required request headers", "Request body too large or malformed", "Invalid content type"],
+        fix: ["Check the request body format and syntax", "Validate all required parameters are present and correctly formatted", "Ensure Content-Type header matches the body format", "Check for special characters that need URL encoding", "Review API documentation for correct request format"]
+      },
+      {
+        code: 401, name: "Unauthorized", cat: "4xx",
+        short: "Authentication is required and has failed or not been provided.",
+        description: "The request requires user authentication. The client must authenticate itself to get the requested response. The server must include a WWW-Authenticate header indicating the authentication scheme. Despite the name, this is about authentication (identity), not authorization (permissions). Compare with 403 Forbidden.",
+        causes: ["Missing authentication credentials", "Expired authentication token (JWT, session, etc.)", "Invalid username or password", "Missing or malformed Authorization header"],
+        fix: ["Include valid authentication credentials in the request", "Refresh expired tokens and retry the request", "Check that the Authorization header format is correct (e.g., 'Bearer <token>')", "Verify credentials are correct", "Check if the authentication endpoint has changed"]
+      },
+      {
+        code: 402, name: "Payment Required", cat: "4xx",
+        short: "Reserved for future use (payment systems).",
+        description: "Originally reserved for future digital payment systems. While not widely standardized for a specific use case, some APIs use this to indicate that a payment is required to access the resource, such as reaching API rate limits on paid plans or accessing premium content.",
+        causes: ["API usage limit exceeded on a paid plan", "Premium content requires payment", "Subscription expired or payment failed", "Usage quota exhausted"],
+        fix: ["Check your billing status and subscription", "Upgrade your plan or add payment method", "Review API usage and stay within quota", "Contact the service provider about payment issues"]
+      },
+      {
+        code: 403, name: "Forbidden", cat: "4xx",
+        short: "Server understood the request but refuses to authorize it.",
+        description: "The server understood the request but refuses to authorize it. Unlike 401, re-authenticating will not help -- the client does not have permission to access this resource. The server may or may not explain why in the response body. This is about authorization (permissions), not authentication (identity).",
+        causes: ["Insufficient permissions for the authenticated user", "IP address blocked or rate limited", "Resource requires specific role or permission level", "Directory listing denied", "File permissions prevent access", "Geographic restrictions (geo-blocking)"],
+        fix: ["Check that your account has the required permissions", "Contact the resource owner to request access", "If IP-blocked, check if a VPN or proxy is causing issues", "Verify CORS configuration for cross-origin requests", "Check file/directory permissions on the server"]
+      },
+      {
+        code: 404, name: "Not Found", cat: "4xx",
+        short: "The requested resource could not be found on the server.",
+        description: "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, it can also mean that the endpoint is valid but the resource itself does not exist. This is one of the most well-known HTTP status codes. A 404 does not indicate whether the condition is temporary or permanent.",
+        causes: ["URL is misspelled or contains typos", "Resource was deleted or moved without a redirect", "Incorrect API endpoint path", "Dynamic resource (e.g., user profile, product) does not exist", "Case-sensitive URL mismatch on Linux servers"],
+        fix: ["Double-check the URL for typos", "Verify the resource exists in the database/filesystem", "Set up proper redirects (301/302) when moving resources", "Implement a user-friendly 404 error page", "Check server logs for the requested path"]
+      },
+      {
+        code: 405, name: "Method Not Allowed", cat: "4xx",
+        short: "HTTP method is not supported for this resource.",
+        description: "The request method is known by the server but has been disabled and cannot be used for the target resource. For example, sending a DELETE request to a read-only resource. The server must include an Allow header listing the supported methods for the resource.",
+        causes: ["Using POST on a resource that only accepts GET", "Trying to DELETE a resource that does not support deletion", "API endpoint does not support the HTTP method used", "CORS preflight check failing due to method restrictions"],
+        fix: ["Check the Allow header in the response for supported methods", "Use the correct HTTP method as per API documentation", "For REST APIs: GET to read, POST to create, PUT/PATCH to update, DELETE to remove", "Configure CORS to allow the required methods"]
+      },
+      {
+        code: 406, name: "Not Acceptable", cat: "4xx",
+        short: "Server cannot produce a response matching the Accept headers.",
+        description: "The server cannot produce a response matching the list of acceptable values defined in the request's Accept, Accept-Language, Accept-Encoding, or Accept-Charset headers. The server is unwilling to supply a default representation. This is related to content negotiation.",
+        causes: ["Request Accept header specifies unsupported content types", "Server cannot provide the requested language or encoding", "Strict content negotiation failure"],
+        fix: ["Check and broaden your Accept header (e.g., use */* to accept anything)", "Remove restrictive Accept-Language or Accept-Encoding headers", "Check API documentation for supported response formats", "Add support for the requested format on the server"]
+      },
+      {
+        code: 407, name: "Proxy Authentication Required", cat: "4xx",
+        short: "Client must authenticate with the proxy server.",
+        description: "Similar to 401, but the client must first authenticate itself with the proxy. The proxy must return a Proxy-Authenticate header field containing a challenge applicable to the proxy. The client should retry with appropriate Proxy-Authorization credentials.",
+        causes: ["Corporate proxy requires authentication", "Proxy credentials expired or missing", "Network requires proxy authentication for internet access"],
+        fix: ["Provide valid proxy authentication credentials", "Configure proxy settings in your application or OS", "Contact your network administrator for proxy credentials", "Check if proxy authentication is being intercepted by security software"]
+      },
+      {
+        code: 408, name: "Request Timeout", cat: "4xx",
+        short: "Server timed out waiting for the request from the client.",
+        description: "The server did not receive a complete request message within the time that it was prepared to wait. The server is closing the connection without a response. This differs from 504 Gateway Timeout, which is about the server timing out while waiting for an upstream server.",
+        causes: ["Slow network connection caused the request to take too long", "Client was too slow sending the request body", "Network interruption during request transmission", "Server has a short timeout configuration"],
+        fix: ["Retry the request -- this is often a transient issue", "Check your network connection speed and stability", "Reduce the request payload size if possible", "Increase server-side request timeout settings", "Use connection keep-alive to reduce overhead"]
+      },
+      {
+        code: 409, name: "Conflict", cat: "4xx",
+        short: "Request conflicts with the current state of the resource.",
+        description: "The request could not be completed due to a conflict with the current state of the target resource. This is often used in situations where the user might be able to resolve the conflict and resubmit the request. Common in version control, concurrent editing, and database operations.",
+        causes: ["Concurrent modification conflict (two users editing the same resource)", "Trying to create a resource that already exists", "Version conflict in optimistic locking (stale ETag)", "Database unique constraint violation", "State machine transition not allowed from current state"],
+        fix: ["Fetch the latest version of the resource and retry", "Use If-Match headers with ETags for optimistic concurrency", "Resolve the conflict (merge changes) and resubmit", "Check for duplicate resources before creation", "Implement conflict resolution strategies in your application"]
+      },
+      {
+        code: 410, name: "Gone", cat: "4xx",
+        short: "Resource has been permanently deleted and will not return.",
+        description: "The target resource is no longer available at the server and no forwarding address is known. This is a permanent condition. Unlike 404, this specifically means the resource existed before but has been intentionally and permanently removed. Search engines will de-index the resource upon receiving a 410.",
+        causes: ["Resource was intentionally and permanently deleted", "API version or endpoint has been retired", "Content was removed due to legal requirements", "User account was permanently deleted"],
+        fix: ["Remove links to this resource from your application", "This is permanent -- the resource will not come back", "Check for an archived version if needed", "Search engines will de-index this URL", "If unintentional, restore the resource on the server"]
+      },
+      {
+        code: 411, name: "Length Required", cat: "4xx",
+        short: "Server requires a Content-Length header in the request.",
+        description: "The server refuses to accept the request without a defined Content-Length header. The client should include a Content-Length header with the size of the request body in bytes. This is sometimes required for request bodies to help the server allocate resources.",
+        causes: ["Missing Content-Length header in a POST/PUT request", "Chunked transfer encoding not supported by the server", "Server requires knowing the request size in advance"],
+        fix: ["Add a Content-Length header with the correct byte count", "Ensure your HTTP client sends Content-Length automatically", "If streaming, check if the server supports chunked transfer encoding"]
+      },
+      {
+        code: 412, name: "Precondition Failed", cat: "4xx",
+        short: "One or more precondition headers evaluated to false.",
+        description: "One or more conditions given in the request header fields (such as If-Match, If-Unmodified-Since, If-None-Match) evaluated to false when tested on the server. This is used for conditional requests to prevent the 'lost update' problem in concurrent editing scenarios.",
+        causes: ["If-Match ETag does not match current resource version", "If-Unmodified-Since date is earlier than last modification", "Optimistic concurrency control detected a conflict", "Resource was modified between your read and write operations"],
+        fix: ["Fetch the latest version of the resource (GET with current ETag)", "Update your If-Match header with the new ETag and retry", "Implement conflict resolution in your application", "Review your conditional request headers"]
+      },
+      {
+        code: 413, name: "Content Too Large", cat: "4xx",
+        short: "Request body exceeds the server's size limit.",
+        description: "The server is refusing to process the request because the request payload is larger than the server is willing or able to process. The server may close the connection or return a Retry-After header if the condition is temporary. Previously called 'Payload Too Large' and before that 'Request Entity Too Large'.",
+        causes: ["File upload exceeds server's maximum size limit", "JSON/XML request body is too large", "Image or video upload exceeds limit", "Server-side upload limit configured too low (e.g., nginx client_max_body_size)"],
+        fix: ["Reduce the size of the request body", "Compress files before uploading", "Use chunked upload for large files", "Increase server-side body size limits (nginx: client_max_body_size, Apache: LimitRequestBody)", "Implement multipart upload for large files"]
+      },
+      {
+        code: 414, name: "URI Too Long", cat: "4xx",
+        short: "The request URI is longer than the server will accept.",
+        description: "The server is refusing to service the request because the request-target is longer than the server is willing to interpret. This is rare, but can occur when a form submission uses GET instead of POST with a large amount of data, or when a client has fallen into a redirect loop creating increasingly longer URIs.",
+        causes: ["GET request with too many or too long query parameters", "Redirect loop creating increasingly longer URLs", "Attempting to send large data via URL instead of request body", "Misconfigured URL rewriting creating infinite loops"],
+        fix: ["Use POST instead of GET for large data submissions", "Check for redirect loops in your application", "Move query parameters to the request body", "Increase URI length limits on the server if appropriate", "Use URL shortening or pagination for long parameter lists"]
+      },
+      {
+        code: 415, name: "Unsupported Media Type", cat: "4xx",
+        short: "Server does not support the media type in the request.",
+        description: "The server refuses the request because the payload format is in an unsupported format. The format problem might be due to the request's indicated Content-Type or Content-Encoding, or as a result of inspecting the data directly.",
+        causes: ["Sending JSON without Content-Type: application/json header", "Uploading a file type the server does not accept", "Content-Type header does not match the actual body format", "Server only accepts specific media types"],
+        fix: ["Set the correct Content-Type header (e.g., application/json, multipart/form-data)", "Check API documentation for accepted media types", "Ensure the Content-Type header matches the actual request body format", "Convert data to a supported format before sending"]
+      },
+      {
+        code: 416, name: "Range Not Satisfiable", cat: "4xx",
+        short: "The requested byte range cannot be fulfilled.",
+        description: "The client requested a portion of the file (via the Range header), but the server cannot supply that portion. For example, if the client asked for a range beyond the end of the file. The server should return a Content-Range header indicating the actual length of the resource.",
+        causes: ["Range header specifies bytes beyond the file size", "Requested range start is greater than the resource length", "Invalid Range header format", "Resource size changed between requests"],
+        fix: ["Check the resource size before making range requests", "Use the Content-Range header from the response to determine valid ranges", "Remove the Range header to request the full resource", "Handle this error gracefully in download resumption logic"]
+      },
+      {
+        code: 417, name: "Expectation Failed", cat: "4xx",
+        short: "Server cannot meet the Expect request header requirements.",
+        description: "The expectation given in the request's Expect header field could not be met by at least one of the inbound servers. This is most commonly seen when the client sends Expect: 100-continue and the server decides not to honor that expectation.",
+        causes: ["Server does not support the Expect: 100-continue header", "Proxy or intermediate server rejected the expectation", "Server configuration does not allow the expected behavior"],
+        fix: ["Remove the Expect header from the request", "Send the request body directly without waiting for 100 Continue", "Check if proxies in the chain support the Expect header"]
+      },
+      {
+        code: 418, name: "I'm a Teapot", cat: "4xx",
+        short: "The server is a teapot and refuses to brew coffee (RFC 2324).",
+        description: "Defined in RFC 2324 (Hyper Text Coffee Pot Control Protocol) as an April Fools' joke. Any attempt to brew coffee with a teapot should result in this error code. While this is a joke status code, it is widely known and sometimes used by servers to indicate they will not process a request, often as an easter egg.",
+        causes: ["You tried to brew coffee with a teapot", "Server uses this as a humorous rejection", "Easter egg in the server implementation", "API uses this to indicate an intentionally unsupported operation"],
+        fix: ["Use a coffee pot instead of a teapot", "This is typically a humorous response -- check if the server has real documentation", "If an API returns this, it may indicate the endpoint is not meant to be used"]
+      },
+      {
+        code: 421, name: "Misdirected Request", cat: "4xx",
+        short: "Request was directed to a server unable to produce a response.",
+        description: "The request was directed at a server that is not able to produce a response. This can be sent by a server that is not configured to produce responses for the combination of scheme and authority that are included in the request URI. This is related to HTTP/2 connection coalescing.",
+        causes: ["HTTP/2 connection reuse sent request to wrong server", "TLS certificate does not match the requested domain", "Virtual host misconfiguration", "Server does not handle the requested host"],
+        fix: ["Retry the request on a new connection", "Check the server's TLS certificate configuration", "Verify virtual host settings on the server", "Ensure the Host header matches the server's configuration"]
+      },
+      {
+        code: 422, name: "Unprocessable Content", cat: "4xx",
+        short: "Request syntax is correct but the content cannot be processed.",
+        description: "The server understands the content type and syntax of the request, but it was unable to process the contained instructions. This is commonly used for validation errors in API requests. The request is well-formed (unlike 400), but the semantic content is invalid. Previously called 'Unprocessable Entity'.",
+        causes: ["Validation errors (e.g., email format invalid, required field missing)", "Business logic violation (e.g., insufficient funds, invalid state transition)", "Semantically incorrect data in a syntactically valid request", "Referenced resource does not exist"],
+        fix: ["Check the response body for specific validation error messages", "Validate your data client-side before sending", "Review the field requirements in the API documentation", "Ensure referenced resources exist before submitting"]
+      },
+      {
+        code: 423, name: "Locked", cat: "4xx",
+        short: "The resource is locked (WebDAV).",
+        description: "The resource that is being accessed is locked. This is a WebDAV-specific status code indicating that the resource is currently locked by another user or process and cannot be modified until the lock is released.",
+        causes: ["Another user has locked the resource for editing", "WebDAV lock on a file or collection", "Resource is being processed by another operation"],
+        fix: ["Wait for the lock to be released", "Check who holds the lock and request they release it", "Use WebDAV UNLOCK method to release the lock if you hold it", "Implement lock timeout handling"]
+      },
+      {
+        code: 424, name: "Failed Dependency", cat: "4xx",
+        short: "Request failed because a required dependent request failed (WebDAV).",
+        description: "The method could not be performed on the resource because the requested action depended on another action and that action failed. This is a WebDAV extension. If a PROPPATCH operation fails on one property, all dependent property changes also fail with this status.",
+        causes: ["A prerequisite operation in a batch request failed", "WebDAV PROPPATCH dependency failure", "Cascading failure from a related operation"],
+        fix: ["Check which dependent operation failed and fix it first", "Retry the entire batch of operations", "Break complex operations into independent steps"]
+      },
+      {
+        code: 425, name: "Too Early", cat: "4xx",
+        short: "Server unwilling to process a request that might be replayed.",
+        description: "The server is unwilling to risk processing a request that might be replayed. This is used with TLS 1.3 Early Data (0-RTT) to protect against replay attacks. The server cannot be sure the request has not been forwarded by an attacker.",
+        causes: ["Request sent using TLS 1.3 0-RTT early data", "Server cannot verify request is not a replay", "Security policy rejects early data requests"],
+        fix: ["Retry the request over a normal (non-0-RTT) connection", "Wait for the TLS handshake to complete before sending the request", "This is a security measure -- do not try to bypass it"]
+      },
+      {
+        code: 426, name: "Upgrade Required", cat: "4xx",
+        short: "Client should switch to a different protocol.",
+        description: "The server refuses to perform the request using the current protocol but might be willing to do so after the client upgrades to a different protocol. The server must include an Upgrade header to indicate the required protocol(s). This is commonly seen when a server requires HTTPS or WebSocket upgrade.",
+        causes: ["Server requires HTTPS but received HTTP request", "WebSocket endpoint requires protocol upgrade", "Server requires a newer HTTP version"],
+        fix: ["Switch to the protocol specified in the Upgrade header", "Use HTTPS instead of HTTP", "Implement the required protocol upgrade in your client"]
+      },
+      {
+        code: 428, name: "Precondition Required", cat: "4xx",
+        short: "Server requires the request to be conditional.",
+        description: "The origin server requires the request to be conditional (e.g., include an If-Match header). This is intended to prevent the 'lost update' problem, where a client GETs a resource, modifies it, and PUTs it back while a third party has modified the resource in the meantime.",
+        causes: ["Server requires conditional headers for this operation", "Optimistic concurrency enforcement", "Missing If-Match or If-Unmodified-Since header", "Server enforcing safe concurrent updates"],
+        fix: ["Add an If-Match header with the resource's current ETag", "First GET the resource to obtain the current ETag", "Add If-Unmodified-Since header with the last known modification time", "Implement optimistic concurrency control in your client"]
+      },
+      {
+        code: 429, name: "Too Many Requests", cat: "4xx",
+        short: "Client has sent too many requests in a given time period.",
+        description: "The user has sent too many requests in a given amount of time (rate limiting). The response should include a Retry-After header indicating how long to wait before making a new request. This is commonly used by APIs to enforce rate limits and prevent abuse.",
+        causes: ["API rate limit exceeded", "Too many login attempts", "Automated requests exceeding threshold", "Shared IP address used by many clients hitting collective limit"],
+        fix: ["Check the Retry-After header and wait before retrying", "Implement exponential backoff in your retry logic", "Cache responses to reduce the number of requests", "Request a higher rate limit from the API provider", "Distribute requests over time instead of bursting"]
+      },
+      {
+        code: 431, name: "Request Header Fields Too Large", cat: "4xx",
+        short: "Individual header or total headers are too large.",
+        description: "The server is unwilling to process the request because its header fields are too large. The request may be resubmitted after reducing the size of the request header fields. This can refer to a single header that is too large or the total size of all headers.",
+        causes: ["Extremely large cookies (common cause)", "Too many cookies accumulated for the domain", "Large Authorization tokens", "Custom headers with excessive data"],
+        fix: ["Clear cookies for the affected domain", "Reduce cookie sizes and number of cookies", "Move large data from headers to the request body", "Increase server header size limits if appropriate (nginx: large_client_header_buffers)", "Use shorter token formats"]
+      },
+      {
+        code: 451, name: "Unavailable For Legal Reasons", cat: "4xx",
+        short: "Resource is unavailable due to legal demands.",
+        description: "The server operator has received a legal demand to deny access to a resource or to a set of resources that includes the requested resource. The code 451 is a reference to the novel Fahrenheit 451 by Ray Bradbury. The response should include an explanation of the legal demand in the body.",
+        causes: ["Government censorship order", "Court order blocking access", "DMCA takedown notice", "Sanctions or trade restrictions", "GDPR right to be forgotten enforcement"],
+        fix: ["This is a legal restriction -- technical fixes may not apply", "Check the response body for details about the legal demand", "Use a VPN if the restriction is geographic (check legality first)", "Contact the resource owner for more information", "If you believe the restriction is in error, seek legal advice"]
+      },
+
+      // 5xx Server Error
+      {
+        code: 500, name: "Internal Server Error", cat: "5xx",
+        short: "Server encountered an unexpected condition.",
+        description: "The server has encountered a situation it does not know how to handle. This is the generic server-side error response when no more specific 5xx error code is suitable. It indicates something went wrong on the server, but the server could not be more specific about what the problem is.",
+        causes: ["Unhandled exception in server code", "Null pointer or undefined variable errors", "Database connection failure", "Configuration error on the server", "Bug in server-side application logic", "Insufficient server resources (memory, disk)"],
+        fix: ["Check server error logs for the specific exception", "Review recent code deployments that may have introduced bugs", "Verify database connectivity and credentials", "Check server resource usage (CPU, memory, disk)", "Implement proper error handling in server code", "If intermittent, may be a race condition or resource contention"]
+      },
+      {
+        code: 501, name: "Not Implemented", cat: "5xx",
+        short: "Server does not support the requested functionality.",
+        description: "The server does not support the functionality required to fulfill the request. This is the appropriate response when the server does not recognize the request method and is not capable of supporting it for any resource. Unlike 405 (Method Not Allowed), this means the server does not recognize the method at all.",
+        causes: ["HTTP method not implemented by the server", "Feature or endpoint is planned but not yet built", "Server software does not support the requested capability", "Reverse proxy forwarding to a server that lacks the feature"],
+        fix: ["Check if you are using the correct HTTP method", "Verify the server software version supports the feature", "Update or configure the server to support the required functionality", "Contact the service provider about feature availability"]
+      },
+      {
+        code: 502, name: "Bad Gateway", cat: "5xx",
+        short: "Server received an invalid response from an upstream server.",
+        description: "The server, while acting as a gateway or proxy, received an invalid response from an upstream server it accessed in attempting to fulfill the request. This commonly occurs with reverse proxies (nginx, Apache), load balancers, or API gateways when the backend service is down or returning malformed responses.",
+        causes: ["Backend/upstream server is down or crashed", "Backend server returned a malformed response", "Network connectivity issues between proxy and backend", "Backend server is overloaded and dropping connections", "DNS resolution failure for the upstream server", "Firewall blocking the connection to the backend"],
+        fix: ["Check if the backend/upstream server is running", "Review backend server logs for errors", "Verify network connectivity between proxy and backend", "Check DNS resolution for upstream hostnames", "Restart the backend service if it crashed", "Increase proxy timeout settings if the backend is slow"]
+      },
+      {
+        code: 503, name: "Service Unavailable", cat: "5xx",
+        short: "Server is temporarily unable to handle the request.",
+        description: "The server is currently unable to handle the request due to temporary overloading or maintenance. This implies a temporary condition. The server may include a Retry-After header indicating when to try again. This is often used during planned maintenance windows or when the server is overloaded.",
+        causes: ["Server is undergoing maintenance", "Server is overloaded with too many requests", "Resource limits exceeded (connections, memory, CPU)", "Application pool recycling", "Dependent service is unavailable", "Auto-scaling has not yet provisioned enough capacity"],
+        fix: ["Wait and retry -- this is usually temporary", "Check Retry-After header for recommended wait time", "If you control the server: check resource usage and scale up", "Review server maintenance schedules", "Implement circuit breaker pattern in your client", "Set up health checks and auto-scaling"]
+      },
+      {
+        code: 504, name: "Gateway Timeout", cat: "5xx",
+        short: "Gateway did not receive a timely response from upstream server.",
+        description: "The server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. This is similar to 408 (Request Timeout) but specifically occurs at the gateway/proxy level.",
+        causes: ["Backend server is too slow to respond", "Network latency between proxy and backend", "Backend server is deadlocked or hung", "Long-running database queries on the backend", "DNS resolution timeout for upstream server", "Backend server is overloaded"],
+        fix: ["Increase gateway/proxy timeout settings", "Optimize backend server response times", "Check backend server health and performance", "Review slow database queries", "Implement request timeouts and circuit breakers", "Consider async processing for long-running operations"]
+      },
+      {
+        code: 505, name: "HTTP Version Not Supported", cat: "5xx",
+        short: "Server does not support the HTTP version used in the request.",
+        description: "The server does not support the major version of HTTP that was used in the request message. The server is indicating that it is unable or unwilling to complete the request using the same major version as the client. The response should contain an entity describing why that version is not supported.",
+        causes: ["Client using an HTTP version the server does not support", "Very old client using HTTP/0.9 or HTTP/1.0", "Server not configured for HTTP/2", "Protocol version mismatch in the request line"],
+        fix: ["Use a supported HTTP version (usually HTTP/1.1 or HTTP/2)", "Update your client or library to use a modern HTTP version", "Configure the server to support the required HTTP version", "Check reverse proxy HTTP version forwarding settings"]
+      },
+      {
+        code: 506, name: "Variant Also Negotiates", cat: "5xx",
+        short: "Server has an internal content negotiation configuration error.",
+        description: "The server has an internal configuration error: the chosen variant resource is configured to engage in transparent content negotiation itself, and is therefore not a proper end point in the negotiation process. This indicates a misconfiguration in the server's content negotiation setup.",
+        causes: ["Misconfigured content negotiation on the server", "Circular reference in variant resources", "Server configuration error in transparent content negotiation"],
+        fix: ["Review and fix server content negotiation configuration", "Check for circular references in variant mappings", "Simplify content negotiation setup", "This is rare -- consult server documentation"]
+      },
+      {
+        code: 507, name: "Insufficient Storage", cat: "5xx",
+        short: "Server cannot store the representation needed (WebDAV).",
+        description: "The method could not be performed on the resource because the server is unable to store the representation needed to successfully complete the request. This is a WebDAV extension and indicates the server has run out of storage space. This condition is considered temporary.",
+        causes: ["Server disk space is full", "Storage quota exceeded for the resource", "WebDAV operation requires more space than available", "Database storage limit reached"],
+        fix: ["Free up disk space on the server", "Increase storage quota or add more storage", "Clean up old or unnecessary files", "Monitor disk usage and set up alerts", "Implement storage quotas and cleanup policies"]
+      },
+      {
+        code: 508, name: "Loop Detected", cat: "5xx",
+        short: "Server detected an infinite loop while processing the request (WebDAV).",
+        description: "The server terminated an operation because it encountered an infinite loop while processing a request with 'Depth: infinity'. This is a WebDAV extension. The server detected that the request would result in an infinite recursion, typically due to circular references in the resource structure.",
+        causes: ["Circular references in WebDAV collections", "Symbolic link loops on the filesystem", "Recursive binding in DAV resources", "Misconfigured resource hierarchy"],
+        fix: ["Remove circular references in the resource structure", "Fix symbolic link loops on the server", "Avoid using Depth: infinity with circular structures", "Audit the resource hierarchy for loops"]
+      },
+      {
+        code: 510, name: "Not Extended", cat: "5xx",
+        short: "Further extensions to the request are required.",
+        description: "The policy for accessing the resource has not been met in the request. The server should send back all the information necessary for the client to issue an extended request. This is defined in the HTTP Extension Framework (RFC 2774) and is rarely used in practice.",
+        causes: ["Request is missing required HTTP extensions", "Server requires additional protocol extensions", "Extension policy not satisfied"],
+        fix: ["Add the required HTTP extensions to the request", "Check server documentation for required extensions", "This is extremely rare -- verify the server configuration"]
+      },
+      {
+        code: 511, name: "Network Authentication Required", cat: "5xx",
+        short: "Client needs to authenticate to gain network access.",
+        description: "The client needs to authenticate to gain network access. This is not sent by the origin server but by an intercepting proxy (like a captive portal at a hotel, airport, or coffee shop WiFi). The response should contain a link to the authentication page. This is intended to prevent captive portals from being confused with legitimate server responses.",
+        causes: ["Captive portal requiring login (hotel, airport, coffee shop WiFi)", "Network access control requiring authentication", "Corporate network requiring proxy authentication", "ISP requiring account verification"],
+        fix: ["Open a browser and navigate to any HTTP (not HTTPS) page to trigger the login portal", "Connect to the captive portal login page and authenticate", "Check for a WiFi login notification on your device", "Contact the network administrator if the portal is not appearing", "Try opening http://neverssl.com to trigger captive portal detection"]
+      }
+    ];
+
+    const CATEGORY_INFO = {
+      '1xx': { label: '1xx Informational', description: 'Request received, continuing process' },
+      '2xx': { label: '2xx Success', description: 'Request successfully received, understood, and accepted' },
+      '3xx': { label: '3xx Redirection', description: 'Further action needed to complete the request' },
+      '4xx': { label: '4xx Client Error', description: 'Request contains bad syntax or cannot be fulfilled' },
+      '5xx': { label: '5xx Server Error', description: 'Server failed to fulfill a valid request' }
+    };
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let expandedCodes = new Set();
+
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const statusList = document.getElementById('statusList');
+    const noResults = document.getElementById('noResults');
+    const quickJump = document.getElementById('quickJump');
+    const categoryTabs = document.getElementById('categoryTabs');
+
+    // Set tab counts
+    document.getElementById('countAll').textContent = STATUS_CODES.length;
+    ['1xx','2xx','3xx','4xx','5xx'].forEach(cat => {
+      const count = STATUS_CODES.filter(s => s.cat === cat).length;
+      document.getElementById('count' + cat).textContent = count;
+    });
+
+    // Category tab click
+    categoryTabs.addEventListener('click', e => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      categoryTabs.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeCategory = tab.dataset.cat;
+      render();
+    });
+
+    // Search input
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      handleQuickJump();
+      render();
+    });
+
+    // Quick jump logic
+    function handleQuickJump() {
+      const numMatch = searchQuery.match(/^\d{3}$/);
+      if (numMatch) {
+        const code = parseInt(numMatch[0]);
+        const found = STATUS_CODES.find(s => s.code === code);
+        if (found) {
+          quickJump.textContent = `Jump to ${code} ${found.name}`;
+          quickJump.classList.add('visible');
+          quickJump.onclick = () => {
+            expandedCodes.add(code);
+            render();
+            setTimeout(() => {
+              const el = document.getElementById('code-' + code);
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.boxShadow = '0 0 0 2px var(--accent)';
+                setTimeout(() => { el.style.boxShadow = ''; }, 2000);
+              }
+            }, 50);
+          };
+          return;
+        }
+      }
+      quickJump.classList.remove('visible');
+    }
+
+    function toggleCode(code) {
+      if (expandedCodes.has(code)) {
+        expandedCodes.delete(code);
+      } else {
+        expandedCodes.add(code);
+      }
+      render();
+    }
+
+    function getFilteredCodes() {
+      return STATUS_CODES.filter(s => {
+        if (activeCategory !== 'all' && s.cat !== activeCategory) return false;
+        if (searchQuery) {
+          const q = searchQuery;
+          const codeStr = String(s.code);
+          const nameL = s.name.toLowerCase();
+          const shortL = s.short.toLowerCase();
+          const descL = s.description.toLowerCase();
+          if (!codeStr.includes(q) && !nameL.includes(q) && !shortL.includes(q) && !descL.includes(q)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function render() {
+      const filtered = getFilteredCodes();
+      searchCount.textContent = filtered.length + ' of ' + STATUS_CODES.length + ' codes';
+
+      if (filtered.length === 0) {
+        statusList.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      // Group by category
+      const groups = {};
+      filtered.forEach(s => {
+        if (!groups[s.cat]) groups[s.cat] = [];
+        groups[s.cat].push(s);
+      });
+
+      let html = '';
+      const catOrder = ['1xx', '2xx', '3xx', '4xx', '5xx'];
+      catOrder.forEach(cat => {
+        if (!groups[cat]) return;
+        const info = CATEGORY_INFO[cat];
+        html += `<div class="category-section cat-${cat}">`;
+        html += `<div class="category-header">`;
+        html += `<span class="category-badge">${cat.toUpperCase()}</span>`;
+        html += `<h2>${info.description}</h2>`;
+        html += `</div>`;
+
+        groups[cat].forEach(s => {
+          const expanded = expandedCodes.has(s.code);
+          html += `<div class="status-card cat-${s.cat}${expanded ? ' expanded' : ''}" id="code-${s.code}">`;
+          html += `<div class="status-card-header" onclick="toggleCode(${s.code})">`;
+          html += `<span class="status-code">${s.code}</span>`;
+          html += `<span class="status-name">${escHtml(s.name)}</span>`;
+          html += `<span class="status-short">${escHtml(s.short)}</span>`;
+          html += `<span class="status-chevron">&#9654;</span>`;
+          html += `</div>`;
+          html += `<div class="status-detail">`;
+          html += `<div class="detail-section"><h4>Description</h4><p>${escHtml(s.description)}</p></div>`;
+          if (s.causes && s.causes.length) {
+            html += `<div class="detail-section"><h4>Common Causes</h4><ul>`;
+            s.causes.forEach(c => { html += `<li>${escHtml(c)}</li>`; });
+            html += `</ul></div>`;
+          }
+          if (s.fix && s.fix.length) {
+            html += `<div class="detail-section"><h4>How to Fix</h4><ul>`;
+            s.fix.forEach(f => { html += `<li>${escHtml(f)}</li>`; });
+            html += `</ul></div>`;
+          }
+          html += `</div></div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      statusList.innerHTML = html;
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // Keyboard shortcut: type a number anywhere to focus search
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        searchInput.focus();
+      }
+    });
+
+    // Initial render
+    render();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

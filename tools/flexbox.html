@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Flexbox Generator - Visual Flexbox Playground | DevTools.fm</title>
+  <meta name="description" content="Visual CSS flexbox playground. Configure flex container and item properties, preview layouts live, and copy generated CSS. Free online flexbox generator.">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/flexbox.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .flex-layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+    .controls-scroll { padding: 16px; display: flex; flex-direction: column; gap: 16px; max-height: 720px; overflow-y: auto; }
+    .controls-scroll::-webkit-scrollbar { width: 6px; }
+    .controls-scroll::-webkit-scrollbar-track { background: transparent; }
+    .controls-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .control-section h3 {
+      font-size: 0.75rem; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;
+    }
+
+    .control-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .control-group label {
+      font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+    }
+    .control-group select,
+    .control-group input[type="text"],
+    .control-group input[type="number"] {
+      width: 100%; background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.8rem; outline: none;
+    }
+    .control-group select:focus,
+    .control-group input:focus { border-color: var(--accent); }
+
+    .preview-area {
+      background: var(--surface-2); border-radius: var(--radius);
+      min-height: 300px; padding: 16px; position: relative;
+    }
+
+    .flex-container {
+      min-height: 260px; border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 12px; transition: all 0.2s;
+    }
+
+    .flex-item {
+      padding: 12px 16px; background: var(--accent); color: white;
+      border-radius: 6px; font-family: var(--mono); font-size: 0.8rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; user-select: none;
+      min-width: 40px; text-align: center; position: relative;
+    }
+    .flex-item:hover { filter: brightness(1.15); }
+    .flex-item.selected { outline: 2px solid #fff; outline-offset: 2px; }
+
+    .item-colors { display: flex; gap: 6px; flex-wrap: wrap; }
+    .item-color-dot {
+      width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: border-color 0.15s;
+    }
+    .item-color-dot:hover, .item-color-dot.active { border-color: var(--text); }
+
+    .item-actions { display: flex; gap: 6px; margin-bottom: 10px; }
+    .item-actions button {
+      flex: 1; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: 0.75rem;
+      cursor: pointer; font-family: var(--font); transition: all 0.15s;
+    }
+    .item-actions button:hover { border-color: var(--accent); color: var(--accent); }
+    .item-actions button.danger:hover { border-color: var(--error); color: var(--error); }
+
+    .presets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .preset-btn {
+      padding: 8px; border-radius: 4px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: 0.7rem;
+      cursor: pointer; font-family: var(--font); transition: all 0.15s;
+      text-align: center;
+    }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .preset-btn.active { border-color: var(--accent); background: rgba(99,102,241,0.1); color: var(--accent); }
+
+    .css-output-area { margin-top: 16px; }
+    .css-output-area .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+    }
+    .css-code {
+      padding: 16px; font-family: var(--mono); font-size: 0.8rem;
+      line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--text);
+    }
+    .css-code::-webkit-scrollbar { height: 4px; }
+    .css-code::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Syntax highlighting */
+    .css-code .css-selector { color: #c084fc; }
+    .css-code .css-prop { color: #67e8f9; }
+    .css-code .css-value { color: #fbbf24; }
+    .css-code .css-brace { color: var(--text-muted); }
+    .css-code .css-comment { color: #4b5563; font-style: italic; }
+
+    .item-list { display: flex; flex-direction: column; gap: 4px; }
+    .item-list-entry {
+      display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+      background: var(--surface-2); border-radius: 4px; font-size: 0.75rem;
+      cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+    }
+    .item-list-entry:hover { border-color: var(--border); }
+    .item-list-entry.selected { border-color: var(--accent); background: rgba(99,102,241,0.08); }
+    .item-list-entry .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .item-list-entry span { color: var(--text-muted); font-family: var(--mono); }
+
+    .divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    .copy-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--accent); color: white; padding: 10px 24px;
+      border-radius: var(--radius); font-size: 0.85rem; font-weight: 600;
+      opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 100;
+    }
+    .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 900px) {
+      .flex-layout { grid-template-columns: 1fr; }
+      .controls-scroll { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Flexbox Generator</h1>
+    <p class="description">Visual flexbox playground. Configure container and item properties, preview layouts live, and copy the generated CSS.</p>
+
+    <div class="flex-layout">
+      <!-- Left: Controls -->
+      <div class="tool-panel">
+        <div class="panel-header">Controls</div>
+        <div class="controls-scroll">
+
+          <!-- Presets -->
+          <div class="control-section">
+            <h3>Presets</h3>
+            <div class="presets-grid">
+              <button class="preset-btn" onclick="applyPreset('navbar')">Navbar</button>
+              <button class="preset-btn" onclick="applyPreset('cards')">Card Grid</button>
+              <button class="preset-btn" onclick="applyPreset('holygrail')">Holy Grail</button>
+              <button class="preset-btn" onclick="applyPreset('centered')">Centered</button>
+              <button class="preset-btn" onclick="applyPreset('sidebar')">Sidebar</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Container Properties -->
+          <div class="control-section">
+            <h3>Container</h3>
+            <div class="control-group">
+              <label>flex-direction</label>
+              <select id="flexDirection" onchange="updatePreview()">
+                <option value="row">row</option>
+                <option value="row-reverse">row-reverse</option>
+                <option value="column">column</option>
+                <option value="column-reverse">column-reverse</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>flex-wrap</label>
+              <select id="flexWrap" onchange="updatePreview()">
+                <option value="nowrap">nowrap</option>
+                <option value="wrap">wrap</option>
+                <option value="wrap-reverse">wrap-reverse</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>justify-content</label>
+              <select id="justifyContent" onchange="updatePreview()">
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+                <option value="center">center</option>
+                <option value="space-between">space-between</option>
+                <option value="space-around">space-around</option>
+                <option value="space-evenly">space-evenly</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>align-items</label>
+              <select id="alignItems" onchange="updatePreview()">
+                <option value="stretch">stretch</option>
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+                <option value="center">center</option>
+                <option value="baseline">baseline</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>align-content</label>
+              <select id="alignContent" onchange="updatePreview()">
+                <option value="stretch">stretch</option>
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+                <option value="center">center</option>
+                <option value="space-between">space-between</option>
+                <option value="space-around">space-around</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>gap</label>
+              <input type="text" id="gap" value="10px" oninput="updatePreview()">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Items management -->
+          <div class="control-section">
+            <h3>Items</h3>
+            <div class="item-actions">
+              <button onclick="addItem()">+ Add Item</button>
+              <button class="danger" onclick="removeSelectedItem()">- Remove</button>
+            </div>
+            <div class="item-list" id="itemList"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Selected Item Properties -->
+          <div class="control-section" id="itemControls" style="display:none;">
+            <h3>Selected Item: <span id="selectedItemLabel"></span></h3>
+            <div class="control-group">
+              <label>flex-grow</label>
+              <input type="number" id="itemGrow" value="0" min="0" step="1" oninput="updateItemProp()">
+            </div>
+            <div class="control-group">
+              <label>flex-shrink</label>
+              <input type="number" id="itemShrink" value="1" min="0" step="1" oninput="updateItemProp()">
+            </div>
+            <div class="control-group">
+              <label>flex-basis</label>
+              <input type="text" id="itemBasis" value="auto" oninput="updateItemProp()">
+            </div>
+            <div class="control-group">
+              <label>order</label>
+              <input type="number" id="itemOrder" value="0" step="1" oninput="updateItemProp()">
+            </div>
+            <div class="control-group">
+              <label>align-self</label>
+              <select id="itemAlignSelf" onchange="updateItemProp()">
+                <option value="auto">auto</option>
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+                <option value="center">center</option>
+                <option value="baseline">baseline</option>
+                <option value="stretch">stretch</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right: Preview + CSS -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="tool-panel">
+          <div class="panel-header">Preview</div>
+          <div class="preview-area">
+            <div class="flex-container" id="flexContainer"></div>
+          </div>
+        </div>
+
+        <div class="tool-panel css-output-area">
+          <div class="panel-header">
+            <span>Generated CSS</span>
+            <button class="btn" onclick="copyCSS()">Copy CSS</button>
+          </div>
+          <div class="css-code" id="cssOutput"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copy-toast" id="toast">Copied to clipboard!</div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    // --- State ---
+    const ITEM_COLORS = [
+      '#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444',
+      '#8b5cf6', '#06b6d4', '#22c55e', '#f97316', '#64748b'
+    ];
+
+    let items = [];
+    let selectedId = null;
+    let nextId = 1;
+
+    function createItem(overrides) {
+      const item = {
+        id: nextId++,
+        label: '' + (items.length + 1),
+        color: ITEM_COLORS[(items.length) % ITEM_COLORS.length],
+        grow: 0,
+        shrink: 1,
+        basis: 'auto',
+        order: 0,
+        alignSelf: 'auto',
+        ...overrides
+      };
+      items.push(item);
+      return item;
+    }
+
+    function addItem() {
+      createItem();
+      updatePreview();
+    }
+
+    function removeSelectedItem() {
+      if (selectedId === null || items.length <= 1) return;
+      items = items.filter(i => i.id !== selectedId);
+      selectedId = items[0].id;
+      // Relabel
+      items.forEach((item, idx) => { item.label = '' + (idx + 1); });
+      updatePreview();
+    }
+
+    function selectItem(id) {
+      selectedId = id;
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+
+      document.getElementById('itemGrow').value = item.grow;
+      document.getElementById('itemShrink').value = item.shrink;
+      document.getElementById('itemBasis').value = item.basis;
+      document.getElementById('itemOrder').value = item.order;
+      document.getElementById('itemAlignSelf').value = item.alignSelf;
+      document.getElementById('selectedItemLabel').textContent = 'Item ' + item.label;
+      document.getElementById('itemControls').style.display = '';
+
+      renderItemList();
+      renderFlexItems();
+    }
+
+    function updateItemProp() {
+      const item = items.find(i => i.id === selectedId);
+      if (!item) return;
+      item.grow = parseFloat(document.getElementById('itemGrow').value) || 0;
+      item.shrink = parseFloat(document.getElementById('itemShrink').value) || 0;
+      item.basis = document.getElementById('itemBasis').value || 'auto';
+      item.order = parseInt(document.getElementById('itemOrder').value) || 0;
+      item.alignSelf = document.getElementById('itemAlignSelf').value;
+      updatePreview();
+    }
+
+    // --- Rendering ---
+    function renderItemList() {
+      const list = document.getElementById('itemList');
+      list.innerHTML = '';
+      items.forEach(item => {
+        const entry = document.createElement('div');
+        entry.className = 'item-list-entry' + (item.id === selectedId ? ' selected' : '');
+        entry.innerHTML = `<span class="dot" style="background:${item.color}"></span><span>Item ${item.label}</span>`;
+        entry.onclick = () => selectItem(item.id);
+        list.appendChild(entry);
+      });
+    }
+
+    function renderFlexItems() {
+      const container = document.getElementById('flexContainer');
+      container.innerHTML = '';
+      items.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'flex-item' + (item.id === selectedId ? ' selected' : '');
+        el.textContent = item.label;
+        el.style.background = item.color;
+        el.style.flexGrow = item.grow;
+        el.style.flexShrink = item.shrink;
+        el.style.flexBasis = item.basis;
+        el.style.order = item.order;
+        if (item.alignSelf !== 'auto') el.style.alignSelf = item.alignSelf;
+        el.onclick = () => selectItem(item.id);
+        container.appendChild(el);
+      });
+    }
+
+    function updatePreview() {
+      const container = document.getElementById('flexContainer');
+
+      // Apply container properties
+      container.style.display = 'flex';
+      container.style.flexDirection = document.getElementById('flexDirection').value;
+      container.style.flexWrap = document.getElementById('flexWrap').value;
+      container.style.justifyContent = document.getElementById('justifyContent').value;
+      container.style.alignItems = document.getElementById('alignItems').value;
+      container.style.alignContent = document.getElementById('alignContent').value;
+      container.style.gap = document.getElementById('gap').value;
+
+      renderFlexItems();
+      renderItemList();
+      generateCSS();
+    }
+
+    // --- CSS Generation ---
+    function getContainerProps() {
+      return {
+        'display': 'flex',
+        'flex-direction': document.getElementById('flexDirection').value,
+        'flex-wrap': document.getElementById('flexWrap').value,
+        'justify-content': document.getElementById('justifyContent').value,
+        'align-items': document.getElementById('alignItems').value,
+        'align-content': document.getElementById('alignContent').value,
+        'gap': document.getElementById('gap').value
+      };
+    }
+
+    function getItemProps(item) {
+      const props = {};
+      if (item.grow !== 0) props['flex-grow'] = item.grow;
+      if (item.shrink !== 1) props['flex-shrink'] = item.shrink;
+      if (item.basis !== 'auto') props['flex-basis'] = item.basis;
+      if (item.order !== 0) props['order'] = item.order;
+      if (item.alignSelf !== 'auto') props['align-self'] = item.alignSelf;
+      return props;
+    }
+
+    function highlight(selector, props) {
+      let html = `<span class="css-selector">${escapeHTML(selector)}</span> <span class="css-brace">{</span>\n`;
+      for (const [prop, val] of Object.entries(props)) {
+        html += `  <span class="css-prop">${escapeHTML(prop)}</span>: <span class="css-value">${escapeHTML(String(val))}</span>;\n`;
+      }
+      html += `<span class="css-brace">}</span>`;
+      return html;
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function generateCSS() {
+      const containerProps = getContainerProps();
+      let html = `<span class="css-comment">/* Container */</span>\n`;
+      html += highlight('.flex-container', containerProps);
+
+      // Check if any items have non-default props
+      const customItems = items.filter(item => {
+        const p = getItemProps(item);
+        return Object.keys(p).length > 0;
+      });
+
+      // If all items share the same non-default props, show a single .flex-item rule
+      const allItemProps = items.map(item => getItemProps(item));
+      const allSame = allItemProps.length > 0 && allItemProps.every(p =>
+        JSON.stringify(p) === JSON.stringify(allItemProps[0])
+      );
+
+      if (allSame && Object.keys(allItemProps[0]).length > 0) {
+        html += `\n\n<span class="css-comment">/* All items */</span>\n`;
+        html += highlight('.flex-item', allItemProps[0]);
+      } else if (customItems.length > 0) {
+        html += `\n\n<span class="css-comment">/* Items */</span>`;
+        customItems.forEach(item => {
+          const props = getItemProps(item);
+          html += `\n` + highlight(`.flex-item:nth-child(${item.label})`, props);
+        });
+      }
+
+      document.getElementById('cssOutput').innerHTML = html;
+    }
+
+    function getPlainCSS() {
+      const containerProps = getContainerProps();
+      let css = `/* Container */\n.flex-container {\n`;
+      for (const [prop, val] of Object.entries(containerProps)) {
+        css += `  ${prop}: ${val};\n`;
+      }
+      css += `}`;
+
+      const allItemProps = items.map(item => getItemProps(item));
+      const allSame = allItemProps.length > 0 && allItemProps.every(p =>
+        JSON.stringify(p) === JSON.stringify(allItemProps[0])
+      );
+
+      if (allSame && Object.keys(allItemProps[0]).length > 0) {
+        css += `\n\n/* All items */\n.flex-item {\n`;
+        for (const [prop, val] of Object.entries(allItemProps[0])) {
+          css += `  ${prop}: ${val};\n`;
+        }
+        css += `}`;
+      } else {
+        const customItems = items.filter(item => Object.keys(getItemProps(item)).length > 0);
+        if (customItems.length > 0) {
+          css += `\n\n/* Items */`;
+          customItems.forEach(item => {
+            const props = getItemProps(item);
+            css += `\n.flex-item:nth-child(${item.label}) {\n`;
+            for (const [prop, val] of Object.entries(props)) {
+              css += `  ${prop}: ${val};\n`;
+            }
+            css += `}`;
+          });
+        }
+      }
+
+      return css;
+    }
+
+    function copyCSS() {
+      navigator.clipboard.writeText(getPlainCSS()).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 1500);
+      });
+    }
+
+    // --- Presets ---
+    function applyPreset(name) {
+      // Clear active preset buttons
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Reset items
+      items = [];
+      nextId = 1;
+      selectedId = null;
+      document.getElementById('itemControls').style.display = 'none';
+
+      const defaults = {
+        flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'flex-start',
+        alignItems: 'stretch', alignContent: 'stretch', gap: '10px'
+      };
+
+      switch (name) {
+        case 'navbar':
+          Object.assign(defaults, {
+            flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '16px'
+          });
+          createItem({ label: '1' }); // Logo
+          createItem({ label: '2', grow: 1 }); // Spacer / nav
+          createItem({ label: '3' }); // Actions
+          break;
+
+        case 'cards':
+          Object.assign(defaults, {
+            flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start',
+            alignItems: 'stretch', gap: '16px'
+          });
+          for (let i = 0; i < 6; i++) {
+            createItem({ basis: '180px', grow: 1 });
+          }
+          break;
+
+        case 'holygrail':
+          Object.assign(defaults, {
+            flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start',
+            alignItems: 'stretch', gap: '10px'
+          });
+          createItem({ basis: '100%', grow: 0 }); // Header
+          createItem({ basis: '120px', grow: 0 }); // Sidebar left
+          createItem({ grow: 1 }); // Main
+          createItem({ basis: '120px', grow: 0 }); // Sidebar right
+          createItem({ basis: '100%', grow: 0 }); // Footer
+          break;
+
+        case 'centered':
+          Object.assign(defaults, {
+            flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '12px'
+          });
+          createItem({});
+          createItem({});
+          createItem({});
+          break;
+
+        case 'sidebar':
+          Object.assign(defaults, {
+            flexDirection: 'row', alignItems: 'stretch', gap: '12px'
+          });
+          createItem({ basis: '160px', shrink: 0 }); // Sidebar
+          createItem({ grow: 1 }); // Main content
+          break;
+      }
+
+      // Apply defaults to controls
+      document.getElementById('flexDirection').value = defaults.flexDirection;
+      document.getElementById('flexWrap').value = defaults.flexWrap;
+      document.getElementById('justifyContent').value = defaults.justifyContent;
+      document.getElementById('alignItems').value = defaults.alignItems;
+      document.getElementById('alignContent').value = defaults.alignContent;
+      document.getElementById('gap').value = defaults.gap;
+
+      // Relabel
+      items.forEach((item, idx) => { item.label = '' + (idx + 1); });
+
+      if (items.length > 0) selectItem(items[0].id);
+      updatePreview();
+    }
+
+    // --- Init ---
+    function init() {
+      // Start with 3 items
+      createItem({});
+      createItem({});
+      createItem({});
+      items.forEach((item, idx) => { item.label = '' + (idx + 1); });
+      selectedId = items[0].id;
+      selectItem(selectedId);
+      updatePreview();
+    }
+
+    init();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
