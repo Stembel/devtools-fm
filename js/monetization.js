@@ -239,12 +239,76 @@
     });
   }
 
+  // === AFFILIATE / RESOURCE LINKS ===
+  const RESOURCES = [
+    { name: 'DigitalOcean', desc: '$200 free credits for new users', url: 'https://www.digitalocean.com/', category: 'hosting', icon: 'DO' },
+    { name: 'Namecheap', desc: 'Domains from $1.98/yr', url: 'https://www.namecheap.com/', category: 'domains', icon: 'NC' },
+    { name: 'Cloudflare', desc: 'Free CDN, DNS & DDoS protection', url: 'https://www.cloudflare.com/', category: 'hosting', icon: 'CF' },
+    { name: 'Vercel', desc: 'Deploy frontend apps instantly', url: 'https://vercel.com/', category: 'hosting', icon: 'V' },
+    { name: 'GitHub Pro', desc: 'Advanced tools for developers', url: 'https://github.com/pricing', category: 'tools', icon: 'GH' },
+    { name: 'Udemy Dev Courses', desc: 'Learn new skills from $9.99', url: 'https://www.udemy.com/courses/development/', category: 'learning', icon: 'U' },
+  ];
+
+  function injectResourceLinks() {
+    // Only on homepage
+    if (document.querySelector('.tool-page')) return;
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const section = document.createElement('div');
+    section.style.cssText = 'max-width:1200px;margin:0 auto;padding:40px 24px 0;';
+    section.innerHTML = `
+      <h2 style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:16px;font-family:'Inter',sans-serif;">Recommended for Developers</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px;">
+        ${RESOURCES.map(r => `
+          <a href="${r.url}" target="_blank" rel="noopener sponsored"
+             style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#141416;border:1px solid #2a2a30;border-radius:8px;color:#e4e4e7;text-decoration:none;transition:border-color 0.2s;"
+             onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#2a2a30'">
+            <span style="min-width:36px;height:36px;background:#1c1c20;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#6366f1;">${r.icon}</span>
+            <span>
+              <strong style="display:block;font-size:0.9rem;">${r.name}</strong>
+              <span style="font-size:0.8rem;color:#8b8b94;">${r.desc}</span>
+            </span>
+          </a>
+        `).join('')}
+      </div>
+    `;
+    footer.parentNode.insertBefore(section, footer);
+  }
+
+  // === SPONSORSHIP CTA ===
+  function injectSponsorCTA() {
+    // Only on homepage
+    if (document.querySelector('.tool-page')) return;
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const cta = document.createElement('div');
+    cta.style.cssText = 'max-width:700px;margin:0 auto;padding:32px 24px 0;text-align:center;';
+    cta.innerHTML = `
+      <div style="background:linear-gradient(135deg,#141416 0%,#1a1a2e 100%);border:1px solid #2a2a30;border-radius:12px;padding:32px 24px;">
+        <h3 style="font-size:1.1rem;font-weight:700;color:#e4e4e7;margin-bottom:8px;font-family:'Inter',sans-serif;">Sponsor DevTools.fm</h3>
+        <p style="color:#8b8b94;font-size:0.9rem;margin-bottom:20px;font-family:'Inter',sans-serif;">
+          Reach 1000s of developers. Your brand on every tool page.
+        </p>
+        <a href="mailto:marcel.detemple@icloud.com?subject=DevTools.fm%20Sponsorship&body=Hi%2C%20I%27m%20interested%20in%20sponsoring%20DevTools.fm."
+           style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:8px;background:#6366f1;border:1px solid #6366f1;color:white;font-size:0.9rem;text-decoration:none;font-family:'Inter',sans-serif;transition:background 0.2s;"
+           onmouseover="this.style.background='#818cf8'" onmouseout="this.style.background='#6366f1'">
+          Get in Touch
+        </a>
+      </div>
+    `;
+    footer.parentNode.insertBefore(cta, footer);
+  }
+
   // === INIT ===
   document.addEventListener('DOMContentLoaded', function() {
     injectFavicon();
     injectOGTags();
     trackPageView();
     injectRelatedTools();
+    injectResourceLinks();
+    injectSponsorCTA();
     injectSupportBanner();
     injectAdSense();
   });
