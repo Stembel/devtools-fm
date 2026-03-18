@@ -304,10 +304,89 @@
     footer.parentNode.insertBefore(cta, footer);
   }
 
+  // === JSON-LD STRUCTURED DATA ===
+  function injectStructuredData() {
+    // Tool pages: WebApplication schema
+    if (document.querySelector('.tool-page')) {
+      const title = document.title.replace(' - DevTools.fm', '');
+      const descMeta = document.querySelector('meta[name="description"]');
+      const description = descMeta ? descMeta.getAttribute('content') : '';
+      const canonical = document.querySelector('link[rel="canonical"]');
+      const url = canonical ? canonical.getAttribute('href') : location.href;
+
+      const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        'name': title,
+        'description': description,
+        'url': url,
+        'applicationCategory': 'DeveloperApplication',
+        'operatingSystem': 'Any',
+        'browserRequirements': 'Requires JavaScript',
+        'offers': {
+          '@type': 'Offer',
+          'price': '0',
+          'priceCurrency': 'USD'
+        },
+        'author': {
+          '@type': 'Organization',
+          'name': 'DevTools.fm',
+          'url': 'https://stembel.github.io/devtools-fm/'
+        }
+      };
+
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(schema);
+      document.head.appendChild(script);
+      return;
+    }
+
+    // Homepage: WebSite + ItemList schema
+    const homepageSchema = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        'name': 'DevTools.fm',
+        'url': 'https://stembel.github.io/devtools-fm/',
+        'description': 'Free online developer tools. JSON formatter, Base64 encoder, hash generator, regex tester, and 35+ more tools.',
+        'potentialAction': {
+          '@type': 'SearchAction',
+          'target': 'https://stembel.github.io/devtools-fm/?q={search_term_string}',
+          'query-input': 'required name=search_term_string'
+        }
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        'name': 'Developer Tools',
+        'numberOfItems': 39,
+        'itemListElement': Array.from(document.querySelectorAll('.tool-card')).slice(0, 10).map(function(card, i) {
+          const link = card.querySelector('a') || card;
+          const name = card.querySelector('h3, .tool-name');
+          return {
+            '@type': 'ListItem',
+            'position': i + 1,
+            'url': link.href || '',
+            'name': name ? name.textContent.trim() : ''
+          };
+        })
+      }
+    ];
+
+    homepageSchema.forEach(function(schema) {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(schema);
+      document.head.appendChild(script);
+    });
+  }
+
   // === INIT ===
   document.addEventListener('DOMContentLoaded', function() {
     injectFavicon();
     injectOGTags();
+    injectStructuredData();
     trackPageView();
     injectRelatedTools();
     injectResourceLinks();

@@ -477,12 +477,13 @@
       var lookupBtn = document.getElementById('lookup-btn');
 
       // Determine API base URL
+      var API_DOMAIN = '65-109-129-230.sslip.io';
       var HETZNER_IP = '65.109.129.230';
       var apiBase;
-      if (window.location.hostname === HETZNER_IP || window.location.hostname === 'localhost') {
+      if (window.location.hostname === HETZNER_IP || window.location.hostname === API_DOMAIN || window.location.hostname === 'localhost') {
         apiBase = '/api/dns';
       } else {
-        apiBase = 'http://' + HETZNER_IP + '/api/dns';
+        apiBase = 'https://' + API_DOMAIN + '/api/dns';
       }
 
       // Enter key triggers lookup

@@ -554,6 +554,7 @@
 
   <script>
     const HETZNER_IP = '65.109.129.230';
+    const API_DOMAIN = '65-109-129-230.sslip.io';
     const domainInput = document.getElementById('domain-input');
     const checkBtn = document.getElementById('check-btn');
     const loadingEl = document.getElementById('loading');
@@ -584,12 +585,12 @@
 
     function buildApiUrl(domain) {
       const hostname = window.location.hostname;
-      // If served directly from Hetzner IP, use relative
-      if (hostname === HETZNER_IP) {
+      // If served directly from Hetzner IP or sslip.io domain, use relative
+      if (hostname === HETZNER_IP || hostname === API_DOMAIN) {
         return '/api/ssl?domain=' + encodeURIComponent(domain);
       }
-      // Otherwise, call Hetzner directly
-      return 'http://' + HETZNER_IP + '/api/ssl?domain=' + encodeURIComponent(domain);
+      // Otherwise, call via HTTPS sslip.io domain
+      return 'https://' + API_DOMAIN + '/api/ssl?domain=' + encodeURIComponent(domain);
     }
 
     function sanitizeDomain(input) {

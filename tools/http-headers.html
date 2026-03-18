@@ -550,21 +550,20 @@
 
       // ---- Configuration ----
       var HETZNER_IP = '65.109.129.230';
+      var API_DOMAIN = '65-109-129-230.sslip.io';
       var API_BASE;
 
       // Detect if served from Hetzner -- use relative path; otherwise absolute
       (function detectApi() {
         try {
           var host = window.location.hostname;
-          // Check if we're on the Hetzner IP directly or resolved to it
-          if (host === HETZNER_IP) {
+          if (host === HETZNER_IP || host === API_DOMAIN) {
             API_BASE = '/api/headers';
           } else {
-            // Try a DNS-based heuristic: if we can't tell, default to absolute
-            API_BASE = 'http://' + HETZNER_IP + '/api/headers';
+            API_BASE = 'https://' + API_DOMAIN + '/api/headers';
           }
         } catch(e) {
-          API_BASE = 'http://' + HETZNER_IP + '/api/headers';
+          API_BASE = 'https://' + API_DOMAIN + '/api/headers';
         }
       })();
 
