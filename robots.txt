@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://stembel.github.io/devtools-fm/sitemap.xml
