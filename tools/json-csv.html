@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON to CSV Converter - DevTools.fm</title>
+  <meta name="description" content="Convert JSON to CSV and CSV to JSON online. Free, fast, handles nested objects. Download results instantly.">
+  <meta name="keywords" content="JSON to CSV, CSV to JSON, JSON converter, CSV converter, data format converter">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/json-csv.html">
+  <meta property="og:title" content="JSON to CSV Converter - DevTools.fm">
+  <meta property="og:description" content="Convert between JSON and CSV formats instantly. Handles nested objects, arrays, and complex data.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .mode-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .mode-toggle button {
+      padding: 8px 20px;
+      border: none;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-weight: 600;
+    }
+    .mode-toggle button:hover {
+      color: var(--text);
+    }
+    .mode-toggle button.active {
+      background: var(--accent);
+      color: white;
+    }
+    .options-row input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .options-row select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+    }
+    .action-bar {
+      flex-wrap: wrap;
+    }
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>JSON &harr; CSV Converter</h1>
+    <p class="description">Convert between JSON and CSV formats. Handles nested objects, arrays, and complex data structures. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="mode-toggle">
+        <button id="modeJsonCsv" class="active" onclick="setMode('json2csv')">JSON &rarr; CSV</button>
+        <button id="modeCsvJson" onclick="setMode('csv2json')">CSV &rarr; JSON</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="convert()">Convert</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="download()">Download</button>
+        <button class="btn" onclick="loadSample()">Sample</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="options-row">
+      <label>Delimiter:
+        <select id="delimiter">
+          <option value="," selected>Comma (,)</option>
+          <option value=";">Semicolon (;)</option>
+          <option value="&#9;">Tab</option>
+          <option value="|">Pipe (|)</option>
+        </select>
+      </label>
+      <label id="headerOption">
+        <input type="checkbox" id="includeHeader" checked>
+        Include header row
+      </label>
+      <label id="flattenOption">
+        <input type="checkbox" id="flattenNested" checked>
+        Flatten nested objects
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header" id="inputHeader">Input (JSON)</div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste your JSON here...
+
+[
+  {"name": "Alice", "age": 30, "city": "Berlin"},
+  {"name": "Bob", "age": 25, "city": "Munich"}
+]'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output <span id="outputLabel">(CSV)</span>
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Converted output will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $delimiter = document.getElementById('delimiter');
+    const $includeHeader = document.getElementById('includeHeader');
+    const $flattenNested = document.getElementById('flattenNested');
+    const $inputHeader = document.getElementById('inputHeader');
+    const $outputLabel = document.getElementById('outputLabel');
+    const $modeJsonCsv = document.getElementById('modeJsonCsv');
+    const $modeCsvJson = document.getElementById('modeCsvJson');
+    const $headerOption = document.getElementById('headerOption');
+    const $flattenOption = document.getElementById('flattenOption');
+
+    let mode = 'json2csv';
+
+    function setMode(m) {
+      mode = m;
+      $modeJsonCsv.classList.toggle('active', m === 'json2csv');
+      $modeCsvJson.classList.toggle('active', m === 'csv2json');
+      if (m === 'json2csv') {
+        $inputHeader.textContent = 'Input (JSON)';
+        $outputLabel.textContent = '(CSV)';
+        $input.placeholder = 'Paste your JSON here...\n\n[\n  {"name": "Alice", "age": 30, "city": "Berlin"},\n  {"name": "Bob", "age": 25, "city": "Munich"}\n]';
+        $headerOption.style.display = '';
+        $flattenOption.style.display = '';
+      } else {
+        $inputHeader.textContent = 'Input (CSV)';
+        $outputLabel.textContent = '(JSON)';
+        $input.placeholder = 'Paste your CSV here...\n\nname,age,city\nAlice,30,Berlin\nBob,25,Munich';
+        $headerOption.style.display = 'none';
+        $flattenOption.style.display = 'none';
+      }
+    }
+
+    // --- Flatten nested objects ---
+    function flattenObject(obj, prefix, result) {
+      result = result || {};
+      prefix = prefix || '';
+      for (const key in obj) {
+        if (!obj.hasOwnProperty(key)) continue;
+        const fullKey = prefix ? prefix + '.' + key : key;
+        const val = obj[key];
+        if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+          flattenObject(val, fullKey, result);
+        } else if (Array.isArray(val)) {
+          // Arrays: serialize as JSON string
+          result[fullKey] = JSON.stringify(val);
+        } else {
+          result[fullKey] = val;
+        }
+      }
+      return result;
+    }
+
+    // --- Escape a CSV field ---
+    function escapeCSVField(value, delim) {
+      if (value === null || value === undefined) return '';
+      const str = String(value);
+      if (str.includes(delim) || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }
+
+    // --- JSON to CSV ---
+    function jsonToCSV(jsonStr) {
+      const delim = $delimiter.value;
+      const includeHeader = $includeHeader.checked;
+      const flatten = $flattenNested.checked;
+
+      let data;
+      try {
+        data = JSON.parse(jsonStr);
+      } catch (e) {
+        throw new Error('Invalid JSON: ' + e.message);
+      }
+
+      // If single object, wrap in array
+      if (!Array.isArray(data)) {
+        if (typeof data === 'object' && data !== null) {
+          data = [data];
+        } else {
+          throw new Error('JSON must be an array of objects or a single object.');
+        }
+      }
+
+      if (data.length === 0) {
+        throw new Error('JSON array is empty.');
+      }
+
+      // Check all items are objects
+      for (let i = 0; i < data.length; i++) {
+        if (typeof data[i] !== 'object' || data[i] === null || Array.isArray(data[i])) {
+          throw new Error('All array items must be objects. Item at index ' + i + ' is not an object.');
+        }
+      }
+
+      // Flatten if requested
+      const rows = flatten ? data.map(item => flattenObject(item)) : data;
+
+      // Collect all unique headers
+      const headerSet = new Set();
+      for (const row of rows) {
+        for (const key of Object.keys(row)) {
+          headerSet.add(key);
+        }
+      }
+      const headers = Array.from(headerSet);
+
+      const lines = [];
+
+      if (includeHeader) {
+        lines.push(headers.map(h => escapeCSVField(h, delim)).join(delim));
+      }
+
+      for (const row of rows) {
+        const line = headers.map(h => {
+          const val = row[h];
+          if (val !== undefined && typeof val === 'object' && val !== null) {
+            return escapeCSVField(JSON.stringify(val), delim);
+          }
+          return escapeCSVField(val, delim);
+        });
+        lines.push(line.join(delim));
+      }
+
+      return lines.join('\n');
+    }
+
+    // --- Parse a CSV line respecting quoted fields ---
+    function parseCSVLine(line, delim) {
+      const fields = [];
+      let current = '';
+      let inQuotes = false;
+      let i = 0;
+
+      while (i < line.length) {
+        const ch = line[i];
+
+        if (inQuotes) {
+          if (ch === '"') {
+            if (i + 1 < line.length && line[i + 1] === '"') {
+              current += '"';
+              i += 2;
+            } else {
+              inQuotes = false;
+              i++;
+            }
+          } else {
+            current += ch;
+            i++;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+            i++;
+          } else if (ch === delim) {
+            fields.push(current);
+            current = '';
+            i++;
+          } else {
+            current += ch;
+            i++;
+          }
+        }
+      }
+      fields.push(current);
+      return fields;
+    }
+
+    // --- Split CSV into lines (respecting quoted newlines) ---
+    function splitCSVLines(text) {
+      const lines = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+          current += ch;
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') {
+            i++; // skip \n after \r
+          }
+          if (current.trim() !== '') {
+            lines.push(current);
+          }
+          current = '';
+        } else {
+          current += ch;
+        }
+      }
+      if (current.trim() !== '') {
+        lines.push(current);
+      }
+      return lines;
+    }
+
+    // --- CSV to JSON ---
+    function csvToJSON(csvStr) {
+      const delim = $delimiter.value;
+      const lines = splitCSVLines(csvStr.trim());
+
+      if (lines.length < 2) {
+        throw new Error('CSV must have at least a header row and one data row.');
+      }
+
+      const headers = parseCSVLine(lines[0], delim);
+      const result = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = parseCSVLine(lines[i], delim);
+        const obj = {};
+        for (let j = 0; j < headers.length; j++) {
+          const key = headers[j].trim();
+          if (!key) continue;
+          let val = j < values.length ? values[j] : '';
+
+          // Try to parse numeric values
+          if (val !== '' && !isNaN(val) && val.trim() !== '') {
+            const num = Number(val);
+            if (isFinite(num)) {
+              obj[key] = num;
+              continue;
+            }
+          }
+
+          // Try to parse booleans
+          if (val.toLowerCase() === 'true') { obj[key] = true; continue; }
+          if (val.toLowerCase() === 'false') { obj[key] = false; continue; }
+
+          // Try to parse null
+          if (val.toLowerCase() === 'null' || val === '') { obj[key] = val === '' ? '' : null; continue; }
+
+          // Try to parse nested JSON (arrays/objects)
+          if ((val.startsWith('[') && val.endsWith(']')) || (val.startsWith('{') && val.endsWith('}'))) {
+            try {
+              obj[key] = JSON.parse(val);
+              continue;
+            } catch (e) { /* treat as string */ }
+          }
+
+          obj[key] = val;
+        }
+        result.push(obj);
+      }
+
+      return JSON.stringify(result, null, 2);
+    }
+
+    // --- Main convert ---
+    function convert() {
+      const raw = $input.value.trim();
+      if (!raw) {
+        showStatus('Please enter some data to convert.', false);
+        return;
+      }
+
+      try {
+        if (mode === 'json2csv') {
+          const csv = jsonToCSV(raw);
+          $output.value = csv;
+          const rowCount = csv.split('\n').length - ($includeHeader.checked ? 1 : 0);
+          showStatus('Converted: ' + rowCount + ' row' + (rowCount !== 1 ? 's' : ''), true);
+        } else {
+          const json = csvToJSON(raw);
+          $output.value = json;
+          const count = JSON.parse(json).length;
+          showStatus('Converted: ' + count + ' object' + (count !== 1 ? 's' : ''), true);
+        }
+      } catch (e) {
+        $output.value = '';
+        showStatus(e.message, false);
+      }
+    }
+
+    function copyOutput() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showStatus('Copied to clipboard!', true);
+      }
+    }
+
+    function download() {
+      if (!$output.value) {
+        showStatus('Nothing to download. Convert first.', false);
+        return;
+      }
+      const ext = mode === 'json2csv' ? 'csv' : 'json';
+      const mime = mode === 'json2csv' ? 'text/csv' : 'application/json';
+      const blob = new Blob([$output.value], { type: mime + ';charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'converted.' + ext;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showStatus('Downloaded as converted.' + ext, true);
+    }
+
+    function loadSample() {
+      if (mode === 'json2csv') {
+        $input.value = JSON.stringify([
+          {
+            "id": 1,
+            "name": "Alice Johnson",
+            "email": "alice@example.com",
+            "age": 32,
+            "active": true,
+            "address": {
+              "street": "123 Main St",
+              "city": "Berlin",
+              "country": "Germany"
+            },
+            "tags": ["admin", "developer"]
+          },
+          {
+            "id": 2,
+            "name": "Bob Smith",
+            "email": "bob@example.com",
+            "age": 28,
+            "active": false,
+            "address": {
+              "street": "456 Oak Ave",
+              "city": "Munich",
+              "country": "Germany"
+            },
+            "tags": ["user"]
+          },
+          {
+            "id": 3,
+            "name": "Carol White",
+            "email": "carol@example.com",
+            "age": 45,
+            "active": true,
+            "address": {
+              "street": "789 Pine Rd",
+              "city": "Hamburg",
+              "country": "Germany"
+            },
+            "tags": ["editor", "moderator"]
+          }
+        ], null, 2);
+      } else {
+        $input.value = 'name,age,email,city,active\nAlice Johnson,32,alice@example.com,Berlin,true\nBob Smith,28,bob@example.com,Munich,false\nCarol White,45,carol@example.com,Hamburg,true\nDave Brown,36,dave@example.com,Frankfurt,true';
+      }
+      showStatus('Sample data loaded. Click Convert.', true);
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $status.textContent = '';
+      $status.className = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    // Auto-convert on paste
+    $input.addEventListener('paste', () => setTimeout(convert, 50));
+  </script>
+</body>
+</html>

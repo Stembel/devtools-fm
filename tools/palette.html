@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Palette Generator - DevTools.fm</title>
+  <meta name="description" content="Generate beautiful color palettes from any base color. Complementary, analogous, triadic, split-complementary, and monochromatic schemes. Export to CSS, SCSS, Tailwind.">
+  <meta name="keywords" content="color palette generator, color scheme generator, complementary colors, analogous colors, triadic colors, CSS color palette">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/palette.html">
+  <meta property="og:title" content="Color Palette Generator - DevTools.fm">
+  <meta property="og:description" content="Generate harmonious color palettes from any base color. Export to CSS, SCSS, Tailwind.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .color-input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .color-input-row input[type="color"] {
+      width: 52px;
+      height: 52px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: none;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .color-input-row input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-input-row input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 4px;
+    }
+
+    .color-input-row input[type="text"] {
+      width: 140px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .color-input-row input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .palette-type-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .palette-type-btns .btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .palette-colors {
+      display: flex;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .palette-swatch {
+      flex: 1;
+      min-height: 200px;
+      display: flex;
+      align-items: flex-end;
+      padding: 12px;
+      cursor: pointer;
+      transition: flex 0.3s;
+      position: relative;
+    }
+
+    .palette-swatch:hover {
+      flex: 1.5;
+    }
+
+    .swatch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .palette-swatch:hover .swatch-info {
+      opacity: 1;
+    }
+
+    .swatch-value {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      display: inline-block;
+      width: fit-content;
+      transition: background 0.15s;
+      line-height: 1.5;
+    }
+
+    .swatch-value:hover {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .swatch-hex {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 4px;
+      opacity: 1;
+      width: 100%;
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+    }
+
+    .palette-swatch:hover .swatch-hex {
+      display: none;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 32px 0 16px;
+      color: var(--text);
+    }
+
+    .export-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+    }
+
+    .export-header {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .export-header .btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .export-code {
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .tints-shades-grid {
+      display: flex;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .ts-swatch {
+      flex: 1;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: flex 0.2s;
+      position: relative;
+    }
+
+    .ts-swatch:hover {
+      flex: 2;
+    }
+
+    .ts-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+      padding: 2px 4px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+    }
+
+    .ts-swatch:hover .ts-label {
+      opacity: 1;
+    }
+
+    .ts-heading {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 600;
+      pointer-events: none;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      z-index: 999;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .palette-colors {
+        flex-direction: column;
+      }
+
+      .palette-swatch {
+        min-height: 80px;
+      }
+
+      .palette-swatch:hover {
+        flex: 1;
+      }
+
+      .swatch-info {
+        opacity: 1;
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .swatch-hex {
+        display: none;
+      }
+
+      .tints-shades-grid {
+        flex-direction: column;
+      }
+
+      .ts-swatch {
+        height: 40px;
+      }
+
+      .ts-label {
+        opacity: 1;
+      }
+
+      .color-input-row {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Color Palette Generator</h1>
+    <p class="description">Generate harmonious color palettes from any base color. Click any color value to copy it.</p>
+
+    <div class="color-input-row">
+      <input type="color" id="colorPicker" value="#6366f1">
+      <input type="text" id="hexInput" value="#6366f1" placeholder="#6366f1" spellcheck="false">
+      <button class="btn" onclick="randomColor()">Random</button>
+    </div>
+
+    <div class="palette-type-btns" id="paletteTypes">
+      <button class="btn active" data-type="complementary">Complementary</button>
+      <button class="btn" data-type="analogous">Analogous</button>
+      <button class="btn" data-type="triadic">Triadic</button>
+      <button class="btn" data-type="split-complementary">Split-Complementary</button>
+      <button class="btn" data-type="tetradic">Tetradic</button>
+      <button class="btn" data-type="monochromatic">Monochromatic</button>
+    </div>
+
+    <div class="palette-colors" id="paletteDisplay"></div>
+
+    <h2 class="section-title">Export</h2>
+    <div class="export-panel">
+      <div class="export-header" id="exportTabs">
+        <button class="btn active" data-format="css">CSS</button>
+        <button class="btn" data-format="scss">SCSS</button>
+        <button class="btn" data-format="tailwind">Tailwind</button>
+        <button class="btn" data-format="json">JSON</button>
+        <button class="btn" onclick="copyExport()" style="margin-left: auto;">Copy</button>
+      </div>
+      <div class="export-code" id="exportCode"></div>
+    </div>
+
+    <h2 class="section-title">Tints &amp; Shades</h2>
+    <div class="ts-heading">Tints (lighter)</div>
+    <div class="tints-shades-grid" id="tintsGrid"></div>
+    <div class="ts-heading" style="margin-top: 12px;">Shades (darker)</div>
+    <div class="tints-shades-grid" id="shadesGrid"></div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    // --- Color Conversion Utilities ---
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      if (hex.length !== 6) return null;
+      const n = parseInt(hex, 16);
+      if (isNaN(n)) return null;
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x =>
+        Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')
+      ).join('');
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return [h * 360, s * 100, l * 100];
+    }
+
+    function hslToRgb(h, s, l) {
+      h /= 360; s /= 100; l /= 100;
+      let r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1 / 6) return p + (q - p) * 6 * t;
+          if (t < 1 / 2) return q;
+          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+      }
+      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+
+    function normalizeHue(h) {
+      return ((h % 360) + 360) % 360;
+    }
+
+    // Determine if text should be white or dark for contrast
+    function contrastColor(hex) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return '#ffffff';
+      const [r, g, b] = rgb;
+      // Relative luminance
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance > 0.55 ? '#1a1a1a' : '#ffffff';
+    }
+
+    // --- Palette Generation ---
+    function generatePalette(hex, type) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return [hex];
+      const [h, s, l] = rgbToHsl(...rgb);
+
+      switch (type) {
+        case 'complementary':
+          return [
+            hex,
+            rgbToHex(...hslToRgb(normalizeHue(h + 180), s, l))
+          ];
+        case 'analogous':
+          return [
+            rgbToHex(...hslToRgb(normalizeHue(h - 60), s, l)),
+            rgbToHex(...hslToRgb(normalizeHue(h - 30), s, l)),
+            hex,
+            rgbToHex(...hslToRgb(normalizeHue(h + 30), s, l)),
+            rgbToHex(...hslToRgb(normalizeHue(h + 60), s, l))
+          ];
+        case 'triadic':
+          return [
+            hex,
+            rgbToHex(...hslToRgb(normalizeHue(h + 120), s, l)),
+            rgbToHex(...hslToRgb(normalizeHue(h + 240), s, l))
+          ];
+        case 'split-complementary':
+          return [
+            hex,
+            rgbToHex(...hslToRgb(normalizeHue(h + 150), s, l)),
+            rgbToHex(...hslToRgb(normalizeHue(h + 210), s, l))
+          ];
+        case 'tetradic':
+          return [
+            hex,
+            rgbToHex(...hslToRgb(normalizeHue(h + 90), s, l)),
+            rgbToHex(...hslToRgb(normalizeHue(h + 180), s, l)),
+            rgbToHex(...hslToRgb(normalizeHue(h + 270), s, l))
+          ];
+        case 'monochromatic':
+          return [
+            rgbToHex(...hslToRgb(h, s, 10)),
+            rgbToHex(...hslToRgb(h, s, 30)),
+            rgbToHex(...hslToRgb(h, s, 50)),
+            rgbToHex(...hslToRgb(h, s, 70)),
+            rgbToHex(...hslToRgb(h, s, 90))
+          ];
+        default:
+          return [hex];
+      }
+    }
+
+    // --- Tints & Shades ---
+    function generateTints(hex, count) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return [];
+      const [h, s, l] = rgbToHsl(...rgb);
+      const tints = [];
+      for (let i = 1; i <= count; i++) {
+        const newL = l + (100 - l) * (i / (count + 1));
+        tints.push(rgbToHex(...hslToRgb(h, s, newL)));
+      }
+      return tints;
+    }
+
+    function generateShades(hex, count) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return [];
+      const [h, s, l] = rgbToHsl(...rgb);
+      const shades = [];
+      for (let i = 1; i <= count; i++) {
+        const newL = l - l * (i / (count + 1));
+        shades.push(rgbToHex(...hslToRgb(h, s, newL)));
+      }
+      return shades;
+    }
+
+    // --- State ---
+    let currentType = 'complementary';
+    let currentFormat = 'css';
+    let currentPalette = [];
+
+    // --- DOM Elements ---
+    const colorPicker = document.getElementById('colorPicker');
+    const hexInput = document.getElementById('hexInput');
+    const paletteDisplay = document.getElementById('paletteDisplay');
+    const tintsGrid = document.getElementById('tintsGrid');
+    const shadesGrid = document.getElementById('shadesGrid');
+    const exportCode = document.getElementById('exportCode');
+    const toastEl = document.getElementById('toast');
+
+    // --- Toast ---
+    let toastTimeout;
+    function showToast(msg) {
+      toastEl.textContent = msg || 'Copied!';
+      toastEl.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 1500);
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => showToast('Copied: ' + text));
+    }
+
+    // --- Render Palette ---
+    function renderPalette() {
+      const hex = hexInput.value;
+      currentPalette = generatePalette(hex, currentType);
+
+      paletteDisplay.innerHTML = currentPalette.map(color => {
+        const rgb = hexToRgb(color);
+        const [h, s, l] = rgbToHsl(...rgb);
+        const textColor = contrastColor(color);
+        const rr = rgb[0], gg = rgb[1], bb = rgb[2];
+        const hexUpper = color.toUpperCase();
+        const rgbStr = `rgb(${rr}, ${gg}, ${bb})`;
+        const hslStr = `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`;
+
+        return `<div class="palette-swatch" style="background:${color};" title="Click values to copy">
+          <span class="swatch-hex" style="color:${textColor}">${hexUpper}</span>
+          <div class="swatch-info">
+            <span class="swatch-value" style="color:${textColor}" onclick="event.stopPropagation();copyText('${hexUpper}')">${hexUpper}</span>
+            <span class="swatch-value" style="color:${textColor}" onclick="event.stopPropagation();copyText('${rgbStr}')">${rgbStr}</span>
+            <span class="swatch-value" style="color:${textColor}" onclick="event.stopPropagation();copyText('${hslStr}')">${hslStr}</span>
+          </div>
+        </div>`;
+      }).join('');
+
+      renderTintsShades();
+      renderExport();
+    }
+
+    // --- Render Tints & Shades ---
+    function renderTintsShades() {
+      const hex = hexInput.value;
+      const tints = generateTints(hex, 9);
+      const shades = generateShades(hex, 9);
+
+      tintsGrid.innerHTML = tints.map(color => {
+        const textColor = contrastColor(color);
+        const upper = color.toUpperCase();
+        return `<div class="ts-swatch" style="background:${color}" onclick="copyText('${upper}')" title="${upper}">
+          <span class="ts-label" style="color:${textColor}">${upper}</span>
+        </div>`;
+      }).join('');
+
+      shadesGrid.innerHTML = shades.map(color => {
+        const textColor = contrastColor(color);
+        const upper = color.toUpperCase();
+        return `<div class="ts-swatch" style="background:${color}" onclick="copyText('${upper}')" title="${upper}">
+          <span class="ts-label" style="color:${textColor}">${upper}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // --- Export ---
+    function paletteNames() {
+      const typeNames = {
+        'complementary': ['base', 'complement'],
+        'analogous': ['analog-1', 'analog-2', 'base', 'analog-3', 'analog-4'],
+        'triadic': ['base', 'triad-2', 'triad-3'],
+        'split-complementary': ['base', 'split-1', 'split-2'],
+        'tetradic': ['base', 'tetrad-2', 'tetrad-3', 'tetrad-4'],
+        'monochromatic': ['shade-1', 'shade-2', 'shade-3', 'shade-4', 'shade-5']
+      };
+      return typeNames[currentType] || currentPalette.map((_, i) => `color-${i + 1}`);
+    }
+
+    function renderExport() {
+      const names = paletteNames();
+      let code = '';
+
+      switch (currentFormat) {
+        case 'css':
+          code = ':root {\n' +
+            currentPalette.map((c, i) =>
+              `  --palette-${names[i]}: ${c};`
+            ).join('\n') +
+            '\n}';
+          break;
+        case 'scss':
+          code = currentPalette.map((c, i) =>
+            `$palette-${names[i]}: ${c};`
+          ).join('\n');
+          break;
+        case 'tailwind':
+          code = `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n        palette: {\n` +
+            currentPalette.map((c, i) =>
+              `          '${names[i]}': '${c}',`
+            ).join('\n') +
+            `\n        },\n      },\n    },\n  },\n};`;
+          break;
+        case 'json':
+          const obj = {};
+          currentPalette.forEach((c, i) => {
+            const rgb = hexToRgb(c);
+            const [h, s, l] = rgbToHsl(...rgb);
+            obj[names[i]] = {
+              hex: c,
+              rgb: { r: rgb[0], g: rgb[1], b: rgb[2] },
+              hsl: { h: Math.round(h), s: Math.round(s), l: Math.round(l) }
+            };
+          });
+          code = JSON.stringify(obj, null, 2);
+          break;
+      }
+
+      exportCode.textContent = code;
+    }
+
+    function copyExport() {
+      const code = exportCode.textContent;
+      navigator.clipboard.writeText(code).then(() => showToast('Export copied!'));
+    }
+
+    // --- Random Color ---
+    function randomColor() {
+      const hex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+      hexInput.value = hex;
+      colorPicker.value = hex;
+      renderPalette();
+    }
+
+    // --- Event Listeners ---
+    colorPicker.addEventListener('input', () => {
+      hexInput.value = colorPicker.value;
+      renderPalette();
+    });
+
+    hexInput.addEventListener('input', () => {
+      let val = hexInput.value.trim();
+      if (!val.startsWith('#')) val = '#' + val;
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+        colorPicker.value = val;
+        renderPalette();
+      }
+    });
+
+    // Palette type buttons
+    document.getElementById('paletteTypes').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-type]');
+      if (!btn) return;
+      document.querySelectorAll('#paletteTypes .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentType = btn.dataset.type;
+      renderPalette();
+    });
+
+    // Export format tabs
+    document.getElementById('exportTabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-format]');
+      if (!btn) return;
+      document.querySelectorAll('#exportTabs [data-format]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFormat = btn.dataset.format;
+      renderExport();
+    });
+
+    // --- Init ---
+    renderPalette();
+  </script>
+</body>
+</html>

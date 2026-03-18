@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Case Converter - DevTools.fm</title>
+  <meta name="description" content="Convert text between UPPERCASE, lowercase, Title Case, camelCase, snake_case, kebab-case, PascalCase, and more. Free online text transformer.">
+  <meta name="keywords" content="text case converter, uppercase converter, lowercase converter, title case, camelCase, snake_case, kebab-case, PascalCase">
+  <link rel="canonical" href="https://stembel.github.io/devtools-fm/tools/textcase.html">
+  <meta property="og:title" content="Text Case Converter - DevTools.fm">
+  <meta property="og:description" content="Convert text between UPPERCASE, lowercase, Title Case, camelCase, snake_case, and more.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .case-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+      padding: 16px 0;
+    }
+
+    .case-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .case-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .case-btn.active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--accent);
+    }
+
+    .output-section {
+      position: relative;
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .char-count {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .tool-textarea {
+      min-height: 180px;
+    }
+
+    @media (max-width: 768px) {
+      .case-buttons {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Text Case Converter</h1>
+    <p class="description">Convert text between UPPERCASE, lowercase, Title Case, camelCase, snake_case, kebab-case, and more. All processing happens in your browser.</p>
+
+    <!-- Input -->
+    <div class="tool-panel">
+      <div class="panel-header">
+        Input
+        <span class="char-count" id="inputCount">0 chars</span>
+      </div>
+      <textarea class="tool-textarea" id="input" placeholder="Type or paste your text here..."></textarea>
+    </div>
+
+    <!-- Conversion Buttons -->
+    <div class="case-buttons" id="caseButtons">
+      <button class="case-btn" data-case="upper">UPPERCASE</button>
+      <button class="case-btn" data-case="lower">lowercase</button>
+      <button class="case-btn" data-case="title">Title Case</button>
+      <button class="case-btn" data-case="sentence">Sentence case</button>
+      <button class="case-btn" data-case="camel">camelCase</button>
+      <button class="case-btn" data-case="pascal">PascalCase</button>
+      <button class="case-btn" data-case="snake">snake_case</button>
+      <button class="case-btn" data-case="kebab">kebab-case</button>
+      <button class="case-btn" data-case="constant">CONSTANT_CASE</button>
+      <button class="case-btn" data-case="dot">dot.case</button>
+      <button class="case-btn" data-case="path">path/case</button>
+      <button class="case-btn" data-case="alternating">aLtErNaTiNg cAsE</button>
+      <button class="case-btn" data-case="reverse">Reverse Text</button>
+      <button class="case-btn" data-case="spaces">Remove Extra Spaces</button>
+    </div>
+
+    <!-- Output -->
+    <div class="tool-panel output-section">
+      <div class="panel-header">
+        Output
+        <div class="output-actions">
+          <span class="char-count" id="outputCount">0 chars</span>
+          <button class="btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+          <button class="btn" onclick="clearAll()">Clear</button>
+        </div>
+      </div>
+      <textarea class="tool-textarea" id="output" readonly placeholder="Converted text will appear here..."></textarea>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $inputCount = document.getElementById('inputCount');
+    const $outputCount = document.getElementById('outputCount');
+    const $copyBtn = document.getElementById('copyBtn');
+    const buttons = document.querySelectorAll('.case-btn');
+    let activeCase = null;
+
+    // Update character count on input
+    $input.addEventListener('input', () => {
+      updateInputCount();
+      if (activeCase) convert(activeCase);
+    });
+
+    function updateInputCount() {
+      const len = $input.value.length;
+      $inputCount.textContent = len + ' char' + (len !== 1 ? 's' : '');
+    }
+
+    function updateOutputCount() {
+      const len = $output.value.length;
+      $outputCount.textContent = len + ' char' + (len !== 1 ? 's' : '');
+    }
+
+    // Tokenize text into words for programmatic case conversions
+    function toWords(text) {
+      // Split on whitespace, hyphens, underscores, dots, slashes, and camelCase boundaries
+      return text
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+        .replace(/[\s_\-./]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(w => w.length > 0);
+    }
+
+    // Conversion functions
+    const converters = {
+      upper(text) {
+        return text.toUpperCase();
+      },
+
+      lower(text) {
+        return text.toLowerCase();
+      },
+
+      title(text) {
+        return text.replace(/\b\w/g, c => c.toUpperCase());
+      },
+
+      sentence(text) {
+        return text.toLowerCase().replace(/(^\s*|[.!?]\s+)([a-z])/g, (match, sep, char) => sep + char.toUpperCase());
+      },
+
+      camel(text) {
+        const words = toWords(text);
+        if (words.length === 0) return '';
+        return words.map((w, i) => {
+          const lower = w.toLowerCase();
+          return i === 0 ? lower : lower.charAt(0).toUpperCase() + lower.slice(1);
+        }).join('');
+      },
+
+      pascal(text) {
+        const words = toWords(text);
+        return words.map(w => {
+          const lower = w.toLowerCase();
+          return lower.charAt(0).toUpperCase() + lower.slice(1);
+        }).join('');
+      },
+
+      snake(text) {
+        return toWords(text).map(w => w.toLowerCase()).join('_');
+      },
+
+      kebab(text) {
+        return toWords(text).map(w => w.toLowerCase()).join('-');
+      },
+
+      constant(text) {
+        return toWords(text).map(w => w.toUpperCase()).join('_');
+      },
+
+      dot(text) {
+        return toWords(text).map(w => w.toLowerCase()).join('.');
+      },
+
+      path(text) {
+        return toWords(text).map(w => w.toLowerCase()).join('/');
+      },
+
+      alternating(text) {
+        let upper = false;
+        return text.split('').map(c => {
+          if (/[a-zA-Z]/.test(c)) {
+            upper = !upper;
+            return upper ? c.toUpperCase() : c.toLowerCase();
+          }
+          return c;
+        }).join('');
+      },
+
+      reverse(text) {
+        return text.split('').reverse().join('');
+      },
+
+      spaces(text) {
+        return text.replace(/[ \t]+/g, ' ').replace(/^ +| +$/gm, '').replace(/\n{3,}/g, '\n\n');
+      }
+    };
+
+    function convert(caseType) {
+      activeCase = caseType;
+      const text = $input.value;
+
+      // Update active button
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.case === caseType);
+      });
+
+      if (!text) {
+        $output.value = '';
+        updateOutputCount();
+        return;
+      }
+
+      const converter = converters[caseType];
+      if (converter) {
+        $output.value = converter(text);
+        updateOutputCount();
+      }
+    }
+
+    // Attach click handlers to buttons
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => convert(btn.dataset.case));
+    });
+
+    function copyOutput() {
+      const text = $output.value;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = $copyBtn.textContent;
+        $copyBtn.textContent = 'Copied!';
+        $copyBtn.style.borderColor = 'var(--success)';
+        $copyBtn.style.color = 'var(--success)';
+        setTimeout(() => {
+          $copyBtn.textContent = original;
+          $copyBtn.style.borderColor = '';
+          $copyBtn.style.color = '';
+        }, 1500);
+      });
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      activeCase = null;
+      buttons.forEach(btn => btn.classList.remove('active'));
+      updateInputCount();
+      updateOutputCount();
+    }
+  </script>
+</body>
+</html>
