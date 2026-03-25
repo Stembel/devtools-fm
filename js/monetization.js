@@ -112,114 +112,104 @@
     } catch(e) {}
   }
 
-  // === RELATED TOOLS ===
+  // === RELATED TOOLS (Category-Based for SEO) ===
   function injectRelatedTools() {
     if (!document.querySelector('.tool-page')) return;
 
     const currentTool = location.pathname.split('/').pop().replace('.html', '');
-    const allTools = [
-      { id: 'json', name: 'JSON Formatter', icon: '{ }' },
-      { id: 'base64', name: 'Base64 Encoder', icon: 'B64' },
-      { id: 'hash', name: 'Hash Generator', icon: '#' },
-      { id: 'uuid', name: 'UUID Generator', icon: 'ID' },
-      { id: 'regex', name: 'Regex Tester', icon: '.*' },
-      { id: 'timestamp', name: 'Timestamp Converter', icon: 'T' },
-      { id: 'password', name: 'Password Generator', icon: '***' },
-      { id: 'qrcode', name: 'QR Code Generator', icon: 'QR' },
-      { id: 'color', name: 'Color Converter', icon: 'C' },
-      { id: 'sql', name: 'SQL Formatter', icon: 'SQL' },
-      { id: 'diff', name: 'Text Diff', icon: '<>' },
-      { id: 'wordcount', name: 'Word Counter', icon: 'Wc' },
-      { id: 'textcase', name: 'Text Case Converter', icon: 'Aa' },
-      { id: 'jwt', name: 'JWT Decoder', icon: 'JWT' },
-      { id: 'cron', name: 'Cron Generator', icon: '@' },
-      { id: 'markdown', name: 'Markdown Preview', icon: 'MD' },
-      { id: 'gradient', name: 'CSS Gradient', icon: 'G' },
-      { id: 'palette', name: 'Color Palette', icon: 'P' },
-      { id: 'url', name: 'URL Encoder', icon: '%' },
-      { id: 'chmod', name: 'Chmod Calculator', icon: '7' },
-      { id: 'ipinfo', name: 'IP & Device Info', icon: 'IP' },
-      { id: 'html2md', name: 'HTML to Markdown', icon: 'H2M' },
-      { id: 'baseconvert', name: 'Base Converter', icon: '0x' },
-      { id: 'contrast', name: 'Contrast Checker', icon: 'AA' },
-      { id: 'imagecompress', name: 'Image Compressor', icon: 'IMG' },
-      { id: 'flexbox', name: 'Flexbox Generator', icon: 'F' },
-      { id: 'metatags', name: 'Meta Tag Generator', icon: 'SEO' },
-      { id: 'httpstatus', name: 'HTTP Status Codes', icon: 'HTTP' },
-      { id: 'dns-lookup', name: 'DNS Lookup', icon: 'DNS' },
-      { id: 'ssl-checker', name: 'SSL Checker', icon: 'SSL' },
-      { id: 'http-headers', name: 'HTTP Headers', icon: 'HDR' },
-      { id: 'whois', name: 'WHOIS Lookup', icon: 'WH' },
-      { id: 'redirect-checker', name: 'Redirect Checker', icon: '3xx' },
-      { id: 'subnet', name: 'Subnet Calculator', icon: 'IP4' },
-      { id: 'apitester', name: 'API Tester', icon: 'API' },
-      { id: 'status-checker', name: 'Status Checker', icon: 'UP?' },
-      { id: 'email-validate', name: 'Email Validator', icon: '@' },
-      { id: 'tech-detect', name: 'Tech Detector', icon: 'TEC' },
-      { id: 'jsonschema', name: 'JSON Schema', icon: 'JS' },
-      { id: 'robots', name: 'Robots.txt Generator', icon: 'BOT' },
-      { id: 'jsonpath', name: 'JSONPath Evaluator', icon: '$.' },
-      { id: 'mdtable', name: 'MD Table Generator', icon: 'MD' },
-      { id: 'cssgrid', name: 'CSS Grid Generator', icon: 'GR' },
-      { id: 'favicon', name: 'Favicon Generator', icon: 'FV' },
-      { id: 'htaccess', name: '.htaccess Generator', icon: '.ht' },
-      { id: 'borderradius', name: 'Border Radius', icon: 'BR' },
-      { id: 'placeholder', name: 'Placeholder Image', icon: 'PH' },
-      { id: 'aspectratio', name: 'Aspect Ratio', icon: '16:9' },
-      { id: 'ogpreview', name: 'OG Preview', icon: 'OG' },
-      { id: 'textbinary', name: 'Text to Binary', icon: '01' },
-      { id: 'svgoptimizer', name: 'SVG Optimizer', icon: 'SVG' },
-      { id: 'cssanimation', name: 'CSS Animation', icon: 'AN' },
-      { id: 'jwtbuilder', name: 'JWT Builder', icon: 'JW+' },
-      { id: 'toml', name: 'TOML Converter', icon: 'TML' },
-      { id: 'crontab', name: 'Crontab Tester', icon: 'CT' },
-      { id: 'csvviewer', name: 'CSV Viewer', icon: 'CSV' },
-      { id: 'colorblind', name: 'Color Blindness', icon: 'CB' },
-      { id: 'nginx', name: 'Nginx Config', icon: 'NGX' },
-      { id: 'dockercompose', name: 'Docker Compose', icon: 'DC' },
-      { id: 'json2ts', name: 'JSON to TypeScript', icon: 'TS' },
-      { id: 'envfile', name: '.env Editor', icon: '.env' },
-      { id: 'gitcheat', name: 'Git Cheatsheet', icon: 'GIT' },
-      { id: 'htmlformat', name: 'HTML Formatter', icon: 'HTM' },
-      { id: 'asciiart', name: 'ASCII Art', icon: 'A#' },
-      { id: 'cssunits', name: 'CSS Units', icon: 'px' },
-      { id: 'sql2mongo', name: 'SQL to MongoDB', icon: 'MDB' },
-      { id: 'tailwind', name: 'Tailwind Lookup', icon: 'TW' },
-      { id: 'jsondiff', name: 'JSON Diff', icon: 'J<>' },
-      { id: 'sshkeygen', name: 'SSH Key Gen', icon: 'SSH' },
-      { id: 'json2yaml', name: 'JSON to YAML', icon: 'YML' },
-      { id: 'base58', name: 'Base58 Encoder', icon: 'B58' },
-      { id: 'colorpicker', name: 'Color Picker', icon: 'CP' },
-      { id: 'regexref', name: 'Regex Reference', icon: 'RX' },
-      { id: 'clippath', name: 'CSS Clip-Path', icon: 'CP' },
-      { id: 'githubprofile', name: 'GitHub README', icon: 'GH' },
-      { id: 'jsontree', name: 'JSON Tree', icon: 'JT' },
-      { id: 'textshadow', name: 'Text Shadow', icon: 'TS' },
-      { id: 'ipconvert', name: 'IP Converter', icon: 'IPC' },
-      { id: 'shortcuts', name: 'Keyboard Shortcuts', icon: 'KB' },
-      { id: 'curl2code', name: 'cURL to Code', icon: 'cU' },
-      { id: 'htmlcolors', name: 'HTML Colors', icon: 'HC' },
-      { id: 'dataurl', name: 'Data URL', icon: 'DU' },
-      { id: 'hmac', name: 'HMAC Generator', icon: 'HM' },
-      { id: 'sqlref', name: 'SQL Reference', icon: 'SQ' },
-      { id: 'cssfilter', name: 'CSS Filter', icon: 'FI' },
-      { id: 'fontpreview', name: 'Font Preview', icon: 'FP' },
-      { id: 'httpmethods', name: 'HTTP Methods', icon: 'GET' },
-      { id: 'json2schema', name: 'JSON Schema Gen', icon: 'JSG' },
-      { id: 'manifest', name: 'PWA Manifest', icon: 'PWA' },
-      { id: 'semver', name: 'SemVer Check', icon: 'SV' },
-      { id: 'subnetvisual', name: 'Subnet Visual', icon: 'SN' },
-      { id: 'emoji', name: 'Emoji Picker', icon: 'EM' },
-    ];
 
-    const others = allTools.filter(t => t.id !== currentTool);
-    // Pick 3 random related tools
-    const picked = [];
-    const copy = [...others];
-    for (let i = 0; i < 3 && copy.length; i++) {
-      const idx = Math.floor(Math.random() * copy.length);
-      picked.push(copy.splice(idx, 1)[0]);
+    // Category-tagged tools for relevant internal linking
+    var cats = {
+      json: ['json','jsonpath','jsondiff','jsontree','jsonschema','json2yaml','json-csv','json2ts','json2schema'],
+      encode: ['base64','base58','url','htmlentity','escape','dataurl','textbinary','imagebase64'],
+      hash: ['hash','hmac','sshkeygen','password','uuid'],
+      css: ['flexbox','cssgrid','gradient','boxshadow','borderradius','textshadow','cssanimation','clippath','cssfilter','tailwind','cssunits'],
+      color: ['color','colorpicker','palette','contrast','colorblind','htmlcolors'],
+      text: ['wordcount','textcase','diff','regex','lorem','asciiart','emoji','markdown','fontpreview'],
+      convert: ['html2md','baseconvert','timestamp','toml','sql2mongo','ipconvert','curl2code'],
+      network: ['dns-lookup','ssl-checker','http-headers','whois','redirect-checker','status-checker','email-validate','tech-detect','ipinfo','subnet','subnetvisual','apitester'],
+      devops: ['cron','crontab','dockercompose','nginx','htaccess','robots','manifest','envfile','chmod','gitcheat','sshkeygen'],
+      reference: ['httpstatus','httpmethods','regexref','sqlref','shortcuts','htmlcolors','cssunits'],
+      format: ['json','sql','htmlformat','markdown','minifier','svgoptimizer','csvviewer'],
+      seo: ['metatags','ogpreview','favicon','githubprofile','robots'],
+      jwt: ['jwt','jwtbuilder'],
+      image: ['imagecompress','svgoptimizer','placeholder','favicon','qrcode','imagebase64','aspectratio']
+    };
+
+    // Find which categories the current tool belongs to
+    var myCats = [];
+    for (var cat in cats) {
+      if (cats[cat].indexOf(currentTool) !== -1) myCats.push(cat);
     }
+
+    // Collect related tools from same categories (deduplicated)
+    var related = {};
+    myCats.forEach(function(cat) {
+      cats[cat].forEach(function(tid) {
+        if (tid !== currentTool) related[tid] = true;
+      });
+    });
+
+    // Tool display info
+    var toolInfo = {
+      'json': {n:'JSON Formatter',i:'{ }'},'base64': {n:'Base64 Encoder',i:'B64'},'hash': {n:'Hash Generator',i:'#'},
+      'uuid': {n:'UUID Generator',i:'ID'},'regex': {n:'Regex Tester',i:'.*'},'timestamp': {n:'Timestamp',i:'T'},
+      'password': {n:'Password Gen',i:'***'},'qrcode': {n:'QR Code',i:'QR'},'color': {n:'Color Converter',i:'C'},
+      'sql': {n:'SQL Formatter',i:'SQL'},'diff': {n:'Text Diff',i:'<>'},'wordcount': {n:'Word Counter',i:'Wc'},
+      'textcase': {n:'Text Case',i:'Aa'},'jwt': {n:'JWT Decoder',i:'JWT'},'cron': {n:'Cron Generator',i:'@'},
+      'markdown': {n:'Markdown Preview',i:'MD'},'gradient': {n:'CSS Gradient',i:'G'},'palette': {n:'Color Palette',i:'P'},
+      'url': {n:'URL Encoder',i:'%'},'chmod': {n:'Chmod Calculator',i:'7'},'ipinfo': {n:'IP & Device Info',i:'IP'},
+      'html2md': {n:'HTML to Markdown',i:'H2M'},'baseconvert': {n:'Base Converter',i:'0x'},
+      'contrast': {n:'Contrast Checker',i:'AA'},'imagecompress': {n:'Image Compressor',i:'IMG'},
+      'flexbox': {n:'Flexbox Generator',i:'F'},'metatags': {n:'Meta Tag Gen',i:'SEO'},
+      'httpstatus': {n:'HTTP Status Codes',i:'HTTP'},'dns-lookup': {n:'DNS Lookup',i:'DNS'},
+      'ssl-checker': {n:'SSL Checker',i:'SSL'},'http-headers': {n:'HTTP Headers',i:'HDR'},
+      'whois': {n:'WHOIS Lookup',i:'WH'},'redirect-checker': {n:'Redirect Checker',i:'3xx'},
+      'subnet': {n:'Subnet Calculator',i:'IP4'},'apitester': {n:'API Tester',i:'API'},
+      'status-checker': {n:'Status Checker',i:'UP?'},'email-validate': {n:'Email Validator',i:'@'},
+      'tech-detect': {n:'Tech Detector',i:'TEC'},'jsonschema': {n:'JSON Schema',i:'JS'},
+      'robots': {n:'Robots.txt Gen',i:'BOT'},'jsonpath': {n:'JSONPath',i:'$.'},
+      'mdtable': {n:'MD Table Gen',i:'MD'},'cssgrid': {n:'CSS Grid',i:'GR'},
+      'favicon': {n:'Favicon Gen',i:'FV'},'htaccess': {n:'.htaccess Gen',i:'.ht'},
+      'borderradius': {n:'Border Radius',i:'BR'},'placeholder': {n:'Placeholder Image',i:'PH'},
+      'aspectratio': {n:'Aspect Ratio',i:'16:9'},'ogpreview': {n:'OG Preview',i:'OG'},
+      'textbinary': {n:'Text to Binary',i:'01'},'svgoptimizer': {n:'SVG Optimizer',i:'SVG'},
+      'cssanimation': {n:'CSS Animation',i:'AN'},'jwtbuilder': {n:'JWT Builder',i:'JW+'},
+      'toml': {n:'TOML Converter',i:'TML'},'crontab': {n:'Crontab Tester',i:'CT'},
+      'csvviewer': {n:'CSV Viewer',i:'CSV'},'colorblind': {n:'Color Blindness',i:'CB'},
+      'nginx': {n:'Nginx Config',i:'NGX'},'dockercompose': {n:'Docker Compose',i:'DC'},
+      'json2ts': {n:'JSON to TypeScript',i:'TS'},'envfile': {n:'.env Editor',i:'.env'},
+      'gitcheat': {n:'Git Cheatsheet',i:'GIT'},'htmlformat': {n:'HTML Formatter',i:'HTM'},
+      'asciiart': {n:'ASCII Art',i:'A#'},'cssunits': {n:'CSS Units',i:'px'},
+      'sql2mongo': {n:'SQL to MongoDB',i:'MDB'},'tailwind': {n:'Tailwind Lookup',i:'TW'},
+      'jsondiff': {n:'JSON Diff',i:'J<>'},'sshkeygen': {n:'SSH Key Gen',i:'SSH'},
+      'json2yaml': {n:'JSON to YAML',i:'YML'},'base58': {n:'Base58 Encoder',i:'B58'},
+      'colorpicker': {n:'Color Picker',i:'CP'},'regexref': {n:'Regex Reference',i:'RX'},
+      'clippath': {n:'CSS Clip-Path',i:'CP'},'githubprofile': {n:'GitHub README',i:'GH'},
+      'jsontree': {n:'JSON Tree',i:'JT'},'textshadow': {n:'Text Shadow',i:'TS'},
+      'ipconvert': {n:'IP Converter',i:'IPC'},'shortcuts': {n:'Shortcuts',i:'KB'},
+      'curl2code': {n:'cURL to Code',i:'cU'},'htmlcolors': {n:'HTML Colors',i:'HC'},
+      'dataurl': {n:'Data URL',i:'DU'},'hmac': {n:'HMAC Generator',i:'HM'},
+      'sqlref': {n:'SQL Reference',i:'SQ'},'cssfilter': {n:'CSS Filter',i:'FI'},
+      'fontpreview': {n:'Font Preview',i:'FP'},'httpmethods': {n:'HTTP Methods',i:'GET'},
+      'json2schema': {n:'JSON Schema Gen',i:'JSG'},'manifest': {n:'PWA Manifest',i:'PWA'},
+      'semver': {n:'SemVer Check',i:'SV'},'subnetvisual': {n:'Subnet Visual',i:'SN'},
+      'emoji': {n:'Emoji Picker',i:'EM'},'json-csv': {n:'JSON to CSV',i:'CSV'},
+      'imagebase64': {n:'Image to Base64',i:'I64'},'lorem': {n:'Lorem Ipsum',i:'Li'},
+      'minifier': {n:'CSS/JS Minifier',i:'Min'},'htmlentity': {n:'HTML Entity',i:'&'},
+      'escape': {n:'String Escape',i:'\\'},'boxshadow': {n:'Box Shadow',i:'SH'}
+    };
+
+    // Pick up to 5 from related, shuffle
+    var relatedIds = Object.keys(related);
+    for (var i = relatedIds.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = relatedIds[i]; relatedIds[i] = relatedIds[j]; relatedIds[j] = tmp;
+    }
+    var picked = relatedIds.slice(0, 5).map(function(id) {
+      var info = toolInfo[id];
+      return info ? { id: id, name: info.n, icon: info.i } : null;
+    }).filter(Boolean);
 
     if (!picked.length) return;
 
@@ -229,7 +219,7 @@
     const section = document.createElement('div');
     section.style.cssText = 'max-width:1200px;margin:0 auto;padding:24px 24px 0;';
     section.innerHTML = `
-      <p style="color:#8b8b94;font-size:0.8rem;margin-bottom:12px;font-family:'Inter',sans-serif;">More Tools</p>
+      <p style="color:#8b8b94;font-size:0.8rem;margin-bottom:12px;font-family:'Inter',sans-serif;">Related Tools</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
         ${picked.map(t => `
           <a href="${t.id}.html" style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#141416;border:1px solid #2a2a30;border-radius:8px;color:#e4e4e7;text-decoration:none;font-size:0.85rem;font-family:'Inter',sans-serif;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#2a2a30'">
