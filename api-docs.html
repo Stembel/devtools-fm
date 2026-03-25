@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation - ZeroKit.dev Server-Side Tools API</title>
+  <meta name="description" content="Free REST API for developer tools: DNS lookup, SSL checker, HTTP headers, WHOIS, redirect tracer, status checker, email validation, and tech detection. No authentication required.">
+  <meta name="keywords" content="developer API, DNS API, SSL API, WHOIS API, HTTP headers API, redirect checker API, email validation API, tech detection API, free REST API">
+  <link rel="canonical" href="https://zerokit.dev/api-docs.html">
+  <meta property="og:title" content="API Documentation - ZeroKit.dev">
+  <meta property="og:description" content="Free REST API for developer tools. DNS, SSL, WHOIS, headers, redirects, status, email validation, and tech detection. No auth required.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zerokit.dev/api-docs.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="API Documentation - ZeroKit.dev">
+  <meta name="twitter:description" content="Free REST API for developer tools. DNS, SSL, WHOIS, headers, redirects, status, email validation, and tech detection.">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .api-hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+    .api-hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .api-hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .api-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 32px 0 48px;
+    }
+    .api-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .api-info-card .info-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .api-info-card .info-value {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .api-base-url {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 0 0 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .api-base-url .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .api-base-url code {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      color: var(--accent);
+      background: var(--surface-2);
+      padding: 6px 12px;
+      border-radius: 4px;
+    }
+    .api-toc {
+      margin: 0 0 48px;
+    }
+    .api-toc h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .api-toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .api-toc-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.2s;
+      font-size: 0.9rem;
+    }
+    .api-toc-item:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .api-toc-item .method-badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+      flex-shrink: 0;
+    }
+    .api-toc-item .endpoint-path {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Endpoint Sections */
+    .endpoint-section {
+      margin: 0 0 48px;
+      scroll-margin-top: 24px;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .endpoint-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .endpoint-method {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+    }
+    .endpoint-url {
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--text);
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+    .endpoint-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* Parameters Table */
+    .params-section h3, .response-section h3, .example-section h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+    .params-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    .params-table td {
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .params-table td:first-child {
+      font-family: var(--mono);
+      font-weight: 500;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .param-required {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+    .param-type {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .code-block-header .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .code-block-header .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .code-block pre {
+      padding: 16px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text);
+      margin: 0;
+    }
+    .code-block pre .key { color: #93c5fd; }
+    .code-block pre .string { color: #86efac; }
+    .code-block pre .number { color: #fde68a; }
+    .code-block pre .bool { color: #fca5a5; }
+    .code-block pre .null { color: var(--text-muted); }
+    .code-block pre .comment { color: var(--text-muted); }
+    .code-block pre .cmd { color: #c4b5fd; }
+
+    /* Divider */
+    .endpoint-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* Rate Limit Notice */
+    .rate-limit-notice {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .rate-limit-notice .notice-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .rate-limit-notice .notice-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .rate-limit-notice .notice-text strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 768px) {
+      .api-hero { padding: 40px 0 24px; }
+      .api-hero h1 { font-size: 1.6rem; }
+      .api-info-grid { grid-template-columns: 1fr 1fr; }
+      .api-toc-grid { grid-template-columns: 1fr; }
+      .endpoint-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .params-table { font-size: 0.8rem; }
+      .params-table th, .params-table td { padding: 8px; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "name": "ZeroKit.dev API Documentation",
+    "url": "https://zerokit.dev/api-docs.html",
+    "description": "REST API documentation for ZeroKit.dev server-side developer tools. DNS lookup, SSL checker, HTTP headers, WHOIS, redirect tracer, status checker, email validation, and tech detection.",
+    "author": {
+      "@type": "Organization",
+      "name": "ZeroKit.dev"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="./" class="logo">
+        <span>&gt;_</span> DevTools.fm
+      </a>
+      <nav>
+        <a href="./">Tools</a>
+        <a href="about.html">About</a>
+        <a href="api-docs.html">API Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="api-hero">
+      <h1>API Documentation</h1>
+      <p>Free REST API for 9 server-side developer tools. No authentication required. CORS enabled. JSON responses.</p>
+    </section>
+
+    <div class="api-info-grid">
+      <div class="api-info-card">
+        <div class="info-label">Authentication</div>
+        <div class="info-value">None required</div>
+      </div>
+      <div class="api-info-card">
+        <div class="info-label">Rate Limit</div>
+        <div class="info-value">30 req/min per IP</div>
+      </div>
+      <div class="api-info-card">
+        <div class="info-label">Response Format</div>
+        <div class="info-value">JSON</div>
+      </div>
+      <div class="api-info-card">
+        <div class="info-label">CORS</div>
+        <div class="info-value">Enabled (all origins)</div>
+      </div>
+    </div>
+
+    <div class="api-base-url">
+      <span class="label">Base URL</span>
+      <code>https://65-109-129-230.sslip.io</code>
+    </div>
+
+    <div class="rate-limit-notice">
+      <span class="notice-icon">&#9432;</span>
+      <div class="notice-text">
+        <strong>Rate Limiting:</strong> All endpoints are rate-limited to 30 requests per minute per IP address. Exceeding this limit returns a <code style="font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 3px; font-size: 0.8rem;">429 Too Many Requests</code> response. CORS is enabled for all origins &mdash; you can call these endpoints directly from any browser-based application.
+      </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <section class="api-toc">
+      <h2>Endpoints</h2>
+      <div class="api-toc-grid">
+        <a href="#health" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>Health Check</span>
+          <span class="endpoint-path">/api/health</span>
+        </a>
+        <a href="#dns" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>DNS Lookup</span>
+          <span class="endpoint-path">/api/dns</span>
+        </a>
+        <a href="#ssl" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>SSL Certificate</span>
+          <span class="endpoint-path">/api/ssl</span>
+        </a>
+        <a href="#headers" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>HTTP Headers</span>
+          <span class="endpoint-path">/api/headers</span>
+        </a>
+        <a href="#whois" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>WHOIS Lookup</span>
+          <span class="endpoint-path">/api/whois</span>
+        </a>
+        <a href="#redirect" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>Redirect Tracer</span>
+          <span class="endpoint-path">/api/redirect</span>
+        </a>
+        <a href="#status" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>Status Checker</span>
+          <span class="endpoint-path">/api/status</span>
+        </a>
+        <a href="#email-validate" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>Email Validation</span>
+          <span class="endpoint-path">/api/email-validate</span>
+        </a>
+        <a href="#tech-detect" class="api-toc-item">
+          <span class="method-badge">GET</span>
+          <span>Tech Detection</span>
+          <span class="endpoint-path">/api/tech-detect</span>
+        </a>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 1. Health Check -->
+    <section class="endpoint-section" id="health">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>Health Check</h2>
+      </div>
+      <div class="endpoint-url">/api/health</div>
+      <p class="endpoint-desc">Simple health check endpoint to verify the API is running. Returns the current server status and timestamp.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;">No parameters required.</p>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> https://65-109-129-230.sslip.io/api/health</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"status"</span>: <span class="string">"ok"</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2026-03-25T12:00:00.000Z"</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 2. DNS Lookup -->
+    <section class="endpoint-section" id="dns">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>DNS Lookup</h2>
+      </div>
+      <div class="endpoint-url">/api/dns?domain=example.com</div>
+      <p class="endpoint-desc">Perform a DNS lookup for any domain. Returns A, AAAA, PTR, and MX records with full resolution details.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>domain<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>The domain name to look up (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/dns?domain=example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"domain"</span>: <span class="string">"example.com"</span>,
+  <span class="key">"a"</span>: [<span class="string">"93.184.216.34"</span>],
+  <span class="key">"aaaa"</span>: [<span class="string">"2606:2800:220:1:248:1893:25c8:1946"</span>],
+  <span class="key">"mx"</span>: [
+    {
+      <span class="key">"priority"</span>: <span class="number">10</span>,
+      <span class="key">"exchange"</span>: <span class="string">"mail.example.com"</span>
+    }
+  ],
+  <span class="key">"ptr"</span>: [<span class="string">"93.184.216.34.in-addr.arpa"</span>]
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 3. SSL Certificate Check -->
+    <section class="endpoint-section" id="ssl">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>SSL Certificate Check</h2>
+      </div>
+      <div class="endpoint-url">/api/ssl?domain=example.com</div>
+      <p class="endpoint-desc">Check the SSL/TLS certificate for any domain. Returns certificate details including issuer, expiry date, subject alternative names, and protocol information.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>domain<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>The domain to check SSL certificate for (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/ssl?domain=example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"domain"</span>: <span class="string">"example.com"</span>,
+  <span class="key">"valid"</span>: <span class="bool">true</span>,
+  <span class="key">"issuer"</span>: {
+    <span class="key">"organization"</span>: <span class="string">"DigiCert Inc"</span>,
+    <span class="key">"commonName"</span>: <span class="string">"DigiCert TLS RSA SHA256 2020 CA1"</span>
+  },
+  <span class="key">"subject"</span>: {
+    <span class="key">"commonName"</span>: <span class="string">"www.example.org"</span>
+  },
+  <span class="key">"validFrom"</span>: <span class="string">"2024-01-30T00:00:00.000Z"</span>,
+  <span class="key">"validTo"</span>: <span class="string">"2025-03-01T23:59:59.000Z"</span>,
+  <span class="key">"daysRemaining"</span>: <span class="number">341</span>,
+  <span class="key">"san"</span>: [
+    <span class="string">"www.example.org"</span>,
+    <span class="string">"example.com"</span>,
+    <span class="string">"example.org"</span>
+  ],
+  <span class="key">"protocol"</span>: <span class="string">"TLSv1.3"</span>,
+  <span class="key">"serialNumber"</span>: <span class="string">"0F:BE:08:B0:85:4D:05:73:..."</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 4. HTTP Headers -->
+    <section class="endpoint-section" id="headers">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>HTTP Headers Analysis</h2>
+      </div>
+      <div class="endpoint-url">/api/headers?url=https://example.com</div>
+      <p class="endpoint-desc">Fetch and analyze HTTP response headers for any URL. Useful for inspecting security headers, caching policies, server configuration, and content settings.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>url<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>Full URL to fetch headers from (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">https://example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/headers?url=https://example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"url"</span>: <span class="string">"https://example.com"</span>,
+  <span class="key">"statusCode"</span>: <span class="number">200</span>,
+  <span class="key">"headers"</span>: {
+    <span class="key">"content-type"</span>: <span class="string">"text/html; charset=UTF-8"</span>,
+    <span class="key">"content-length"</span>: <span class="string">"1256"</span>,
+    <span class="key">"server"</span>: <span class="string">"ECS (dce/26CD)"</span>,
+    <span class="key">"cache-control"</span>: <span class="string">"max-age=604800"</span>,
+    <span class="key">"x-frame-options"</span>: <span class="string">"DENY"</span>,
+    <span class="key">"strict-transport-security"</span>: <span class="string">"max-age=31536000"</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 5. WHOIS -->
+    <section class="endpoint-section" id="whois">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>WHOIS Lookup</h2>
+      </div>
+      <div class="endpoint-url">/api/whois?domain=example.com</div>
+      <p class="endpoint-desc">Retrieve WHOIS domain registration data. Returns registrar, creation date, expiry, nameservers, and status codes.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>domain<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>The domain to look up WHOIS data for (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/whois?domain=example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"domain"</span>: <span class="string">"example.com"</span>,
+  <span class="key">"registrar"</span>: <span class="string">"RESERVED-Internet Assigned Numbers Authority"</span>,
+  <span class="key">"createdDate"</span>: <span class="string">"1995-08-14T04:00:00Z"</span>,
+  <span class="key">"expiryDate"</span>: <span class="string">"2025-08-13T04:00:00Z"</span>,
+  <span class="key">"updatedDate"</span>: <span class="string">"2024-08-14T07:01:38Z"</span>,
+  <span class="key">"nameservers"</span>: [
+    <span class="string">"a.iana-servers.net"</span>,
+    <span class="string">"b.iana-servers.net"</span>
+  ],
+  <span class="key">"status"</span>: [
+    <span class="string">"clientDeleteProhibited"</span>,
+    <span class="string">"clientTransferProhibited"</span>,
+    <span class="string">"clientUpdateProhibited"</span>
+  ]
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 6. Redirect Tracer -->
+    <section class="endpoint-section" id="redirect">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>Redirect Chain Tracer</h2>
+      </div>
+      <div class="endpoint-url">/api/redirect?url=https://example.com</div>
+      <p class="endpoint-desc">Trace the full HTTP redirect chain for a URL. See every hop, status code, and the final destination. Useful for SEO auditing and debugging redirect loops.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>url<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>The URL to trace redirects for (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">https://example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/redirect?url=https://example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"url"</span>: <span class="string">"https://example.com"</span>,
+  <span class="key">"redirectCount"</span>: <span class="number">1</span>,
+  <span class="key">"chain"</span>: [
+    {
+      <span class="key">"url"</span>: <span class="string">"https://example.com"</span>,
+      <span class="key">"statusCode"</span>: <span class="number">301</span>,
+      <span class="key">"statusText"</span>: <span class="string">"Moved Permanently"</span>,
+      <span class="key">"redirectTo"</span>: <span class="string">"https://www.example.com/"</span>
+    },
+    {
+      <span class="key">"url"</span>: <span class="string">"https://www.example.com/"</span>,
+      <span class="key">"statusCode"</span>: <span class="number">200</span>,
+      <span class="key">"statusText"</span>: <span class="string">"OK"</span>,
+      <span class="key">"redirectTo"</span>: <span class="null">null</span>
+    }
+  ],
+  <span class="key">"finalUrl"</span>: <span class="string">"https://www.example.com/"</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 7. Status Checker -->
+    <section class="endpoint-section" id="status">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>Website Status Checker</h2>
+      </div>
+      <div class="endpoint-url">/api/status?url=https://example.com</div>
+      <p class="endpoint-desc">Check if a website is up or down. Returns status code, response time, server info, and IP address. Useful for uptime monitoring and availability checks.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>url<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>Full URL to check (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">https://example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/status?url=https://example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"url"</span>: <span class="string">"https://example.com"</span>,
+  <span class="key">"isUp"</span>: <span class="bool">true</span>,
+  <span class="key">"statusCode"</span>: <span class="number">200</span>,
+  <span class="key">"statusText"</span>: <span class="string">"OK"</span>,
+  <span class="key">"responseTimeMs"</span>: <span class="number">142</span>,
+  <span class="key">"server"</span>: <span class="string">"ECS (dce/26CD)"</span>,
+  <span class="key">"ipAddress"</span>: <span class="string">"93.184.216.34"</span>,
+  <span class="key">"contentType"</span>: <span class="string">"text/html; charset=UTF-8"</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 8. Email Validation -->
+    <section class="endpoint-section" id="email-validate">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>Email Validation</h2>
+      </div>
+      <div class="endpoint-url">/api/email-validate?email=user@example.com</div>
+      <p class="endpoint-desc">Validate an email address. Checks syntax validity, verifies the domain has MX records, and confirms the domain can receive mail.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>email<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>The email address to validate (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">user@example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/email-validate?email=user@example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"email"</span>: <span class="string">"user@example.com"</span>,
+  <span class="key">"valid"</span>: <span class="bool">true</span>,
+  <span class="key">"syntaxValid"</span>: <span class="bool">true</span>,
+  <span class="key">"domain"</span>: <span class="string">"example.com"</span>,
+  <span class="key">"mxRecords"</span>: [
+    {
+      <span class="key">"priority"</span>: <span class="number">10</span>,
+      <span class="key">"exchange"</span>: <span class="string">"mail.example.com"</span>
+    }
+  ],
+  <span class="key">"hasMx"</span>: <span class="bool">true</span>,
+  <span class="key">"canReceiveMail"</span>: <span class="bool">true</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- 9. Tech Detection -->
+    <section class="endpoint-section" id="tech-detect">
+      <div class="endpoint-header">
+        <span class="endpoint-method">GET</span>
+        <h2>Technology Stack Detection</h2>
+      </div>
+      <div class="endpoint-url">/api/tech-detect?url=https://example.com</div>
+      <p class="endpoint-desc">Detect the technology stack used by any website. Identifies frameworks, CMS platforms, CDNs, analytics tools, JavaScript libraries, and security headers.</p>
+
+      <div class="params-section">
+        <h3>Parameters</h3>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>url<span class="param-required">Required</span></td>
+              <td><span class="param-type">string</span></td>
+              <td>Full URL to analyze (e.g. <code style="font-family: var(--mono); font-size: 0.8rem;">https://example.com</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="example-section">
+        <h3>Example Request</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>curl</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><span class="cmd">curl</span> "https://65-109-129-230.sslip.io/api/tech-detect?url=https://example.com"</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>Example Response</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>200 OK</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"url"</span>: <span class="string">"https://example.com"</span>,
+  <span class="key">"technologies"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="string">"Nginx"</span>,
+      <span class="key">"category"</span>: <span class="string">"Web Server"</span>,
+      <span class="key">"confidence"</span>: <span class="number">100</span>
+    },
+    {
+      <span class="key">"name"</span>: <span class="string">"React"</span>,
+      <span class="key">"category"</span>: <span class="string">"JavaScript Framework"</span>,
+      <span class="key">"confidence"</span>: <span class="number">95</span>
+    },
+    {
+      <span class="key">"name"</span>: <span class="string">"Google Analytics"</span>,
+      <span class="key">"category"</span>: <span class="string">"Analytics"</span>,
+      <span class="key">"confidence"</span>: <span class="number">100</span>
+    },
+    {
+      <span class="key">"name"</span>: <span class="string">"Cloudflare"</span>,
+      <span class="key">"category"</span>: <span class="string">"CDN"</span>,
+      <span class="key">"confidence"</span>: <span class="number">90</span>
+    }
+  ],
+  <span class="key">"securityHeaders"</span>: {
+    <span class="key">"x-frame-options"</span>: <span class="bool">true</span>,
+    <span class="key">"strict-transport-security"</span>: <span class="bool">true</span>,
+    <span class="key">"content-security-policy"</span>: <span class="bool">false</span>,
+    <span class="key">"x-content-type-options"</span>: <span class="bool">true</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="endpoint-divider">
+
+    <!-- Error Responses -->
+    <section class="endpoint-section" id="errors">
+      <div class="endpoint-header">
+        <h2>Error Responses</h2>
+      </div>
+      <p class="endpoint-desc">All endpoints return consistent error responses. Below are the common error formats you may encounter.</p>
+
+      <div class="response-section">
+        <h3>400 Bad Request &mdash; Missing Parameter</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>400 Bad Request</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"error"</span>: <span class="string">"Missing required parameter: domain"</span>
+}</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>429 Too Many Requests &mdash; Rate Limited</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>429 Too Many Requests</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"error"</span>: <span class="string">"Rate limit exceeded. Try again in 60 seconds."</span>
+}</pre>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <h3>500 Internal Server Error</h3>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span>500 Internal Server Error</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre>{
+  <span class="key">"error"</span>: <span class="string">"Internal server error"</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ad Slot -->
+    <div id="ad-slot-bottom" class="ad-container" style="text-align:center; padding: 24px 0; min-height: 90px;">
+      <!-- AdSense code will be inserted here once account is approved -->
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; Free developer tools API. No authentication required.</div>
+      <div style="font-size: 0.8rem;"><a href="about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+
+  <script>
+    function copyCode(btn) {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      const text = pre.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.color = 'var(--success)';
+        btn.style.borderColor = 'var(--success)';
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 2000);
+      });
+    }
+  </script>
+  <script src="js/monetization.js"></script>
+</body>
+</html>
