@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Tokens Explained: How to Decode and Understand JSON Web Tokens - ZeroKit.dev</title>
+  <meta name="description" content="Learn how JWT tokens work: the three-part structure (header, payload, signature), how signing algorithms protect integrity, and how to decode JWTs for debugging.">
+  <link rel="canonical" href="https://zerokit.dev/blog/jwt-token-explained.html">
+  <meta property="og:title" content="JWT Tokens Explained: How to Decode and Understand JSON Web Tokens">
+  <meta property="og:description" content="Learn how JWT tokens work: the three-part structure, signing algorithms, and how to decode JWTs for debugging.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://zerokit.dev/blog/jwt-token-explained.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;530&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; }
+    .article h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+    .article .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .article h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 14px; color: var(--text); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+    .article p { color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+    .article ul, .article ol { color: var(--text-muted); line-height: 1.8; margin: 0 0 16px 20px; font-size: 0.95rem; }
+    .article li { margin-bottom: 6px; }
+    .article code { font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; color: var(--accent); }
+    .article pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-bottom: 20px; }
+    .article pre code { background: transparent; padding: 0; color: var(--text); font-size: 0.85rem; line-height: 1.7; }
+    .article .cta-box { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 24px; text-align: center; margin: 32px 0; }
+    .article .cta-box p { color: var(--text); margin-bottom: 12px; }
+    .article .cta-box a { display: inline-block; background: var(--accent); color: white; padding: 10px 24px; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+    .article .cta-box a:hover { background: var(--accent-hover); }
+    .faq { margin-top: 40px; }
+    .faq h2 { margin-bottom: 20px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .faq-item h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text); }
+    .faq-item p { margin: 0; }
+    .related { margin-top: 40px; }
+    .related h2 { margin-bottom: 16px; }
+    .related-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .related-links a { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.85rem; color: var(--text); }
+    .related-links a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "JWT Tokens Explained: How to Decode and Understand JSON Web Tokens",
+    "description": "Learn how JWT tokens work: the three-part structure (header, payload, signature), how signing algorithms protect integrity, and how to decode JWTs for debugging.",
+    "author": {"@type": "Organization", "name": "ZeroKit.dev"},
+    "publisher": {"@type": "Organization", "name": "ZeroKit.dev", "url": "https://zerokit.dev"},
+    "datePublished": "2026-03-25",
+    "dateModified": "2026-03-25",
+    "mainEntityOfPage": "https://zerokit.dev/blog/jwt-token-explained.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can I decode a JWT without the secret key?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The header and payload of a JWT are only Base64url-encoded, not encrypted. Anyone can decode them and read the claims. The secret key is only needed to verify the signature, which proves the token was issued by a trusted party and has not been tampered with. Never store sensitive data in a JWT payload."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between HS256 and RS256?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HS256 (HMAC-SHA256) is a symmetric algorithm: the same secret key is used to sign and verify the token. RS256 (RSA-SHA256) is asymmetric: a private key signs the token and a public key verifies it. RS256 is preferred in distributed systems where multiple services need to verify tokens without sharing a secret."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I handle expired JWT tokens?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Check the 'exp' (expiration) claim in the payload. If the current Unix timestamp exceeds the exp value, the token is expired and should be rejected. Most JWT libraries handle this automatically. To avoid disrupting users, implement a refresh token flow: issue short-lived access tokens (15 minutes) alongside a longer-lived refresh token that can request a new access token."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav>
+        <a href="../">Tools</a>
+        <a href="../api-docs.html">API</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Blog</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="article">
+      <a href="./" class="back-link">&larr; Back to Blog</a>
+      <h1>JWT Tokens Explained: Structure, Security, and Decoding</h1>
+      <div class="meta">March 25, 2026 &middot; 7 min read</div>
+
+      <p>JSON Web Tokens are everywhere. If you have built or consumed a modern web API, you have almost certainly run into one. That long dot-separated string in an <code>Authorization: Bearer ...</code> header? That is a JWT. Knowing how it works helps you debug auth issues, catch security misconfigurations, and make better decisions when designing token-based systems.</p>
+
+      <h2>What Is a JWT?</h2>
+
+      <p>A JSON Web Token (JWT, pronounced "jot") is a compact, URL-safe way to represent claims between two parties. <a href="https://datatracker.ietf.org/doc/html/rfc7519" rel="nofollow">RFC 7519</a> defines the spec. In practice, JWTs show up most often in authentication flows: user logs in, server issues a JWT, client sends it with every subsequent request to prove who it is.</p>
+
+      <p>The key difference from session-based auth is that a JWT is self-contained. The token carries everything the server needs to authenticate and authorize the request. No session store, no database lookup. That makes JWTs a natural fit for stateless architectures, microservices, and serverless functions.</p>
+
+      <h2>The Three Parts of a JWT</h2>
+
+      <p>A JWT consists of three Base64url-encoded segments separated by dots:</p>
+
+<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsaWNlIiwiaWF0IjoxNjE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+|_________ Header _________|._________ Payload ___________|._______ Signature ________|</code></pre>
+
+      <h3>1. Header</h3>
+      <p>The header is a JSON object describing how the token is signed:</p>
+<pre><code>{
+  "alg": "HS256",
+  "typ": "JWT"
+}</code></pre>
+      <p><code>alg</code> specifies the signing algorithm (HS256, RS256, ES256, etc.) and <code>typ</code> is always "JWT". Base64url-encode this object and you get the first segment of the token.</p>
+
+      <h3>2. Payload (Claims)</h3>
+      <p>The payload contains claims, which are just statements about the user and metadata. The spec defines three categories. Registered claims are the standard optional ones: <code>iss</code> (issuer), <code>sub</code> (subject), <code>aud</code> (audience), <code>exp</code> (expiration), <code>nbf</code> (not before), <code>iat</code> (issued at), and <code>jti</code> (unique ID). Public claims come from the IANA JWT Claims Registry or use collision-resistant URIs. Private claims are whatever custom fields you and the consumer agree on, like <code>role</code>, <code>org_id</code>, or <code>permissions</code>.</p>
+
+      <p>Example payload:</p>
+<pre><code>{
+  "sub": "user_8x4k2",
+  "name": "Alice",
+  "role": "admin",
+  "iat": 1616239022,
+  "exp": 1616242622
+}</code></pre>
+
+      <p>One thing I see people get tripped up on: the payload is encoded, not encrypted. Anyone with the token can decode it and read every claim. Do not put passwords, credit card numbers, or anything sensitive in there.</p>
+
+      <h3>3. Signature</h3>
+      <p>The signature is what prevents tampering. For HS256, it is computed like this:</p>
+<pre><code>HMAC-SHA256(
+  base64url(header) + "." + base64url(payload),
+  secret
+)</code></pre>
+      <p>When the server receives a JWT, it recomputes this signature using its secret key and compares the result to the signature in the token. Match? The token is legit and unmodified. Mismatch? Rejected.</p>
+
+      <h2>Symmetric vs. Asymmetric Signing</h2>
+
+      <h3>HS256 (Symmetric)</h3>
+      <p>Both the token issuer and verifier share the same secret key. Simple to set up, but it gets awkward when multiple services need to verify tokens. You end up distributing the secret everywhere, which increases the attack surface.</p>
+
+      <h3>RS256 / ES256 (Asymmetric)</h3>
+      <p>The issuer signs with a private key and verifiers only need the public key. This is the standard approach when an identity provider (Auth0, Keycloak, AWS Cognito) issues tokens and many downstream services verify them. The public key is typically published at a JWKS (JSON Web Key Set) endpoint like <code>/.well-known/jwks.json</code>.</p>
+
+      <h2>Common JWT Security Pitfalls</h2>
+
+      <h3>The "alg: none" Attack</h3>
+      <p>Some JWT libraries will happily accept tokens with <code>"alg": "none"</code>, meaning no signature verification at all. An attacker can forge any claims they want. Reject <code>alg: none</code> in production and explicitly specify the expected algorithm when verifying.</p>
+
+      <h3>Algorithm Confusion</h3>
+      <p>Say your server expects RS256 but an attacker sends an HS256 token signed with the public key (which is, well, public). A poorly written library might verify it as valid. The fix is simple: hardcode the expected algorithm rather than trusting the token's header.</p>
+
+      <h3>Missing Expiration</h3>
+      <p>Tokens without an <code>exp</code> claim never expire. If one gets stolen, it grants permanent access. Set a short expiration (15 minutes for access tokens) and use refresh tokens for long-lived sessions.</p>
+
+      <h3>Storing JWTs in localStorage</h3>
+      <p>Any JavaScript running on the page can read <code>localStorage</code>, which makes tokens vulnerable to XSS attacks. For browser-based apps, storing JWTs in <code>httpOnly</code> cookies is usually a better call since JavaScript cannot access them.</p>
+
+      <h2>How to Decode a JWT for Debugging</h2>
+
+      <p>The header and payload are just Base64url-encoded JSON, so you can decode them in any language:</p>
+
+<pre><code># Bash (using jq)
+echo "eyJhbGciOiJIUzI1NiJ9" | base64 -d | jq .
+
+// JavaScript
+JSON.parse(atob("eyJhbGciOiJIUzI1NiJ9"))</code></pre>
+
+      <p>That said, when I am in the middle of debugging something, I usually just paste the token into an online decoder. Faster than writing code, and you can check expiration times at a glance.</p>
+
+      <div class="cta-box">
+        <p>Paste a JWT and instantly see the decoded header, payload, and expiration status. No data is sent to any server.</p>
+        <a href="../tools/jwt.html">Try the Free JWT Decoder</a>
+      </div>
+
+      <h2>When Not to Use JWTs</h2>
+
+      <p>JWTs are not always the right tool. Plain old server-side sessions with a session ID in a cookie are simpler, easier to revoke, and perfectly fine for monolithic apps. I would reach for JWTs when you actually need stateless auth across multiple services or when you are building a public API that third parties consume. Otherwise, keep it simple.</p>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>Can I decode a JWT without the secret key?</h3>
+          <p>Yes. The header and payload are only Base64url-encoded, not encrypted. Anyone can decode them and read the claims. The secret key is only needed to verify the signature, which proves the token was issued by a trusted party and has not been tampered with. Never store sensitive data in a JWT payload.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>What is the difference between HS256 and RS256?</h3>
+          <p>HS256 (HMAC-SHA256) is a symmetric algorithm: the same secret key is used to sign and verify the token. RS256 (RSA-SHA256) is asymmetric: a private key signs the token and a public key verifies it. RS256 is preferred in distributed systems where multiple services need to verify tokens without sharing a secret.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>How do I handle expired JWT tokens?</h3>
+          <p>Check the <code>exp</code> (expiration) claim in the payload. If the current Unix timestamp exceeds the exp value, the token is expired and should be rejected. To avoid disrupting users, implement a refresh token flow: issue short-lived access tokens (15 minutes) alongside a longer-lived refresh token that can request a new access token.</p>
+        </div>
+      </section>
+
+      <section class="related">
+        <h2>Related Tools</h2>
+        <div class="related-links">
+          <a href="../tools/jwt.html">JWT Decoder</a>
+          <a href="../tools/jwtbuilder.html">JWT Builder</a>
+          <a href="../tools/base64.html">Base64 Encoder/Decoder</a>
+          <a href="../tools/hash.html">Hash Generator</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; 105 free developer tools. All processing happens in your browser. No data leaves your machine.</div>
+      <div style="font-size: 0.8rem;"><a href="../about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="../privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="../impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

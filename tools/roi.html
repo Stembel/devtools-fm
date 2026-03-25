@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROI Calculator — Return on Investment & Annualized ROI | ZeroKit.dev</title>
+  <meta name="description" content="Free ROI calculator: calculate return on investment, annualized ROI, net profit, and break-even analysis. Compare investment performance instantly.">
+  <link rel="canonical" href="https://zerokit.dev/tools/roi.html">
+  <meta property="og:title" content="ROI Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Calculate return on investment, annualized ROI, and net profit. Free investment ROI calculator.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>ROI Calculator</h1>
+    <p class="description">Calculate return on investment, annualized ROI, and net profit from any investment.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Investment Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Amount Invested ($)</label>
+            <input type="number" id="invested" value="10000" min="0" step="100">
+          </div>
+          <div class="form-group">
+            <label>Amount Returned ($)</label>
+            <input type="number" id="returned" value="15000" min="0" step="100">
+          </div>
+          <div class="form-group">
+            <label>Investment Duration (years)</label>
+            <input type="number" id="years" value="3" min="0.1" max="100" step="0.5">
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Results</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="roi">0%</div>
+            <div class="result-label">Total ROI</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="annualRoi">0%</div>
+              <div class="label">Annualized ROI</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="netProfit">$0</div>
+              <div class="label">Net Profit</div>
+            </div>
+            <div class="result-item" style="grid-column:1/-1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div class="label">Performance</div>
+                  <div id="perfText" style="color:var(--text);font-size:0.85rem;margin-top:4px;">—</div>
+                </div>
+                <div id="perfIcon" style="font-size:2rem;">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>Understanding ROI</h2>
+      <p>Return on Investment (ROI) measures the profitability of an investment relative to its cost. It's one of the most widely used financial metrics for evaluating investment performance.</p>
+      <p><strong>ROI Formula:</strong> ROI = (Net Profit / Cost of Investment) x 100</p>
+      <p><strong>Annualized ROI Formula:</strong> Annualized ROI = ((1 + ROI)^(1/n) - 1) x 100, where n = number of years</p>
+      <ul>
+        <li>Annualized ROI normalizes returns to a yearly rate, making it easy to compare investments of different durations</li>
+        <li>A positive ROI means the investment gained value; negative means a loss</li>
+        <li>The S&P 500 has historically returned about 10% annually (before inflation)</li>
+        <li>Always consider inflation: a 5% return with 3% inflation is only ~2% real return</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+    function calc() {
+      var invested = parseFloat(document.getElementById('invested').value) || 0;
+      var returned = parseFloat(document.getElementById('returned').value) || 0;
+      var years = parseFloat(document.getElementById('years').value) || 1;
+
+      var netProfit = returned - invested;
+      var roi = invested > 0 ? (netProfit / invested) * 100 : 0;
+      var annualRoi = 0;
+      if (invested > 0 && returned > 0 && years > 0) {
+        annualRoi = (Math.pow(returned / invested, 1 / years) - 1) * 100;
+      }
+
+      document.getElementById('roi').textContent = roi.toFixed(1) + '%';
+      document.getElementById('roi').style.color = roi >= 0 ? 'var(--accent)' : 'var(--error)';
+      document.getElementById('annualRoi').textContent = annualRoi.toFixed(1) + '%';
+      document.getElementById('annualRoi').style.color = annualRoi >= 0 ? 'var(--accent)' : 'var(--error)';
+      document.getElementById('netProfit').textContent = fmt(netProfit);
+      document.getElementById('netProfit').style.color = netProfit >= 0 ? 'var(--accent)' : 'var(--error)';
+
+      var perfText, perfIcon;
+      if (roi > 100) { perfText = 'Excellent — doubled or more'; perfIcon = '\u{1F680}'; }
+      else if (roi > 50) { perfText = 'Strong return'; perfIcon = '\u{1F4AA}'; }
+      else if (roi > 10) { perfText = 'Solid return'; perfIcon = '\u{2705}'; }
+      else if (roi > 0) { perfText = 'Modest gain'; perfIcon = '\u{1F44D}'; }
+      else if (roi === 0) { perfText = 'Break even'; perfIcon = '\u{2796}'; }
+      else { perfText = 'Loss on investment'; perfIcon = '\u{1F4C9}'; }
+
+      document.getElementById('perfText').textContent = perfText;
+      document.getElementById('perfIcon').textContent = perfIcon;
+    }
+
+    document.querySelectorAll('#invested,#returned,#years').forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+    calc();
+  })();
+  </script>
+</body>
+</html>

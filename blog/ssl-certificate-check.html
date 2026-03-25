@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Check an SSL Certificate: A Developer's Guide to TLS Verification - ZeroKit.dev</title>
+  <meta name="description" content="Learn what SSL/TLS certificates do, how to check certificate validity, common certificate errors and how to fix them, and how to verify certificates from the command line and online.">
+  <link rel="canonical" href="https://zerokit.dev/blog/ssl-certificate-check.html">
+  <meta property="og:title" content="How to Check an SSL Certificate: A Developer's Guide to TLS Verification">
+  <meta property="og:description" content="Learn what SSL/TLS certificates do, how to verify them, and how to diagnose common certificate errors before they hit your users.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://zerokit.dev/blog/ssl-certificate-check.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;530&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; }
+    .article h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+    .article .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .article h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 14px; color: var(--text); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+    .article p { color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+    .article ul, .article ol { color: var(--text-muted); line-height: 1.8; margin: 0 0 16px 20px; font-size: 0.95rem; }
+    .article li { margin-bottom: 6px; }
+    .article code { font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; color: var(--accent); }
+    .article pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-bottom: 20px; }
+    .article pre code { background: transparent; padding: 0; color: var(--text); font-size: 0.85rem; line-height: 1.7; }
+    .article .cta-box { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 24px; text-align: center; margin: 32px 0; }
+    .article .cta-box p { color: var(--text); margin-bottom: 12px; }
+    .article .cta-box a { display: inline-block; background: var(--accent); color: white; padding: 10px 24px; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+    .article .cta-box a:hover { background: var(--accent-hover); }
+    .faq { margin-top: 40px; }
+    .faq h2 { margin-bottom: 20px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .faq-item h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text); }
+    .faq-item p { margin: 0; }
+    .related { margin-top: 40px; }
+    .related h2 { margin-bottom: 16px; }
+    .related-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .related-links a { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.85rem; color: var(--text); }
+    .related-links a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How to Check an SSL Certificate: A Developer's Guide to TLS Verification",
+    "description": "Learn what SSL/TLS certificates do, how to verify them, and how to diagnose common certificate errors before they hit your users.",
+    "author": {"@type": "Organization", "name": "ZeroKit.dev"},
+    "publisher": {"@type": "Organization", "name": "ZeroKit.dev", "url": "https://zerokit.dev"},
+    "datePublished": "2026-03-25",
+    "dateModified": "2026-03-25",
+    "mainEntityOfPage": "https://zerokit.dev/blog/ssl-certificate-check.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between SSL and TLS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SSL (Secure Sockets Layer) is the predecessor of TLS (Transport Layer Security). SSL 3.0 was deprecated in 2015 due to security vulnerabilities. Modern 'SSL certificates' actually use TLS 1.2 or TLS 1.3. The term 'SSL' persists in common usage, but the protocol in use is TLS. When you buy an 'SSL certificate,' you are getting a certificate that works with TLS."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often do SSL certificates need to be renewed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most SSL certificates are valid for 1 year (398 days maximum as of 2020). Let's Encrypt certificates are valid for 90 days but can be auto-renewed with certbot or similar ACME clients. Set up automatic renewal and monitoring so you never get surprised by an expiry. Some certificate authorities are moving toward even shorter validity periods (90 days) for all certificates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is a free SSL certificate from Let's Encrypt as secure as a paid one?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, from a cryptographic standpoint. A Let's Encrypt certificate provides the same encryption strength as a paid certificate. The difference is in validation level: Let's Encrypt only offers Domain Validation (DV). Paid certificates can include Organization Validation (OV) or Extended Validation (EV), which verify the legal identity of the organization. For most websites and APIs, a free DV certificate is perfectly sufficient."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav>
+        <a href="../">Tools</a>
+        <a href="../api-docs.html">API</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Blog</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="article">
+      <a href="./" class="back-link">&larr; Back to Blog</a>
+      <h1>How to Check an SSL Certificate: A Developer's Guide to TLS Verification</h1>
+      <div class="meta">March 25, 2026 &middot; 6 min read</div>
+
+      <p>An expired or misconfigured SSL certificate does not just show a browser warning. It breaks trust, kills conversions, and can take down API integrations that enforce certificate validation. I've been paged at 3 AM over a cert that nobody remembered to renew. Monitoring your certificates proactively is boring work, but it saves you from exactly that kind of incident.</p>
+
+      <h2>What SSL/TLS Certificates Actually Do</h2>
+
+      <p>An SSL/TLS certificate does two things. First, it verifies identity: the certificate proves that the server you are connecting to is legitimately operated by whoever owns the domain, because a Certificate Authority (CA) has vouched for it by signing the cert. Second, it sets up encryption. During the TLS handshake, the certificate's public key establishes an encrypted connection, so all data exchanged afterward is protected from eavesdropping and tampering.</p>
+
+      <p>Without a valid certificate, browsers show a security warning and most users leave. Search engines penalize your site too. For APIs, invalid certificates cause connection failures that cascade through your service's dependency chain.</p>
+
+      <h2>Anatomy of an SSL Certificate</h2>
+
+      <p>When you inspect a certificate (click the padlock icon in your browser), you'll see several fields. The Common Name (CN) and Subject Alternative Names (SANs) list the domain(s) the certificate covers; a wildcard certificate for <code>*.example.com</code> covers all subdomains. The Issuer is the Certificate Authority that signed it (Let's Encrypt, DigiCert, Sectigo, etc.). The Valid From and Valid To dates define the certificate's validity window, and outside that window, the certificate gets rejected. You'll also find a Serial Number used for revocation checking, a Signature Algorithm (typically RSA with SHA-256 or ECDSA; older SHA-1 certificates are no longer trusted), and the Public Key itself (RSA 2048-bit or ECDSA P-256 are current standards).</p>
+
+      <h2>How to Check a Certificate from the Command Line</h2>
+
+      <p>The <code>openssl</code> command is your go-to tool for certificate inspection.</p>
+
+<pre><code># Connect and display the certificate
+openssl s_client -connect example.com:443 -servername example.com &lt; /dev/null 2&gt;/dev/null | openssl x509 -noout -text
+
+# Check expiration date only
+openssl s_client -connect example.com:443 -servername example.com &lt; /dev/null 2&gt;/dev/null | openssl x509 -noout -dates
+
+# Check which domains the certificate covers
+openssl s_client -connect example.com:443 -servername example.com &lt; /dev/null 2&gt;/dev/null | openssl x509 -noout -ext subjectAltName</code></pre>
+
+      <p>The <code>-servername</code> flag matters for servers that host multiple domains (SNI). Without it, you might get the wrong certificate back.</p>
+
+      <p>For a quick check using <code>curl</code>:</p>
+<pre><code># Show certificate details during a request
+curl -vI https://example.com 2>&1 | grep -A 6 "Server certificate"</code></pre>
+
+      <h2>Common Certificate Errors and How to Fix Them</h2>
+
+      <h3>Certificate Expired</h3>
+      <p>This is the one you'll hit most often. The certificate's "Not After" date has passed. Renew the certificate. If you use Let's Encrypt with certbot, check that the cron job or systemd timer for <code>certbot renew</code> is actually running. Test with <code>certbot renew --dry-run</code>.</p>
+
+      <h3>Certificate Name Mismatch</h3>
+      <p>The domain in the browser does not match any of the certificate's SANs. This happens when you access a site via a subdomain not covered by the cert, or when you set up a new domain and forgot to issue a new one. Issue a certificate that includes all required domains, or use a wildcard certificate.</p>
+
+      <h3>Intermediate Certificate Missing</h3>
+      <p>Browsers need the full certificate chain: your server's certificate plus the intermediate certificate(s) linking it to the root CA. If the intermediate is missing, some browsers work fine because they have the intermediate cached, while others fail. Mobile browsers and API clients are the usual victims. Configure your web server to serve the full chain. Most CAs provide a "full chain" or "bundle" file for this.</p>
+
+      <h3>Self-Signed Certificate</h3>
+      <p>The certificate was not signed by a trusted CA. Fine for development, unacceptable in production. Use a certificate from a trusted CA. Let's Encrypt is free and automated.</p>
+
+      <h3>Mixed Content</h3>
+      <p>Your page loads over HTTPS but includes resources (images, scripts, stylesheets) over HTTP. Browsers block or warn about these requests. Make sure all resource URLs use HTTPS or protocol-relative URLs.</p>
+
+      <div class="cta-box">
+        <p>Enter any domain and see the full certificate chain, expiration date, issuer, SANs, and protocol details instantly.</p>
+        <a href="../tools/ssl-checker.html">Try the Free SSL Certificate Checker</a>
+      </div>
+
+      <h2>Automated Certificate Monitoring</h2>
+
+      <p>Checking manually does not scale. You'll want to set up ongoing monitoring, and there are a few solid ways to do it. If you're on Let's Encrypt, certbot handles auto-renewal through a cron job or systemd timer. Most uptime monitoring services like UptimeRobot, Pingdom, or Better Uptime can alert you when a certificate is approaching expiry. You can also write a simple cron job that runs <code>openssl s_client</code>, checks the expiry date against a threshold like 14 days, and fires alerts via email, Slack, or PagerDuty. If you're worried about unauthorized certificate issuance, keep an eye on Certificate Transparency Logs for your domain.</p>
+
+      <p>You can also monitor your site's overall health with our <a href="../tools/status-checker.html">Website Status Checker</a> and verify DNS configuration with the <a href="dns-lookup-explained.html">DNS Lookup tool</a>.</p>
+
+      <h2>SSL/TLS Best Practices for 2026</h2>
+
+      <p>Use TLS 1.3. It gives you faster handshakes and stronger security. Disable TLS 1.0 and 1.1 entirely; TLS 1.2 is acceptable as a fallback. Enable HSTS by adding the <code>Strict-Transport-Security</code> header, which tells browsers to always use HTTPS and prevents downgrade attacks. Consider ECDSA certificates over RSA since they use smaller keys and produce faster handshakes. A P-256 ECDSA certificate matches the security of RSA-3072. Set up OCSP stapling so your server includes the certificate's revocation status in the TLS handshake, removing the need for clients to contact the CA separately. And finally, monitor certificate expiry with alerts at 30, 14, and 7 days before it hits. Automate renewal wherever possible.</p>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>What is the difference between SSL and TLS?</h3>
+          <p>SSL (Secure Sockets Layer) is the predecessor of TLS (Transport Layer Security). SSL 3.0 was deprecated in 2015 due to security vulnerabilities. Modern "SSL certificates" actually use TLS 1.2 or 1.3. The term "SSL" persists in common usage, but the protocol in use is TLS.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>How often do SSL certificates need to be renewed?</h3>
+          <p>Most certificates are valid for 1 year (398 days maximum). Let's Encrypt certificates are valid for 90 days but can be auto-renewed with certbot. Set up automatic renewal and monitoring so you never get surprised by an expiry.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Is a free SSL certificate from Let's Encrypt as secure as a paid one?</h3>
+          <p>Yes, from a cryptographic standpoint. A Let's Encrypt certificate provides the same encryption strength as a paid certificate. The difference is in validation level: Let's Encrypt offers Domain Validation (DV) only. Paid certificates can include Organization Validation (OV) or Extended Validation (EV). For most websites and APIs, a free DV certificate is perfectly sufficient.</p>
+        </div>
+      </section>
+
+      <section class="related">
+        <h2>Related Tools</h2>
+        <div class="related-links">
+          <a href="../tools/ssl-checker.html">SSL Certificate Checker</a>
+          <a href="../tools/http-headers.html">HTTP Header Inspector</a>
+          <a href="../tools/dns-lookup.html">DNS Lookup</a>
+          <a href="../tools/status-checker.html">Website Status Checker</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; 105 free developer tools. All processing happens in your browser. No data leaves your machine.</div>
+      <div style="font-size: 0.8rem;"><a href="../about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="../privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="../impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

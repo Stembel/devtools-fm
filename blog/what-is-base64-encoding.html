@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What Is Base64 Encoding? How It Works, When to Use It, and Why - ZeroKit.dev</title>
+  <meta name="description" content="Understand Base64 encoding: how it converts binary data to ASCII text, real-world use cases like data URIs and email attachments, and when you should (and shouldn't) use it.">
+  <link rel="canonical" href="https://zerokit.dev/blog/what-is-base64-encoding.html">
+  <meta property="og:title" content="What Is Base64 Encoding? How It Works, When to Use It, and Why">
+  <meta property="og:description" content="Understand Base64 encoding: how it converts binary data to ASCII text, real-world use cases, and when you should (and shouldn't) use it.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://zerokit.dev/blog/what-is-base64-encoding.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;530&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; }
+    .article h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+    .article .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .article h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 14px; color: var(--text); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+    .article p { color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+    .article ul, .article ol { color: var(--text-muted); line-height: 1.8; margin: 0 0 16px 20px; font-size: 0.95rem; }
+    .article li { margin-bottom: 6px; }
+    .article code { font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; color: var(--accent); }
+    .article pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-bottom: 20px; }
+    .article pre code { background: transparent; padding: 0; color: var(--text); font-size: 0.85rem; line-height: 1.7; }
+    .article .cta-box { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 24px; text-align: center; margin: 32px 0; }
+    .article .cta-box p { color: var(--text); margin-bottom: 12px; }
+    .article .cta-box a { display: inline-block; background: var(--accent); color: white; padding: 10px 24px; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+    .article .cta-box a:hover { background: var(--accent-hover); }
+    .faq { margin-top: 40px; }
+    .faq h2 { margin-bottom: 20px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .faq-item h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text); }
+    .faq-item p { margin: 0; }
+    .related { margin-top: 40px; }
+    .related h2 { margin-bottom: 16px; }
+    .related-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .related-links a { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.85rem; color: var(--text); }
+    .related-links a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "What Is Base64 Encoding? How It Works, When to Use It, and Why",
+    "description": "Understand Base64 encoding: how it converts binary data to ASCII text, real-world use cases, and when you should (and shouldn't) use it.",
+    "author": {"@type": "Organization", "name": "ZeroKit.dev"},
+    "publisher": {"@type": "Organization", "name": "ZeroKit.dev", "url": "https://zerokit.dev"},
+    "datePublished": "2026-03-25",
+    "dateModified": "2026-03-25",
+    "mainEntityOfPage": "https://zerokit.dev/blog/what-is-base64-encoding.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Base64 encryption?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Base64 is an encoding scheme, not encryption. It is fully reversible by anyone without a key. It provides zero security. If you need to protect data, use encryption (AES, ChaCha20) or hashing (SHA-256). Base64 is only for encoding binary data into a text-safe format."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Base64 make data about 33% larger?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Base64 represents every 3 bytes of input as 4 ASCII characters. Each character uses 6 bits of information but takes up 8 bits in the encoded output. The ratio 4/3 = 1.333, meaning a ~33% size increase. Padding characters (=) may add a few extra bytes at the end."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When should I use Base64 encoding?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use Base64 when you need to embed binary data (images, files, certificates) inside a text-only context: JSON payloads, HTML data URIs, email attachments (MIME), XML documents, or environment variables. Avoid it when you can transmit binary data directly, since Base64 adds a 33% size overhead."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav>
+        <a href="../">Tools</a>
+        <a href="../api-docs.html">API</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Blog</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="article">
+      <a href="./" class="back-link">&larr; Back to Blog</a>
+      <h1>What Is Base64 Encoding? When and Why You Should Use It</h1>
+      <div class="meta">March 25, 2026 &middot; 6 min read</div>
+
+      <p>You've probably seen Base64 without knowing it. That long string of seemingly random letters in an email source. The <code>data:image/png;base64,...</code> block in a CSS file. The garbled middle section of a JWT. All Base64-encoded data. So what is Base64, and why does it exist?</p>
+
+      <h2>The Problem Base64 Solves</h2>
+
+      <p>Many protocols and data formats were designed to carry text, not arbitrary binary data. SMTP (email), JSON, XML, HTML attributes, URL query strings: they all expect printable ASCII characters. If you try to shove raw binary bytes (a JPEG image, a TLS certificate) directly into an email body, certain bytes get interpreted as control characters and the data gets mangled in transit.</p>
+
+      <p>Base64 fixes that. It takes any sequence of bytes and re-encodes it using 64 "safe" ASCII characters: <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>+</code>, and <code>/</code>, plus <code>=</code> for padding. The output is a text string that survives any text-only channel intact.</p>
+
+      <h2>How Base64 Works, Step by Step</h2>
+
+      <p>The encoding process is straightforward:</p>
+
+      <ol>
+        <li>Take 3 bytes (24 bits) of input data.</li>
+        <li>Split them into 4 groups of 6 bits. Each group has a value from 0 to 63.</li>
+        <li>Map each value to a character in the Base64 alphabet. Value 0 = <code>A</code>, value 25 = <code>Z</code>, value 26 = <code>a</code>, value 51 = <code>z</code>, value 52 = <code>0</code>, value 62 = <code>+</code>, value 63 = <code>/</code>.</li>
+        <li>If the input isn't a multiple of 3 bytes, pad the output with <code>=</code> characters. One leftover byte produces two Base64 characters plus <code>==</code>. Two leftover bytes produce three characters plus <code>=</code>.</li>
+      </ol>
+
+      <p>I find it helps to trace through a short example. Take the string "Hi" (two bytes: 0x48 0x69):</p>
+
+<pre><code>Binary:  01001000 01101001
+Grouped: 010010 000110 1001xx
+Values:  18     6      36 (padded)
+Base64:  S      G      k=
+
+Result:  "SGk="</code></pre>
+
+      <p>Decoding is the exact reverse: map characters back to 6-bit values, concatenate, and extract the original bytes.</p>
+
+      <h2>Where Base64 Shows Up in Practice</h2>
+
+      <h3>Email Attachments (MIME)</h3>
+      <p>When you attach a PDF to an email, your mail client Base64-encodes the file and embeds it in the MIME body with a <code>Content-Transfer-Encoding: base64</code> header. The recipient's client decodes it. This has been the standard approach since RFC 2045 in 1996.</p>
+
+      <h3>Data URIs in HTML and CSS</h3>
+      <p>Small images and fonts can be inlined directly into HTML or CSS to save an HTTP request:</p>
+<pre><code>&lt;img src="data:image/png;base64,iVBORw0KGgoAAAA..." /&gt;</code></pre>
+      <p>Works well for icons under a few KB. For larger images it's counterproductive, since Base64 adds 33% overhead and defeats browser caching.</p>
+
+      <h3>JSON Web Tokens (JWT)</h3>
+      <p>A JWT is three Base64url-encoded segments separated by dots. The header and payload are JSON objects; the third segment is the signature. Base64url replaces <code>+</code> with <code>-</code> and <code>/</code> with <code>_</code> to make the token URL-safe. More on that in the <a href="jwt-token-explained.html">JWT deep dive</a>.</p>
+
+      <h3>API Payloads</h3>
+      <p>APIs that accept file uploads via JSON often require the file to be Base64-encoded, since JSON can't carry raw binary. GitHub's Contents API is a typical example: you send file content as a Base64 string.</p>
+
+      <h3>Certificates and Keys</h3>
+      <p>PEM-encoded certificates (the ones starting with <code>-----BEGIN CERTIFICATE-----</code>) wrap Base64-encoded DER binary data. SSH public keys and PGP keys use the same approach.</p>
+
+      <h2>Base64 Is NOT Encryption</h2>
+
+      <p>This deserves its own heading because I still see people get it wrong. Base64 provides zero security. It's a reversible encoding, not encryption. Anyone can decode a Base64 string without a key. Don't use Base64 to "protect" passwords, tokens, or sensitive data. If you need confidentiality, use actual encryption (AES-256-GCM, ChaCha20-Poly1305). If you need to verify integrity, use a <a href="hash-functions-explained.html">cryptographic hash function</a>.</p>
+
+      <h2>The 33% Size Overhead</h2>
+
+      <p>Because 3 input bytes become 4 output characters, Base64 inflates data by about 33%. A 1 MB image becomes ~1.33 MB as Base64 text. For small payloads like icons or short certificates, that's fine. For large files, just use binary protocols: HTTP multipart, gRPC streams, or a plain file upload endpoint.</p>
+
+      <h2>Variants of Base64</h2>
+
+      <p>There are a few variants you'll run into. Standard Base64 (RFC 4648) uses the alphabet <code>A-Za-z0-9+/</code> with <code>=</code> padding. Base64url swaps <code>+</code> for <code>-</code> and <code>/</code> for <code>_</code>, which makes it safe for URLs, JWTs, and filenames. MIME Base64 (RFC 2045) uses the standard alphabet but inserts line breaks every 76 characters for email compatibility.</p>
+
+      <div class="cta-box">
+        <p>Need to encode or decode a Base64 string? Supports standard and URL-safe variants, runs entirely in your browser.</p>
+        <a href="../tools/base64.html">Base64 Encoder/Decoder</a>
+      </div>
+
+      <h2>Quick Reference: Base64 in Code</h2>
+
+<pre><code># Python
+import base64
+encoded = base64.b64encode(b"Hello").decode()  # "SGVsbG8="
+decoded = base64.b64decode("SGVsbG8=")         # b"Hello"
+
+// JavaScript (browser)
+btoa("Hello")     // "SGVsbG8="
+atob("SGVsbG8=")  // "Hello"
+
+// Node.js
+Buffer.from("Hello").toString("base64")           // "SGVsbG8="
+Buffer.from("SGVsbG8=", "base64").toString()      // "Hello"</code></pre>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>Is Base64 encryption?</h3>
+          <p>No. Base64 is an encoding scheme, not encryption. It is fully reversible by anyone without a key. It provides zero security. If you need to protect data, use encryption (AES, ChaCha20) or hashing (SHA-256). Base64 is only for encoding binary data into a text-safe format.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Why does Base64 make data about 33% larger?</h3>
+          <p>Base64 represents every 3 bytes of input as 4 ASCII characters. Each character uses 6 bits of information but takes up 8 bits in the encoded output. The ratio 4/3 = 1.333, meaning a ~33% size increase. Padding characters (=) may add a few extra bytes at the end.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>When should I use Base64 encoding?</h3>
+          <p>Use Base64 when you need to embed binary data (images, files, certificates) inside a text-only context: JSON payloads, HTML data URIs, email attachments (MIME), XML documents, or environment variables. Avoid it when you can transmit binary data directly, since Base64 adds a 33% size overhead.</p>
+        </div>
+      </section>
+
+      <section class="related">
+        <h2>Related Tools</h2>
+        <div class="related-links">
+          <a href="../tools/base64.html">Base64 Encoder/Decoder</a>
+          <a href="../tools/imagebase64.html">Image to Base64</a>
+          <a href="../tools/dataurl.html">Data URL Generator</a>
+          <a href="../tools/jwt.html">JWT Decoder</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; 105 free developer tools. All processing happens in your browser. No data leaves your machine.</div>
+      <div style="font-size: 0.8rem;"><a href="../about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="../privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="../impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

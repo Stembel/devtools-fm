@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Format JSON Online: Pretty Print, Validate & Fix JSON Data - ZeroKit.dev</title>
+  <meta name="description" content="Learn how to format and pretty-print JSON data online. Understand JSON syntax rules, catch common errors, and use free tools to validate your JSON instantly.">
+  <link rel="canonical" href="https://zerokit.dev/blog/how-to-format-json.html">
+  <meta property="og:title" content="How to Format JSON Online: Pretty Print, Validate & Fix JSON Data">
+  <meta property="og:description" content="Learn how to format and pretty-print JSON data online. Understand JSON syntax rules, catch common errors, and use free tools to validate your JSON instantly.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://zerokit.dev/blog/how-to-format-json.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;530&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; }
+    .article h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+    .article .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .article h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 14px; color: var(--text); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+    .article p { color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+    .article ul, .article ol { color: var(--text-muted); line-height: 1.8; margin: 0 0 16px 20px; font-size: 0.95rem; }
+    .article li { margin-bottom: 6px; }
+    .article code { font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; color: var(--accent); }
+    .article pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-bottom: 20px; }
+    .article pre code { background: transparent; padding: 0; color: var(--text); font-size: 0.85rem; line-height: 1.7; }
+    .article .cta-box { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 24px; text-align: center; margin: 32px 0; }
+    .article .cta-box p { color: var(--text); margin-bottom: 12px; }
+    .article .cta-box a { display: inline-block; background: var(--accent); color: white; padding: 10px 24px; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+    .article .cta-box a:hover { background: var(--accent-hover); }
+    .faq { margin-top: 40px; }
+    .faq h2 { margin-bottom: 20px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .faq-item h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text); }
+    .faq-item p { margin: 0; }
+    .related { margin-top: 40px; }
+    .related h2 { margin-bottom: 16px; }
+    .related-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .related-links a { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.85rem; color: var(--text); }
+    .related-links a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How to Format JSON Online: Pretty Print, Validate & Fix JSON Data",
+    "description": "Learn how to format and pretty-print JSON data online. Understand JSON syntax rules, catch common errors, and use free tools to validate your JSON instantly.",
+    "author": {"@type": "Organization", "name": "ZeroKit.dev"},
+    "publisher": {"@type": "Organization", "name": "ZeroKit.dev", "url": "https://zerokit.dev"},
+    "datePublished": "2026-03-25",
+    "dateModified": "2026-03-25",
+    "mainEntityOfPage": "https://zerokit.dev/blog/how-to-format-json.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does it mean to pretty-print JSON?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pretty-printing JSON means adding line breaks, indentation, and spacing to a JSON string so that its structure is easy to read. Minified JSON packs everything onto one line to save bytes, while pretty-printed JSON uses whitespace to show the nesting of objects and arrays."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is my JSON invalid?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The most common reasons JSON is invalid are: trailing commas after the last item in an object or array, single quotes instead of double quotes around keys and strings, unquoted property names, comments (JSON does not support them), and missing or extra brackets. A JSON formatter with validation will point you to the exact line and character where the error occurs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a difference between JSON formatting and JSON validation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JSON validation checks whether a string is syntactically correct according to the JSON specification (RFC 8259). JSON formatting (pretty-printing) takes valid JSON and reformats it with indentation and line breaks for readability. Most online tools do both at the same time — they validate the input and, if it is valid, output a formatted version."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav>
+        <a href="../">Tools</a>
+        <a href="../api-docs.html">API</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Blog</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="article">
+      <a href="./" class="back-link">&larr; Back to Blog</a>
+      <h1>How to Format JSON: A Complete Guide to Pretty-Printing and Validation</h1>
+      <div class="meta">March 25, 2026 &middot; 6 min read</div>
+
+      <p>You've probably stared at a wall of minified JSON trying to find a missing bracket. I know I have. JSON (JavaScript Object Notation) is the default data interchange format for web APIs, config files, and database exports, but raw JSON from an API response or a log file is often compressed into a single unreadable line. Formatting it properly is the first step to understanding what the data actually says.</p>
+
+      <h2>What Is JSON?</h2>
+
+      <p>JSON is a lightweight text format for structured data. It uses key-value pairs and ordered lists. It was derived from JavaScript syntax but is language-independent, so virtually every programming language can parse and generate it out of the box. A typical JSON object looks like this:</p>
+
+<pre><code>{
+  "name": "Alice",
+  "age": 30,
+  "languages": ["Python", "Go", "Rust"],
+  "address": {
+    "city": "Berlin",
+    "zip": "10115"
+  }
+}</code></pre>
+
+      <p>When this same object comes back from an API endpoint, it usually arrives minified:</p>
+
+<pre><code>{"name":"Alice","age":30,"languages":["Python","Go","Rust"],"address":{"city":"Berlin","zip":"10115"}}</code></pre>
+
+      <p>Both are identical data. The first version is for humans; the second is for the wire. A JSON formatter converts between the two.</p>
+
+      <h2>Why Format JSON?</h2>
+
+      <p>Pretty-printing is not cosmetic. It is a debugging tool. Indentation reveals nesting depth at a glance, so you can immediately see that <code>address</code> is a child of the top-level object. A trailing comma or a missing bracket is nearly impossible to spot in a minified string, but in formatted JSON those errors jump right out.</p>
+
+      <p>Formatted JSON also makes diffing practical. Two minified payloads with a single field change show up as one giant modified line. Format them first, and you get meaningful line-by-line diffs. And if you are writing API docs or sharing example responses with your team, formatted JSON is just the expected standard.</p>
+
+      <h2>Common JSON Syntax Errors (and How to Fix Them)</h2>
+
+      <p>JSON's grammar is simple, but the strictness catches people off guard. These are the errors I see developers hit most often.</p>
+
+      <h3>1. Trailing Commas</h3>
+      <p>JavaScript allows a comma after the last element in an array or object. JSON does not. This is invalid:</p>
+<pre><code>{"name": "Alice", "age": 30,}</code></pre>
+      <p>Remove the comma after <code>30</code> and it parses correctly.</p>
+
+      <h3>2. Single Quotes</h3>
+      <p>JSON requires double quotes around all strings and keys. Using single quotes like <code>{'name': 'Alice'}</code> produces a parse error. Always use <code>"name"</code>, not <code>'name'</code>.</p>
+
+      <h3>3. Unquoted Keys</h3>
+      <p>In JavaScript you can write <code>{name: "Alice"}</code>, but JSON demands <code>{"name": "Alice"}</code>. Every key must be a double-quoted string.</p>
+
+      <h3>4. Comments</h3>
+      <p>JSON has no comment syntax. Neither <code>// line comment</code> nor <code>/* block comment */</code> is valid. If you need comments in config files, look at JSON5 or JSONC (VS Code supports JSONC), or just use YAML or TOML instead.</p>
+
+      <h3>5. Numeric Formats</h3>
+      <p>Leading zeros are not allowed (<code>007</code> is invalid, <code>7</code> is fine). Hex literals like <code>0xFF</code> are not valid JSON either. Infinity and NaN get rejected too. Use <code>null</code> or a string representation instead.</p>
+
+      <h2>How to Format JSON</h2>
+
+      <h3>Command Line</h3>
+      <p>If you have Python installed, <code>python3 -m json.tool</code> reads from stdin and writes formatted JSON to stdout:</p>
+<pre><code>echo '{"a":1,"b":2}' | python3 -m json.tool</code></pre>
+      <p>With <code>jq</code> installed, you can do a lot more:</p>
+<pre><code>curl -s https://api.example.com/data | jq '.'</code></pre>
+
+      <h3>In Your Editor</h3>
+      <p>VS Code: select the JSON, open the command palette (Ctrl+Shift+P), and run "Format Document." IntelliJ-based IDEs: Ctrl+Alt+L. Vim users can pipe through <code>jq</code> with <code>:%!jq .</code>.</p>
+
+      <h3>Online</h3>
+      <p>Sometimes you are debugging a webhook payload from a Slack notification or helping a teammate over screen-share, and opening an IDE is overkill. An online formatter gets you from paste to pretty-print in under a second, no install needed.</p>
+
+      <div class="cta-box">
+        <p>Paste your JSON and see it formatted instantly, with syntax validation and error highlighting.</p>
+        <a href="../tools/json.html">Try the Free JSON Formatter</a>
+      </div>
+
+      <h2>What Makes a Good JSON Formatter?</h2>
+
+      <p>Not all formatters are equal. A good one tells you exactly where a syntax error is, not just "invalid JSON." It lets you pick your indentation style (two spaces, four spaces, tabs) and also minify in the other direction, which is useful when you need to embed JSON in a config or a URL. Privacy matters too: your JSON might contain API keys or user data, so pick a tool that processes everything client-side with no server round-trip.</p>
+
+      <h2>Beyond Formatting: Related JSON Operations</h2>
+
+      <p>Once your JSON is formatted, you might need to do more with it. A few tools that pair well with a JSON formatter:</p>
+
+      <ul>
+        <li><a href="../tools/json2yaml.html">JSON to YAML Converter</a>, useful when you need YAML for Kubernetes, Docker Compose, or CI/CD pipelines.</li>
+        <li><a href="../tools/jsontree.html">JSON Tree Viewer</a>, which shows deeply nested structures as a collapsible tree instead of raw text.</li>
+        <li><a href="../tools/jsonpath.html">JSONPath Evaluator</a> for querying specific values from large JSON documents using JSONPath expressions.</li>
+      </ul>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>What does it mean to pretty-print JSON?</h3>
+          <p>Pretty-printing JSON means adding line breaks, indentation, and spacing to a JSON string so that its structure is easy to read. Minified JSON packs everything onto one line to save bytes, while pretty-printed JSON uses whitespace to show the nesting of objects and arrays.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Why is my JSON invalid?</h3>
+          <p>The most common reasons are trailing commas after the last item, single quotes instead of double quotes, unquoted property names, comments (JSON does not support them), and missing or extra brackets. A JSON formatter with validation will point you to the exact line where the error occurs.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Is there a difference between JSON formatting and JSON validation?</h3>
+          <p>Yes. Validation checks whether the string is syntactically correct per RFC 8259. Formatting takes valid JSON and adds indentation and line breaks for readability. Most online tools do both simultaneously. They validate the input and output a formatted version if it passes.</p>
+        </div>
+      </section>
+
+      <section class="related">
+        <h2>Related Tools</h2>
+        <div class="related-links">
+          <a href="../tools/json.html">JSON Formatter</a>
+          <a href="../tools/json2yaml.html">JSON to YAML</a>
+          <a href="../tools/jsontree.html">JSON Tree Viewer</a>
+          <a href="../tools/jsonpath.html">JSONPath Evaluator</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; 105 free developer tools. All processing happens in your browser. No data leaves your machine.</div>
+      <div style="font-size: 0.8rem;"><a href="../about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="../privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="../impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

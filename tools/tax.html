@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Income Tax Calculator 2026 — Federal Tax Brackets & Estimator | ZeroKit.dev</title>
+  <meta name="description" content="Free income tax calculator: estimate your 2026 US federal income tax. See your effective tax rate, marginal bracket, and tax owed by bracket with this simple estimator.">
+  <link rel="canonical" href="https://zerokit.dev/tools/tax.html">
+  <meta property="og:title" content="Income Tax Calculator 2026 — ZeroKit.dev">
+  <meta property="og:description" content="Estimate your 2026 US federal income tax. See effective rate, marginal bracket, and breakdown.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Income Tax Estimator (2026)</h1>
+    <p class="description">Estimate your US federal income tax using projected 2026 tax brackets.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Income Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Gross Annual Income ($)</label>
+            <input type="number" id="income" value="85000" min="0" step="1000">
+          </div>
+          <div class="form-group">
+            <label>Filing Status</label>
+            <select id="status">
+              <option value="single" selected>Single</option>
+              <option value="married">Married Filing Jointly</option>
+              <option value="head">Head of Household</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Deduction</label>
+            <select id="deductionType">
+              <option value="standard" selected>Standard Deduction</option>
+              <option value="custom">Itemized (Custom)</option>
+            </select>
+          </div>
+          <div class="form-group" id="customDeductionGroup" style="display:none;">
+            <label>Itemized Deduction Amount ($)</label>
+            <input type="number" id="customDeduction" value="0" min="0" step="100">
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Tax Summary</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="totalTax">$0</div>
+            <div class="result-label">Federal Tax Owed</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="effectiveRate">0%</div>
+              <div class="label">Effective Rate</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="marginalRate">0%</div>
+              <div class="label">Marginal Rate</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="afterTax">$0</div>
+              <div class="label">After-Tax Income</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="deductionAmt">$0</div>
+              <div class="label">Deduction</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bracket breakdown -->
+    <div class="calc-panel calc-panel-full" style="margin-top:16px;">
+      <div class="panel-header">Tax by Bracket</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead><tr><th>Bracket</th><th>Rate</th><th>Taxable in Bracket</th><th>Tax</th></tr></thead>
+          <tbody id="bracketBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>How Federal Income Tax Works</h2>
+      <p>The US federal income tax uses a progressive bracket system. This means you don't pay one flat rate on all your income. Instead, different portions of your income are taxed at different rates.</p>
+      <p>For example, if you're single with $85,000 of taxable income in 2026, you don't pay 22% on the entire amount. You pay 10% on the first $11,925, 12% on income from $11,925 to $48,475, and 22% on income above $48,475.</p>
+      <ul>
+        <li><strong>Marginal Rate:</strong> The tax rate on your last dollar of income (your highest bracket)</li>
+        <li><strong>Effective Rate:</strong> Your total tax divided by total income (what you actually pay overall)</li>
+        <li><strong>Standard Deduction:</strong> An amount subtracted from your income before tax is calculated ($15,000 for single filers in 2026, estimated)</li>
+      </ul>
+      <p><em>Note: This is an estimate for federal income tax only. It does not include state taxes, FICA (Social Security & Medicare), or other deductions. Consult a tax professional for complete tax planning.</em></p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+    // 2026 projected brackets (estimated based on inflation adjustments)
+    var brackets = {
+      single: [
+        { min: 0, max: 11925, rate: 0.10 },
+        { min: 11925, max: 48475, rate: 0.12 },
+        { min: 48475, max: 103350, rate: 0.22 },
+        { min: 103350, max: 197300, rate: 0.24 },
+        { min: 197300, max: 250525, rate: 0.32 },
+        { min: 250525, max: 626350, rate: 0.35 },
+        { min: 626350, max: Infinity, rate: 0.37 }
+      ],
+      married: [
+        { min: 0, max: 23850, rate: 0.10 },
+        { min: 23850, max: 96950, rate: 0.12 },
+        { min: 96950, max: 206700, rate: 0.22 },
+        { min: 206700, max: 394600, rate: 0.24 },
+        { min: 394600, max: 501050, rate: 0.32 },
+        { min: 501050, max: 751600, rate: 0.35 },
+        { min: 751600, max: Infinity, rate: 0.37 }
+      ],
+      head: [
+        { min: 0, max: 17000, rate: 0.10 },
+        { min: 17000, max: 64850, rate: 0.12 },
+        { min: 64850, max: 103350, rate: 0.22 },
+        { min: 103350, max: 197300, rate: 0.24 },
+        { min: 197300, max: 250500, rate: 0.32 },
+        { min: 250500, max: 626350, rate: 0.35 },
+        { min: 626350, max: Infinity, rate: 0.37 }
+      ]
+    };
+
+    var standardDeductions = { single: 15000, married: 30000, head: 22500 };
+
+    function calc() {
+      var income = parseFloat(document.getElementById('income').value) || 0;
+      var status = document.getElementById('status').value;
+      var deductionType = document.getElementById('deductionType').value;
+
+      var deduction;
+      if (deductionType === 'custom') {
+        deduction = parseFloat(document.getElementById('customDeduction').value) || 0;
+        document.getElementById('customDeductionGroup').style.display = '';
+      } else {
+        deduction = standardDeductions[status];
+        document.getElementById('customDeductionGroup').style.display = 'none';
+      }
+
+      var taxable = Math.max(0, income - deduction);
+      var b = brackets[status];
+      var totalTax = 0;
+      var marginal = 0;
+      var tbody = document.getElementById('bracketBody');
+      tbody.innerHTML = '';
+
+      for (var i = 0; i < b.length; i++) {
+        var lo = b[i].min;
+        var hi = b[i].max;
+        var rate = b[i].rate;
+        var inBracket = Math.max(0, Math.min(taxable, hi) - lo);
+        var tax = inBracket * rate;
+        if (inBracket > 0) {
+          totalTax += tax;
+          marginal = rate;
+        }
+        var rangeStr = hi === Infinity ? fmt(lo) + '+' : fmt(lo) + ' - ' + fmt(hi);
+        tbody.innerHTML += '<tr><td>' + rangeStr + '</td><td>' + (rate * 100) + '%</td><td>' + fmt(inBracket) + '</td><td>' + fmt(tax) + '</td></tr>';
+      }
+
+      var effective = income > 0 ? (totalTax / income * 100) : 0;
+      document.getElementById('totalTax').textContent = fmt(totalTax);
+      document.getElementById('effectiveRate').textContent = effective.toFixed(1) + '%';
+      document.getElementById('marginalRate').textContent = (marginal * 100) + '%';
+      document.getElementById('afterTax').textContent = fmt(income - totalTax);
+      document.getElementById('deductionAmt').textContent = fmt(deduction);
+    }
+
+    document.querySelectorAll('#income,#status,#deductionType,#customDeduction').forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+    calc();
+  })();
+  </script>
+</body>
+</html>

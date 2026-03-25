@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regex Tutorial for Beginners: Patterns, Syntax & Real-World Examples - ZeroKit.dev</title>
+  <meta name="description" content="Learn regular expressions from scratch. This beginner-friendly regex tutorial covers syntax, quantifiers, character classes, groups, lookaheads, and practical patterns for email, URL, and phone validation.">
+  <link rel="canonical" href="https://zerokit.dev/blog/regex-tutorial-beginners.html">
+  <meta property="og:title" content="Regex Tutorial for Beginners: Patterns, Syntax & Real-World Examples">
+  <meta property="og:description" content="Learn regular expressions from scratch with practical patterns for validation, search, and text processing.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://zerokit.dev/blog/regex-tutorial-beginners.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;530&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; }
+    .article h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+    .article .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .article h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 14px; color: var(--text); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+    .article p { color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+    .article ul, .article ol { color: var(--text-muted); line-height: 1.8; margin: 0 0 16px 20px; font-size: 0.95rem; }
+    .article li { margin-bottom: 6px; }
+    .article code { font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; color: var(--accent); }
+    .article pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-bottom: 20px; }
+    .article pre code { background: transparent; padding: 0; color: var(--text); font-size: 0.85rem; line-height: 1.7; }
+    .article .cta-box { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 24px; text-align: center; margin: 32px 0; }
+    .article .cta-box p { color: var(--text); margin-bottom: 12px; }
+    .article .cta-box a { display: inline-block; background: var(--accent); color: white; padding: 10px 24px; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+    .article .cta-box a:hover { background: var(--accent-hover); }
+    .faq { margin-top: 40px; }
+    .faq h2 { margin-bottom: 20px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .faq-item h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text); }
+    .faq-item p { margin: 0; }
+    .related { margin-top: 40px; }
+    .related h2 { margin-bottom: 16px; }
+    .related-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .related-links a { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.85rem; color: var(--text); }
+    .related-links a:hover { border-color: var(--accent); color: var(--accent); }
+    .cheat-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .cheat-table th, .cheat-table td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .cheat-table th { color: var(--text); font-weight: 600; }
+    .cheat-table td { color: var(--text-muted); }
+    .cheat-table td:first-child { font-family: var(--mono); color: var(--accent); white-space: nowrap; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Regex Tutorial for Beginners: Patterns, Syntax & Real-World Examples",
+    "description": "Learn regular expressions from scratch with practical patterns for validation, search, and text processing.",
+    "author": {"@type": "Organization", "name": "ZeroKit.dev"},
+    "publisher": {"@type": "Organization", "name": "ZeroKit.dev", "url": "https://zerokit.dev"},
+    "datePublished": "2026-03-25",
+    "dateModified": "2026-03-25",
+    "mainEntityOfPage": "https://zerokit.dev/blog/regex-tutorial-beginners.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between .* and .*? in regex?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": ".* is a greedy quantifier: it matches as many characters as possible. .*? is lazy (non-greedy): it matches as few characters as possible. For example, given the string '<b>one</b><b>two</b>', the pattern '<b>.*</b>' (greedy) matches the entire string, while '<b>.*?</b>' matches only '<b>one</b>'. Use lazy quantifiers when you want the shortest possible match."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I match a literal dot or bracket in regex?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Special characters like . * + ? ( ) [ ] { } \\ ^ $ | must be escaped with a backslash to match literally. To match a literal dot, use \\. instead of just . (which matches any character). To match a literal opening bracket, use \\[. Inside a character class [...], most special characters lose their meaning, except ] \\ ^ and -."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use regex to validate email addresses?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can use regex for basic email format validation, such as checking for an @ sign and a domain with a dot. A practical pattern is: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$. However, the full email spec (RFC 5322) is far too complex for regex. For production systems, use basic regex validation plus a confirmation email to verify the address actually works."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav>
+        <a href="../">Tools</a>
+        <a href="../api-docs.html">API</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Blog</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="article">
+      <a href="./" class="back-link">&larr; Back to Blog</a>
+      <h1>Regex Tutorial for Beginners: Patterns, Syntax, and Real-World Examples</h1>
+      <div class="meta">March 25, 2026 &middot; 7 min read</div>
+
+      <p>Regular expressions look like line noise the first time you see them. I get it. A pattern like <code>^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</code> seems impenetrable. But the building blocks? There are only about a dozen of them. Learn those and you can read and write regex patterns for search, validation, and text processing in any language or text editor.</p>
+
+      <h2>What Are Regular Expressions?</h2>
+
+      <p>A regular expression (regex) is a sequence of characters that defines a search pattern. You use it to match, extract, or replace text. It's built into JavaScript, Python, Java, Go, Rust, PHP, Ruby, and every major text editor. If you've ever used Ctrl+H in VS Code with the regex toggle enabled, you were already writing regular expressions.</p>
+
+      <p>The real value is that regex describes patterns, not fixed strings. Instead of searching for the exact text "2026-03-25", you write <code>\d{4}-\d{2}-\d{2}</code> to match any date in YYYY-MM-DD format.</p>
+
+      <h2>The Building Blocks</h2>
+
+      <h3>Literal Characters</h3>
+      <p>Most characters just match themselves. The pattern <code>cat</code> matches the string "cat" inside "concatenate". Nothing surprising there.</p>
+
+      <h3>Metacharacters</h3>
+      <p>Some characters have special meaning in regex:</p>
+
+      <table class="cheat-table">
+        <tr><th>Pattern</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td>.</td><td>Any character except newline</td><td><code>c.t</code> matches "cat", "cut", "c3t"</td></tr>
+        <tr><td>\d</td><td>Any digit (0-9)</td><td><code>\d\d</code> matches "42"</td></tr>
+        <tr><td>\w</td><td>Word character (letter, digit, underscore)</td><td><code>\w+</code> matches "hello_world"</td></tr>
+        <tr><td>\s</td><td>Whitespace (space, tab, newline)</td><td><code>\s+</code> matches "   "</td></tr>
+        <tr><td>\D, \W, \S</td><td>Negated versions of above</td><td><code>\D</code> matches "a" but not "5"</td></tr>
+        <tr><td>^</td><td>Start of string</td><td><code>^Hello</code> matches "Hello world"</td></tr>
+        <tr><td>$</td><td>End of string</td><td><code>world$</code> matches "Hello world"</td></tr>
+      </table>
+
+      <h3>Quantifiers</h3>
+      <p>Quantifiers tell regex how many times a pattern should repeat:</p>
+
+      <table class="cheat-table">
+        <tr><th>Quantifier</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td>*</td><td>0 or more</td><td><code>ab*c</code> matches "ac", "abc", "abbc"</td></tr>
+        <tr><td>+</td><td>1 or more</td><td><code>ab+c</code> matches "abc", "abbc" (not "ac")</td></tr>
+        <tr><td>?</td><td>0 or 1</td><td><code>colou?r</code> matches "color" and "colour"</td></tr>
+        <tr><td>{n}</td><td>Exactly n times</td><td><code>\d{4}</code> matches "2026"</td></tr>
+        <tr><td>{n,m}</td><td>Between n and m times</td><td><code>\d{2,4}</code> matches "42" or "2026"</td></tr>
+      </table>
+
+      <p>By default, quantifiers are <strong>greedy</strong>, meaning they grab as much text as they can. Add <code>?</code> after a quantifier to make it <strong>lazy</strong> so it matches as little as possible. You'll use <code>.*?</code> instead of <code>.*</code> more often than you'd expect.</p>
+
+      <h3>Character Classes</h3>
+      <p>Square brackets define a set of characters to match. <code>[aeiou]</code> matches any vowel. <code>[0-9]</code> matches any digit (same as <code>\d</code>). <code>[A-Za-z]</code> matches any letter. Put a caret inside the brackets to negate: <code>[^0-9]</code> matches anything that is NOT a digit.</p>
+
+      <h3>Groups and Alternation</h3>
+      <p>Parentheses create groups, and the pipe <code>|</code> acts as OR:</p>
+<pre><code>(cat|dog)        matches "cat" or "dog"
+(\d{3})-(\d{4})  captures area code and number separately
+(?:non-capture)  groups without capturing</code></pre>
+
+      <h3>Lookaheads and Lookbehinds</h3>
+      <p>Lookaheads and lookbehinds check that something exists (or doesn't) at a position without consuming any characters. They're weird at first, but very useful once they click:</p>
+<pre><code>\d+(?= dollars)    matches "100" in "100 dollars" (positive lookahead)
+\d+(?! dollars)    matches "100" in "100 euros" (negative lookahead)
+(?&lt;=\$)\d+         matches "50" in "$50" (positive lookbehind)
+(?&lt;!\$)\d+         matches "50" in "€50" (negative lookbehind)</code></pre>
+
+      <h2>Practical Patterns You Will Actually Use</h2>
+
+      <h3>Validate an Email (Basic)</h3>
+<pre><code>^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</code></pre>
+      <p>This catches most valid email addresses. The full RFC 5322 spec is way too complex for regex, so don't try to cover every edge case. Use this for quick format checks and send a confirmation email for real verification.</p>
+
+      <h3>Extract URLs from Text</h3>
+<pre><code>https?://[^\s&lt;&gt;"']+</code></pre>
+      <p>This grabs HTTP and HTTPS URLs by matching from the protocol until it hits whitespace or a quote character. Simple and effective.</p>
+
+      <h3>Match a Date (YYYY-MM-DD)</h3>
+<pre><code>\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])</code></pre>
+      <p>This validates month (01-12) and day (01-31). It won't catch impossible dates like February 30, but it handles most formatting errors. For anything more precise, validate in code after the regex pass.</p>
+
+      <h3>Find Duplicate Words</h3>
+<pre><code>\b(\w+)\s+\1\b</code></pre>
+      <p>I use this one all the time. It catches "the the" or "is is", those typos that spellcheck misses. The <code>\1</code> is a backreference to whatever the first group captured.</p>
+
+      <h3>Match an IPv4 Address</h3>
+<pre><code>\b(?:\d{1,3}\.){3}\d{1,3}\b</code></pre>
+      <p>Matches patterns like "192.168.1.1". If you need strict validation (0-255 per octet), the pattern gets longer and uglier, but this is good enough for most log-parsing work.</p>
+
+      <div class="cta-box">
+        <p>Write regex patterns and test them against sample text. Matches highlight as you type.</p>
+        <a href="../tools/regex.html">Try the Regex Tester</a>
+      </div>
+
+      <h2>Common Mistakes</h2>
+
+      <p>You'll hit these. Everyone does. The most common is forgetting to escape special characters. To match a literal dot, write <code>\.</code> not <code>.</code> (which matches any character). I've debugged this exact problem more times than I'd like to admit.</p>
+
+      <p>Another classic: using greedy matching when you want lazy. <code>&lt;.*&gt;</code> on <code>&lt;b&gt;bold&lt;/b&gt;</code> matches the entire string, not just <code>&lt;b&gt;</code>. Use <code>&lt;.*?&gt;</code> for the shortest match.</p>
+
+      <p>Then there's anchoring. Without <code>^</code> and <code>$</code>, your email regex will happily match "not-an-email@foo.com-garbage" as valid. Anchors force the entire string to match the pattern.</p>
+
+      <p>And finally, know when to stop. If you need to parse HTML, JSON, or XML, use a proper parser. Regex cannot handle nested structures reliably. Don't be the person who writes a 200-character regex to extract JSON values.</p>
+
+      <p>For a quick-reference card, see the <a href="../tools/regexref.html">Regex Reference</a> tool with all the syntax on one page.</p>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>What is the difference between .* and .*? in regex?</h3>
+          <p><code>.*</code> is a greedy quantifier: it matches as many characters as possible. <code>.*?</code> is lazy (non-greedy): it matches as few characters as possible. Given the string <code>&lt;b&gt;one&lt;/b&gt;&lt;b&gt;two&lt;/b&gt;</code>, the greedy <code>&lt;b&gt;.*&lt;/b&gt;</code> matches the entire string, while the lazy <code>&lt;b&gt;.*?&lt;/b&gt;</code> matches only <code>&lt;b&gt;one&lt;/b&gt;</code>.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>How do I match a literal dot or bracket in regex?</h3>
+          <p>Escape special characters with a backslash: <code>\.</code> for a dot, <code>\[</code> for a bracket. Inside a character class <code>[...]</code>, most special characters lose their meaning except <code>]</code>, <code>\</code>, <code>^</code>, and <code>-</code>.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can I use regex to validate email addresses?</h3>
+          <p>You can use regex for basic format checks, like verifying an <code>@</code> sign and a domain with a dot. A practical pattern: <code>^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</code>. But the full email spec (RFC 5322) is too complex for regex. For production systems, combine basic regex validation with a confirmation email.</p>
+        </div>
+      </section>
+
+      <section class="related">
+        <h2>Related Tools</h2>
+        <div class="related-links">
+          <a href="../tools/regex.html">Regex Tester</a>
+          <a href="../tools/regexref.html">Regex Reference</a>
+          <a href="../tools/escape.html">String Escape</a>
+          <a href="../tools/textcase.html">Text Case Converter</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; 105 free developer tools. All processing happens in your browser. No data leaves your machine.</div>
+      <div style="font-size: 0.8rem;"><a href="../about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="../privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="../impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

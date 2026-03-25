@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hash Functions Explained: MD5, SHA-256, and When to Use Each - ZeroKit.dev</title>
+  <meta name="description" content="Understand how cryptographic hash functions work, compare MD5, SHA-1, SHA-256, and SHA-3, and learn which algorithm to use for passwords, checksums, data integrity, and digital signatures.">
+  <link rel="canonical" href="https://zerokit.dev/blog/hash-functions-explained.html">
+  <meta property="og:title" content="Hash Functions Explained: MD5, SHA-256, and When to Use Each">
+  <meta property="og:description" content="Understand how cryptographic hash functions work, compare popular algorithms, and learn which one to use for passwords, checksums, and data integrity.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://zerokit.dev/blog/hash-functions-explained.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;530&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; }
+    .article h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+    .article .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .article h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 14px; color: var(--text); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+    .article p { color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+    .article ul, .article ol { color: var(--text-muted); line-height: 1.8; margin: 0 0 16px 20px; font-size: 0.95rem; }
+    .article li { margin-bottom: 6px; }
+    .article code { font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; color: var(--accent); }
+    .article pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-bottom: 20px; }
+    .article pre code { background: transparent; padding: 0; color: var(--text); font-size: 0.85rem; line-height: 1.7; }
+    .article .cta-box { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 24px; text-align: center; margin: 32px 0; }
+    .article .cta-box p { color: var(--text); margin-bottom: 12px; }
+    .article .cta-box a { display: inline-block; background: var(--accent); color: white; padding: 10px 24px; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+    .article .cta-box a:hover { background: var(--accent-hover); }
+    .faq { margin-top: 40px; }
+    .faq h2 { margin-bottom: 20px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .faq-item h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text); }
+    .faq-item p { margin: 0; }
+    .related { margin-top: 40px; }
+    .related h2 { margin-bottom: 16px; }
+    .related-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .related-links a { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.85rem; color: var(--text); }
+    .related-links a:hover { border-color: var(--accent); color: var(--accent); }
+    .compare-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .compare-table th, .compare-table td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.87rem; }
+    .compare-table th { color: var(--text); font-weight: 600; }
+    .compare-table td { color: var(--text-muted); }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Hash Functions Explained: MD5, SHA-256, and When to Use Each",
+    "description": "Understand how cryptographic hash functions work, compare popular algorithms, and learn which one to use for passwords, checksums, and data integrity.",
+    "author": {"@type": "Organization", "name": "ZeroKit.dev"},
+    "publisher": {"@type": "Organization", "name": "ZeroKit.dev", "url": "https://zerokit.dev"},
+    "datePublished": "2026-03-25",
+    "dateModified": "2026-03-25",
+    "mainEntityOfPage": "https://zerokit.dev/blog/hash-functions-explained.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can you reverse a hash back to the original data?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Cryptographic hash functions are designed to be one-way. Given a hash output, there is no mathematical way to compute the original input. Attackers use brute-force or rainbow table attacks to find inputs that produce a given hash, but they cannot 'reverse' the function. This is why hashing is used for passwords: even if the hash database leaks, the original passwords are not directly exposed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is MD5 considered insecure?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "MD5 is vulnerable to collision attacks: two different inputs can produce the same hash. Researchers demonstrated practical collision attacks in 2004, and by 2008 they created a rogue CA certificate using an MD5 collision. MD5 is also too fast for password hashing, making brute-force attacks feasible. Use SHA-256 for checksums and bcrypt/Argon2 for passwords."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which hash function should I use for passwords?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Do not use MD5, SHA-1, or even SHA-256 for passwords. These functions are too fast, which makes brute-force attacks easy. Use a dedicated password hashing function: Argon2id (the current recommendation), bcrypt, or scrypt. These are deliberately slow and memory-hard, making large-scale cracking impractical."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav>
+        <a href="../">Tools</a>
+        <a href="../api-docs.html">API</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Blog</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="article">
+      <a href="./" class="back-link">&larr; Back to Blog</a>
+      <h1>Hash Functions Explained: MD5, SHA-256, and When to Use Each</h1>
+      <div class="meta">March 25, 2026 &middot; 7 min read</div>
+
+      <p>Hash functions show up everywhere in software engineering: password storage, file integrity checks, Git commits, blockchain, digital signatures, caching, data deduplication. If you write code, you use hashes. Knowing which algorithm to reach for and why will save you from security mistakes that range from embarrassing to career-ending.</p>
+
+      <h2>What Is a Hash Function?</h2>
+
+      <p>A hash function takes input data of any size and produces a fixed-size output, usually called a hash, digest, or checksum. Same input, same output, every time. Change a single bit and the output looks completely different. You'll typically see it rendered as a hex string.</p>
+
+<pre><code>Input:  "Hello"
+MD5:    8b1a9953c4611296a827abf8c47804d7
+SHA-256: 185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969
+
+Input:  "Hello."  (added a period)
+MD5:    2946545e2e0a5f58f92738ac3ed3e02f
+SHA-256: 2d8bd7d9bb5f85ba643f0110d50cb506a1fe439e769a22503193ea6046bb87f7</code></pre>
+
+      <p>One period flips both hashes completely. That's the <strong>avalanche effect</strong>. A good hash function gives you no predictable relationship between similar inputs and their outputs.</p>
+
+      <h2>Properties of Cryptographic Hash Functions</h2>
+
+      <p>A hash function counts as "cryptographic" when it meets three properties. First, <strong>pre-image resistance</strong>: given a hash output, you can't find any input that produces it. No reversing. Second, <strong>second pre-image resistance</strong>: given one input and its hash, you can't find a different input with the same hash. Third, <strong>collision resistance</strong>: you can't find any two inputs that share a hash.</p>
+
+      <p>Non-cryptographic hash functions like CRC32, MurmurHash, and xxHash are fast but don't guarantee any of these. They work for hash tables and checksums when nobody is trying to attack you, but never use them where security matters.</p>
+
+      <h2>The Algorithms Compared</h2>
+
+      <table class="compare-table">
+        <tr>
+          <th>Algorithm</th>
+          <th>Output Size</th>
+          <th>Status</th>
+          <th>Use Case</th>
+        </tr>
+        <tr>
+          <td><strong>MD5</strong></td>
+          <td>128 bits (32 hex chars)</td>
+          <td>Broken (collisions practical since 2004)</td>
+          <td>Legacy file checksums only. Never for security.</td>
+        </tr>
+        <tr>
+          <td><strong>SHA-1</strong></td>
+          <td>160 bits (40 hex chars)</td>
+          <td>Broken (SHAttered attack, 2017)</td>
+          <td>Git still uses it internally, but SHA-256 migration underway. Do not use for new projects.</td>
+        </tr>
+        <tr>
+          <td><strong>SHA-256</strong></td>
+          <td>256 bits (64 hex chars)</td>
+          <td>Secure. Industry standard.</td>
+          <td>File integrity, digital signatures, blockchain, TLS certificates, code signing.</td>
+        </tr>
+        <tr>
+          <td><strong>SHA-512</strong></td>
+          <td>512 bits (128 hex chars)</td>
+          <td>Secure. Faster than SHA-256 on 64-bit CPUs.</td>
+          <td>Same as SHA-256 when you need a larger hash or are on 64-bit hardware.</td>
+        </tr>
+        <tr>
+          <td><strong>SHA-3</strong></td>
+          <td>224/256/384/512 bits</td>
+          <td>Secure. Different internal design (Keccak).</td>
+          <td>Defense-in-depth: if SHA-2 is ever broken, SHA-3 is the fallback.</td>
+        </tr>
+        <tr>
+          <td><strong>BLAKE2/BLAKE3</strong></td>
+          <td>Variable (up to 512 bits)</td>
+          <td>Secure. Very fast.</td>
+          <td>High-performance checksums, file hashing, key derivation.</td>
+        </tr>
+      </table>
+
+      <h2>When to Use What</h2>
+
+      <h3>File Integrity and Checksums</h3>
+      <p>Use <strong>SHA-256</strong>. You've probably seen this already: download a Linux ISO, check the published SHA-256 hash against what you compute locally. If they match, the file hasn't been corrupted or tampered with. MD5 still shows up for this, but since collisions are practical, an attacker could substitute a malicious file with the same MD5 hash. Don't rely on it.</p>
+
+<pre><code># Compute SHA-256 of a file
+sha256sum ubuntu-24.04-amd64.iso        # Linux
+shasum -a 256 ubuntu-24.04-amd64.iso     # macOS</code></pre>
+
+      <h3>Password Storage</h3>
+      <p>Do <strong>not</strong> use MD5, SHA-1, or SHA-256 for passwords. General-purpose hash functions are fast, and that's exactly the problem. An attacker with a GPU can try billions of SHA-256 hashes per second.</p>
+
+      <p>Use a dedicated <strong>password hashing function</strong> instead. Argon2id is the current winner of the Password Hashing Competition and the right pick for new projects: memory-hard, configurable, well-studied. If Argon2 isn't available in your stack, bcrypt has been solid since 1999 and is supported practically everywhere. scrypt is another option, memory-hard and CPU-hard, though I've mostly seen it in cryptocurrency contexts.</p>
+
+      <p>All three are deliberately slow and memory-intensive, which is the whole point. They also salt automatically, so rainbow tables are off the table.</p>
+
+      <h3>Digital Signatures and Certificates</h3>
+      <p>TLS certificates use SHA-256 for the signature hash. The CA hashes the certificate data with SHA-256, then signs that hash with its private key. Browsers verify using the CA's public key. SHA-1 certificates were deprecated in 2017 after the SHAttered attack showed that practical forgery was possible.</p>
+
+      <h3>Git and Version Control</h3>
+      <p>Git identifies every object (commit, tree, blob) by its SHA-1 hash. You'll see this when you run <code>git log</code>: each commit hash is a SHA-1 digest of the commit content. Git is moving to SHA-256, but it's a slow migration. The SHAttered attack requires a specifically crafted collision, so existing repos aren't in immediate danger.</p>
+
+      <h3>HMACs and API Authentication</h3>
+      <p>HMAC (Hash-based Message Authentication Code) combines a hash function with a secret key to authenticate messages. If you've integrated Stripe, GitHub, or Shopify webhooks, you've seen this: they sign payloads with HMAC-SHA256. Your server recomputes the HMAC using the shared secret and compares it to the signature in the request header. Match means the payload is legit and untampered. You can test these signatures with the <a href="../tools/hmac.html">HMAC generator</a>.</p>
+
+      <div class="cta-box">
+        <p>Compute MD5, SHA-1, SHA-256, SHA-512, and other hashes instantly. Paste text or upload a file. Everything runs in your browser.</p>
+        <a href="../tools/hash.html">Try the Free Hash Generator</a>
+      </div>
+
+      <h2>Common Mistakes</h2>
+
+      <ul>
+        <li><strong>Using MD5 or SHA-1 for anything security-sensitive.</strong> Both have practical collision attacks. Use SHA-256 or stronger.</li>
+        <li><strong>Hashing passwords with SHA-256.</strong> It is too fast. Use Argon2id, bcrypt, or scrypt.</li>
+        <li><strong>Storing unsalted hashes.</strong> Without a unique random salt per entry, identical inputs produce identical hashes, enabling rainbow table attacks. Password hashing functions include salting automatically.</li>
+        <li><strong>Confusing hashing with encryption.</strong> Hashing is one-way; encryption is reversible with a key. Hashing is for verification, encryption is for confidentiality. They solve different problems.</li>
+        <li><strong>Using <code>==</code> to compare hashes.</strong> Use a constant-time comparison function to prevent timing attacks. Most languages provide one: <code>hmac.compare_digest()</code> in Python, <code>crypto.timingSafeEqual()</code> in Node.js.</li>
+      </ul>
+
+      <p>Understanding the difference between hashing and encoding? <a href="what-is-base64-encoding.html">Base64 is encoding</a>, not hashing — it is fully reversible and provides zero security.</p>
+
+      <h2>Quick Reference: Hashing in Code</h2>
+
+<pre><code># Python
+import hashlib
+hashlib.sha256(b"Hello").hexdigest()
+# "185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969"
+
+// JavaScript (browser)
+const hash = await crypto.subtle.digest("SHA-256",
+  new TextEncoder().encode("Hello"));
+[...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,"0")).join("")
+
+// Node.js
+require("crypto").createHash("sha256").update("Hello").digest("hex")
+
+# Bash
+echo -n "Hello" | sha256sum</code></pre>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>Can you reverse a hash back to the original data?</h3>
+          <p>No. Cryptographic hash functions are one-way by design. Given a hash output, there is no way to compute the original input. Attackers use brute-force or rainbow table attacks to find inputs that produce a given hash, but they cannot reverse the function itself. This is why hashing is used for passwords: even if the hash database leaks, the original passwords are not directly exposed.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Why is MD5 considered insecure?</h3>
+          <p>MD5 is vulnerable to collision attacks: two different inputs can produce the same hash. Researchers demonstrated practical collisions in 2004, and by 2008 created a rogue CA certificate using an MD5 collision. MD5 is also too fast for password hashing, making brute-force attacks feasible. Use SHA-256 for checksums and Argon2/bcrypt for passwords.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Which hash function should I use for passwords?</h3>
+          <p>Do not use MD5, SHA-1, or SHA-256 for passwords. These are too fast, making brute-force attacks trivial. Use a dedicated password hashing function: Argon2id (current best practice), bcrypt (battle-tested), or scrypt (memory-hard). These are deliberately slow and memory-intensive, making large-scale cracking impractical.</p>
+        </div>
+      </section>
+
+      <section class="related">
+        <h2>Related Tools</h2>
+        <div class="related-links">
+          <a href="../tools/hash.html">Hash Generator</a>
+          <a href="../tools/hmac.html">HMAC Generator</a>
+          <a href="../tools/password.html">Password Generator</a>
+          <a href="../tools/base64.html">Base64 Encoder/Decoder</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; 105 free developer tools. All processing happens in your browser. No data leaves your machine.</div>
+      <div style="font-size: 0.8rem;"><a href="../about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="../privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="../impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

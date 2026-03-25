@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compound Interest Calculator — Investment Growth with Chart | ZeroKit.dev</title>
+  <meta name="description" content="Free compound interest calculator: see how your savings and investments grow over time. Visualize compound growth with an interactive chart. Includes regular contribution options.">
+  <link rel="canonical" href="https://zerokit.dev/tools/compound.html">
+  <meta property="og:title" content="Compound Interest Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Visualize compound interest growth with charts. Calculate investment returns with regular contributions.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Compound Interest Calculator</h1>
+    <p class="description">See how your investments grow over time with the power of compound interest.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Investment Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Initial Investment ($)</label>
+            <input type="number" id="principal" value="10000" min="0" step="100">
+          </div>
+          <div class="form-group">
+            <label>Monthly Contribution ($)</label>
+            <input type="number" id="contribution" value="200" min="0" step="50">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Annual Interest Rate (%)</label>
+              <input type="number" id="rate" value="7" min="0" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Time Period (years)</label>
+              <input type="number" id="years" value="20" min="1" max="100" step="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Compounding Frequency</label>
+            <select id="freq">
+              <option value="12" selected>Monthly</option>
+              <option value="4">Quarterly</option>
+              <option value="2">Semi-Annually</option>
+              <option value="1">Annually</option>
+              <option value="365">Daily</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Results</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="total">$0</div>
+            <div class="result-label">Final Balance</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="totalContrib">$0</div>
+              <div class="label">Total Contributions</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="totalInterest">$0</div>
+              <div class="label">Total Interest Earned</div>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding:16px;background:var(--surface-2);border-radius:6px;text-align:center;">
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Interest as % of Total</div>
+            <div style="font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--accent);margin-top:4px;" id="interestPct">0%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="calc-panel calc-panel-full" style="margin-top:16px;">
+      <div class="panel-header">Growth Over Time</div>
+      <div class="chart-container">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>Understanding Compound Interest</h2>
+      <p>Compound interest is interest calculated on both the initial principal and the accumulated interest from previous periods. It's often called "interest on interest" and is the reason investments can grow exponentially over time.</p>
+      <p>The formula for compound interest is: <strong>A = P(1 + r/n)^(nt)</strong></p>
+      <ul>
+        <li><strong>A</strong> = Final amount</li>
+        <li><strong>P</strong> = Initial principal</li>
+        <li><strong>r</strong> = Annual interest rate (decimal)</li>
+        <li><strong>n</strong> = Number of times interest is compounded per year</li>
+        <li><strong>t</strong> = Number of years</li>
+      </ul>
+      <p>The "Rule of 72" is a quick way to estimate how long it takes to double your money: divide 72 by your annual interest rate. At 7% growth, your money roughly doubles every 10.3 years.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+    var canvas = document.getElementById('chart');
+    var ctx = canvas.getContext('2d');
+
+    function calc() {
+      var P = parseFloat(document.getElementById('principal').value) || 0;
+      var contrib = parseFloat(document.getElementById('contribution').value) || 0;
+      var rate = parseFloat(document.getElementById('rate').value) / 100 || 0;
+      var years = parseInt(document.getElementById('years').value) || 1;
+      var n = parseInt(document.getElementById('freq').value) || 12;
+
+      var r = rate / n;
+      var dataContrib = [];
+      var dataTotal = [];
+      var labels = [];
+
+      var balance = P;
+      var totalContrib = P;
+
+      // Approximate monthly contribution into compounding periods
+      var contribPerPeriod = contrib * (12 / n);
+      var periods = n * years;
+
+      for (var y = 0; y <= years; y++) {
+        labels.push(y);
+        if (y === 0) {
+          dataContrib.push(P);
+          dataTotal.push(P);
+          continue;
+        }
+        for (var p = 0; p < n; p++) {
+          balance = balance * (1 + r) + contribPerPeriod;
+          totalContrib += contribPerPeriod;
+        }
+        dataContrib.push(totalContrib);
+        dataTotal.push(balance);
+      }
+
+      var interest = balance - totalContrib;
+      document.getElementById('total').textContent = fmt(balance);
+      document.getElementById('totalContrib').textContent = fmt(totalContrib);
+      document.getElementById('totalInterest').textContent = fmt(interest > 0 ? interest : 0);
+      document.getElementById('interestPct').textContent = balance > 0 ? Math.round((interest / balance) * 100) + '%' : '0%';
+
+      drawChart(labels, dataContrib, dataTotal);
+    }
+
+    function drawChart(labels, contrib, total) {
+      var rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      var w = canvas.width;
+      var h = canvas.height;
+      var pad = { top: 20, right: 20, bottom: 40, left: 70 };
+      var cw = w - pad.left - pad.right;
+      var ch = h - pad.top - pad.bottom;
+
+      ctx.clearRect(0, 0, w, h);
+
+      var maxVal = Math.max.apply(null, total) || 1;
+      maxVal = Math.ceil(maxVal / 1000) * 1000;
+
+      // Grid lines
+      ctx.strokeStyle = '#2a2a30';
+      ctx.lineWidth = 1;
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillStyle = '#8b8b94';
+      ctx.textAlign = 'right';
+      for (var i = 0; i <= 5; i++) {
+        var y = pad.top + ch - (i / 5) * ch;
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+        var val = (maxVal * i / 5);
+        ctx.fillText(val >= 1000000 ? '$' + (val / 1000000).toFixed(1) + 'M' : val >= 1000 ? '$' + Math.round(val / 1000) + 'K' : '$' + val, pad.left - 8, y + 4);
+      }
+
+      // X labels
+      ctx.textAlign = 'center';
+      var step = Math.max(1, Math.floor(labels.length / 10));
+      for (var i = 0; i < labels.length; i += step) {
+        var x = pad.left + (i / (labels.length - 1)) * cw;
+        ctx.fillText('Yr ' + labels[i], x, h - pad.bottom + 20);
+      }
+
+      // Contribution area
+      ctx.beginPath();
+      ctx.moveTo(pad.left, pad.top + ch);
+      for (var i = 0; i < contrib.length; i++) {
+        var x = pad.left + (i / (contrib.length - 1)) * cw;
+        var y = pad.top + ch - (contrib[i] / maxVal) * ch;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(pad.left + cw, pad.top + ch);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(99, 102, 241, 0.15)';
+      ctx.fill();
+
+      // Total area
+      ctx.beginPath();
+      ctx.moveTo(pad.left, pad.top + ch);
+      for (var i = 0; i < total.length; i++) {
+        var x = pad.left + (i / (total.length - 1)) * cw;
+        var y = pad.top + ch - (total[i] / maxVal) * ch;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(pad.left + cw, pad.top + ch);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(99, 102, 241, 0.08)';
+      ctx.fill();
+
+      // Total line
+      ctx.beginPath();
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 2.5;
+      for (var i = 0; i < total.length; i++) {
+        var x = pad.left + (i / (total.length - 1)) * cw;
+        var y = pad.top + ch - (total[i] / maxVal) * ch;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Contribution line
+      ctx.beginPath();
+      ctx.strokeStyle = '#8b8b94';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      for (var i = 0; i < contrib.length; i++) {
+        var x = pad.left + (i / (contrib.length - 1)) * cw;
+        var y = pad.top + ch - (contrib[i] / maxVal) * ch;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Legend
+      ctx.fillStyle = '#6366f1';
+      ctx.fillRect(pad.left, h - 12, 12, 3);
+      ctx.fillStyle = '#8b8b94';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('Total Balance', pad.left + 18, h - 8);
+      ctx.fillStyle = '#8b8b94';
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(pad.left + 120, h - 10); ctx.lineTo(pad.left + 132, h - 10); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillText('Contributions', pad.left + 138, h - 8);
+    }
+
+    document.querySelectorAll('#principal,#contribution,#rate,#years,#freq').forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+
+    window.addEventListener('resize', calc);
+    calc();
+  })();
+  </script>
+</body>
+</html>

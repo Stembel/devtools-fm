@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNS Lookup Explained: How Domain Name Resolution Works - ZeroKit.dev</title>
+  <meta name="description" content="Understand how DNS works: trace a query from browser to root server, learn about A, AAAA, CNAME, MX, and TXT records, TTL, propagation delays, and how to troubleshoot DNS issues.">
+  <link rel="canonical" href="https://zerokit.dev/blog/dns-lookup-explained.html">
+  <meta property="og:title" content="DNS Lookup Explained: How Domain Name Resolution Works">
+  <meta property="og:description" content="Trace a DNS query from browser to root server. Learn about record types, TTL, propagation, and troubleshooting.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://zerokit.dev/blog/dns-lookup-explained.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;530&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .article { max-width: 760px; margin: 0 auto; padding: 40px 0 80px; }
+    .article h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+    .article .meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+    .article h2 { font-size: 1.4rem; font-weight: 700; margin: 36px 0 14px; color: var(--text); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; margin: 28px 0 10px; color: var(--text); }
+    .article p { color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+    .article ul, .article ol { color: var(--text-muted); line-height: 1.8; margin: 0 0 16px 20px; font-size: 0.95rem; }
+    .article li { margin-bottom: 6px; }
+    .article code { font-family: var(--mono); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; color: var(--accent); }
+    .article pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-bottom: 20px; }
+    .article pre code { background: transparent; padding: 0; color: var(--text); font-size: 0.85rem; line-height: 1.7; }
+    .article .cta-box { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 24px; text-align: center; margin: 32px 0; }
+    .article .cta-box p { color: var(--text); margin-bottom: 12px; }
+    .article .cta-box a { display: inline-block; background: var(--accent); color: white; padding: 10px 24px; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+    .article .cta-box a:hover { background: var(--accent-hover); }
+    .faq { margin-top: 40px; }
+    .faq h2 { margin-bottom: 20px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+    .faq-item h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text); }
+    .faq-item p { margin: 0; }
+    .related { margin-top: 40px; }
+    .related h2 { margin-bottom: 16px; }
+    .related-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .related-links a { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.85rem; color: var(--text); }
+    .related-links a:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "DNS Lookup Explained: How Domain Name Resolution Works",
+    "description": "Understand how DNS works: trace a query from browser to root server, learn about record types, TTL, propagation, and troubleshooting.",
+    "author": {"@type": "Organization", "name": "ZeroKit.dev"},
+    "publisher": {"@type": "Organization", "name": "ZeroKit.dev", "url": "https://zerokit.dev"},
+    "datePublished": "2026-03-25",
+    "dateModified": "2026-03-25",
+    "mainEntityOfPage": "https://zerokit.dev/blog/dns-lookup-explained.html"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How long does DNS propagation take?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "DNS propagation typically takes anywhere from a few minutes to 48 hours, depending on the TTL (Time To Live) of the old record. If the previous record had a TTL of 3600 seconds (1 hour), most resolvers will cache it for up to an hour. To speed up propagation before a migration, lower the TTL to 300 seconds (5 minutes) a day or two in advance."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between an A record and a CNAME record?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An A record maps a domain name directly to an IPv4 address (e.g., example.com -> 93.184.216.34). A CNAME record maps a domain name to another domain name (e.g., www.example.com -> example.com). The resolver follows the CNAME chain until it finds an A record. You cannot set a CNAME on the root domain (zone apex) in standard DNS."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is my DNS not resolving?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Common causes: the domain's nameservers are not correctly set at the registrar, the DNS record does not exist or has a typo, the record was recently changed and the old value is still cached (wait for TTL expiry or flush your local DNS cache), or the DNS provider is experiencing an outage. Use dig or an online DNS lookup tool to test resolution from different locations."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav>
+        <a href="../">Tools</a>
+        <a href="../api-docs.html">API</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Blog</a>
+        <a href="../about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="article">
+      <a href="./" class="back-link">&larr; Back to Blog</a>
+      <h1>DNS Lookup Explained: How Domain Name Resolution Actually Works</h1>
+      <div class="meta">March 25, 2026 &middot; 7 min read</div>
+
+      <p>Every time you type a URL into your browser, something has to turn that domain name into an IP address. That something is DNS, the Domain Name System. It maps names like <code>zerokit.dev</code> to the IP addresses computers actually use to talk to each other. Once you understand how DNS works, you'll be noticeably faster at debugging connectivity problems, setting up domains, and deploying services. I've lost count of how many "the site is down" incidents turned out to be DNS.</p>
+
+      <h2>The Journey of a DNS Query</h2>
+
+      <p>When you visit <code>example.com</code>, this whole sequence plays out in roughly 50 milliseconds:</p>
+
+      <ol>
+        <li>The browser checks its own cache first. If it resolved this domain recently, it reuses the cached IP and skips everything else.</li>
+        <li>On a cache miss, the OS stub resolver checks its cache. On macOS you can flush it with <code>sudo dscacheutil -flushcache</code>; on Linux, systemd-resolved manages it.</li>
+        <li>If the OS cache misses too, the query goes to a recursive DNS resolver. That's usually your ISP's resolver or a public one like Cloudflare (1.1.1.1) or Google (8.8.8.8). This is the workhorse of the process.</li>
+        <li>The recursive resolver asks one of the 13 root nameserver clusters: "Who handles .com?" The root hands back the addresses of the .com TLD nameservers.</li>
+        <li>The resolver then asks the .com TLD server: "Who handles example.com?" It responds with the authoritative nameservers for the domain, something like <code>ns1.example-dns.com</code>.</li>
+        <li>Finally, the resolver asks the authoritative server for the A record of example.com. It gets back the IP address: <code>93.184.216.34</code>.</li>
+        <li>The recursive resolver caches that answer for the duration of the record's TTL, returns it to your browser, and your browser opens a TCP connection to that IP.</li>
+      </ol>
+
+      <p>All of that only happens on a cache miss. After the first lookup, subsequent requests for the same domain resolve in under a millisecond.</p>
+
+      <h2>DNS Record Types You Need to Know</h2>
+
+      <h3>A Record</h3>
+      <p>An A record maps a domain to an IPv4 address. It's the most basic and most common record type: <code>example.com. 3600 IN A 93.184.216.34</code></p>
+
+      <h3>AAAA Record</h3>
+      <p>Same idea as the A record, but for IPv6: <code>example.com. 3600 IN AAAA 2606:2800:220:1:248:1893:25c8:1946</code></p>
+
+      <h3>CNAME Record</h3>
+      <p>A CNAME creates an alias from one domain to another. You'll often see <code>www.example.com</code> with a CNAME pointing to <code>example.com</code>. The resolver follows the chain until it finds an A or AAAA record. One gotcha: you cannot set a CNAME on the zone apex (the bare domain) in standard DNS. Some providers offer "ALIAS" or "ANAME" records to work around this.</p>
+
+      <h3>MX Record</h3>
+      <p>MX records tell the world which mail servers handle email for your domain. They include priority values; lower numbers win. Example: <code>example.com. 3600 IN MX 10 mail.example.com.</code></p>
+
+      <h3>TXT Record</h3>
+      <p>TXT records hold arbitrary text. You'll run into them constantly for domain verification (Google Search Console, email providers), SPF (which servers can send email for your domain), DKIM signatures, and DMARC policies. If you've ever added a TXT record to prove you own a domain, that's this one.</p>
+
+      <h3>NS Record</h3>
+      <p>NS records declare the authoritative nameservers for a domain. When you change nameservers at your registrar, you're really updating the NS records at the parent zone (the .com TLD, for example).</p>
+
+      <h3>SRV Record</h3>
+      <p>SRV records specify the host and port for specific services like SIP, XMPP, or custom service discovery. Format: <code>_service._proto.name. TTL IN SRV priority weight port target.</code></p>
+
+      <h2>TTL: Time To Live</h2>
+
+      <p>Every DNS record has a TTL value in seconds. It tells resolvers how long they're allowed to cache the answer. A TTL of 3600 means "cache this for one hour." Shorter TTLs mean changes show up faster but generate more queries. Longer TTLs reduce load but slow down changes.</p>
+
+      <p>I always do this before a server migration: lower the TTL on the relevant records to 300 seconds (5 minutes) at least 24 hours ahead of time. That way, the old high-TTL records expire from caches before you swap the IP. Once the migration is stable, bump the TTL back to 3600 or higher.</p>
+
+      <h2>DNS Propagation: Why Changes Are Not Instant</h2>
+
+      <p>When you update a DNS record, the authoritative nameserver reflects the change immediately. But recursive resolvers around the world still have the old record cached. Until each resolver's cache expires, users going through those resolvers see the old IP. That's what people mean by "DNS propagation."</p>
+
+      <p>It's not a wave moving across the globe. Different resolvers cached the record at different times, so their caches expire independently. In practice, propagation finishes within one TTL period. But edge cases exist: resolvers that don't honor TTL strictly, users with stale browser caches. In my experience, the 24-48 hour worst case is rare, but it does happen.</p>
+
+      <h2>Troubleshooting DNS with dig and nslookup</h2>
+
+      <p><code>dig</code> is the go-to tool for DNS debugging on Unix-like systems:</p>
+
+<pre><code># Query the A record for example.com
+dig example.com A
+
+# Query a specific nameserver
+dig @8.8.8.8 example.com A
+
+# Query MX records
+dig example.com MX
+
+# Trace the full resolution path
+dig +trace example.com</code></pre>
+
+      <p>On Windows, <code>nslookup</code> does the same job:</p>
+<pre><code>nslookup example.com
+nslookup -type=MX example.com</code></pre>
+
+      <p>If you don't have a terminal handy or want to check resolution from a different geographic location, an online DNS lookup tool works fine.</p>
+
+      <div class="cta-box">
+        <p>Look up A, AAAA, CNAME, MX, TXT, NS, and SRV records for any domain. See TTL values and authoritative nameservers.</p>
+        <a href="../tools/dns-lookup.html">Try the Free DNS Lookup Tool</a>
+      </div>
+
+      <h2>DNS Security: DNSSEC and DoH</h2>
+
+      <p>Standard DNS queries travel in plaintext over UDP. Anyone on the network path can see what domains you're resolving and could forge responses (DNS spoofing). Two technologies fix this.</p>
+
+      <p>DNSSEC (DNS Security Extensions) adds cryptographic signatures to DNS records. Resolvers can then verify that the response actually came from the legitimate authoritative server and hasn't been tampered with. DNS over HTTPS (DoH) and DNS over TLS (DoT) go further by encrypting the query itself, preventing eavesdropping. Cloudflare's 1.1.1.1 and Google's 8.8.8.8 both support DoH and DoT, and most modern browsers use DoH by default.</p>
+
+      <p>You can verify your domain's SSL configuration with the <a href="ssl-certificate-check.html">SSL certificate checker</a>, and check WHOIS registration details with the <a href="../tools/whois.html">WHOIS lookup tool</a>.</p>
+
+      <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>How long does DNS propagation take?</h3>
+          <p>DNS propagation typically takes anywhere from a few minutes to 48 hours, depending on the TTL of the old record. If the previous TTL was 3600 seconds (1 hour), most resolvers will cache it for up to an hour. To speed up propagation before a migration, lower the TTL to 300 seconds (5 minutes) a day or two in advance.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>What is the difference between an A record and a CNAME record?</h3>
+          <p>An A record maps a domain directly to an IPv4 address (e.g., example.com to 93.184.216.34). A CNAME maps a domain to another domain name (e.g., www.example.com to example.com). The resolver follows the CNAME chain until it finds an A record. You cannot set a CNAME on the root domain (zone apex) in standard DNS.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Why is my DNS not resolving?</h3>
+          <p>Common causes: nameservers are not correctly set at the registrar, the DNS record does not exist or has a typo, the record was recently changed and the old value is still cached (wait for TTL expiry or flush your local DNS cache), or the DNS provider is experiencing an outage. Use <code>dig</code> or an online DNS lookup tool to test resolution from different locations.</p>
+        </div>
+      </section>
+
+      <section class="related">
+        <h2>Related Tools</h2>
+        <div class="related-links">
+          <a href="../tools/dns-lookup.html">DNS Lookup</a>
+          <a href="../tools/whois.html">WHOIS Lookup</a>
+          <a href="../tools/ssl-checker.html">SSL Certificate Checker</a>
+          <a href="../tools/ipinfo.html">IP Address Info</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; 105 free developer tools. All processing happens in your browser. No data leaves your machine.</div>
+      <div style="font-size: 0.8rem;"><a href="../about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="../privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="../impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:marcel.detemple@icloud.com" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

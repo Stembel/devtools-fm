@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salary Calculator — Annual, Monthly, Weekly, Hourly Pay Converter | ZeroKit.dev</title>
+  <meta name="description" content="Free salary calculator: convert between annual salary, monthly pay, weekly wage, and hourly rate. See take-home pay estimates and compare compensation.">
+  <link rel="canonical" href="https://zerokit.dev/tools/salary.html">
+  <meta property="og:title" content="Salary Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Convert between annual, monthly, weekly, and hourly pay rates. Free salary and wage calculator.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Salary Calculator</h1>
+    <p class="description">Convert between annual, monthly, weekly, and hourly pay rates instantly.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Enter Your Pay</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Pay Amount ($)</label>
+            <input type="number" id="amount" value="75000" min="0" step="100">
+          </div>
+          <div class="form-group">
+            <label>Pay Period</label>
+            <select id="period">
+              <option value="annual" selected>Annual Salary</option>
+              <option value="monthly">Monthly Pay</option>
+              <option value="biweekly">Bi-Weekly Pay</option>
+              <option value="weekly">Weekly Pay</option>
+              <option value="hourly">Hourly Rate</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Hours per Week</label>
+              <input type="number" id="hours" value="40" min="1" max="168" step="1">
+            </div>
+            <div class="form-group">
+              <label>Weeks per Year</label>
+              <input type="number" id="weeks" value="52" min="1" max="52" step="1">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Equivalent Pay Rates</div>
+        <div class="panel-body">
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="value" id="annual">$0</div>
+              <div class="label">Annual</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="monthly">$0</div>
+              <div class="label">Monthly</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="biweekly">$0</div>
+              <div class="label">Bi-Weekly</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="weekly">$0</div>
+              <div class="label">Weekly</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="daily">$0</div>
+              <div class="label">Daily</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="hourly">$0</div>
+              <div class="label">Hourly</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>How Salary Conversions Work</h2>
+      <p>Salary conversions depend on how many hours you work per week and how many weeks per year you work. Standard assumptions are 40 hours/week and 52 weeks/year (2,080 hours total).</p>
+      <ul>
+        <li><strong>Annual to Hourly:</strong> Annual Salary / (Hours per Week x Weeks per Year)</li>
+        <li><strong>Hourly to Annual:</strong> Hourly Rate x Hours per Week x Weeks per Year</li>
+        <li><strong>Monthly:</strong> Annual Salary / 12</li>
+        <li><strong>Bi-Weekly:</strong> Annual Salary / 26</li>
+        <li><strong>Weekly:</strong> Annual Salary / 52</li>
+        <li><strong>Daily:</strong> Weekly / 5 (assumes 5-day work week)</li>
+      </ul>
+      <p>If you receive paid vacation, use 52 weeks. If unpaid, subtract your vacation weeks (e.g., 50 weeks for 2 weeks unpaid vacation).</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+    function calc() {
+      var amount = parseFloat(document.getElementById('amount').value) || 0;
+      var period = document.getElementById('period').value;
+      var hpw = parseFloat(document.getElementById('hours').value) || 40;
+      var wpy = parseFloat(document.getElementById('weeks').value) || 52;
+      var totalHours = hpw * wpy;
+
+      var annual;
+      switch (period) {
+        case 'annual': annual = amount; break;
+        case 'monthly': annual = amount * 12; break;
+        case 'biweekly': annual = amount * 26; break;
+        case 'weekly': annual = amount * wpy; break;
+        case 'hourly': annual = amount * totalHours; break;
+        default: annual = amount;
+      }
+
+      document.getElementById('annual').textContent = fmt(annual);
+      document.getElementById('monthly').textContent = fmt(annual / 12);
+      document.getElementById('biweekly').textContent = fmt(annual / 26);
+      document.getElementById('weekly').textContent = fmt(annual / wpy);
+      document.getElementById('daily').textContent = fmt(annual / wpy / 5);
+      document.getElementById('hourly').textContent = fmt(totalHours > 0 ? annual / totalHours : 0);
+    }
+
+    document.querySelectorAll('#amount,#period,#hours,#weeks').forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+    calc();
+  })();
+  </script>
+</body>
+</html>
