@@ -331,7 +331,7 @@
         'author': {
           '@type': 'Organization',
           'name': 'DevTools.fm',
-          'url': 'https://stembel.github.io/devtools-fm/'
+          'url': 'https://zerokit.dev/'
         }
       };
 
@@ -348,11 +348,11 @@
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         'name': 'DevTools.fm',
-        'url': 'https://stembel.github.io/devtools-fm/',
+        'url': 'https://zerokit.dev/',
         'description': 'Free online developer tools. JSON formatter, Base64 encoder, hash generator, regex tester, and 35+ more tools.',
         'potentialAction': {
           '@type': 'SearchAction',
-          'target': 'https://stembel.github.io/devtools-fm/?q={search_term_string}',
+          'target': 'https://zerokit.dev/?q={search_term_string}',
           'query-input': 'required name=search_term_string'
         }
       },
@@ -360,7 +360,7 @@
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         'name': 'Developer Tools',
-        'numberOfItems': 39,
+        'numberOfItems': 47,
         'itemListElement': Array.from(document.querySelectorAll('.tool-card')).slice(0, 10).map(function(card, i) {
           const link = card.querySelector('a') || card;
           const name = card.querySelector('h3, .tool-name');
