@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Cheatsheet - Interactive SQL Reference | ZeroKit.dev</title>
+  <meta name="description" content="Interactive SQL cheatsheet with 60+ commands and patterns. Search, filter by category, copy SQL instantly. Covers SELECT, JOIN, subqueries, functions, transactions, and more. Includes MySQL, PostgreSQL, SQLite differences.">
+  <link rel="canonical" href="https://zerokit.dev/tools/sqlref.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .category-tab .tab-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .category-section {
+      margin-bottom: 32px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .cat-select .category-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .cat-insert .category-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-update .category-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .cat-delete .category-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .cat-join .category-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .cat-where .category-badge { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .cat-groupby .category-badge { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .cat-orderby .category-badge { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+    .cat-subquery .category-badge { background: rgba(132, 204, 22, 0.15); color: #a3e635; }
+    .cat-functions .category-badge { background: rgba(244, 114, 182, 0.15); color: #f472b6; }
+    .cat-datatypes .category-badge { background: rgba(251, 146, 60, 0.15); color: #fb923c; }
+    .cat-constraints .category-badge { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+    .cat-indexes .category-badge { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+    .cat-views .category-badge { background: rgba(192, 132, 252, 0.15); color: #c084fc; }
+    .cat-transactions .category-badge { background: rgba(250, 204, 21, 0.15); color: #facc15; }
+
+    .cat-select .category-header { border-bottom-color: rgba(59, 130, 246, 0.2); }
+    .cat-insert .category-header { border-bottom-color: rgba(34, 197, 94, 0.2); }
+    .cat-update .category-header { border-bottom-color: rgba(234, 179, 8, 0.2); }
+    .cat-delete .category-header { border-bottom-color: rgba(239, 68, 68, 0.2); }
+    .cat-join .category-header { border-bottom-color: rgba(168, 85, 247, 0.2); }
+    .cat-where .category-header { border-bottom-color: rgba(249, 115, 22, 0.2); }
+    .cat-groupby .category-header { border-bottom-color: rgba(236, 72, 153, 0.2); }
+    .cat-orderby .category-header { border-bottom-color: rgba(6, 182, 212, 0.2); }
+    .cat-subquery .category-header { border-bottom-color: rgba(132, 204, 22, 0.2); }
+    .cat-functions .category-header { border-bottom-color: rgba(244, 114, 182, 0.2); }
+    .cat-datatypes .category-header { border-bottom-color: rgba(251, 146, 60, 0.2); }
+    .cat-constraints .category-header { border-bottom-color: rgba(96, 165, 250, 0.2); }
+    .cat-indexes .category-header { border-bottom-color: rgba(52, 211, 153, 0.2); }
+    .cat-views .category-header { border-bottom-color: rgba(192, 132, 252, 0.2); }
+    .cat-transactions .category-header { border-bottom-color: rgba(250, 204, 21, 0.2); }
+
+    .cmd-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .cmd-card:hover {
+      border-color: var(--text-muted);
+    }
+    .cmd-card.expanded {
+      border-color: var(--accent);
+    }
+
+    .cmd-card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cmd-syntax {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-width: 200px;
+      flex-shrink: 0;
+    }
+    .cat-select .cmd-syntax { color: #60a5fa; }
+    .cat-insert .cmd-syntax { color: #4ade80; }
+    .cat-update .cmd-syntax { color: #facc15; }
+    .cat-delete .cmd-syntax { color: #f87171; }
+    .cat-join .cmd-syntax { color: #c084fc; }
+    .cat-where .cmd-syntax { color: #fb923c; }
+    .cat-groupby .cmd-syntax { color: #f472b6; }
+    .cat-orderby .cmd-syntax { color: #22d3ee; }
+    .cat-subquery .cmd-syntax { color: #a3e635; }
+    .cat-functions .cmd-syntax { color: #f472b6; }
+    .cat-datatypes .cmd-syntax { color: #fb923c; }
+    .cat-constraints .cmd-syntax { color: #60a5fa; }
+    .cat-indexes .cmd-syntax { color: #34d399; }
+    .cat-views .cmd-syntax { color: #c084fc; }
+    .cat-transactions .cmd-syntax { color: #facc15; }
+
+    .cmd-desc {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cmd-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-family: var(--mono);
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+    .cmd-chevron {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .cmd-card.expanded .cmd-chevron {
+      transform: rotate(90deg);
+    }
+
+    .cmd-detail {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .cmd-card.expanded .cmd-detail {
+      display: block;
+    }
+    .detail-section {
+      margin-top: 16px;
+    }
+    .detail-section h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .detail-section p {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .detail-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .detail-section ul li {
+      font-size: 0.85rem;
+      color: var(--text);
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+      line-height: 1.6;
+    }
+    .detail-section ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+    .flag-item code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .example-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--text);
+      overflow-x: auto;
+      white-space: pre;
+      position: relative;
+    }
+    .example-block .example-copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .example-block .example-copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .example-block .example-copy.copied {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+
+    .db-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 4px;
+    }
+    .db-mysql { background: rgba(0, 136, 204, 0.15); color: #4db8ff; }
+    .db-postgres { background: rgba(51, 103, 214, 0.15); color: #6d9eeb; }
+    .db-sqlite { background: rgba(76, 175, 80, 0.15); color: #81c784; }
+    .db-all { background: rgba(99, 102, 241, 0.08); color: var(--text-muted); }
+
+    /* Patterns section */
+    .patterns-section {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+    .patterns-section h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .workflow-card:hover {
+      border-color: var(--text-muted);
+    }
+    .workflow-card.expanded {
+      border-color: var(--accent);
+    }
+    .workflow-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .workflow-icon {
+      font-size: 1.1rem;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .workflow-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    .workflow-chevron {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .workflow-card.expanded .workflow-chevron {
+      transform: rotate(90deg);
+    }
+    .workflow-detail {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .workflow-card.expanded .workflow-detail {
+      display: block;
+    }
+    .workflow-steps {
+      margin-top: 16px;
+    }
+    .workflow-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .step-content p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    .step-content code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 12px;
+      display: block;
+      color: var(--text);
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-code {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    .scroll-top {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .scroll-top:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+    .scroll-top.visible {
+      display: flex;
+    }
+
+    @media (max-width: 768px) {
+      .cmd-card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+      }
+      .cmd-syntax {
+        min-width: auto;
+      }
+      .cmd-desc {
+        flex-basis: 100%;
+        order: 3;
+        white-space: normal;
+      }
+      .cmd-detail {
+        padding: 0 16px 16px;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>SQL Cheatsheet</h1>
+    <p class="description">Interactive SQL reference with 60+ commands and patterns. Search by keyword, filter by category, and copy SQL with one click. Covers MySQL, PostgreSQL, and SQLite differences. Includes common query patterns for pagination, deduplication, pivots, and running totals.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search SQL... (e.g. JOIN, GROUP BY, COALESCE)" autofocus spellcheck="false">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs">
+      <button class="category-tab active" data-cat="all">All <span class="tab-count" id="countAll"></span></button>
+      <button class="category-tab" data-cat="select">SELECT <span class="tab-count" id="countSelect"></span></button>
+      <button class="category-tab" data-cat="insert">INSERT <span class="tab-count" id="countInsert"></span></button>
+      <button class="category-tab" data-cat="update">UPDATE <span class="tab-count" id="countUpdate"></span></button>
+      <button class="category-tab" data-cat="delete">DELETE <span class="tab-count" id="countDelete"></span></button>
+      <button class="category-tab" data-cat="join">JOIN <span class="tab-count" id="countJoin"></span></button>
+      <button class="category-tab" data-cat="where">WHERE <span class="tab-count" id="countWhere"></span></button>
+      <button class="category-tab" data-cat="groupby">GROUP BY <span class="tab-count" id="countGroupby"></span></button>
+      <button class="category-tab" data-cat="orderby">ORDER BY <span class="tab-count" id="countOrderby"></span></button>
+      <button class="category-tab" data-cat="subquery">Subqueries <span class="tab-count" id="countSubquery"></span></button>
+      <button class="category-tab" data-cat="functions">Functions <span class="tab-count" id="countFunctions"></span></button>
+      <button class="category-tab" data-cat="datatypes">Data Types <span class="tab-count" id="countDatatypes"></span></button>
+      <button class="category-tab" data-cat="constraints">Constraints <span class="tab-count" id="countConstraints"></span></button>
+      <button class="category-tab" data-cat="indexes">Indexes <span class="tab-count" id="countIndexes"></span></button>
+      <button class="category-tab" data-cat="views">Views <span class="tab-count" id="countViews"></span></button>
+      <button class="category-tab" data-cat="transactions">Transactions <span class="tab-count" id="countTransactions"></span></button>
+    </div>
+
+    <div id="cmdList"></div>
+    <div id="noResults" class="no-results" style="display:none">
+      <div class="nr-code">SQL ?</div>
+      <p>No commands match your search.</p>
+    </div>
+
+    <!-- Common Query Patterns -->
+    <div class="patterns-section" id="patternsSection">
+      <h2>Common Query Patterns</h2>
+      <div id="patternList"></div>
+    </div>
+
+    <button class="scroll-top" id="scrollTop" title="Scroll to top">&#9650;</button>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    // ========== SQL COMMANDS DATA ==========
+    const SQL_COMMANDS = [
+      // === SELECT ===
+      {
+        cmd: "SELECT columns FROM table",
+        cat: "select",
+        desc: "Retrieve specific columns from a table.",
+        notes: [
+          { note: "*", info: "Select all columns" },
+          { note: "DISTINCT", info: "Return only unique rows" },
+          { note: "AS alias", info: "Rename a column in the result set" },
+          { note: "TOP n / LIMIT n", info: "Restrict number of rows returned" }
+        ],
+        example: "SELECT name, email FROM users;\nSELECT * FROM products;\nSELECT DISTINCT city FROM customers;",
+        db: "all"
+      },
+      {
+        cmd: "SELECT DISTINCT",
+        cat: "select",
+        desc: "Return only unique (different) values, eliminating duplicate rows.",
+        notes: [
+          { note: "DISTINCT column", info: "Unique values in one column" },
+          { note: "DISTINCT col1, col2", info: "Unique combinations of multiple columns" }
+        ],
+        example: "SELECT DISTINCT department FROM employees;\nSELECT DISTINCT city, state FROM customers;",
+        db: "all"
+      },
+      {
+        cmd: "SELECT ... AS alias",
+        cat: "select",
+        desc: "Assign a temporary name to a column or table in the result set.",
+        notes: [
+          { note: "column AS name", info: "Alias a column" },
+          { note: "table AS t", info: "Alias a table for shorter references" },
+          { note: "expression AS name", info: "Name a computed column" }
+        ],
+        example: "SELECT first_name AS name, salary * 12 AS annual_salary\nFROM employees;\n\nSELECT e.name, d.name AS department\nFROM employees e\nJOIN departments d ON e.dept_id = d.id;",
+        db: "all"
+      },
+      {
+        cmd: "SELECT ... LIMIT / FETCH",
+        cat: "select",
+        desc: "Restrict the number of rows returned by a query.",
+        notes: [
+          { note: "LIMIT n", info: "MySQL, PostgreSQL, SQLite -- return first n rows" },
+          { note: "LIMIT n OFFSET m", info: "Skip m rows, then return n rows" },
+          { note: "FETCH FIRST n ROWS ONLY", info: "SQL standard (PostgreSQL)" },
+          { note: "TOP n", info: "SQL Server syntax" }
+        ],
+        example: "-- MySQL / PostgreSQL / SQLite\nSELECT * FROM users LIMIT 10;\nSELECT * FROM users LIMIT 10 OFFSET 20;\n\n-- PostgreSQL (SQL standard)\nSELECT * FROM users\nFETCH FIRST 10 ROWS ONLY;",
+        db: "all"
+      },
+      {
+        cmd: "SELECT INTO",
+        cat: "select",
+        desc: "Create a new table from the result of a query.",
+        notes: [
+          { note: "SELECT ... INTO new_table", info: "SQL Server / PostgreSQL syntax" },
+          { note: "CREATE TABLE ... AS SELECT", info: "MySQL / SQLite alternative" }
+        ],
+        example: "-- PostgreSQL / SQL Server\nSELECT * INTO employees_backup\nFROM employees WHERE active = 1;\n\n-- MySQL / SQLite\nCREATE TABLE employees_backup AS\nSELECT * FROM employees WHERE active = 1;",
+        db: "all"
+      },
+      {
+        cmd: "SELECT ... CASE WHEN",
+        cat: "select",
+        desc: "Conditional logic in SQL queries, similar to if/else statements.",
+        notes: [
+          { note: "CASE WHEN ... THEN ... END", info: "Simple conditional expression" },
+          { note: "CASE col WHEN val THEN ...", info: "Simple CASE with equality check" },
+          { note: "ELSE default", info: "Fallback value when no condition matches" }
+        ],
+        example: "SELECT name, salary,\n  CASE\n    WHEN salary > 100000 THEN 'Senior'\n    WHEN salary > 50000 THEN 'Mid'\n    ELSE 'Junior'\n  END AS level\nFROM employees;",
+        db: "all"
+      },
+      {
+        cmd: "SELECT ... UNION / UNION ALL",
+        cat: "select",
+        desc: "Combine results from multiple SELECT statements into one result set.",
+        notes: [
+          { note: "UNION", info: "Combine and remove duplicates" },
+          { note: "UNION ALL", info: "Combine and keep all rows (faster)" },
+          { note: "INTERSECT", info: "Return only rows present in both queries" },
+          { note: "EXCEPT / MINUS", info: "Return rows in first query but not second" }
+        ],
+        example: "SELECT name, email FROM customers\nUNION\nSELECT name, email FROM suppliers;\n\nSELECT id FROM orders_2023\nUNION ALL\nSELECT id FROM orders_2024;",
+        db: "all"
+      },
+
+      // === INSERT ===
+      {
+        cmd: "INSERT INTO ... VALUES",
+        cat: "insert",
+        desc: "Insert one or more new rows into a table with explicit values.",
+        notes: [
+          { note: "INSERT INTO t (cols) VALUES (vals)", info: "Specify columns and values" },
+          { note: "INSERT INTO t VALUES (vals)", info: "Insert values for all columns in order" },
+          { note: "Multiple rows", info: "Comma-separated value lists in one statement" }
+        ],
+        example: "INSERT INTO users (name, email, age)\nVALUES ('Alice', 'alice@example.com', 30);\n\n-- Multiple rows\nINSERT INTO users (name, email, age) VALUES\n  ('Bob', 'bob@example.com', 25),\n  ('Carol', 'carol@example.com', 35);",
+        db: "all"
+      },
+      {
+        cmd: "INSERT INTO ... SELECT",
+        cat: "insert",
+        desc: "Insert rows from the result of another query.",
+        notes: [
+          { note: "Column count must match", info: "SELECT columns must align with INSERT columns" },
+          { note: "Can include WHERE", info: "Filter which rows to copy" }
+        ],
+        example: "INSERT INTO employees_archive (name, dept, salary)\nSELECT name, dept, salary\nFROM employees\nWHERE terminated = 1;",
+        db: "all"
+      },
+      {
+        cmd: "INSERT ... ON CONFLICT / ON DUPLICATE KEY",
+        cat: "insert",
+        desc: "Handle conflicts when inserting duplicate keys (upsert).",
+        notes: [
+          { note: "ON CONFLICT DO NOTHING", info: "PostgreSQL -- skip on conflict" },
+          { note: "ON CONFLICT DO UPDATE", info: "PostgreSQL -- update existing row" },
+          { note: "ON DUPLICATE KEY UPDATE", info: "MySQL -- update on duplicate" },
+          { note: "INSERT OR REPLACE", info: "SQLite -- replace on conflict" }
+        ],
+        example: "-- PostgreSQL\nINSERT INTO users (id, name, email)\nVALUES (1, 'Alice', 'alice@new.com')\nON CONFLICT (id) DO UPDATE\nSET email = EXCLUDED.email;\n\n-- MySQL\nINSERT INTO users (id, name, email)\nVALUES (1, 'Alice', 'alice@new.com')\nON DUPLICATE KEY UPDATE email = VALUES(email);\n\n-- SQLite\nINSERT OR REPLACE INTO users (id, name, email)\nVALUES (1, 'Alice', 'alice@new.com');",
+        db: "all"
+      },
+      {
+        cmd: "INSERT ... RETURNING",
+        cat: "insert",
+        desc: "Return data from inserted rows without a separate SELECT query.",
+        notes: [
+          { note: "RETURNING *", info: "Return all columns of inserted rows" },
+          { note: "RETURNING id", info: "Return only specific columns" }
+        ],
+        example: "-- PostgreSQL / SQLite 3.35+\nINSERT INTO users (name, email)\nVALUES ('Alice', 'alice@example.com')\nRETURNING id, name;\n\n-- MySQL: Use LAST_INSERT_ID() instead\nINSERT INTO users (name, email)\nVALUES ('Alice', 'alice@example.com');\nSELECT LAST_INSERT_ID();",
+        db: "postgres"
+      },
+
+      // === UPDATE ===
+      {
+        cmd: "UPDATE ... SET ... WHERE",
+        cat: "update",
+        desc: "Modify existing rows in a table based on a condition.",
+        notes: [
+          { note: "SET col = value", info: "Set one or more columns to new values" },
+          { note: "WHERE condition", info: "Filter which rows to update (CRITICAL!)" },
+          { note: "Multiple columns", info: "SET col1 = val1, col2 = val2" }
+        ],
+        example: "UPDATE employees\nSET salary = salary * 1.10, updated_at = NOW()\nWHERE department = 'Engineering';\n\nUPDATE products\nSET price = 19.99\nWHERE id = 42;",
+        db: "all"
+      },
+      {
+        cmd: "UPDATE ... FROM / JOIN",
+        cat: "update",
+        desc: "Update rows based on data from another table.",
+        notes: [
+          { note: "UPDATE ... FROM (PostgreSQL)", info: "Use FROM clause for joins" },
+          { note: "UPDATE ... JOIN (MySQL)", info: "Use JOIN syntax directly" },
+          { note: "Subquery in SET", info: "Works in all databases" }
+        ],
+        example: "-- PostgreSQL\nUPDATE employees e\nSET salary = d.avg_salary\nFROM departments d\nWHERE e.dept_id = d.id;\n\n-- MySQL\nUPDATE employees e\nJOIN departments d ON e.dept_id = d.id\nSET e.salary = d.avg_salary;\n\n-- SQLite (subquery)\nUPDATE employees\nSET salary = (\n  SELECT avg_salary FROM departments\n  WHERE departments.id = employees.dept_id\n);",
+        db: "all"
+      },
+      {
+        cmd: "UPDATE ... RETURNING",
+        cat: "update",
+        desc: "Return data from updated rows without a separate query.",
+        notes: [
+          { note: "RETURNING *", info: "Return all columns of updated rows" },
+          { note: "RETURNING old.col", info: "Not standard -- use triggers for old values" }
+        ],
+        example: "-- PostgreSQL / SQLite 3.35+\nUPDATE products\nSET price = price * 0.9\nWHERE category = 'clearance'\nRETURNING id, name, price;",
+        db: "postgres"
+      },
+
+      // === DELETE ===
+      {
+        cmd: "DELETE FROM ... WHERE",
+        cat: "delete",
+        desc: "Remove rows from a table based on a condition.",
+        notes: [
+          { note: "WHERE condition", info: "Filter which rows to delete (CRITICAL!)" },
+          { note: "Without WHERE", info: "Deletes ALL rows -- use with extreme caution" }
+        ],
+        example: "DELETE FROM sessions\nWHERE expires_at < NOW();\n\nDELETE FROM users\nWHERE id = 42;",
+        db: "all"
+      },
+      {
+        cmd: "DELETE ... USING / JOIN",
+        cat: "delete",
+        desc: "Delete rows based on a condition involving another table.",
+        notes: [
+          { note: "DELETE ... USING (PostgreSQL)", info: "Use USING clause for joins" },
+          { note: "DELETE ... JOIN (MySQL)", info: "Use JOIN syntax" }
+        ],
+        example: "-- PostgreSQL\nDELETE FROM orders o\nUSING customers c\nWHERE o.customer_id = c.id\nAND c.status = 'inactive';\n\n-- MySQL\nDELETE o FROM orders o\nJOIN customers c ON o.customer_id = c.id\nWHERE c.status = 'inactive';",
+        db: "all"
+      },
+      {
+        cmd: "TRUNCATE TABLE",
+        cat: "delete",
+        desc: "Remove all rows from a table quickly (faster than DELETE, resets auto-increment).",
+        notes: [
+          { note: "CASCADE", info: "PostgreSQL -- also truncate dependent tables" },
+          { note: "RESTART IDENTITY", info: "PostgreSQL -- reset sequence counters" },
+          { note: "Not in SQLite", info: "Use DELETE FROM table instead" }
+        ],
+        example: "TRUNCATE TABLE logs;\n\n-- PostgreSQL\nTRUNCATE TABLE orders RESTART IDENTITY CASCADE;",
+        db: "all"
+      },
+      {
+        cmd: "DELETE ... RETURNING",
+        cat: "delete",
+        desc: "Return deleted rows for confirmation or further processing.",
+        notes: [
+          { note: "RETURNING *", info: "Return all columns of deleted rows" },
+          { note: "RETURNING id, name", info: "Return specific columns only" }
+        ],
+        example: "-- PostgreSQL / SQLite 3.35+\nDELETE FROM expired_tokens\nWHERE created_at < NOW() - INTERVAL '30 days'\nRETURNING id, user_id;",
+        db: "postgres"
+      },
+
+      // === JOIN ===
+      {
+        cmd: "INNER JOIN",
+        cat: "join",
+        desc: "Return rows that have matching values in both tables.",
+        notes: [
+          { note: "ON condition", info: "Specify the join condition" },
+          { note: "USING (column)", info: "Shorthand when column names match" },
+          { note: "NATURAL JOIN", info: "Auto-join on all matching column names" }
+        ],
+        example: "SELECT e.name, d.name AS department\nFROM employees e\nINNER JOIN departments d ON e.dept_id = d.id;\n\n-- Using USING shorthand\nSELECT * FROM orders\nINNER JOIN customers USING (customer_id);",
+        db: "all"
+      },
+      {
+        cmd: "LEFT JOIN",
+        cat: "join",
+        desc: "Return all rows from left table plus matched rows from right table (NULLs for no match).",
+        notes: [
+          { note: "LEFT OUTER JOIN", info: "Full syntax (OUTER is optional)" },
+          { note: "NULL check", info: "Right table columns are NULL when no match" }
+        ],
+        example: "SELECT c.name, o.order_date\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id;\n\n-- Find customers with no orders\nSELECT c.name\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nWHERE o.id IS NULL;",
+        db: "all"
+      },
+      {
+        cmd: "RIGHT JOIN",
+        cat: "join",
+        desc: "Return all rows from right table plus matched rows from left table.",
+        notes: [
+          { note: "RIGHT OUTER JOIN", info: "Full syntax (OUTER is optional)" },
+          { note: "Not in SQLite", info: "SQLite does not support RIGHT JOIN -- use LEFT JOIN with swapped tables" }
+        ],
+        example: "SELECT e.name, d.name AS department\nFROM employees e\nRIGHT JOIN departments d ON e.dept_id = d.id;",
+        db: "all"
+      },
+      {
+        cmd: "FULL OUTER JOIN",
+        cat: "join",
+        desc: "Return all rows from both tables, with NULLs where there is no match.",
+        notes: [
+          { note: "Not in MySQL", info: "Emulate with UNION of LEFT + RIGHT JOIN" },
+          { note: "Not in SQLite", info: "Emulate with UNION of LEFT JOINs" }
+        ],
+        example: "-- PostgreSQL\nSELECT e.name, d.name\nFROM employees e\nFULL OUTER JOIN departments d ON e.dept_id = d.id;\n\n-- MySQL emulation\nSELECT e.name, d.name FROM employees e\nLEFT JOIN departments d ON e.dept_id = d.id\nUNION\nSELECT e.name, d.name FROM employees e\nRIGHT JOIN departments d ON e.dept_id = d.id;",
+        db: "all"
+      },
+      {
+        cmd: "CROSS JOIN",
+        cat: "join",
+        desc: "Return the Cartesian product of both tables (every row combination).",
+        notes: [
+          { note: "No ON clause", info: "Every row in A is paired with every row in B" },
+          { note: "Row count", info: "Result has rows_A * rows_B rows" }
+        ],
+        example: "SELECT s.size, c.color\nFROM sizes s\nCROSS JOIN colors c;\n\n-- Equivalent implicit syntax\nSELECT s.size, c.color\nFROM sizes s, colors c;",
+        db: "all"
+      },
+      {
+        cmd: "SELF JOIN",
+        cat: "join",
+        desc: "Join a table with itself to compare rows within the same table.",
+        notes: [
+          { note: "Requires aliases", info: "Use different aliases for the same table" },
+          { note: "Common uses", info: "Hierarchies, comparisons, finding duplicates" }
+        ],
+        example: "-- Find employees and their managers\nSELECT e.name AS employee, m.name AS manager\nFROM employees e\nLEFT JOIN employees m ON e.manager_id = m.id;",
+        db: "all"
+      },
+      {
+        cmd: "LATERAL JOIN",
+        cat: "join",
+        desc: "Join where the right side can reference columns from the left side (correlated subquery in FROM).",
+        notes: [
+          { note: "PostgreSQL", info: "JOIN LATERAL (...) ON true" },
+          { note: "MySQL 8.0.14+", info: "LATERAL keyword supported" },
+          { note: "Not in SQLite", info: "Use correlated subqueries instead" }
+        ],
+        example: "-- PostgreSQL: Top 3 orders per customer\nSELECT c.name, o.order_date, o.total\nFROM customers c\nJOIN LATERAL (\n  SELECT * FROM orders\n  WHERE customer_id = c.id\n  ORDER BY total DESC\n  LIMIT 3\n) o ON true;",
+        db: "postgres"
+      },
+
+      // === WHERE ===
+      {
+        cmd: "WHERE ... comparison operators",
+        cat: "where",
+        desc: "Filter rows using comparison operators: =, <>, <, >, <=, >=.",
+        notes: [
+          { note: "=", info: "Equal to" },
+          { note: "<> or !=", info: "Not equal to" },
+          { note: "< / > / <= / >=", info: "Less than, greater than, etc." }
+        ],
+        example: "SELECT * FROM products WHERE price > 50;\nSELECT * FROM users WHERE status <> 'inactive';\nSELECT * FROM orders WHERE total >= 100;",
+        db: "all"
+      },
+      {
+        cmd: "WHERE ... AND / OR / NOT",
+        cat: "where",
+        desc: "Combine multiple conditions with logical operators.",
+        notes: [
+          { note: "AND", info: "Both conditions must be true" },
+          { note: "OR", info: "At least one condition must be true" },
+          { note: "NOT", info: "Negate a condition" },
+          { note: "Parentheses", info: "Control evaluation order" }
+        ],
+        example: "SELECT * FROM products\nWHERE price > 10 AND category = 'Electronics';\n\nSELECT * FROM users\nWHERE (role = 'admin' OR role = 'superadmin')\nAND active = 1;",
+        db: "all"
+      },
+      {
+        cmd: "WHERE ... BETWEEN",
+        cat: "where",
+        desc: "Filter values within an inclusive range.",
+        notes: [
+          { note: "BETWEEN a AND b", info: "Inclusive on both ends (>= a AND <= b)" },
+          { note: "NOT BETWEEN", info: "Exclude values in the range" },
+          { note: "Works with dates", info: "BETWEEN '2024-01-01' AND '2024-12-31'" }
+        ],
+        example: "SELECT * FROM orders\nWHERE total BETWEEN 100 AND 500;\n\nSELECT * FROM events\nWHERE event_date BETWEEN '2024-01-01' AND '2024-12-31';",
+        db: "all"
+      },
+      {
+        cmd: "WHERE ... IN / NOT IN",
+        cat: "where",
+        desc: "Match a value against a list of values or a subquery result.",
+        notes: [
+          { note: "IN (list)", info: "Match any value in the list" },
+          { note: "IN (subquery)", info: "Match any value returned by subquery" },
+          { note: "NOT IN", info: "Exclude values in the list" },
+          { note: "NULL caveat", info: "NOT IN returns no rows if list contains NULL" }
+        ],
+        example: "SELECT * FROM users\nWHERE country IN ('US', 'UK', 'DE');\n\nSELECT * FROM products\nWHERE category_id IN (\n  SELECT id FROM categories WHERE active = 1\n);",
+        db: "all"
+      },
+      {
+        cmd: "WHERE ... LIKE / ILIKE",
+        cat: "where",
+        desc: "Pattern matching with wildcards for string comparison.",
+        notes: [
+          { note: "% (percent)", info: "Match any sequence of characters" },
+          { note: "_ (underscore)", info: "Match exactly one character" },
+          { note: "ILIKE", info: "Case-insensitive LIKE (PostgreSQL only)" },
+          { note: "ESCAPE", info: "Define escape character for literal % or _" }
+        ],
+        example: "SELECT * FROM users WHERE name LIKE 'J%';\nSELECT * FROM products WHERE sku LIKE 'AB-___';\n\n-- PostgreSQL case-insensitive\nSELECT * FROM users WHERE name ILIKE '%smith%';\n\n-- MySQL case-insensitive by default\nSELECT * FROM users WHERE name LIKE '%smith%';",
+        db: "all"
+      },
+      {
+        cmd: "WHERE ... IS NULL / IS NOT NULL",
+        cat: "where",
+        desc: "Check for NULL values (= NULL does NOT work in SQL).",
+        notes: [
+          { note: "IS NULL", info: "Column has no value" },
+          { note: "IS NOT NULL", info: "Column has a value" },
+          { note: "COALESCE alternative", info: "Replace NULL with a default value" }
+        ],
+        example: "SELECT * FROM orders WHERE shipped_at IS NULL;\nSELECT * FROM users WHERE email IS NOT NULL;\n\n-- Use COALESCE for default values\nSELECT name, COALESCE(phone, 'N/A') AS phone\nFROM contacts;",
+        db: "all"
+      },
+      {
+        cmd: "WHERE ... EXISTS",
+        cat: "where",
+        desc: "Test for the existence of rows returned by a subquery.",
+        notes: [
+          { note: "EXISTS (subquery)", info: "True if subquery returns any rows" },
+          { note: "NOT EXISTS", info: "True if subquery returns no rows" },
+          { note: "Performance", info: "Often faster than IN for large datasets" }
+        ],
+        example: "-- Find customers who have placed orders\nSELECT c.name FROM customers c\nWHERE EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.customer_id = c.id\n);\n\n-- Find products never ordered\nSELECT p.name FROM products p\nWHERE NOT EXISTS (\n  SELECT 1 FROM order_items oi\n  WHERE oi.product_id = p.id\n);",
+        db: "all"
+      },
+
+      // === GROUP BY ===
+      {
+        cmd: "GROUP BY column",
+        cat: "groupby",
+        desc: "Group rows that have the same values into summary rows.",
+        notes: [
+          { note: "Aggregate functions", info: "Use with COUNT, SUM, AVG, MAX, MIN" },
+          { note: "Multiple columns", info: "GROUP BY col1, col2 for nested grouping" },
+          { note: "Column position", info: "GROUP BY 1, 2 (MySQL, PostgreSQL)" }
+        ],
+        example: "SELECT department, COUNT(*) AS num_employees\nFROM employees\nGROUP BY department;\n\nSELECT country, city, SUM(revenue) AS total\nFROM sales\nGROUP BY country, city;",
+        db: "all"
+      },
+      {
+        cmd: "GROUP BY ... HAVING",
+        cat: "groupby",
+        desc: "Filter groups after aggregation (like WHERE but for groups).",
+        notes: [
+          { note: "HAVING condition", info: "Filter on aggregate results" },
+          { note: "vs WHERE", info: "WHERE filters before grouping, HAVING filters after" }
+        ],
+        example: "SELECT department, AVG(salary) AS avg_salary\nFROM employees\nGROUP BY department\nHAVING AVG(salary) > 60000;\n\nSELECT customer_id, COUNT(*) AS order_count\nFROM orders\nGROUP BY customer_id\nHAVING COUNT(*) >= 5;",
+        db: "all"
+      },
+      {
+        cmd: "GROUP BY ... ROLLUP",
+        cat: "groupby",
+        desc: "Generate subtotals and a grand total for grouped data.",
+        notes: [
+          { note: "ROLLUP (col1, col2)", info: "Hierarchical subtotals" },
+          { note: "CUBE (col1, col2)", info: "All possible subtotal combinations" },
+          { note: "GROUPING SETS", info: "Specify exact grouping combinations" }
+        ],
+        example: "-- PostgreSQL / MySQL\nSELECT department, job_title, SUM(salary)\nFROM employees\nGROUP BY ROLLUP (department, job_title);\n\n-- With GROUPING SETS\nSELECT department, quarter, SUM(revenue)\nFROM sales\nGROUP BY GROUPING SETS (\n  (department, quarter),\n  (department),\n  ()\n);",
+        db: "all"
+      },
+
+      // === ORDER BY ===
+      {
+        cmd: "ORDER BY column [ASC|DESC]",
+        cat: "orderby",
+        desc: "Sort the result set by one or more columns.",
+        notes: [
+          { note: "ASC", info: "Ascending order (default)" },
+          { note: "DESC", info: "Descending order" },
+          { note: "Multiple columns", info: "ORDER BY col1 ASC, col2 DESC" },
+          { note: "NULLS FIRST/LAST", info: "PostgreSQL -- control NULL position in sort" }
+        ],
+        example: "SELECT * FROM products ORDER BY price DESC;\n\nSELECT * FROM employees\nORDER BY department ASC, salary DESC;\n\n-- PostgreSQL: NULLs at the end\nSELECT * FROM users\nORDER BY last_login DESC NULLS LAST;",
+        db: "all"
+      },
+      {
+        cmd: "ORDER BY ... COLLATE",
+        cat: "orderby",
+        desc: "Specify a collation for string sorting to control case sensitivity and locale.",
+        notes: [
+          { note: "COLLATE utf8mb4_general_ci", info: "MySQL -- case-insensitive sort" },
+          { note: "COLLATE \"C\"", info: "PostgreSQL -- byte-level comparison" },
+          { note: "COLLATE NOCASE", info: "SQLite -- case-insensitive sort" }
+        ],
+        example: "-- MySQL\nSELECT * FROM users\nORDER BY name COLLATE utf8mb4_general_ci;\n\n-- SQLite\nSELECT * FROM users\nORDER BY name COLLATE NOCASE;",
+        db: "all"
+      },
+
+      // === SUBQUERIES ===
+      {
+        cmd: "Scalar Subquery",
+        cat: "subquery",
+        desc: "A subquery that returns a single value, usable anywhere a single value is expected.",
+        notes: [
+          { note: "In SELECT", info: "Use as a computed column" },
+          { note: "In WHERE", info: "Compare against a single value" },
+          { note: "Must return 1 row, 1 column", info: "Error if returns more" }
+        ],
+        example: "SELECT name, salary,\n  (SELECT AVG(salary) FROM employees) AS avg_salary\nFROM employees;\n\nSELECT * FROM products\nWHERE price > (SELECT AVG(price) FROM products);",
+        db: "all"
+      },
+      {
+        cmd: "Correlated Subquery",
+        cat: "subquery",
+        desc: "A subquery that references columns from the outer query, executed once per outer row.",
+        notes: [
+          { note: "Performance", info: "Can be slow -- consider JOIN alternatives" },
+          { note: "EXISTS", info: "Common with correlated subqueries" }
+        ],
+        example: "-- Employees earning above their department average\nSELECT name, salary, dept_id\nFROM employees e1\nWHERE salary > (\n  SELECT AVG(salary) FROM employees e2\n  WHERE e2.dept_id = e1.dept_id\n);",
+        db: "all"
+      },
+      {
+        cmd: "Derived Table (Subquery in FROM)",
+        cat: "subquery",
+        desc: "Use a subquery as a temporary table in the FROM clause.",
+        notes: [
+          { note: "Must have alias", info: "The derived table needs an alias name" },
+          { note: "Common use", info: "Pre-aggregate data before joining" }
+        ],
+        example: "SELECT d.department, d.avg_salary\nFROM (\n  SELECT department, AVG(salary) AS avg_salary\n  FROM employees\n  GROUP BY department\n) d\nWHERE d.avg_salary > 50000;",
+        db: "all"
+      },
+      {
+        cmd: "CTE (WITH ... AS)",
+        cat: "subquery",
+        desc: "Common Table Expression -- named temporary result set for readable complex queries.",
+        notes: [
+          { note: "WITH name AS (...)", info: "Define a CTE" },
+          { note: "Multiple CTEs", info: "Comma-separated: WITH a AS (...), b AS (...)" },
+          { note: "RECURSIVE", info: "CTE that references itself for hierarchical data" }
+        ],
+        example: "WITH high_earners AS (\n  SELECT * FROM employees\n  WHERE salary > 100000\n)\nSELECT department, COUNT(*) AS count\nFROM high_earners\nGROUP BY department;\n\n-- Recursive CTE: org chart\nWITH RECURSIVE org AS (\n  SELECT id, name, manager_id, 0 AS depth\n  FROM employees WHERE manager_id IS NULL\n  UNION ALL\n  SELECT e.id, e.name, e.manager_id, o.depth + 1\n  FROM employees e\n  JOIN org o ON e.manager_id = o.id\n)\nSELECT * FROM org;",
+        db: "all"
+      },
+
+      // === FUNCTIONS ===
+      {
+        cmd: "COUNT / SUM / AVG / MIN / MAX",
+        cat: "functions",
+        desc: "Aggregate functions to compute summary statistics over groups of rows.",
+        notes: [
+          { note: "COUNT(*)", info: "Count all rows including NULLs" },
+          { note: "COUNT(col)", info: "Count non-NULL values" },
+          { note: "COUNT(DISTINCT col)", info: "Count unique non-NULL values" },
+          { note: "SUM / AVG", info: "Numeric aggregation (ignores NULLs)" }
+        ],
+        example: "SELECT\n  COUNT(*) AS total_orders,\n  SUM(amount) AS revenue,\n  AVG(amount) AS avg_order,\n  MIN(amount) AS smallest,\n  MAX(amount) AS largest\nFROM orders;",
+        db: "all"
+      },
+      {
+        cmd: "COALESCE / NULLIF / IFNULL",
+        cat: "functions",
+        desc: "Handle NULL values with fallback expressions.",
+        notes: [
+          { note: "COALESCE(a, b, c)", info: "Return first non-NULL argument (all DBs)" },
+          { note: "NULLIF(a, b)", info: "Return NULL if a = b, else return a" },
+          { note: "IFNULL(a, b)", info: "MySQL/SQLite -- return b if a is NULL" },
+          { note: "NVL(a, b)", info: "Oracle equivalent of IFNULL" }
+        ],
+        example: "SELECT name, COALESCE(phone, email, 'no contact') AS contact\nFROM users;\n\nSELECT NULLIF(discount, 0) AS discount -- NULL instead of 0\nFROM products;\n\n-- MySQL\nSELECT IFNULL(middle_name, '') FROM users;",
+        db: "all"
+      },
+      {
+        cmd: "CAST / CONVERT",
+        cat: "functions",
+        desc: "Convert a value from one data type to another.",
+        notes: [
+          { note: "CAST(x AS type)", info: "SQL standard (all DBs)" },
+          { note: "x::type", info: "PostgreSQL shorthand" },
+          { note: "CONVERT(x, type)", info: "MySQL syntax" }
+        ],
+        example: "-- Standard SQL\nSELECT CAST(price AS INTEGER) FROM products;\nSELECT CAST('2024-01-15' AS DATE);\n\n-- PostgreSQL shorthand\nSELECT '42'::INTEGER;\nSELECT price::NUMERIC(10,2) FROM products;\n\n-- MySQL\nSELECT CONVERT(price, SIGNED) FROM products;",
+        db: "all"
+      },
+      {
+        cmd: "String Functions",
+        cat: "functions",
+        desc: "Common string manipulation functions: CONCAT, SUBSTRING, LENGTH, REPLACE, TRIM, UPPER, LOWER.",
+        notes: [
+          { note: "CONCAT(a, b)", info: "Concatenate strings (|| in PostgreSQL/SQLite)" },
+          { note: "SUBSTRING(s, start, len)", info: "Extract part of a string" },
+          { note: "LENGTH(s) / CHAR_LENGTH(s)", info: "String length" },
+          { note: "REPLACE(s, from, to)", info: "Replace occurrences in a string" },
+          { note: "TRIM / UPPER / LOWER", info: "Whitespace and case functions" }
+        ],
+        example: "SELECT CONCAT(first_name, ' ', last_name) AS full_name\nFROM users;\n\nSELECT UPPER(email), LENGTH(name)\nFROM customers;\n\nSELECT SUBSTRING(phone, 1, 3) AS area_code\nFROM contacts;\n\n-- PostgreSQL\nSELECT first_name || ' ' || last_name FROM users;",
+        db: "all"
+      },
+      {
+        cmd: "Date/Time Functions",
+        cat: "functions",
+        desc: "Functions for working with dates and timestamps.",
+        notes: [
+          { note: "NOW() / CURRENT_TIMESTAMP", info: "Current date and time" },
+          { note: "CURRENT_DATE", info: "Current date only" },
+          { note: "EXTRACT(part FROM date)", info: "Get year, month, day, etc." },
+          { note: "DATE_TRUNC (PG) / DATE (MySQL)", info: "Truncate to precision" },
+          { note: "INTERVAL", info: "Date arithmetic" }
+        ],
+        example: "-- PostgreSQL\nSELECT NOW(), CURRENT_DATE;\nSELECT EXTRACT(YEAR FROM created_at) FROM orders;\nSELECT DATE_TRUNC('month', created_at) FROM orders;\nSELECT created_at + INTERVAL '30 days' FROM orders;\n\n-- MySQL\nSELECT NOW(), CURDATE();\nSELECT YEAR(created_at), MONTH(created_at) FROM orders;\nSELECT DATE_ADD(created_at, INTERVAL 30 DAY) FROM orders;\n\n-- SQLite\nSELECT date('now');\nSELECT strftime('%Y', created_at) FROM orders;",
+        db: "all"
+      },
+      {
+        cmd: "Window Functions (OVER)",
+        cat: "functions",
+        desc: "Perform calculations across a set of rows related to the current row without collapsing groups.",
+        notes: [
+          { note: "ROW_NUMBER()", info: "Sequential number for each row" },
+          { note: "RANK() / DENSE_RANK()", info: "Ranking with/without gaps" },
+          { note: "LAG() / LEAD()", info: "Access previous/next row values" },
+          { note: "PARTITION BY", info: "Divide rows into groups" },
+          { note: "ORDER BY", info: "Order within each partition" }
+        ],
+        example: "SELECT name, department, salary,\n  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rank,\n  AVG(salary) OVER (PARTITION BY department) AS dept_avg\nFROM employees;\n\nSELECT date, revenue,\n  LAG(revenue, 1) OVER (ORDER BY date) AS prev_day,\n  revenue - LAG(revenue, 1) OVER (ORDER BY date) AS change\nFROM daily_sales;",
+        db: "all"
+      },
+      {
+        cmd: "NTILE / PERCENT_RANK / CUME_DIST",
+        cat: "functions",
+        desc: "Statistical window functions for distribution and percentile analysis.",
+        notes: [
+          { note: "NTILE(n)", info: "Divide rows into n roughly equal groups" },
+          { note: "PERCENT_RANK()", info: "Relative rank as percentage (0 to 1)" },
+          { note: "CUME_DIST()", info: "Cumulative distribution value" }
+        ],
+        example: "SELECT name, salary,\n  NTILE(4) OVER (ORDER BY salary DESC) AS quartile,\n  PERCENT_RANK() OVER (ORDER BY salary) AS pct_rank\nFROM employees;",
+        db: "all"
+      },
+      {
+        cmd: "STRING_AGG / GROUP_CONCAT",
+        cat: "functions",
+        desc: "Concatenate values from multiple rows into a single string.",
+        notes: [
+          { note: "STRING_AGG(col, sep)", info: "PostgreSQL -- aggregate with separator" },
+          { note: "GROUP_CONCAT(col)", info: "MySQL -- aggregate with separator" },
+          { note: "group_concat(col, sep)", info: "SQLite -- aggregate with separator" }
+        ],
+        example: "-- PostgreSQL\nSELECT department,\n  STRING_AGG(name, ', ' ORDER BY name) AS members\nFROM employees\nGROUP BY department;\n\n-- MySQL\nSELECT department,\n  GROUP_CONCAT(name ORDER BY name SEPARATOR ', ') AS members\nFROM employees\nGROUP BY department;\n\n-- SQLite\nSELECT department,\n  group_concat(name, ', ') AS members\nFROM employees\nGROUP BY department;",
+        db: "all"
+      },
+      {
+        cmd: "JSON Functions",
+        cat: "functions",
+        desc: "Query and manipulate JSON data stored in columns.",
+        notes: [
+          { note: "-> / ->>", info: "PostgreSQL/MySQL -- extract JSON field" },
+          { note: "json_extract()", info: "SQLite -- extract JSON value" },
+          { note: "jsonb_* functions", info: "PostgreSQL -- binary JSON operations" },
+          { note: "JSON_TABLE", info: "MySQL 8.0+ -- convert JSON to relational rows" }
+        ],
+        example: "-- PostgreSQL\nSELECT data->>'name' AS name,\n  data->'address'->>'city' AS city\nFROM users;\n\n-- MySQL\nSELECT JSON_EXTRACT(data, '$.name') AS name,\n  data->>'$.address.city' AS city\nFROM users;\n\n-- SQLite\nSELECT json_extract(data, '$.name') AS name\nFROM users;",
+        db: "all"
+      },
+
+      // === DATA TYPES ===
+      {
+        cmd: "INTEGER / INT / BIGINT / SMALLINT",
+        cat: "datatypes",
+        desc: "Whole number types with different storage sizes and ranges.",
+        notes: [
+          { note: "SMALLINT", info: "2 bytes: -32768 to 32767" },
+          { note: "INTEGER / INT", info: "4 bytes: -2B to 2B" },
+          { note: "BIGINT", info: "8 bytes: very large numbers" },
+          { note: "SERIAL (PG) / AUTO_INCREMENT (MySQL)", info: "Auto-incrementing integer" },
+          { note: "SQLite", info: "INTEGER is flexible, can be 1-8 bytes" }
+        ],
+        example: "-- PostgreSQL\nCREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  age SMALLINT,\n  score INTEGER\n);\n\n-- MySQL\nCREATE TABLE users (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  age SMALLINT,\n  score INT\n);",
+        db: "all"
+      },
+      {
+        cmd: "VARCHAR / TEXT / CHAR",
+        cat: "datatypes",
+        desc: "String/text data types for storing character data.",
+        notes: [
+          { note: "CHAR(n)", info: "Fixed-length string, padded with spaces" },
+          { note: "VARCHAR(n)", info: "Variable-length string with max length n" },
+          { note: "TEXT", info: "Unlimited length text (no max specified)" },
+          { note: "SQLite", info: "All text stored as TEXT regardless of declared type" }
+        ],
+        example: "CREATE TABLE products (\n  sku CHAR(10),\n  name VARCHAR(255),\n  description TEXT\n);",
+        db: "all"
+      },
+      {
+        cmd: "NUMERIC / DECIMAL / FLOAT / REAL",
+        cat: "datatypes",
+        desc: "Numeric types for decimal and floating-point values.",
+        notes: [
+          { note: "NUMERIC(p,s) / DECIMAL(p,s)", info: "Exact precision: p digits, s after decimal" },
+          { note: "FLOAT / REAL", info: "Approximate floating-point (4 bytes)" },
+          { note: "DOUBLE PRECISION", info: "Approximate floating-point (8 bytes)" },
+          { note: "MONEY (PG)", info: "Currency type with locale formatting" }
+        ],
+        example: "CREATE TABLE accounts (\n  balance NUMERIC(12, 2),  -- exact: 1234567890.12\n  rate FLOAT,               -- approximate\n  amount DECIMAL(10, 4)     -- exact: 123456.1234\n);",
+        db: "all"
+      },
+      {
+        cmd: "DATE / TIME / TIMESTAMP / INTERVAL",
+        cat: "datatypes",
+        desc: "Date and time data types for temporal values.",
+        notes: [
+          { note: "DATE", info: "Date only: 2024-01-15" },
+          { note: "TIME", info: "Time only: 14:30:00" },
+          { note: "TIMESTAMP", info: "Date and time combined" },
+          { note: "TIMESTAMPTZ (PG)", info: "Timestamp with time zone" },
+          { note: "DATETIME (MySQL)", info: "Date and time without timezone" },
+          { note: "INTERVAL (PG)", info: "Duration: '1 year 2 months 3 days'" }
+        ],
+        example: "CREATE TABLE events (\n  event_date DATE,\n  start_time TIME,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\n-- PostgreSQL with timezone\nCREATE TABLE logs (\n  ts TIMESTAMPTZ DEFAULT NOW()\n);",
+        db: "all"
+      },
+      {
+        cmd: "BOOLEAN / ENUM / UUID / ARRAY",
+        cat: "datatypes",
+        desc: "Specialized data types for specific use cases.",
+        notes: [
+          { note: "BOOLEAN", info: "TRUE/FALSE (PG/MySQL); SQLite uses 0/1" },
+          { note: "ENUM", info: "Predefined set of values (MySQL/PG)" },
+          { note: "UUID", info: "Universally unique identifier (PG native)" },
+          { note: "ARRAY", info: "PostgreSQL -- store arrays of any type" },
+          { note: "JSONB (PG) / JSON", info: "JSON data storage" }
+        ],
+        example: "-- PostgreSQL\nCREATE TABLE users (\n  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,\n  active BOOLEAN DEFAULT true,\n  tags TEXT[],\n  metadata JSONB\n);\n\n-- MySQL\nCREATE TABLE users (\n  role ENUM('admin', 'user', 'guest'),\n  active BOOLEAN DEFAULT TRUE\n);",
+        db: "all"
+      },
+
+      // === CONSTRAINTS ===
+      {
+        cmd: "PRIMARY KEY",
+        cat: "constraints",
+        desc: "Uniquely identify each row in a table. Cannot be NULL.",
+        notes: [
+          { note: "Single column", info: "column_name type PRIMARY KEY" },
+          { note: "Composite", info: "PRIMARY KEY (col1, col2)" },
+          { note: "Auto-increment", info: "SERIAL (PG), AUTO_INCREMENT (MySQL), AUTOINCREMENT (SQLite)" }
+        ],
+        example: "CREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  email VARCHAR(255) NOT NULL\n);\n\n-- Composite primary key\nCREATE TABLE order_items (\n  order_id INT,\n  product_id INT,\n  quantity INT,\n  PRIMARY KEY (order_id, product_id)\n);",
+        db: "all"
+      },
+      {
+        cmd: "FOREIGN KEY",
+        cat: "constraints",
+        desc: "Enforce referential integrity by linking to a primary key in another table.",
+        notes: [
+          { note: "REFERENCES table(col)", info: "Link to parent table column" },
+          { note: "ON DELETE CASCADE", info: "Delete child rows when parent is deleted" },
+          { note: "ON DELETE SET NULL", info: "Set FK to NULL when parent is deleted" },
+          { note: "ON UPDATE CASCADE", info: "Update FK when parent key changes" }
+        ],
+        example: "CREATE TABLE orders (\n  id SERIAL PRIMARY KEY,\n  customer_id INT NOT NULL,\n  FOREIGN KEY (customer_id)\n    REFERENCES customers(id)\n    ON DELETE CASCADE\n    ON UPDATE CASCADE\n);",
+        db: "all"
+      },
+      {
+        cmd: "UNIQUE",
+        cat: "constraints",
+        desc: "Ensure all values in a column (or combination) are unique.",
+        notes: [
+          { note: "Single column", info: "column_name type UNIQUE" },
+          { note: "Multi-column", info: "UNIQUE (col1, col2)" },
+          { note: "NULLs", info: "Multiple NULLs allowed in UNIQUE columns (varies by DB)" }
+        ],
+        example: "CREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  email VARCHAR(255) UNIQUE NOT NULL,\n  username VARCHAR(50) UNIQUE\n);\n\n-- Multi-column unique\nALTER TABLE enrollments\nADD CONSTRAINT uq_enrollment\nUNIQUE (student_id, course_id);",
+        db: "all"
+      },
+      {
+        cmd: "CHECK",
+        cat: "constraints",
+        desc: "Enforce a condition that values must satisfy.",
+        notes: [
+          { note: "Column level", info: "column_name type CHECK (condition)" },
+          { note: "Table level", info: "CHECK (condition) as separate clause" },
+          { note: "Named constraint", info: "CONSTRAINT name CHECK (...)" }
+        ],
+        example: "CREATE TABLE products (\n  id SERIAL PRIMARY KEY,\n  name VARCHAR(255) NOT NULL,\n  price NUMERIC(10,2) CHECK (price >= 0),\n  quantity INT CHECK (quantity >= 0),\n  CONSTRAINT valid_dates\n    CHECK (end_date > start_date)\n);",
+        db: "all"
+      },
+      {
+        cmd: "NOT NULL / DEFAULT",
+        cat: "constraints",
+        desc: "Prevent NULL values and set default values for columns.",
+        notes: [
+          { note: "NOT NULL", info: "Column must always have a value" },
+          { note: "DEFAULT value", info: "Automatic value if none is provided" },
+          { note: "DEFAULT expression", info: "Can use functions like NOW(), gen_random_uuid()" }
+        ],
+        example: "CREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  name VARCHAR(255) NOT NULL,\n  role VARCHAR(50) DEFAULT 'user',\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  active BOOLEAN NOT NULL DEFAULT true\n);",
+        db: "all"
+      },
+      {
+        cmd: "ALTER TABLE (add/modify constraints)",
+        cat: "constraints",
+        desc: "Modify table structure: add columns, change types, add or drop constraints.",
+        notes: [
+          { note: "ADD COLUMN", info: "Add a new column to the table" },
+          { note: "DROP COLUMN", info: "Remove a column (not in older SQLite)" },
+          { note: "ALTER COLUMN / MODIFY", info: "Change column type or constraints" },
+          { note: "ADD CONSTRAINT", info: "Add a named constraint" },
+          { note: "DROP CONSTRAINT", info: "Remove a named constraint" }
+        ],
+        example: "ALTER TABLE users ADD COLUMN phone VARCHAR(20);\n\nALTER TABLE users DROP COLUMN middle_name;\n\n-- PostgreSQL\nALTER TABLE users ALTER COLUMN email SET NOT NULL;\nALTER TABLE users ADD CONSTRAINT uq_email UNIQUE (email);\n\n-- MySQL\nALTER TABLE users MODIFY email VARCHAR(255) NOT NULL;\n\n-- Drop constraint\nALTER TABLE users DROP CONSTRAINT uq_email;",
+        db: "all"
+      },
+
+      // === INDEXES ===
+      {
+        cmd: "CREATE INDEX",
+        cat: "indexes",
+        desc: "Create an index to speed up queries on specific columns.",
+        notes: [
+          { note: "B-tree (default)", info: "Good for equality and range queries" },
+          { note: "UNIQUE INDEX", info: "Index that also enforces uniqueness" },
+          { note: "Multi-column", info: "Index on (col1, col2) -- leftmost prefix rule" }
+        ],
+        example: "CREATE INDEX idx_users_email ON users (email);\n\nCREATE UNIQUE INDEX idx_users_username\nON users (username);\n\n-- Multi-column index\nCREATE INDEX idx_orders_customer_date\nON orders (customer_id, order_date);",
+        db: "all"
+      },
+      {
+        cmd: "CREATE INDEX (specialized types)",
+        cat: "indexes",
+        desc: "Database-specific index types for specialized queries.",
+        notes: [
+          { note: "GIN (PG)", info: "Generalized Inverted Index -- arrays, JSONB, full-text" },
+          { note: "GiST (PG)", info: "Generalized Search Tree -- geometry, ranges" },
+          { note: "HASH (PG/MySQL)", info: "Fast equality lookups only" },
+          { note: "FULLTEXT (MySQL)", info: "Full-text search index" },
+          { note: "Partial (PG)", info: "Index with a WHERE clause" }
+        ],
+        example: "-- PostgreSQL GIN for JSONB\nCREATE INDEX idx_data ON users USING GIN (metadata);\n\n-- PostgreSQL partial index\nCREATE INDEX idx_active_users ON users (email)\nWHERE active = true;\n\n-- MySQL fulltext\nCREATE FULLTEXT INDEX idx_ft_name\nON products (name, description);",
+        db: "all"
+      },
+      {
+        cmd: "DROP INDEX / REINDEX",
+        cat: "indexes",
+        desc: "Remove or rebuild an index.",
+        notes: [
+          { note: "DROP INDEX name", info: "PostgreSQL/SQLite" },
+          { note: "DROP INDEX name ON table", info: "MySQL" },
+          { note: "REINDEX", info: "PostgreSQL -- rebuild corrupted indexes" },
+          { note: "IF EXISTS", info: "Avoid error if index does not exist" }
+        ],
+        example: "-- PostgreSQL / SQLite\nDROP INDEX IF EXISTS idx_users_email;\n\n-- MySQL\nDROP INDEX idx_users_email ON users;\n\n-- PostgreSQL: rebuild\nREINDEX INDEX idx_users_email;\nREINDEX TABLE users;",
+        db: "all"
+      },
+      {
+        cmd: "EXPLAIN / ANALYZE",
+        cat: "indexes",
+        desc: "Show the query execution plan to understand how indexes are used.",
+        notes: [
+          { note: "EXPLAIN", info: "Show planned execution path" },
+          { note: "EXPLAIN ANALYZE (PG)", info: "Run query and show actual timings" },
+          { note: "EXPLAIN FORMAT=JSON (MySQL)", info: "Detailed JSON output" },
+          { note: "EXPLAIN QUERY PLAN (SQLite)", info: "SQLite execution plan" }
+        ],
+        example: "-- PostgreSQL\nEXPLAIN ANALYZE\nSELECT * FROM users WHERE email = 'alice@example.com';\n\n-- MySQL\nEXPLAIN FORMAT=JSON\nSELECT * FROM orders WHERE customer_id = 42;\n\n-- SQLite\nEXPLAIN QUERY PLAN\nSELECT * FROM users WHERE email = 'alice@example.com';",
+        db: "all"
+      },
+
+      // === VIEWS ===
+      {
+        cmd: "CREATE VIEW",
+        cat: "views",
+        desc: "Create a virtual table based on the result of a SELECT query.",
+        notes: [
+          { note: "CREATE VIEW name AS", info: "Define the view query" },
+          { note: "CREATE OR REPLACE VIEW", info: "Update existing view definition" },
+          { note: "WITH CHECK OPTION", info: "Ensure INSERT/UPDATE through view satisfies WHERE" }
+        ],
+        example: "CREATE VIEW active_users AS\nSELECT id, name, email, last_login\nFROM users\nWHERE active = true;\n\nCREATE OR REPLACE VIEW order_summary AS\nSELECT c.name, COUNT(o.id) AS total_orders,\n  SUM(o.total) AS total_spent\nFROM customers c\nJOIN orders o ON c.id = o.customer_id\nGROUP BY c.name;",
+        db: "all"
+      },
+      {
+        cmd: "CREATE MATERIALIZED VIEW",
+        cat: "views",
+        desc: "Create a view that stores its result physically (PostgreSQL). Faster reads, needs refresh.",
+        notes: [
+          { note: "REFRESH MATERIALIZED VIEW", info: "Update stored data" },
+          { note: "CONCURRENTLY", info: "Refresh without locking reads (needs unique index)" },
+          { note: "Not in MySQL/SQLite", info: "Use tables + triggers as workaround" }
+        ],
+        example: "-- PostgreSQL only\nCREATE MATERIALIZED VIEW monthly_sales AS\nSELECT DATE_TRUNC('month', order_date) AS month,\n  SUM(total) AS revenue, COUNT(*) AS orders\nFROM orders\nGROUP BY 1;\n\n-- Refresh when data changes\nREFRESH MATERIALIZED VIEW monthly_sales;\nREFRESH MATERIALIZED VIEW CONCURRENTLY monthly_sales;",
+        db: "postgres"
+      },
+      {
+        cmd: "DROP VIEW / ALTER VIEW",
+        cat: "views",
+        desc: "Remove or modify an existing view.",
+        notes: [
+          { note: "DROP VIEW name", info: "Remove the view" },
+          { note: "DROP VIEW IF EXISTS", info: "Avoid error if view does not exist" },
+          { note: "CASCADE", info: "PostgreSQL -- also drop dependent objects" }
+        ],
+        example: "DROP VIEW IF EXISTS active_users;\n\n-- PostgreSQL\nDROP VIEW active_users CASCADE;\n\n-- Drop materialized view\nDROP MATERIALIZED VIEW IF EXISTS monthly_sales;",
+        db: "all"
+      },
+
+      // === TRANSACTIONS ===
+      {
+        cmd: "BEGIN / START TRANSACTION",
+        cat: "transactions",
+        desc: "Start a new transaction to group multiple operations atomically.",
+        notes: [
+          { note: "BEGIN", info: "PostgreSQL/SQLite start transaction" },
+          { note: "START TRANSACTION", info: "MySQL start transaction" },
+          { note: "READ ONLY / READ WRITE", info: "Transaction access mode" }
+        ],
+        example: "-- PostgreSQL / SQLite\nBEGIN;\n  UPDATE accounts SET balance = balance - 100 WHERE id = 1;\n  UPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;\n\n-- MySQL\nSTART TRANSACTION;\n  UPDATE accounts SET balance = balance - 100 WHERE id = 1;\n  UPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;",
+        db: "all"
+      },
+      {
+        cmd: "COMMIT / ROLLBACK",
+        cat: "transactions",
+        desc: "Finalize or undo all changes made during a transaction.",
+        notes: [
+          { note: "COMMIT", info: "Save all changes permanently" },
+          { note: "ROLLBACK", info: "Undo all changes since BEGIN" },
+          { note: "Autocommit", info: "Default mode -- each statement is its own transaction" }
+        ],
+        example: "BEGIN;\n  INSERT INTO orders (customer_id, total) VALUES (1, 99.99);\n  INSERT INTO order_items (order_id, product_id, qty)\n    VALUES (LASTVAL(), 42, 2);\n  -- Oops, something went wrong\nROLLBACK;\n\n-- Or if everything is fine:\nCOMMIT;",
+        db: "all"
+      },
+      {
+        cmd: "SAVEPOINT / ROLLBACK TO",
+        cat: "transactions",
+        desc: "Create intermediate save points within a transaction for partial rollback.",
+        notes: [
+          { note: "SAVEPOINT name", info: "Create a savepoint" },
+          { note: "ROLLBACK TO name", info: "Undo to the savepoint (keep transaction open)" },
+          { note: "RELEASE SAVEPOINT", info: "Remove the savepoint" }
+        ],
+        example: "BEGIN;\n  INSERT INTO orders (customer_id) VALUES (1);\n  SAVEPOINT after_order;\n\n  INSERT INTO payments (order_id, amount) VALUES (1, 99.99);\n  -- Payment failed, rollback only this part\n  ROLLBACK TO after_order;\n\n  -- Order still exists, try different payment\n  INSERT INTO payments (order_id, amount) VALUES (1, 89.99);\nCOMMIT;",
+        db: "all"
+      },
+      {
+        cmd: "SET TRANSACTION ISOLATION LEVEL",
+        cat: "transactions",
+        desc: "Control how transactions interact with concurrent operations.",
+        notes: [
+          { note: "READ UNCOMMITTED", info: "Least strict -- dirty reads possible" },
+          { note: "READ COMMITTED", info: "Default in PostgreSQL/MySQL -- no dirty reads" },
+          { note: "REPEATABLE READ", info: "Default in MySQL InnoDB -- consistent reads" },
+          { note: "SERIALIZABLE", info: "Most strict -- full isolation" }
+        ],
+        example: "-- PostgreSQL\nBEGIN;\nSET TRANSACTION ISOLATION LEVEL SERIALIZABLE;\n  SELECT * FROM accounts WHERE id = 1;\n  UPDATE accounts SET balance = balance - 100 WHERE id = 1;\nCOMMIT;\n\n-- MySQL\nSET TRANSACTION ISOLATION LEVEL REPEATABLE READ;\nSTART TRANSACTION;\n  -- your queries here\nCOMMIT;",
+        db: "all"
+      },
+      {
+        cmd: "LOCK TABLE / SELECT FOR UPDATE",
+        cat: "transactions",
+        desc: "Explicitly lock tables or rows to prevent concurrent modifications.",
+        notes: [
+          { note: "SELECT ... FOR UPDATE", info: "Lock selected rows (all DBs)" },
+          { note: "FOR UPDATE SKIP LOCKED", info: "Skip already locked rows (PG/MySQL)" },
+          { note: "FOR UPDATE NOWAIT", info: "Fail immediately if locked (PG/MySQL)" },
+          { note: "LOCK TABLE", info: "Lock entire table (use sparingly)" }
+        ],
+        example: "-- Row-level locking\nBEGIN;\nSELECT * FROM inventory\nWHERE product_id = 42\nFOR UPDATE;\n\nUPDATE inventory\nSET quantity = quantity - 1\nWHERE product_id = 42;\nCOMMIT;\n\n-- Skip locked rows (job queue pattern)\nSELECT * FROM tasks\nWHERE status = 'pending'\nORDER BY created_at\nLIMIT 1\nFOR UPDATE SKIP LOCKED;",
+        db: "all"
+      }
+    ];
+
+    // ========== CATEGORIES ==========
+    const CATEGORIES = [
+      { key: 'select', label: 'SELECT', desc: 'Querying and retrieving data' },
+      { key: 'insert', label: 'INSERT', desc: 'Adding new data' },
+      { key: 'update', label: 'UPDATE', desc: 'Modifying existing data' },
+      { key: 'delete', label: 'DELETE', desc: 'Removing data' },
+      { key: 'join', label: 'JOIN', desc: 'Combining tables' },
+      { key: 'where', label: 'WHERE', desc: 'Filtering conditions' },
+      { key: 'groupby', label: 'GROUP BY', desc: 'Aggregation and grouping' },
+      { key: 'orderby', label: 'ORDER BY', desc: 'Sorting results' },
+      { key: 'subquery', label: 'Subqueries', desc: 'Nested queries and CTEs' },
+      { key: 'functions', label: 'Functions', desc: 'Built-in SQL functions' },
+      { key: 'datatypes', label: 'Data Types', desc: 'Column data types' },
+      { key: 'constraints', label: 'Constraints', desc: 'Data integrity rules' },
+      { key: 'indexes', label: 'Indexes', desc: 'Query performance optimization' },
+      { key: 'views', label: 'Views', desc: 'Virtual and materialized tables' },
+      { key: 'transactions', label: 'Transactions', desc: 'ACID operations and locking' }
+    ];
+
+    // ========== COMMON QUERY PATTERNS ==========
+    const PATTERNS = [
+      {
+        title: "Pagination (OFFSET/LIMIT)",
+        icon: "&#x1F4C4;",
+        steps: [
+          { text: "Basic pagination with LIMIT and OFFSET:", cmd: "SELECT * FROM products\nORDER BY id\nLIMIT 20 OFFSET 40;  -- Page 3 (20 items per page)" },
+          { text: "Keyset pagination (faster for large offsets):", cmd: "SELECT * FROM products\nWHERE id > 1000  -- last seen ID\nORDER BY id\nLIMIT 20;" },
+          { text: "Get total count alongside results:", cmd: "SELECT *, COUNT(*) OVER () AS total_count\nFROM products\nORDER BY id\nLIMIT 20 OFFSET 40;" }
+        ]
+      },
+      {
+        title: "Deduplication (Remove Duplicates)",
+        icon: "&#x1F9F9;",
+        steps: [
+          { text: "Find duplicates:", cmd: "SELECT email, COUNT(*) AS cnt\nFROM users\nGROUP BY email\nHAVING COUNT(*) > 1;" },
+          { text: "Keep latest row per group using ROW_NUMBER:", cmd: "DELETE FROM users\nWHERE id NOT IN (\n  SELECT id FROM (\n    SELECT id, ROW_NUMBER() OVER (\n      PARTITION BY email ORDER BY created_at DESC\n    ) AS rn\n    FROM users\n  ) t WHERE rn = 1\n);" },
+          { text: "PostgreSQL: Delete with CTE:", cmd: "WITH dupes AS (\n  SELECT id, ROW_NUMBER() OVER (\n    PARTITION BY email ORDER BY created_at DESC\n  ) AS rn\n  FROM users\n)\nDELETE FROM users\nWHERE id IN (SELECT id FROM dupes WHERE rn > 1);" }
+        ]
+      },
+      {
+        title: "Pivot / Crosstab (Rows to Columns)",
+        icon: "&#x1F504;",
+        steps: [
+          { text: "Manual pivot using CASE + aggregate:", cmd: "SELECT product,\n  SUM(CASE WHEN quarter = 'Q1' THEN revenue ELSE 0 END) AS q1,\n  SUM(CASE WHEN quarter = 'Q2' THEN revenue ELSE 0 END) AS q2,\n  SUM(CASE WHEN quarter = 'Q3' THEN revenue ELSE 0 END) AS q3,\n  SUM(CASE WHEN quarter = 'Q4' THEN revenue ELSE 0 END) AS q4\nFROM sales\nGROUP BY product;" },
+          { text: "PostgreSQL crosstab (requires tablefunc extension):", cmd: "CREATE EXTENSION IF NOT EXISTS tablefunc;\n\nSELECT * FROM crosstab(\n  'SELECT product, quarter, revenue FROM sales ORDER BY 1,2',\n  $$VALUES ('Q1'),('Q2'),('Q3'),('Q4')$$\n) AS ct(product TEXT, q1 NUMERIC, q2 NUMERIC, q3 NUMERIC, q4 NUMERIC);" }
+        ]
+      },
+      {
+        title: "Running Totals / Cumulative Sum",
+        icon: "&#x1F4C8;",
+        steps: [
+          { text: "Running total with window function:", cmd: "SELECT date, amount,\n  SUM(amount) OVER (ORDER BY date) AS running_total\nFROM transactions;" },
+          { text: "Running total per group:", cmd: "SELECT account_id, date, amount,\n  SUM(amount) OVER (\n    PARTITION BY account_id\n    ORDER BY date\n  ) AS running_balance\nFROM transactions;" },
+          { text: "Moving average (last 7 days):", cmd: "SELECT date, revenue,\n  AVG(revenue) OVER (\n    ORDER BY date\n    ROWS BETWEEN 6 PRECEDING AND CURRENT ROW\n  ) AS moving_avg_7d\nFROM daily_sales;" }
+        ]
+      },
+      {
+        title: "Upsert (Insert or Update)",
+        icon: "&#x1F501;",
+        steps: [
+          { text: "PostgreSQL: ON CONFLICT:", cmd: "INSERT INTO user_settings (user_id, theme, lang)\nVALUES (1, 'dark', 'en')\nON CONFLICT (user_id)\nDO UPDATE SET\n  theme = EXCLUDED.theme,\n  lang = EXCLUDED.lang;" },
+          { text: "MySQL: ON DUPLICATE KEY:", cmd: "INSERT INTO user_settings (user_id, theme, lang)\nVALUES (1, 'dark', 'en')\nON DUPLICATE KEY UPDATE\n  theme = VALUES(theme),\n  lang = VALUES(lang);" },
+          { text: "SQLite: INSERT OR REPLACE:", cmd: "INSERT OR REPLACE INTO user_settings (user_id, theme, lang)\nVALUES (1, 'dark', 'en');" }
+        ]
+      },
+      {
+        title: "Hierarchical / Tree Queries (Recursive CTE)",
+        icon: "&#x1F333;",
+        steps: [
+          { text: "Traverse a tree structure (e.g. categories, org chart):", cmd: "WITH RECURSIVE tree AS (\n  -- Base case: root nodes\n  SELECT id, name, parent_id, 0 AS depth,\n    name::TEXT AS path\n  FROM categories\n  WHERE parent_id IS NULL\n\n  UNION ALL\n\n  -- Recursive step\n  SELECT c.id, c.name, c.parent_id, t.depth + 1,\n    t.path || ' > ' || c.name\n  FROM categories c\n  JOIN tree t ON c.parent_id = t.id\n)\nSELECT * FROM tree ORDER BY path;" },
+          { text: "Limit depth to avoid infinite loops:", cmd: "-- Add WHERE depth < 10 in the recursive part\n-- or use CYCLE detection (PostgreSQL 14+):\nWITH RECURSIVE tree AS (...)\nCYCLE id SET is_cycle USING path_array" }
+        ]
+      },
+      {
+        title: "Gap and Island Detection",
+        icon: "&#x1F3DD;",
+        steps: [
+          { text: "Find gaps in a sequence:", cmd: "SELECT prev_id + 1 AS gap_start,\n  id - 1 AS gap_end\nFROM (\n  SELECT id, LAG(id) OVER (ORDER BY id) AS prev_id\n  FROM numbered_items\n) t\nWHERE id - prev_id > 1;" },
+          { text: "Find islands (consecutive groups):", cmd: "SELECT MIN(date) AS island_start,\n  MAX(date) AS island_end,\n  COUNT(*) AS days\nFROM (\n  SELECT date,\n    date - ROW_NUMBER() OVER (ORDER BY date)\n      * INTERVAL '1 day' AS grp\n  FROM active_days\n) t\nGROUP BY grp\nORDER BY island_start;" }
+        ]
+      },
+      {
+        title: "Conditional Aggregation",
+        icon: "&#x1F4CA;",
+        steps: [
+          { text: "Count and sum with conditions:", cmd: "SELECT\n  COUNT(*) AS total_orders,\n  COUNT(*) FILTER (WHERE status = 'shipped') AS shipped,\n  SUM(amount) FILTER (WHERE status = 'paid') AS paid_revenue\nFROM orders;\n\n-- MySQL (no FILTER, use CASE)\nSELECT\n  COUNT(*) AS total_orders,\n  SUM(CASE WHEN status = 'shipped' THEN 1 ELSE 0 END) AS shipped,\n  SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS paid_revenue\nFROM orders;" }
+        ]
+      }
+    ];
+
+    // ========== STATE ==========
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let expandedCmds = new Set();
+    let expandedPatterns = new Set();
+
+    // ========== DOM REFS ==========
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const cmdList = document.getElementById('cmdList');
+    const noResults = document.getElementById('noResults');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const patternsSection = document.getElementById('patternsSection');
+    const patternList = document.getElementById('patternList');
+    const scrollTopBtn = document.getElementById('scrollTop');
+
+    // ========== TAB COUNTS ==========
+    document.getElementById('countAll').textContent = SQL_COMMANDS.length;
+    CATEGORIES.forEach(cat => {
+      const count = SQL_COMMANDS.filter(c => c.cat === cat.key).length;
+      const el = document.getElementById('count' + cat.key.charAt(0).toUpperCase() + cat.key.slice(1));
+      if (el) el.textContent = count;
+    });
+
+    // ========== EVENTS ==========
+    categoryTabs.addEventListener('click', e => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      categoryTabs.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeCategory = tab.dataset.cat;
+      render();
+    });
+
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      render();
+    });
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ========== COPY ==========
+    function copyCmd(text, btnId) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 1500);
+        }
+      });
+    }
+
+    function copyExample(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+
+    // ========== TOGGLE ==========
+    function toggleCmd(idx) {
+      if (expandedCmds.has(idx)) {
+        expandedCmds.delete(idx);
+      } else {
+        expandedCmds.add(idx);
+      }
+      render();
+    }
+
+    function togglePattern(idx) {
+      if (expandedPatterns.has(idx)) {
+        expandedPatterns.delete(idx);
+      } else {
+        expandedPatterns.add(idx);
+      }
+      renderPatterns();
+    }
+
+    // ========== FILTERING ==========
+    function getFilteredCmds() {
+      return SQL_COMMANDS.map((c, i) => ({ ...c, _idx: i })).filter(c => {
+        if (activeCategory !== 'all' && c.cat !== activeCategory) return false;
+        if (searchQuery) {
+          const q = searchQuery;
+          const cmdL = c.cmd.toLowerCase();
+          const descL = c.desc.toLowerCase();
+          const notesStr = c.notes.map(n => n.note + ' ' + n.info).join(' ').toLowerCase();
+          const exampleL = c.example.toLowerCase();
+          if (!cmdL.includes(q) && !descL.includes(q) && !notesStr.includes(q) && !exampleL.includes(q)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    // ========== DB BADGE ==========
+    function dbBadge(db) {
+      if (db === 'all') return '<span class="db-badge db-all">All DBs</span>';
+      if (db === 'mysql') return '<span class="db-badge db-mysql">MySQL</span>';
+      if (db === 'postgres') return '<span class="db-badge db-postgres">PostgreSQL</span>';
+      if (db === 'sqlite') return '<span class="db-badge db-sqlite">SQLite</span>';
+      return '';
+    }
+
+    // ========== RENDER ==========
+    function render() {
+      const filtered = getFilteredCmds();
+      searchCount.textContent = filtered.length + ' of ' + SQL_COMMANDS.length + ' entries';
+
+      if (filtered.length === 0) {
+        cmdList.innerHTML = '';
+        noResults.style.display = 'block';
+        patternsSection.style.display = 'none';
+        return;
+      }
+      noResults.style.display = 'none';
+      patternsSection.style.display = searchQuery ? 'none' : 'block';
+
+      // Group by category
+      const groups = {};
+      filtered.forEach(c => {
+        if (!groups[c.cat]) groups[c.cat] = [];
+        groups[c.cat].push(c);
+      });
+
+      let html = '';
+      const catOrder = CATEGORIES.map(c => c.key);
+      catOrder.forEach(catKey => {
+        if (!groups[catKey]) return;
+        const catInfo = CATEGORIES.find(c => c.key === catKey);
+        html += `<div class="category-section cat-${catKey}">`;
+        html += `<div class="category-header">`;
+        html += `<span class="category-badge">${escHtml(catInfo.label)}</span>`;
+        html += `<h2>${escHtml(catInfo.desc)}</h2>`;
+        html += `</div>`;
+
+        groups[catKey].forEach(c => {
+          const expanded = expandedCmds.has(c._idx);
+          const copyId = 'copy-' + c._idx;
+          html += `<div class="cmd-card cat-${c.cat}${expanded ? ' expanded' : ''}" id="cmd-${c._idx}">`;
+          html += `<div class="cmd-card-header">`;
+          html += `<span class="cmd-syntax" onclick="toggleCmd(${c._idx})">${escHtml(c.cmd)}</span>`;
+          html += `<span class="cmd-desc" onclick="toggleCmd(${c._idx})">${escHtml(c.desc)}</span>`;
+          html += `<span class="cmd-actions">`;
+          html += `<button class="copy-btn" id="${copyId}" onclick="event.stopPropagation(); copyCmd('${escAttr(c.cmd)}', '${copyId}')">Copy</button>`;
+          html += `</span>`;
+          html += `<span class="cmd-chevron" onclick="toggleCmd(${c._idx})">&#9654;</span>`;
+          html += `</div>`;
+
+          html += `<div class="cmd-detail">`;
+          html += `<div class="detail-section"><h4>Description ${dbBadge(c.db)}</h4><p>${escHtml(c.desc)}</p></div>`;
+
+          if (c.notes && c.notes.length) {
+            html += `<div class="detail-section"><h4>Details</h4><ul>`;
+            c.notes.forEach(n => {
+              html += `<li class="flag-item"><code>${escHtml(n.note)}</code> &mdash; ${escHtml(n.info)}</li>`;
+            });
+            html += `</ul></div>`;
+          }
+
+          if (c.example) {
+            const exId = 'ex-copy-' + c._idx;
+            html += `<div class="detail-section"><h4>Example</h4>`;
+            html += `<div class="example-block"><button class="example-copy" id="${exId}" onclick="copyExample(\`${escTemplate(c.example)}\`, this)">Copy</button>${escHtml(c.example)}</div>`;
+            html += `</div>`;
+          }
+
+          html += `</div></div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      cmdList.innerHTML = html;
+    }
+
+    // ========== RENDER PATTERNS ==========
+    function renderPatterns() {
+      let html = '';
+      PATTERNS.forEach((p, i) => {
+        const expanded = expandedPatterns.has(i);
+        html += `<div class="workflow-card${expanded ? ' expanded' : ''}">`;
+        html += `<div class="workflow-header" onclick="togglePattern(${i})">`;
+        html += `<span class="workflow-icon">${p.icon}</span>`;
+        html += `<span class="workflow-title">${escHtml(p.title)}</span>`;
+        html += `<span class="workflow-chevron">&#9654;</span>`;
+        html += `</div>`;
+        html += `<div class="workflow-detail">`;
+        html += `<div class="workflow-steps">`;
+        p.steps.forEach((s, j) => {
+          html += `<div class="workflow-step">`;
+          html += `<span class="step-num">${j + 1}</span>`;
+          html += `<div class="step-content">`;
+          html += `<p>${escHtml(s.text)}</p>`;
+          if (s.cmd) {
+            html += `<code>${escHtml(s.cmd)}</code>`;
+          }
+          html += `</div></div>`;
+        });
+        html += `</div></div></div>`;
+      });
+      patternList.innerHTML = html;
+    }
+
+    // ========== HELPERS ==========
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function escAttr(str) {
+      return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function escTemplate(str) {
+      return str.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+    }
+
+    // Keyboard shortcut: focus search on /
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    // ========== INITIAL RENDER ==========
+    render();
+    renderPatterns();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

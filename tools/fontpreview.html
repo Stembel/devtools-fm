@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Font Preview - Compare Google Fonts | ZeroKit.dev</title>
+  <meta name="description" content="Preview and compare Google Fonts side-by-side. Adjust weight, size, line height, letter spacing. Copy CSS instantly. Free, fast, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/fontpreview.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .font-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .font-controls .full-width {
+      grid-column: 1 / -1;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .control-group select,
+    .control-group input[type="text"],
+    .control-group textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+      outline: none;
+      width: 100%;
+    }
+    .control-group textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.5;
+    }
+    .control-group select:focus,
+    .control-group input:focus,
+    .control-group textarea:focus {
+      border-color: var(--accent);
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    .slider-value {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    /* Font gallery */
+    .font-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .font-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+    }
+    .font-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .font-card.selected {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    .font-card-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .font-card-category {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: var(--surface-2);
+      color: var(--text-muted);
+    }
+    .font-card-preview {
+      font-size: 1.5rem;
+      line-height: 1.4;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .font-card .compare-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Compare panel */
+    .compare-section {
+      margin-top: 32px;
+    }
+    .compare-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .compare-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .compare-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .compare-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .compare-panel-header .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 4px;
+      transition: color 0.15s;
+    }
+    .compare-panel-header .remove-btn:hover {
+      color: var(--error);
+    }
+    .compare-panel-preview {
+      padding: 24px 16px;
+      min-height: 180px;
+    }
+    .compare-panel-css {
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      background: var(--surface-2);
+    }
+    .compare-panel-css pre {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .compare-panel-css .copy-css-btn {
+      margin-top: 8px;
+    }
+
+    /* Search / filter */
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .search-bar input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-family: var(--font);
+      outline: none;
+    }
+    .search-bar input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+    .search-bar select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-family: var(--font);
+      outline: none;
+    }
+
+    .empty-compare {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .section-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .compare-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .font-controls { grid-template-columns: 1fr; }
+      .compare-layout { grid-template-columns: 1fr; }
+      .font-gallery { grid-template-columns: 1fr; }
+      .search-bar { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Web Font Preview</h1>
+    <p class="description">Preview Google Fonts, adjust settings, compare side-by-side, and copy CSS. Everything runs locally in your browser.</p>
+
+    <!-- Controls -->
+    <div class="font-controls">
+      <div class="control-group full-width">
+        <label for="previewText">Preview Text</label>
+        <textarea id="previewText">The quick brown fox jumps over the lazy dog. 0123456789</textarea>
+      </div>
+
+      <div class="control-group">
+        <label for="fontSize">Font Size: <span id="fontSizeVal" class="slider-value">32px</span></label>
+        <div class="slider-row">
+          <input type="range" id="fontSize" min="10" max="120" value="32" step="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="fontWeight">Font Weight</label>
+        <select id="fontWeight">
+          <option value="100">100 - Thin</option>
+          <option value="200">200 - Extra Light</option>
+          <option value="300">300 - Light</option>
+          <option value="400" selected>400 - Regular</option>
+          <option value="500">500 - Medium</option>
+          <option value="600">600 - Semi Bold</option>
+          <option value="700">700 - Bold</option>
+          <option value="800">800 - Extra Bold</option>
+          <option value="900">900 - Black</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="lineHeight">Line Height: <span id="lineHeightVal" class="slider-value">1.5</span></label>
+        <div class="slider-row">
+          <input type="range" id="lineHeight" min="0.8" max="3" value="1.5" step="0.05">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="letterSpacing">Letter Spacing: <span id="letterSpacingVal" class="slider-value">0px</span></label>
+        <div class="slider-row">
+          <input type="range" id="letterSpacing" min="-5" max="20" value="0" step="0.5">
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and filter -->
+    <div class="section-label">Font Gallery</div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search fonts...">
+      <select id="categoryFilter">
+        <option value="all">All Categories</option>
+        <option value="sans-serif">Sans Serif</option>
+        <option value="serif">Serif</option>
+        <option value="monospace">Monospace</option>
+        <option value="display">Display</option>
+        <option value="handwriting">Handwriting</option>
+      </select>
+    </div>
+    <p class="compare-hint">Click a font to add it to comparison (max 2). Click again to remove.</p>
+
+    <!-- Font gallery -->
+    <div class="font-gallery" id="fontGallery"></div>
+
+    <!-- Comparison section -->
+    <div class="compare-section" id="compareSection">
+      <h2>Side-by-Side Comparison</h2>
+      <div class="compare-layout" id="compareLayout">
+        <div class="empty-compare" id="emptySlot1">Click a font above to compare</div>
+        <div class="empty-compare" id="emptySlot2">Click a second font to compare</div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // Font database
+    const FONTS = [
+      { name: 'Inter', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Roboto', category: 'sans-serif', weights: [100,300,400,500,700,900] },
+      { name: 'Open Sans', category: 'sans-serif', weights: [300,400,500,600,700,800] },
+      { name: 'Lato', category: 'sans-serif', weights: [100,300,400,700,900] },
+      { name: 'Montserrat', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Poppins', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Nunito', category: 'sans-serif', weights: [200,300,400,500,600,700,800,900] },
+      { name: 'Raleway', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Playfair Display', category: 'serif', weights: [400,500,600,700,800,900] },
+      { name: 'Source Code Pro', category: 'monospace', weights: [200,300,400,500,600,700,800,900] },
+      { name: 'JetBrains Mono', category: 'monospace', weights: [100,200,300,400,500,600,700,800] },
+      { name: 'Fira Code', category: 'monospace', weights: [300,400,500,600,700] },
+      { name: 'Oswald', category: 'sans-serif', weights: [200,300,400,500,600,700] },
+      { name: 'Merriweather', category: 'serif', weights: [300,400,700,900] },
+      { name: 'Roboto Slab', category: 'serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Ubuntu', category: 'sans-serif', weights: [300,400,500,700] },
+      { name: 'Noto Sans', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'PT Sans', category: 'sans-serif', weights: [400,700] },
+      { name: 'Work Sans', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Quicksand', category: 'sans-serif', weights: [300,400,500,600,700] },
+      { name: 'Rubik', category: 'sans-serif', weights: [300,400,500,600,700,800,900] },
+      { name: 'Inconsolata', category: 'monospace', weights: [200,300,400,500,600,700,800,900] },
+      { name: 'Libre Baskerville', category: 'serif', weights: [400,700] },
+      { name: 'DM Sans', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Crimson Text', category: 'serif', weights: [400,600,700] },
+      { name: 'Space Grotesk', category: 'sans-serif', weights: [300,400,500,600,700] },
+      { name: 'Space Mono', category: 'monospace', weights: [400,700] },
+      { name: 'Archivo', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Bitter', category: 'serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'IBM Plex Sans', category: 'sans-serif', weights: [100,200,300,400,500,600,700] },
+      { name: 'IBM Plex Mono', category: 'monospace', weights: [100,200,300,400,500,600,700] },
+      { name: 'Cabin', category: 'sans-serif', weights: [400,500,600,700] },
+      { name: 'Karla', category: 'sans-serif', weights: [200,300,400,500,600,700,800] },
+      { name: 'Barlow', category: 'sans-serif', weights: [100,200,300,400,500,600,700,800,900] },
+      { name: 'Josefin Sans', category: 'sans-serif', weights: [100,200,300,400,500,600,700] },
+      { name: 'Pacifico', category: 'handwriting', weights: [400] },
+      { name: 'Dancing Script', category: 'handwriting', weights: [400,500,600,700] },
+      { name: 'Lobster', category: 'display', weights: [400] },
+      { name: 'Bebas Neue', category: 'display', weights: [400] },
+      { name: 'Abril Fatface', category: 'display', weights: [400] },
+    ];
+
+    // State
+    const loadedFonts = new Set();
+    const compareSlots = [null, null]; // max 2
+
+    // DOM refs
+    const $gallery = document.getElementById('fontGallery');
+    const $compareLayout = document.getElementById('compareLayout');
+    const $search = document.getElementById('searchInput');
+    const $category = document.getElementById('categoryFilter');
+    const $previewText = document.getElementById('previewText');
+    const $fontSize = document.getElementById('fontSize');
+    const $fontSizeVal = document.getElementById('fontSizeVal');
+    const $fontWeight = document.getElementById('fontWeight');
+    const $lineHeight = document.getElementById('lineHeight');
+    const $lineHeightVal = document.getElementById('lineHeightVal');
+    const $letterSpacing = document.getElementById('letterSpacing');
+    const $letterSpacingVal = document.getElementById('letterSpacingVal');
+
+    // Load a Google Font dynamically
+    function loadFont(fontName, weights) {
+      if (loadedFonts.has(fontName)) return;
+      loadedFonts.add(fontName);
+      const weightStr = weights ? weights.join(';') : '400';
+      const familyParam = fontName.replace(/ /g, '+') + ':wght@' + weightStr;
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=' + familyParam + '&display=swap';
+      document.head.appendChild(link);
+    }
+
+    // Get current settings
+    function getSettings() {
+      return {
+        text: $previewText.value || 'The quick brown fox jumps over the lazy dog.',
+        size: $fontSize.value + 'px',
+        weight: $fontWeight.value,
+        lineHeight: $lineHeight.value,
+        letterSpacing: $letterSpacing.value + 'px',
+      };
+    }
+
+    // Generate CSS code for a font
+    function getCSSCode(fontName, settings) {
+      const familyParam = fontName.replace(/ /g, '+');
+      const fallback = FONTS.find(f => f.name === fontName);
+      const cat = fallback ? fallback.category : 'sans-serif';
+      const importUrl = `https://fonts.googleapis.com/css2?family=${familyParam}:wght@${settings.weight}&display=swap`;
+      return `@import url('${importUrl}');\n\nfont-family: '${fontName}', ${cat};\nfont-weight: ${settings.weight};\nfont-size: ${settings.size};\nline-height: ${settings.lineHeight};\nletter-spacing: ${settings.letterSpacing};`;
+    }
+
+    // Render font gallery
+    function renderGallery() {
+      const query = $search.value.toLowerCase();
+      const cat = $category.value;
+      const settings = getSettings();
+
+      const filtered = FONTS.filter(f => {
+        if (query && !f.name.toLowerCase().includes(query)) return false;
+        if (cat !== 'all' && f.category !== cat) return false;
+        return true;
+      });
+
+      $gallery.innerHTML = '';
+      filtered.forEach(font => {
+        loadFont(font.name, font.weights);
+
+        const card = document.createElement('div');
+        card.className = 'font-card';
+
+        const slotIndex = compareSlots.indexOf(font.name);
+        if (slotIndex !== -1) {
+          card.classList.add('selected');
+        }
+
+        card.innerHTML = `
+          <div class="font-card-name">
+            ${font.name}
+            <span class="font-card-category">${font.category}</span>
+          </div>
+          <div class="font-card-preview" style="font-family: '${font.name}', ${font.category}; font-size: ${settings.size}; font-weight: ${settings.weight}; line-height: ${settings.lineHeight}; letter-spacing: ${settings.letterSpacing};">
+            ${settings.text}
+          </div>
+        `;
+
+        if (slotIndex !== -1) {
+          const badge = document.createElement('div');
+          badge.className = 'compare-badge';
+          badge.textContent = slotIndex + 1;
+          card.appendChild(badge);
+        }
+
+        card.addEventListener('click', () => toggleCompare(font.name));
+        $gallery.appendChild(card);
+      });
+    }
+
+    // Toggle font in compare slots
+    function toggleCompare(fontName) {
+      const idx = compareSlots.indexOf(fontName);
+      if (idx !== -1) {
+        compareSlots[idx] = null;
+      } else {
+        // Find first empty slot
+        const emptyIdx = compareSlots.indexOf(null);
+        if (emptyIdx !== -1) {
+          compareSlots[emptyIdx] = fontName;
+        } else {
+          // Replace second slot
+          compareSlots[1] = fontName;
+        }
+      }
+      renderGallery();
+      renderComparison();
+    }
+
+    // Render comparison panels
+    function renderComparison() {
+      const settings = getSettings();
+      $compareLayout.innerHTML = '';
+
+      for (let i = 0; i < 2; i++) {
+        const fontName = compareSlots[i];
+        if (!fontName) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-compare';
+          empty.textContent = i === 0 ? 'Click a font above to compare' : 'Click a second font to compare';
+          $compareLayout.appendChild(empty);
+          continue;
+        }
+
+        const font = FONTS.find(f => f.name === fontName);
+        const cat = font ? font.category : 'sans-serif';
+        const cssCode = getCSSCode(fontName, settings);
+
+        const panel = document.createElement('div');
+        panel.className = 'compare-panel';
+        panel.innerHTML = `
+          <div class="compare-panel-header">
+            <span>${fontName}</span>
+            <button class="remove-btn" data-slot="${i}" title="Remove">&times;</button>
+          </div>
+          <div class="compare-panel-preview" style="font-family: '${fontName}', ${cat}; font-size: ${settings.size}; font-weight: ${settings.weight}; line-height: ${settings.lineHeight}; letter-spacing: ${settings.letterSpacing};">
+            ${settings.text}
+          </div>
+          <div class="compare-panel-css">
+            <pre>${escapeHTML(cssCode)}</pre>
+            <button class="btn copy-css-btn" data-css="${escapeAttr(cssCode)}">Copy CSS</button>
+          </div>
+        `;
+
+        panel.querySelector('.remove-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const slot = parseInt(e.target.dataset.slot);
+          compareSlots[slot] = null;
+          renderGallery();
+          renderComparison();
+        });
+
+        panel.querySelector('.copy-css-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const css = e.target.dataset.css;
+          navigator.clipboard.writeText(css).then(() => {
+            const orig = e.target.textContent;
+            e.target.textContent = 'Copied!';
+            e.target.style.color = 'var(--success)';
+            e.target.style.borderColor = 'var(--success)';
+            setTimeout(() => {
+              e.target.textContent = orig;
+              e.target.style.color = '';
+              e.target.style.borderColor = '';
+            }, 1500);
+          });
+        });
+
+        $compareLayout.appendChild(panel);
+      }
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Event listeners for controls
+    $fontSize.addEventListener('input', () => {
+      $fontSizeVal.textContent = $fontSize.value + 'px';
+      renderGallery();
+      renderComparison();
+    });
+
+    $fontWeight.addEventListener('change', () => {
+      renderGallery();
+      renderComparison();
+    });
+
+    $lineHeight.addEventListener('input', () => {
+      $lineHeightVal.textContent = $lineHeight.value;
+      renderGallery();
+      renderComparison();
+    });
+
+    $letterSpacing.addEventListener('input', () => {
+      $letterSpacingVal.textContent = $letterSpacing.value + 'px';
+      renderGallery();
+      renderComparison();
+    });
+
+    $previewText.addEventListener('input', () => {
+      renderGallery();
+      renderComparison();
+    });
+
+    $search.addEventListener('input', renderGallery);
+    $category.addEventListener('change', renderGallery);
+
+    // Initial render
+    renderGallery();
+    renderComparison();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

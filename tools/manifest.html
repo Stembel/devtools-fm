@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web App Manifest Generator - Create manifest.json | ZeroKit.dev</title>
+  <meta name="description" content="Generate a complete manifest.json for your Progressive Web App. Configure icons, display mode, colors, and more. Free, no signup required.">
+  <link rel="canonical" href="https://zerokit.dev/tools/manifest.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .manifest-form {
+      display: grid;
+      gap: 24px;
+    }
+    .form-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .section-header:hover {
+      background: var(--surface-2);
+    }
+    .section-header .badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+    }
+    .section-header .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .section-header.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+    .section-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      overflow: hidden;
+    }
+    .section-body.collapsed {
+      max-height: 0;
+      padding: 0 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .form-group label .char-count {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+    }
+    .char-count.warn {
+      color: #eab308;
+    }
+    .char-count.over {
+      color: var(--error);
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.5;
+    }
+    .form-group select {
+      cursor: pointer;
+    }
+    .form-group input[type="color"] {
+      height: 40px;
+      padding: 4px;
+      cursor: pointer;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Color input group */
+    .color-input-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .color-input-group input[type="color"] {
+      width: 40px;
+      height: 36px;
+      padding: 2px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-2);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .color-input-group input[type="text"] {
+      flex: 1;
+    }
+
+    /* Icon grid */
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .icon-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .icon-item .icon-size {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+    .icon-item input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 10px;
+      border-radius: 4px;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .icon-item input:focus {
+      border-color: var(--accent);
+    }
+    .icon-item .icon-preview {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+    .icon-item .icon-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .icon-item .icon-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Categories */
+    .categories-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .category-tag {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .category-tag:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .category-tag.active {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Validation */
+    .validation-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .validation-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .validation-header .validation-score {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 10px;
+    }
+    .validation-score.score-good {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+    }
+    .validation-score.score-warn {
+      background: rgba(234, 179, 8, 0.15);
+      color: #eab308;
+    }
+    .validation-score.score-bad {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+    }
+    .validation-list {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .validation-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+    .validation-item .vi-icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+    .vi-pass .vi-icon {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+    }
+    .vi-fail .vi-icon {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+    }
+    .vi-warn .vi-icon {
+      background: rgba(234, 179, 8, 0.15);
+      color: #eab308;
+    }
+
+    /* PWA Checklist */
+    .checklist-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 24px;
+    }
+    .checklist-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .checklist-body {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .checklist-category {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+    .checklist-category:first-child {
+      margin-top: 0;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+    .checklist-item .ci-icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      margin-top: 1px;
+      color: var(--text-muted);
+    }
+    .checklist-item.ci-done .ci-icon {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    .checklist-item.ci-done {
+      color: var(--text);
+    }
+
+    /* Output */
+    .output-section {
+      margin-top: 24px;
+    }
+    .output-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .output-header span {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .output-code {
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--text);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 120px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    /* JSON syntax highlighting */
+    .json-key { color: #f59e0b; }
+    .json-string { color: #22c55e; }
+    .json-number { color: #60a5fa; }
+    .json-bracket { color: var(--text-muted); }
+    .json-bool { color: #c084fc; }
+
+    /* Link tag output */
+    .link-tag-output {
+      margin-top: 16px;
+    }
+    .link-tag-code {
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--text);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .tag-bracket { color: var(--text-muted); }
+    .tag-name { color: #ef4444; }
+    .tag-attr { color: #f59e0b; }
+    .tag-value { color: #22c55e; }
+
+    /* Copy toast */
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Web App Manifest Generator</h1>
+    <p class="description">Generate a complete manifest.json for your Progressive Web App. Configure all fields, icons, and validate your setup. Everything runs locally in your browser.</p>
+
+    <div class="two-col">
+      <!-- Left column: Form -->
+      <div class="manifest-form">
+        <!-- Basic Info -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Basic Information <span class="badge">Required</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label>
+                App Name
+                <span class="char-count" id="name-count">0 / 45</span>
+              </label>
+              <input type="text" id="m-name" placeholder="My Progressive Web App" maxlength="200" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>
+                Short Name
+                <span class="char-count" id="short-name-count">0 / 12</span>
+              </label>
+              <input type="text" id="m-short-name" placeholder="My App" maxlength="50" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>
+                Description
+                <span class="char-count" id="desc-count">0 / 300</span>
+              </label>
+              <textarea id="m-description" placeholder="A brief description of your web application" maxlength="500" oninput="update()"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Start URL</label>
+              <input type="text" id="m-start-url" placeholder="/" value="/" oninput="update()">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Display Mode</label>
+                <select id="m-display" onchange="update()">
+                  <option value="standalone">standalone</option>
+                  <option value="fullscreen">fullscreen</option>
+                  <option value="minimal-ui">minimal-ui</option>
+                  <option value="browser">browser</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Orientation</label>
+                <select id="m-orientation" onchange="update()">
+                  <option value="any">any</option>
+                  <option value="portrait">portrait</option>
+                  <option value="landscape">landscape</option>
+                  <option value="portrait-primary">portrait-primary</option>
+                  <option value="portrait-secondary">portrait-secondary</option>
+                  <option value="landscape-primary">landscape-primary</option>
+                  <option value="landscape-secondary">landscape-secondary</option>
+                  <option value="natural">natural</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colors -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Theme &amp; Colors <span class="badge">Recommended</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label>Theme Color</label>
+              <div class="color-input-group">
+                <input type="color" id="m-theme-color-picker" value="#6366f1" oninput="syncColorFromPicker('theme')">
+                <input type="text" id="m-theme-color" placeholder="#6366f1" value="#6366f1" oninput="syncColorFromText('theme'); update()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Background Color</label>
+              <div class="color-input-group">
+                <input type="color" id="m-bg-color-picker" value="#ffffff" oninput="syncColorFromPicker('bg')">
+                <input type="text" id="m-bg-color" placeholder="#ffffff" value="#ffffff" oninput="syncColorFromText('bg'); update()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Icons -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Icons <span class="badge">PWA Required</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label>Base Icon URL (auto-fills all sizes)</label>
+              <input type="text" id="m-icon-base" placeholder="https://example.com/icons/icon-{size}.png" oninput="applyBaseUrl(); update()">
+              <span style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Use <code>{size}</code> as a placeholder, e.g. <code>/icons/icon-{size}.png</code></span>
+            </div>
+            <div class="icon-grid" id="icon-grid"></div>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Categories <span class="badge">Optional</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="categories-grid" id="categories-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: Validation + Preview + PWA Checklist -->
+      <div>
+        <!-- Validation -->
+        <div class="validation-panel">
+          <div class="validation-header">
+            <span>Manifest Validation</span>
+            <span class="validation-score" id="validation-score">0 / 0</span>
+          </div>
+          <div class="validation-list" id="validation-list"></div>
+        </div>
+
+        <!-- PWA Checklist -->
+        <div class="checklist-panel">
+          <div class="checklist-header">PWA Checklist &mdash; What Else Do You Need?</div>
+          <div class="checklist-body" id="pwa-checklist"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated Output: manifest.json -->
+    <div class="output-section">
+      <div class="output-panel">
+        <div class="output-header">
+          <span>manifest.json</span>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="copyManifest()">Copy manifest.json</button>
+            <button class="btn" onclick="downloadManifest()">Download</button>
+          </div>
+        </div>
+        <div class="output-code" id="output-manifest"></div>
+      </div>
+    </div>
+
+    <!-- Generated Output: HTML link tag -->
+    <div class="output-section link-tag-output">
+      <div class="output-panel">
+        <div class="output-header">
+          <span>HTML &lt;link&gt; Tag</span>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="copyLinkTag()">Copy HTML Tag</button>
+          </div>
+        </div>
+        <div class="link-tag-code" id="output-link-tag"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <div class="copy-toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    // Icon sizes for PWA
+    const ICON_SIZES = [48, 72, 96, 128, 144, 152, 192, 384, 512];
+
+    // Available categories per W3C spec
+    const CATEGORIES = [
+      'books', 'business', 'education', 'entertainment', 'finance',
+      'fitness', 'food', 'games', 'government', 'health', 'kids',
+      'lifestyle', 'magazines', 'medical', 'music', 'navigation',
+      'news', 'personalization', 'photo', 'politics', 'productivity',
+      'security', 'shopping', 'social', 'sports', 'travel', 'utilities', 'weather'
+    ];
+
+    const selectedCategories = new Set();
+
+    // Build icon grid
+    function buildIconGrid() {
+      const grid = document.getElementById('icon-grid');
+      grid.innerHTML = ICON_SIZES.map(size => `
+        <div class="icon-item">
+          <div class="icon-top">
+            <span class="icon-size">${size}x${size}</span>
+            <div class="icon-preview" id="icon-preview-${size}">--</div>
+          </div>
+          <input type="text" id="icon-${size}" placeholder="/icons/icon-${size}.png" oninput="previewIcon(${size}); update()">
+        </div>
+      `).join('');
+    }
+
+    // Build categories grid
+    function buildCategories() {
+      const grid = document.getElementById('categories-grid');
+      grid.innerHTML = CATEGORIES.map(cat => `
+        <span class="category-tag" data-cat="${cat}" onclick="toggleCategory(this, '${cat}')">${cat}</span>
+      `).join('');
+    }
+
+    function toggleCategory(el, cat) {
+      if (selectedCategories.has(cat)) {
+        selectedCategories.delete(cat);
+        el.classList.remove('active');
+      } else {
+        selectedCategories.add(cat);
+        el.classList.add('active');
+      }
+      update();
+    }
+
+    function previewIcon(size) {
+      const url = document.getElementById('icon-' + size).value.trim();
+      const preview = document.getElementById('icon-preview-' + size);
+      if (url) {
+        preview.innerHTML = '<img src="' + escapeAttr(url) + '" alt="' + size + '" onerror="this.parentElement.innerHTML=\'err\'">';
+      } else {
+        preview.innerHTML = '--';
+      }
+    }
+
+    function applyBaseUrl() {
+      const base = document.getElementById('m-icon-base').value.trim();
+      if (!base) return;
+      ICON_SIZES.forEach(size => {
+        const input = document.getElementById('icon-' + size);
+        if (!input.value.trim()) {
+          input.value = base.replace('{size}', size + 'x' + size);
+          previewIcon(size);
+        }
+      });
+    }
+
+    function syncColorFromPicker(type) {
+      if (type === 'theme') {
+        document.getElementById('m-theme-color').value = document.getElementById('m-theme-color-picker').value;
+      } else {
+        document.getElementById('m-bg-color').value = document.getElementById('m-bg-color-picker').value;
+      }
+      update();
+    }
+
+    function syncColorFromText(type) {
+      const hex = type === 'theme'
+        ? document.getElementById('m-theme-color').value.trim()
+        : document.getElementById('m-bg-color').value.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
+        if (type === 'theme') {
+          document.getElementById('m-theme-color-picker').value = hex;
+        } else {
+          document.getElementById('m-bg-color-picker').value = hex;
+        }
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Gather manifest data
+    function getManifestData() {
+      const data = {};
+
+      const name = document.getElementById('m-name').value.trim();
+      const shortName = document.getElementById('m-short-name').value.trim();
+      const description = document.getElementById('m-description').value.trim();
+      const startUrl = document.getElementById('m-start-url').value.trim();
+      const display = document.getElementById('m-display').value;
+      const orientation = document.getElementById('m-orientation').value;
+      const themeColor = document.getElementById('m-theme-color').value.trim();
+      const bgColor = document.getElementById('m-bg-color').value.trim();
+
+      if (name) data.name = name;
+      if (shortName) data.short_name = shortName;
+      if (description) data.description = description;
+      if (startUrl) data.start_url = startUrl;
+      data.display = display;
+      if (orientation !== 'any') data.orientation = orientation;
+      if (themeColor) data.theme_color = themeColor;
+      if (bgColor) data.background_color = bgColor;
+
+      // Icons
+      const icons = [];
+      ICON_SIZES.forEach(size => {
+        const src = document.getElementById('icon-' + size).value.trim();
+        if (src) {
+          icons.push({
+            src: src,
+            sizes: size + 'x' + size,
+            type: guessImageType(src)
+          });
+        }
+      });
+      if (icons.length > 0) data.icons = icons;
+
+      // Categories
+      if (selectedCategories.size > 0) {
+        data.categories = Array.from(selectedCategories).sort();
+      }
+
+      return data;
+    }
+
+    function guessImageType(src) {
+      const lower = src.toLowerCase();
+      if (lower.endsWith('.svg')) return 'image/svg+xml';
+      if (lower.endsWith('.webp')) return 'image/webp';
+      if (lower.endsWith('.ico')) return 'image/x-icon';
+      return 'image/png';
+    }
+
+    // JSON syntax highlighting
+    function highlightJSON(json) {
+      return json
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"([^"\\]*(\\.[^"\\]*)*)"\s*:/g, '<span class="json-key">"$1"</span>:')
+        .replace(/:\s*"([^"\\]*(\\.[^"\\]*)*)"/g, ': <span class="json-string">"$1"</span>')
+        .replace(/:\s*(\d+)/g, ': <span class="json-number">$1</span>')
+        .replace(/:\s*(true|false|null)/g, ': <span class="json-bool">$1</span>')
+        .replace(/[{}\[\]]/g, '<span class="json-bracket">$&</span>');
+    }
+
+    // Generate HTML link tag
+    function generateLinkTag() {
+      return '<span class="tag-bracket">&lt;</span><span class="tag-name">link</span> <span class="tag-attr">rel</span>=<span class="tag-value">"manifest"</span> <span class="tag-attr">href</span>=<span class="tag-value">"/manifest.json"</span><span class="tag-bracket">&gt;</span>';
+    }
+
+    function getPlainLinkTag() {
+      return '<link rel="manifest" href="/manifest.json">';
+    }
+
+    // Validation
+    function validateManifest(data) {
+      const checks = [];
+
+      checks.push({
+        pass: !!data.name,
+        label: 'App name is set',
+        level: 'required'
+      });
+      checks.push({
+        pass: !!data.short_name,
+        label: 'Short name is set (used on home screen)',
+        level: 'required'
+      });
+      checks.push({
+        pass: !!data.short_name && data.short_name.length <= 12,
+        label: 'Short name is 12 characters or less',
+        level: data.short_name ? 'warn' : 'skip'
+      });
+      checks.push({
+        pass: !!data.start_url,
+        label: 'Start URL is defined',
+        level: 'required'
+      });
+      checks.push({
+        pass: data.display === 'standalone' || data.display === 'fullscreen',
+        label: 'Display mode is standalone or fullscreen (for PWA install)',
+        level: 'warn'
+      });
+      checks.push({
+        pass: !!data.theme_color,
+        label: 'Theme color is set',
+        level: 'recommended'
+      });
+      checks.push({
+        pass: !!data.background_color,
+        label: 'Background color is set (splash screen)',
+        level: 'recommended'
+      });
+
+      const has192 = data.icons && data.icons.some(i => i.sizes === '192x192');
+      const has512 = data.icons && data.icons.some(i => i.sizes === '512x512');
+      checks.push({
+        pass: has192,
+        label: '192x192 icon is provided (required for Chrome)',
+        level: 'required'
+      });
+      checks.push({
+        pass: has512,
+        label: '512x512 icon is provided (required for splash screen)',
+        level: 'required'
+      });
+      checks.push({
+        pass: data.icons && data.icons.length >= 3,
+        label: 'At least 3 icon sizes provided',
+        level: 'recommended'
+      });
+      checks.push({
+        pass: !!data.description,
+        label: 'Description is provided',
+        level: 'recommended'
+      });
+
+      return checks.filter(c => c.level !== 'skip');
+    }
+
+    function renderValidation(checks) {
+      const list = document.getElementById('validation-list');
+      const score = document.getElementById('validation-score');
+      const passed = checks.filter(c => c.pass).length;
+      const total = checks.length;
+
+      score.textContent = passed + ' / ' + total;
+      score.className = 'validation-score';
+      if (passed === total) {
+        score.classList.add('score-good');
+      } else if (passed >= total * 0.6) {
+        score.classList.add('score-warn');
+      } else {
+        score.classList.add('score-bad');
+      }
+
+      list.innerHTML = checks.map(c => {
+        const cls = c.pass ? 'vi-pass' : (c.level === 'warn' || c.level === 'recommended' ? 'vi-warn' : 'vi-fail');
+        const icon = c.pass ? '&#10003;' : (c.level === 'warn' || c.level === 'recommended' ? '!' : '&#10005;');
+        return `<div class="validation-item ${cls}">
+          <span class="vi-icon">${icon}</span>
+          <span>${escapeHtml(c.label)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // PWA Checklist
+    function renderPWAChecklist(data) {
+      const container = document.getElementById('pwa-checklist');
+
+      const hasManifest = !!data.name && !!data.start_url;
+      const has192 = data.icons && data.icons.some(i => i.sizes === '192x192');
+      const has512 = data.icons && data.icons.some(i => i.sizes === '512x512');
+      const hasDisplay = data.display === 'standalone' || data.display === 'fullscreen';
+
+      const items = [
+        { category: 'Manifest (this tool)', items: [
+          { done: hasManifest, label: 'Valid manifest.json with name and start_url' },
+          { done: has192 && has512, label: 'Icons in 192x192 and 512x512 sizes' },
+          { done: hasDisplay, label: 'Display mode set to standalone or fullscreen' },
+          { done: !!data.theme_color && !!data.background_color, label: 'Theme color and background color defined' },
+        ]},
+        { category: 'Service Worker (code needed)', items: [
+          { done: false, label: 'Register a service worker in your main JavaScript' },
+          { done: false, label: 'Implement a caching strategy (Cache First, Network First, etc.)' },
+          { done: false, label: 'Handle offline fallback page' },
+        ]},
+        { category: 'HTTPS & HTML', items: [
+          { done: false, label: 'Serve your site over HTTPS' },
+          { done: false, label: 'Add <link rel="manifest" href="/manifest.json"> to your HTML' },
+          { done: false, label: 'Add <meta name="theme-color"> matching your manifest' },
+          { done: false, label: 'Add apple-touch-icon link tags for iOS support' },
+        ]},
+        { category: 'Optional Enhancements', items: [
+          { done: false, label: 'Add maskable icons for Android adaptive icons' },
+          { done: false, label: 'Implement push notifications' },
+          { done: false, label: 'Add screenshots to manifest for richer install UI' },
+          { done: false, label: 'Test with Lighthouse PWA audit in Chrome DevTools' },
+        ]},
+      ];
+
+      container.innerHTML = items.map(group => {
+        const categoryHtml = `<div class="checklist-category">${escapeHtml(group.category)}</div>`;
+        const itemsHtml = group.items.map(item => `
+          <div class="checklist-item ${item.done ? 'ci-done' : ''}">
+            <span class="ci-icon">${item.done ? '&#10003;' : ''}</span>
+            <span>${escapeHtml(item.label)}</span>
+          </div>
+        `).join('');
+        return categoryHtml + itemsHtml;
+      }).join('');
+    }
+
+    // Character count helpers
+    function updateCharCount(el, countEl, max) {
+      const len = el.value.length;
+      countEl.textContent = len + ' / ' + max;
+      countEl.className = 'char-count';
+      if (len > max) {
+        countEl.classList.add('over');
+      } else if (len > max * 0.85) {
+        countEl.classList.add('warn');
+      }
+    }
+
+    // Main update function
+    function update() {
+      // Char counts
+      updateCharCount(document.getElementById('m-name'), document.getElementById('name-count'), 45);
+      updateCharCount(document.getElementById('m-short-name'), document.getElementById('short-name-count'), 12);
+      updateCharCount(document.getElementById('m-description'), document.getElementById('desc-count'), 300);
+
+      const data = getManifestData();
+
+      // JSON output with syntax highlighting
+      const jsonStr = JSON.stringify(data, null, 2);
+      document.getElementById('output-manifest').innerHTML = highlightJSON(jsonStr);
+
+      // Link tag output
+      document.getElementById('output-link-tag').innerHTML = generateLinkTag();
+
+      // Validation
+      const checks = validateManifest(data);
+      renderValidation(checks);
+
+      // PWA checklist
+      renderPWAChecklist(data);
+    }
+
+    // Copy functions
+    function copyManifest() {
+      const data = getManifestData();
+      const text = JSON.stringify(data, null, 2);
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('manifest.json copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    }
+
+    function downloadManifest() {
+      const data = getManifestData();
+      const text = JSON.stringify(data, null, 2);
+      const blob = new Blob([text], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'manifest.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('manifest.json downloaded!');
+    }
+
+    function copyLinkTag() {
+      const text = getPlainLinkTag();
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('HTML tag copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch {
+        showToast('Copy failed. Please select and copy manually.');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function toggleSection(header) {
+      const body = header.nextElementSibling;
+      const isCollapsed = body.classList.toggle('collapsed');
+      header.classList.toggle('collapsed', isCollapsed);
+    }
+
+    // Initialize
+    buildIconGrid();
+    buildCategories();
+    update();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

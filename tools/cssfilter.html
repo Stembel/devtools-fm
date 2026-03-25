@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Filter Generator - Image Effects with CSS | ZeroKit.dev</title>
+  <meta name="description" content="Generate CSS filter effects visually. Adjust blur, brightness, contrast, grayscale, hue-rotate, invert, opacity, saturate, sepia, and drop-shadow. Copy CSS instantly.">
+  <link rel="canonical" href="https://zerokit.dev/tools/cssfilter.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .filter-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .filter-preview-area { display: flex; align-items: center; justify-content: center; min-height: 350px; background: #1a1a2e; overflow: hidden; position: relative; }
+    .filter-preview-area canvas,
+    .filter-preview-area img { max-width: 100%; max-height: 350px; object-fit: contain; border-radius: 4px; }
+    .filter-controls { padding: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 600px; overflow-y: auto; }
+    .slider-group { display: flex; flex-direction: column; gap: 4px; }
+    .slider-group .slider-header { display: flex; justify-content: space-between; align-items: center; }
+    .slider-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .slider-group .slider-value { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); }
+    .slider-group input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .drop-shadow-group { border: 1px solid var(--surface-2); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .drop-shadow-group .ds-title { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+    .drop-shadow-group .ds-title label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .drop-shadow-group .ds-title input[type="checkbox"] { accent-color: var(--accent); }
+    .ds-row { display: flex; gap: 10px; align-items: center; }
+    .ds-row input[type="color"] { width: 36px; height: 30px; border: none; cursor: pointer; border-radius: 4px; }
+    .filter-presets { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 0 8px; }
+    .filter-preset { padding: 6px 12px; background: var(--surface-2); border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s, background 0.15s; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+    .filter-preset:hover { border-color: var(--accent); color: var(--text); }
+    .filter-preset.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .css-out { padding: 16px; }
+    .css-out pre { background: var(--surface-2); padding: 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; color: var(--text); cursor: pointer; white-space: pre-wrap; word-break: break-all; }
+    .upload-area { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .upload-btn { padding: 6px 14px; background: var(--surface-2); border: 1px dashed var(--text-muted); border-radius: 6px; cursor: pointer; font-size: 0.75rem; color: var(--text-muted); transition: border-color 0.15s, color 0.15s; }
+    .upload-btn:hover { border-color: var(--accent); color: var(--text); }
+    .action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: background 0.15s, opacity 0.15s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: var(--surface-2); color: var(--text-muted); }
+    .btn-secondary:hover { color: var(--text); }
+    @media (max-width: 768px) { .filter-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Filter Generator</h1>
+    <p class="description">Apply CSS filter effects to images visually. Adjust filters, pick presets, upload your own image, and copy the CSS.</p>
+
+    <div class="filter-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Controls</div>
+        <div class="filter-controls">
+          <div class="filter-presets" id="presets"></div>
+
+          <div class="slider-group">
+            <div class="slider-header"><label>Blur</label><span class="slider-value" id="blurVal">0px</span></div>
+            <input type="range" id="blur" min="0" max="20" value="0" step="0.5" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Brightness</label><span class="slider-value" id="brightnessVal">100%</span></div>
+            <input type="range" id="brightness" min="0" max="300" value="100" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Contrast</label><span class="slider-value" id="contrastVal">100%</span></div>
+            <input type="range" id="contrast" min="0" max="300" value="100" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Grayscale</label><span class="slider-value" id="grayscaleVal">0%</span></div>
+            <input type="range" id="grayscale" min="0" max="100" value="0" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Hue Rotate</label><span class="slider-value" id="hueRotateVal">0deg</span></div>
+            <input type="range" id="hueRotate" min="0" max="360" value="0" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Invert</label><span class="slider-value" id="invertVal">0%</span></div>
+            <input type="range" id="invert" min="0" max="100" value="0" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Opacity</label><span class="slider-value" id="opacityVal">100%</span></div>
+            <input type="range" id="opacity" min="0" max="100" value="100" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Saturate</label><span class="slider-value" id="saturateVal">100%</span></div>
+            <input type="range" id="saturate" min="0" max="300" value="100" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Sepia</label><span class="slider-value" id="sepiaVal">0%</span></div>
+            <input type="range" id="sepia" min="0" max="100" value="0" oninput="update()">
+          </div>
+
+          <div class="drop-shadow-group">
+            <div class="ds-title">
+              <span>Drop Shadow</span>
+              <label><input type="checkbox" id="dsEnabled" onchange="update()"> Enable</label>
+            </div>
+            <div id="dsControls" style="display:none;">
+              <div class="slider-group">
+                <div class="slider-header"><label>X Offset</label><span class="slider-value" id="dsXVal">4px</span></div>
+                <input type="range" id="dsX" min="-30" max="30" value="4" oninput="update()">
+              </div>
+              <div class="slider-group">
+                <div class="slider-header"><label>Y Offset</label><span class="slider-value" id="dsYVal">4px</span></div>
+                <input type="range" id="dsY" min="-30" max="30" value="4" oninput="update()">
+              </div>
+              <div class="slider-group">
+                <div class="slider-header"><label>Blur</label><span class="slider-value" id="dsBlurVal">6px</span></div>
+                <input type="range" id="dsBlur" min="0" max="40" value="6" oninput="update()">
+              </div>
+              <div class="ds-row">
+                <input type="color" id="dsColor" value="#000000" onchange="update()">
+                <div class="slider-group" style="flex:1;">
+                  <div class="slider-header"><label>Opacity</label><span class="slider-value" id="dsOpacityVal">50%</span></div>
+                  <input type="range" id="dsOpacity" min="0" max="100" value="50" oninput="update()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-secondary" onclick="resetAll()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-panel" style="display:flex; flex-direction:column;">
+        <div class="panel-header">Preview</div>
+        <div class="upload-area" style="padding: 12px 16px;">
+          <label class="upload-btn" for="imageUpload">Upload Image</label>
+          <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="handleUpload(event)">
+          <span style="font-size:0.7rem; color:var(--text-muted);" id="uploadInfo">Using generated gradient</span>
+        </div>
+        <div class="filter-preview-area" style="flex:1;">
+          <canvas id="previewCanvas" width="400" height="280"></canvas>
+          <img id="previewImg" style="display:none;" alt="Filter preview">
+        </div>
+        <div class="css-out">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-size:0.75rem; color:var(--text-muted);">Generated CSS</span>
+            <button class="btn btn-primary" onclick="copyCSS()" style="padding:4px 12px; font-size:0.7rem;">Copy CSS</button>
+          </div>
+          <pre id="cssOutput"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    /* --- Default values --- */
+    const defaults = {
+      blur: 0, brightness: 100, contrast: 100, grayscale: 0,
+      hueRotate: 0, invert: 0, opacity: 100, saturate: 100, sepia: 0,
+      dsEnabled: false, dsX: 4, dsY: 4, dsBlur: 6, dsColor: '#000000', dsOpacity: 50
+    };
+
+    /* --- Presets --- */
+    const presets = {
+      'Vintage': { blur: 0.5, brightness: 110, contrast: 85, grayscale: 20, hueRotate: 15, invert: 0, opacity: 100, saturate: 80, sepia: 40, dsEnabled: false },
+      'B&W': { blur: 0, brightness: 105, contrast: 120, grayscale: 100, hueRotate: 0, invert: 0, opacity: 100, saturate: 0, sepia: 0, dsEnabled: false },
+      'Warm': { blur: 0, brightness: 105, contrast: 105, grayscale: 0, hueRotate: 10, invert: 0, opacity: 100, saturate: 130, sepia: 20, dsEnabled: false },
+      'Cool': { blur: 0, brightness: 100, contrast: 105, grayscale: 0, hueRotate: 190, invert: 0, opacity: 100, saturate: 110, sepia: 10, dsEnabled: false },
+      'High Contrast': { blur: 0, brightness: 110, contrast: 200, grayscale: 0, hueRotate: 0, invert: 0, opacity: 100, saturate: 130, sepia: 0, dsEnabled: false },
+      'Sepia': { blur: 0, brightness: 100, contrast: 100, grayscale: 0, hueRotate: 0, invert: 0, opacity: 100, saturate: 100, sepia: 100, dsEnabled: false },
+      'Pop Art': { blur: 0, brightness: 130, contrast: 180, grayscale: 0, hueRotate: 300, invert: 0, opacity: 100, saturate: 250, sepia: 0, dsEnabled: false }
+    };
+
+    let activePreset = null;
+    let usingCustomImage = false;
+
+    /* --- Generate gradient placeholder on canvas --- */
+    function drawPlaceholder() {
+      const canvas = document.getElementById('previewCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+
+      /* Sky gradient */
+      const sky = ctx.createLinearGradient(0, 0, 0, h * 0.6);
+      sky.addColorStop(0, '#1a1a4e');
+      sky.addColorStop(0.5, '#4a3080');
+      sky.addColorStop(1, '#e8706a');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h * 0.65);
+
+      /* Sun */
+      const sunGrad = ctx.createRadialGradient(w * 0.5, h * 0.42, 8, w * 0.5, h * 0.42, 50);
+      sunGrad.addColorStop(0, '#ffe066');
+      sunGrad.addColorStop(0.5, '#ff9a44');
+      sunGrad.addColorStop(1, 'rgba(232,112,106,0)');
+      ctx.fillStyle = sunGrad;
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.42, 50, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* Mountains */
+      ctx.fillStyle = '#2d1b4e';
+      ctx.beginPath();
+      ctx.moveTo(0, h * 0.6);
+      ctx.lineTo(w * 0.15, h * 0.4);
+      ctx.lineTo(w * 0.3, h * 0.55);
+      ctx.lineTo(w * 0.5, h * 0.35);
+      ctx.lineTo(w * 0.7, h * 0.5);
+      ctx.lineTo(w * 0.85, h * 0.38);
+      ctx.lineTo(w, h * 0.55);
+      ctx.lineTo(w, h * 0.65);
+      ctx.lineTo(0, h * 0.65);
+      ctx.closePath();
+      ctx.fill();
+
+      /* Ground */
+      const ground = ctx.createLinearGradient(0, h * 0.6, 0, h);
+      ground.addColorStop(0, '#1a3a2a');
+      ground.addColorStop(1, '#0d1f15');
+      ctx.fillStyle = ground;
+      ctx.fillRect(0, h * 0.6, w, h * 0.4);
+
+      /* Water reflection */
+      ctx.fillStyle = 'rgba(255, 200, 100, 0.08)';
+      ctx.fillRect(w * 0.3, h * 0.65, w * 0.4, h * 0.3);
+
+      /* Stars */
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 30; i++) {
+        const sx = Math.random() * w;
+        const sy = Math.random() * h * 0.35;
+        const sr = Math.random() * 1.5 + 0.3;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    /* --- Upload handler --- */
+    function handleUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = document.getElementById('previewImg');
+        const canvas = document.getElementById('previewCanvas');
+        img.src = ev.target.result;
+        img.style.display = 'block';
+        canvas.style.display = 'none';
+        usingCustomImage = true;
+        document.getElementById('uploadInfo').textContent = file.name;
+        update();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* --- Helpers --- */
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function getFilterCSS() {
+      const blur = parseFloat(document.getElementById('blur').value);
+      const brightness = parseInt(document.getElementById('brightness').value);
+      const contrast = parseInt(document.getElementById('contrast').value);
+      const grayscale = parseInt(document.getElementById('grayscale').value);
+      const hueRotate = parseInt(document.getElementById('hueRotate').value);
+      const invert = parseInt(document.getElementById('invert').value);
+      const opacity = parseInt(document.getElementById('opacity').value);
+      const saturate = parseInt(document.getElementById('saturate').value);
+      const sepia = parseInt(document.getElementById('sepia').value);
+      const dsEnabled = document.getElementById('dsEnabled').checked;
+
+      const parts = [];
+      if (blur !== 0) parts.push(`blur(${blur}px)`);
+      if (brightness !== 100) parts.push(`brightness(${brightness}%)`);
+      if (contrast !== 100) parts.push(`contrast(${contrast}%)`);
+      if (grayscale !== 0) parts.push(`grayscale(${grayscale}%)`);
+      if (hueRotate !== 0) parts.push(`hue-rotate(${hueRotate}deg)`);
+      if (invert !== 0) parts.push(`invert(${invert}%)`);
+      if (opacity !== 100) parts.push(`opacity(${opacity}%)`);
+      if (saturate !== 100) parts.push(`saturate(${saturate}%)`);
+      if (sepia !== 0) parts.push(`sepia(${sepia}%)`);
+
+      if (dsEnabled) {
+        const dsX = document.getElementById('dsX').value;
+        const dsY = document.getElementById('dsY').value;
+        const dsBlur = document.getElementById('dsBlur').value;
+        const dsColor = document.getElementById('dsColor').value;
+        const dsAlpha = document.getElementById('dsOpacity').value / 100;
+        parts.push(`drop-shadow(${dsX}px ${dsY}px ${dsBlur}px ${hexToRgba(dsColor, dsAlpha)})`);
+      }
+
+      if (parts.length === 0) return 'none';
+      return parts.join(' ');
+    }
+
+    /* --- Update display --- */
+    function update() {
+      /* Update value labels */
+      document.getElementById('blurVal').textContent = document.getElementById('blur').value + 'px';
+      document.getElementById('brightnessVal').textContent = document.getElementById('brightness').value + '%';
+      document.getElementById('contrastVal').textContent = document.getElementById('contrast').value + '%';
+      document.getElementById('grayscaleVal').textContent = document.getElementById('grayscale').value + '%';
+      document.getElementById('hueRotateVal').textContent = document.getElementById('hueRotate').value + 'deg';
+      document.getElementById('invertVal').textContent = document.getElementById('invert').value + '%';
+      document.getElementById('opacityVal').textContent = document.getElementById('opacity').value + '%';
+      document.getElementById('saturateVal').textContent = document.getElementById('saturate').value + '%';
+      document.getElementById('sepiaVal').textContent = document.getElementById('sepia').value + '%';
+
+      /* Drop shadow controls visibility */
+      const dsEnabled = document.getElementById('dsEnabled').checked;
+      document.getElementById('dsControls').style.display = dsEnabled ? 'flex' : 'none';
+      document.getElementById('dsControls').style.flexDirection = 'column';
+      document.getElementById('dsControls').style.gap = '8px';
+      if (dsEnabled) {
+        document.getElementById('dsXVal').textContent = document.getElementById('dsX').value + 'px';
+        document.getElementById('dsYVal').textContent = document.getElementById('dsY').value + 'px';
+        document.getElementById('dsBlurVal').textContent = document.getElementById('dsBlur').value + 'px';
+        document.getElementById('dsOpacityVal').textContent = document.getElementById('dsOpacity').value + '%';
+      }
+
+      /* Apply filter to preview */
+      const filterValue = getFilterCSS();
+      const target = usingCustomImage ? document.getElementById('previewImg') : document.getElementById('previewCanvas');
+      target.style.filter = filterValue;
+
+      /* Output CSS */
+      const cssText = filterValue === 'none' ? 'filter: none;' : `filter: ${filterValue};`;
+      document.getElementById('cssOutput').textContent = cssText;
+    }
+
+    /* --- Apply preset --- */
+    function applyPreset(name) {
+      const p = presets[name];
+      if (!p) return;
+      activePreset = name;
+
+      document.getElementById('blur').value = p.blur;
+      document.getElementById('brightness').value = p.brightness;
+      document.getElementById('contrast').value = p.contrast;
+      document.getElementById('grayscale').value = p.grayscale;
+      document.getElementById('hueRotate').value = p.hueRotate;
+      document.getElementById('invert').value = p.invert;
+      document.getElementById('opacity').value = p.opacity;
+      document.getElementById('saturate').value = p.saturate;
+      document.getElementById('sepia').value = p.sepia;
+      document.getElementById('dsEnabled').checked = p.dsEnabled || false;
+
+      /* Highlight active preset */
+      document.querySelectorAll('.filter-preset').forEach(el => {
+        el.classList.toggle('active', el.dataset.name === name);
+      });
+
+      update();
+    }
+
+    /* --- Reset --- */
+    function resetAll() {
+      activePreset = null;
+      document.getElementById('blur').value = defaults.blur;
+      document.getElementById('brightness').value = defaults.brightness;
+      document.getElementById('contrast').value = defaults.contrast;
+      document.getElementById('grayscale').value = defaults.grayscale;
+      document.getElementById('hueRotate').value = defaults.hueRotate;
+      document.getElementById('invert').value = defaults.invert;
+      document.getElementById('opacity').value = defaults.opacity;
+      document.getElementById('saturate').value = defaults.saturate;
+      document.getElementById('sepia').value = defaults.sepia;
+      document.getElementById('dsEnabled').checked = defaults.dsEnabled;
+      document.getElementById('dsX').value = defaults.dsX;
+      document.getElementById('dsY').value = defaults.dsY;
+      document.getElementById('dsBlur').value = defaults.dsBlur;
+      document.getElementById('dsColor').value = defaults.dsColor;
+      document.getElementById('dsOpacity').value = defaults.dsOpacity;
+
+      document.querySelectorAll('.filter-preset').forEach(el => el.classList.remove('active'));
+      update();
+    }
+
+    /* --- Copy CSS --- */
+    function copyCSS() {
+      const text = document.getElementById('cssOutput').textContent;
+      navigator.clipboard.writeText(text);
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = orig, 1000);
+    }
+
+    /* --- Render preset buttons --- */
+    function renderPresets() {
+      const container = document.getElementById('presets');
+      Object.keys(presets).forEach(name => {
+        const btn = document.createElement('div');
+        btn.className = 'filter-preset';
+        btn.dataset.name = name;
+        btn.textContent = name;
+        btn.onclick = () => applyPreset(name);
+        container.appendChild(btn);
+      });
+    }
+
+    /* --- Init --- */
+    renderPresets();
+    drawPlaceholder();
+    update();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON to JSON Schema Generator - Create Schema from JSON | ZeroKit.dev</title>
+  <meta name="description" content="Generate JSON Schema from any JSON data. Supports Draft 4, Draft 7, and 2020-12. Detect types, required fields, nested objects and arrays. Free, fast, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/json2schema.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .schema-options {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .schema-options label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .schema-options select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+    }
+    .schema-options input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .validate-result {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-family: var(--mono);
+      display: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .validate-result.show { display: block; }
+    .validate-result.valid {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .validate-result.invalid {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      padding: 8px 0;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-item strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>JSON to JSON Schema Generator</h1>
+    <p class="description">Paste JSON data to auto-generate a JSON Schema. Supports nested objects, arrays, and multiple schema drafts. Everything runs locally in your browser.</p>
+
+    <div class="action-bar" style="flex-wrap:wrap;">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="generate()">Generate Schema</button>
+        <button class="btn" onclick="validateJSON()">Validate</button>
+        <button class="btn" onclick="copySchema()">Copy Schema</button>
+        <button class="btn" onclick="loadSample()">Sample</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="schema-options">
+        <label>Draft:
+          <select id="schemaDraft" onchange="generate()">
+            <option value="draft-04">Draft 4</option>
+            <option value="draft-07" selected>Draft 7</option>
+            <option value="2020-12">2020-12</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" id="optRequired" checked onchange="generate()">
+          Required fields
+        </label>
+        <label>
+          <input type="checkbox" id="optDescriptions" checked onchange="generate()">
+          Descriptions
+        </label>
+        <label>
+          <input type="checkbox" id="optExamples" onchange="generate()">
+          Examples
+        </label>
+      </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar" style="display:none;">
+      <span class="stat-item">Properties: <strong id="statProps">0</strong></span>
+      <span class="stat-item">Depth: <strong id="statDepth">0</strong></span>
+      <span class="stat-item">Types: <strong id="statTypes">0</strong></span>
+      <span class="stat-item">Required: <strong id="statRequired">0</strong></span>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">
+          JSON Input
+          <span id="inputStatus"></span>
+        </div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste your JSON here...
+
+{
+  "name": "John Doe",
+  "age": 30,
+  "email": "john@example.com",
+  "active": true,
+  "tags": ["admin", "user"],
+  "address": {
+    "street": "123 Main St",
+    "city": "Anytown"
+  }
+}'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Generated Schema
+          <span id="outputStatus"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Generated JSON Schema will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="validate-result" id="validateResult"></div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $inputStatus = document.getElementById('inputStatus');
+    const $outputStatus = document.getElementById('outputStatus');
+    const $draft = document.getElementById('schemaDraft');
+    const $optRequired = document.getElementById('optRequired');
+    const $optDescriptions = document.getElementById('optDescriptions');
+    const $optExamples = document.getElementById('optExamples');
+    const $validateResult = document.getElementById('validateResult');
+    const $statsBar = document.getElementById('statsBar');
+
+    // Schema URL mapping
+    const SCHEMA_URLS = {
+      'draft-04': 'http://json-schema.org/draft-04/schema#',
+      'draft-07': 'http://json-schema.org/draft-07/schema#',
+      '2020-12': 'https://json-schema.org/draft/2020-12/schema'
+    };
+
+    // Schema keyword mapping per draft
+    const SCHEMA_KEY = {
+      'draft-04': '$schema',
+      'draft-07': '$schema',
+      '2020-12': '$schema'
+    };
+
+    // Track stats
+    let stats = { props: 0, depth: 0, types: new Set(), required: 0 };
+
+    function resetStats() {
+      stats = { props: 0, depth: 0, types: new Set(), required: 0 };
+    }
+
+    function updateStatsUI() {
+      $statsBar.style.display = 'flex';
+      document.getElementById('statProps').textContent = stats.props;
+      document.getElementById('statDepth').textContent = stats.depth;
+      document.getElementById('statTypes').textContent = stats.types.size;
+      document.getElementById('statRequired').textContent = stats.required;
+    }
+
+    /**
+     * Detect JSON type of a value
+     */
+    function detectType(value) {
+      if (value === null) return 'null';
+      if (Array.isArray(value)) return 'array';
+      if (typeof value === 'boolean') return 'boolean';
+      if (typeof value === 'number') {
+        return Number.isInteger(value) ? 'integer' : 'number';
+      }
+      if (typeof value === 'string') return 'string';
+      if (typeof value === 'object') return 'object';
+      return 'string';
+    }
+
+    /**
+     * Infer a format hint for strings
+     */
+    function inferFormat(value) {
+      if (typeof value !== 'string') return null;
+      // date-time: ISO 8601
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) return 'date-time';
+      // date
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'date';
+      // time
+      if (/^\d{2}:\d{2}:\d{2}/.test(value)) return 'time';
+      // email
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'email';
+      // uri
+      if (/^https?:\/\/.+/.test(value)) return 'uri';
+      // ipv4
+      if (/^(\d{1,3}\.){3}\d{1,3}$/.test(value)) return 'ipv4';
+      // ipv6
+      if (/^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(value)) return 'ipv6';
+      // uuid
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return 'uuid';
+      return null;
+    }
+
+    /**
+     * Generate a description for a property based on its key and type
+     */
+    function generateDescription(key, type, format) {
+      const readable = key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/[_-]/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase())
+        .trim();
+      let desc = `The ${readable.toLowerCase()}`;
+      if (format) {
+        desc += ` (${format} format)`;
+      }
+      return desc;
+    }
+
+    /**
+     * Merge multiple schemas for array items (union type)
+     */
+    function mergeSchemas(schemas) {
+      if (schemas.length === 0) return {};
+      if (schemas.length === 1) return schemas[0];
+
+      // Check if all same type
+      const types = [...new Set(schemas.map(s => s.type))];
+      if (types.length === 1 && types[0] === 'object') {
+        // Merge object properties
+        const merged = { type: 'object', properties: {} };
+        const allKeys = new Set();
+        const keyCounts = {};
+
+        schemas.forEach(s => {
+          if (s.properties) {
+            Object.keys(s.properties).forEach(k => {
+              allKeys.add(k);
+              keyCounts[k] = (keyCounts[k] || 0) + 1;
+            });
+          }
+        });
+
+        allKeys.forEach(k => {
+          // Take the first schema's definition for this property
+          for (const s of schemas) {
+            if (s.properties && s.properties[k]) {
+              merged.properties[k] = s.properties[k];
+              break;
+            }
+          }
+        });
+
+        // Only require fields present in all items
+        if ($optRequired.checked) {
+          const required = [...allKeys].filter(k => keyCounts[k] === schemas.length);
+          if (required.length > 0) {
+            merged.required = required;
+          }
+        }
+
+        return merged;
+      }
+
+      if (types.length === 1) {
+        return schemas[0];
+      }
+
+      // Mixed types: use oneOf for draft-07+, or type array
+      const draft = $draft.value;
+      if (draft === 'draft-04') {
+        // Draft 4: use oneOf
+        const unique = [];
+        const seen = new Set();
+        schemas.forEach(s => {
+          const key = JSON.stringify(s);
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(s);
+          }
+        });
+        return unique.length === 1 ? unique[0] : { oneOf: unique };
+      } else {
+        // Draft 7 / 2020-12: can use anyOf
+        const unique = [];
+        const seen = new Set();
+        schemas.forEach(s => {
+          const key = JSON.stringify(s);
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(s);
+          }
+        });
+        return unique.length === 1 ? unique[0] : { anyOf: unique };
+      }
+    }
+
+    /**
+     * Generate JSON Schema from a value
+     */
+    function generateSchema(value, key, depth) {
+      if (depth > stats.depth) stats.depth = depth;
+      const type = detectType(value);
+      stats.types.add(type);
+      const schema = {};
+
+      switch (type) {
+        case 'null':
+          schema.type = 'null';
+          break;
+
+        case 'boolean':
+          schema.type = 'boolean';
+          if ($optDescriptions.checked && key) {
+            schema.description = generateDescription(key, type, null);
+          }
+          if ($optExamples.checked) {
+            schema.examples = [value];
+          }
+          break;
+
+        case 'integer':
+        case 'number':
+          schema.type = type;
+          if ($optDescriptions.checked && key) {
+            schema.description = generateDescription(key, type, null);
+          }
+          if ($optExamples.checked) {
+            schema.examples = [value];
+          }
+          break;
+
+        case 'string':
+          schema.type = 'string';
+          const fmt = inferFormat(value);
+          if (fmt) {
+            // Draft 4 does not support 'date', 'time', 'uuid'
+            const draft4Formats = ['date-time', 'email', 'hostname', 'ipv4', 'ipv6', 'uri'];
+            if ($draft.value === 'draft-04' && !draft4Formats.includes(fmt)) {
+              // skip format for draft-04
+            } else {
+              schema.format = fmt;
+            }
+          }
+          if ($optDescriptions.checked && key) {
+            schema.description = generateDescription(key, type, fmt);
+          }
+          if ($optExamples.checked) {
+            schema.examples = [value];
+          }
+          break;
+
+        case 'array':
+          schema.type = 'array';
+          if (value.length > 0) {
+            const itemSchemas = value.map((item, i) => generateSchema(item, null, depth + 1));
+            const merged = mergeSchemas(itemSchemas);
+            // Draft 2020-12 uses "prefixItems" for tuple, "items" for uniform
+            schema.items = merged;
+          }
+          if ($optDescriptions.checked && key) {
+            schema.description = generateDescription(key, type, null);
+          }
+          if ($optExamples.checked && value.length <= 5) {
+            schema.examples = [value];
+          }
+          break;
+
+        case 'object':
+          schema.type = 'object';
+          const keys = Object.keys(value);
+          if (keys.length > 0) {
+            schema.properties = {};
+            const requiredKeys = [];
+
+            keys.forEach(k => {
+              stats.props++;
+              schema.properties[k] = generateSchema(value[k], k, depth + 1);
+              // Consider all present keys as required
+              if ($optRequired.checked && value[k] !== null) {
+                requiredKeys.push(k);
+              }
+            });
+
+            if (requiredKeys.length > 0) {
+              schema.required = requiredKeys;
+              stats.required = (stats.required || 0) + requiredKeys.length;
+            }
+          }
+          if ($optDescriptions.checked && key) {
+            schema.description = generateDescription(key, 'object', null);
+          }
+          break;
+      }
+
+      return schema;
+    }
+
+    /**
+     * Main generation function
+     */
+    function generate() {
+      const raw = $input.value.trim();
+      if (!raw) {
+        $output.value = '';
+        $inputStatus.textContent = '';
+        $outputStatus.textContent = '';
+        $statsBar.style.display = 'none';
+        hideValidation();
+        return;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+        showInputStatus('Valid JSON', true);
+      } catch (e) {
+        $output.value = '';
+        showInputStatus('Invalid JSON: ' + e.message, false);
+        $outputStatus.textContent = '';
+        $statsBar.style.display = 'none';
+        hideValidation();
+        return;
+      }
+
+      resetStats();
+
+      const draft = $draft.value;
+      const rootSchema = generateSchema(parsed, null, 0);
+
+      // Add schema metadata
+      const fullSchema = {};
+      fullSchema[SCHEMA_KEY[draft]] = SCHEMA_URLS[draft];
+
+      if (draft === '2020-12') {
+        fullSchema.$id = 'https://example.com/schema.json';
+      }
+
+      fullSchema.title = 'Generated Schema';
+      fullSchema.description = 'Auto-generated JSON Schema from sample data';
+
+      // Merge root schema into full schema
+      Object.assign(fullSchema, rootSchema);
+
+      $output.value = JSON.stringify(fullSchema, null, 2);
+      showOutputStatus('Schema generated', true);
+      updateStatsUI();
+      hideValidation();
+    }
+
+    /**
+     * Validate JSON input against the generated schema (basic validation)
+     */
+    function validateJSON() {
+      const raw = $input.value.trim();
+      const schemaRaw = $output.value.trim();
+
+      if (!raw || !schemaRaw) {
+        showValidation('Please provide JSON input and generate a schema first.', false);
+        return;
+      }
+
+      let data, schema;
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        showValidation('Invalid JSON input: ' + e.message, false);
+        return;
+      }
+
+      try {
+        schema = JSON.parse(schemaRaw);
+      } catch (e) {
+        showValidation('Invalid schema JSON: ' + e.message, false);
+        return;
+      }
+
+      // Basic schema validation
+      const errors = validateValue(data, schema, '#');
+      if (errors.length === 0) {
+        showValidation('Validation passed. The JSON data is valid against the generated schema.', true);
+      } else {
+        showValidation('Validation failed:\n' + errors.map(e => '  - ' + e).join('\n'), false);
+      }
+    }
+
+    /**
+     * Basic JSON Schema validator (handles common keywords)
+     */
+    function validateValue(value, schema, path) {
+      const errors = [];
+
+      if (!schema || typeof schema !== 'object') return errors;
+
+      // Type check
+      if (schema.type) {
+        const actualType = getSchemaType(value);
+        const expectedTypes = Array.isArray(schema.type) ? schema.type : [schema.type];
+
+        // integer is also a number
+        let typeMatch = expectedTypes.some(t => {
+          if (t === 'integer') return typeof value === 'number' && Number.isInteger(value);
+          if (t === 'number') return typeof value === 'number';
+          if (t === 'null') return value === null;
+          if (t === 'array') return Array.isArray(value);
+          if (t === 'object') return value !== null && typeof value === 'object' && !Array.isArray(value);
+          return typeof value === t;
+        });
+
+        if (!typeMatch) {
+          errors.push(`${path}: expected type "${schema.type}", got "${actualType}"`);
+          return errors; // Skip further checks if type mismatch
+        }
+      }
+
+      // Object validation
+      if (schema.type === 'object' && value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        // Required fields
+        if (schema.required && Array.isArray(schema.required)) {
+          schema.required.forEach(key => {
+            if (!(key in value)) {
+              errors.push(`${path}: missing required property "${key}"`);
+            }
+          });
+        }
+
+        // Properties
+        if (schema.properties) {
+          Object.keys(schema.properties).forEach(key => {
+            if (key in value) {
+              const propErrors = validateValue(value[key], schema.properties[key], path + '/' + key);
+              errors.push(...propErrors);
+            }
+          });
+        }
+      }
+
+      // Array validation
+      if (schema.type === 'array' && Array.isArray(value)) {
+        if (schema.items) {
+          value.forEach((item, index) => {
+            const itemErrors = validateValue(item, schema.items, path + '/[' + index + ']');
+            errors.push(...itemErrors);
+          });
+        }
+      }
+
+      // Format validation (basic)
+      if (schema.format && typeof value === 'string') {
+        const fmt = inferFormat(value);
+        // Lenient: only flag if we can confidently say it does not match
+        if (schema.format === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.push(`${path}: string does not match format "email"`);
+        }
+        if (schema.format === 'uri' && !/^https?:\/\/.+/.test(value)) {
+          errors.push(`${path}: string does not match format "uri"`);
+        }
+        if (schema.format === 'date-time' && isNaN(Date.parse(value))) {
+          errors.push(`${path}: string does not match format "date-time"`);
+        }
+        if (schema.format === 'ipv4' && !/^(\d{1,3}\.){3}\d{1,3}$/.test(value)) {
+          errors.push(`${path}: string does not match format "ipv4"`);
+        }
+        if (schema.format === 'uuid' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) {
+          errors.push(`${path}: string does not match format "uuid"`);
+        }
+      }
+
+      // anyOf / oneOf
+      if (schema.anyOf) {
+        const anyMatch = schema.anyOf.some(sub => validateValue(value, sub, path).length === 0);
+        if (!anyMatch) {
+          errors.push(`${path}: value does not match any of the anyOf schemas`);
+        }
+      }
+
+      if (schema.oneOf) {
+        const matches = schema.oneOf.filter(sub => validateValue(value, sub, path).length === 0);
+        if (matches.length === 0) {
+          errors.push(`${path}: value does not match any of the oneOf schemas`);
+        } else if (matches.length > 1) {
+          errors.push(`${path}: value matches more than one oneOf schema`);
+        }
+      }
+
+      return errors;
+    }
+
+    function getSchemaType(value) {
+      if (value === null) return 'null';
+      if (Array.isArray(value)) return 'array';
+      if (typeof value === 'number') return Number.isInteger(value) ? 'integer' : 'number';
+      return typeof value;
+    }
+
+    function showValidation(msg, valid) {
+      $validateResult.textContent = msg;
+      $validateResult.className = 'validate-result show ' + (valid ? 'valid' : 'invalid');
+    }
+
+    function hideValidation() {
+      $validateResult.className = 'validate-result';
+    }
+
+    function showInputStatus(msg, ok) {
+      $inputStatus.textContent = msg;
+      $inputStatus.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    function showOutputStatus(msg, ok) {
+      $outputStatus.textContent = msg;
+      $outputStatus.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    function copySchema() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showOutputStatus('Copied!', true);
+      }
+    }
+
+    function loadSample() {
+      $input.value = JSON.stringify({
+        "id": 1,
+        "name": "Jane Smith",
+        "email": "jane@example.com",
+        "age": 28,
+        "active": true,
+        "score": 95.5,
+        "website": "https://jane.dev",
+        "registered": "2024-01-15T10:30:00Z",
+        "tags": ["developer", "designer"],
+        "address": {
+          "street": "456 Oak Ave",
+          "city": "Techville",
+          "zip": "90210",
+          "country": "US"
+        },
+        "projects": [
+          {
+            "name": "Project Alpha",
+            "stars": 42,
+            "active": true
+          },
+          {
+            "name": "Project Beta",
+            "stars": 17,
+            "active": false
+          }
+        ],
+        "metadata": null
+      }, null, 2);
+      generate();
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $inputStatus.textContent = '';
+      $inputStatus.className = '';
+      $outputStatus.textContent = '';
+      $outputStatus.className = '';
+      $statsBar.style.display = 'none';
+      hideValidation();
+    }
+
+    // Real-time generation on input
+    let debounceTimer;
+    $input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(generate, 300);
+    });
+
+    // Auto-generate on paste
+    $input.addEventListener('paste', () => setTimeout(generate, 50));
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Methods Reference - GET, POST, PUT, DELETE Guide | ZeroKit.dev</title>
+  <meta name="description" content="Complete HTTP methods reference guide. Learn GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, CONNECT, TRACE with code examples (curl &amp; fetch), comparison table, and REST API best practices.">
+  <link rel="canonical" href="https://zerokit.dev/tools/httpmethods.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .method-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .method-card:hover {
+      border-color: var(--text-muted);
+    }
+    .method-card.expanded {
+      border-color: var(--accent);
+    }
+
+    .method-card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .method-name {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      min-width: 90px;
+    }
+    .method-short {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .method-badges {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .method-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-safe { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .badge-idempotent { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-body { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .method-chevron {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .method-card.expanded .method-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Method colors */
+    .method-get .method-name { color: #4ade80; }
+    .method-post .method-name { color: #facc15; }
+    .method-put .method-name { color: #60a5fa; }
+    .method-patch .method-name { color: #fb923c; }
+    .method-delete .method-name { color: #f87171; }
+    .method-head .method-name { color: #a78bfa; }
+    .method-options .method-name { color: #2dd4bf; }
+    .method-connect .method-name { color: #f472b6; }
+    .method-trace .method-name { color: #94a3b8; }
+
+    .method-detail {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .method-card.expanded .method-detail {
+      display: block;
+    }
+
+    .detail-section {
+      margin-top: 16px;
+    }
+    .detail-section h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .detail-section p {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .detail-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .detail-section ul li {
+      font-size: 0.85rem;
+      color: var(--text);
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+      line-height: 1.6;
+    }
+    .detail-section ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .props-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+    .prop-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+    }
+    .prop-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+    .prop-value {
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+    .prop-yes { color: #4ade80; }
+    .prop-no { color: #f87171; }
+    .prop-optional { color: #facc15; }
+
+    .code-block-wrapper {
+      position: relative;
+      margin-top: 8px;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+    }
+    .code-tab {
+      padding: 6px 16px;
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      font-weight: 500;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .code-tab:hover {
+      color: var(--text);
+    }
+    .code-tab.active {
+      background: #1e1e2e;
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .code-block {
+      display: none;
+      position: relative;
+      background: #1e1e2e;
+      border: 1px solid var(--border);
+      border-radius: 0 var(--radius) var(--radius) var(--radius);
+      padding: 16px;
+      overflow-x: auto;
+    }
+    .code-block.active {
+      display: block;
+    }
+    .code-block pre {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      z-index: 2;
+    }
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.15);
+      color: #e2e8f0;
+    }
+    .copy-btn.copied {
+      color: #4ade80;
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    /* Comparison table */
+    .comparison-section {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+    .comparison-section h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 700px;
+    }
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .comparison-table th {
+      background: var(--surface);
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+    }
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    .comparison-table tr:hover td {
+      background: rgba(99, 102, 241, 0.04);
+    }
+    .comparison-table td:first-child {
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+    .tbl-yes { color: #4ade80; font-weight: 600; }
+    .tbl-no { color: #f87171; font-weight: 600; }
+    .tbl-opt { color: #facc15; font-weight: 600; }
+
+    /* Best practices */
+    .best-practices-section {
+      margin-bottom: 40px;
+    }
+    .best-practices-section h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .bp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .bp-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color 0.15s;
+    }
+    .bp-card:hover {
+      border-color: var(--text-muted);
+    }
+    .bp-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+    .bp-card p {
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+    .bp-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .bp-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .bp-card ul li {
+      font-size: 0.82rem;
+      color: var(--text);
+      padding: 3px 0 3px 16px;
+      position: relative;
+      line-height: 1.6;
+    }
+    .bp-card ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-code {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .method-card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+      }
+      .method-short {
+        flex-basis: 100%;
+        order: 3;
+        white-space: normal;
+      }
+      .method-badges {
+        order: 2;
+      }
+      .method-detail {
+        padding: 0 16px 16px;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      .props-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .bp-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>HTTP Methods Reference</h1>
+    <p class="description">Complete reference for all HTTP request methods. Explore GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, CONNECT, and TRACE with properties, use cases, and ready-to-use code examples.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search methods... (e.g. GET, idempotent, body)" autofocus spellcheck="false">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs">
+      <button class="category-tab active" data-cat="all">All Methods</button>
+      <button class="category-tab" data-cat="safe">Safe</button>
+      <button class="category-tab" data-cat="idempotent">Idempotent</button>
+      <button class="category-tab" data-cat="body">Has Request Body</button>
+      <button class="category-tab" data-cat="common">Common (REST)</button>
+    </div>
+
+    <div id="methodList"></div>
+    <div id="noResults" class="no-results" style="display:none">
+      <div class="nr-code">?_?</div>
+      <p>No methods match your search.</p>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="comparison-section" id="comparisonSection">
+      <h2>Methods Comparison Table</h2>
+      <div class="table-wrapper">
+        <table class="comparison-table" id="comparisonTable">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Safe</th>
+              <th>Idempotent</th>
+              <th>Request Body</th>
+              <th>Response Body</th>
+              <th>Cacheable</th>
+              <th>Primary Use</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REST API Best Practices -->
+    <div class="best-practices-section" id="bestPractices">
+      <h2>REST API Best Practices</h2>
+      <div class="bp-grid">
+        <div class="bp-card">
+          <h3>Use Nouns for Resources, Not Verbs</h3>
+          <p>The HTTP method already conveys the action. Keep your URL paths as resource nouns.</p>
+          <ul>
+            <li>Good: <code>GET /users</code>, <code>POST /orders</code></li>
+            <li>Avoid: <code>GET /getUsers</code>, <code>POST /createOrder</code></li>
+            <li>Use plural nouns: <code>/users</code> not <code>/user</code></li>
+          </ul>
+        </div>
+        <div class="bp-card">
+          <h3>Use Correct HTTP Methods</h3>
+          <p>Each method has a specific semantic meaning. Respect that contract.</p>
+          <ul>
+            <li><code>GET</code> for retrieval only -- never modify data</li>
+            <li><code>POST</code> for creating new resources</li>
+            <li><code>PUT</code> for full replacement of a resource</li>
+            <li><code>PATCH</code> for partial updates</li>
+            <li><code>DELETE</code> for removing resources</li>
+          </ul>
+        </div>
+        <div class="bp-card">
+          <h3>Return Appropriate Status Codes</h3>
+          <p>Pair HTTP methods with correct response status codes for clear API contracts.</p>
+          <ul>
+            <li><code>GET</code> returns <code>200 OK</code> with the resource</li>
+            <li><code>POST</code> returns <code>201 Created</code> with Location header</li>
+            <li><code>PUT/PATCH</code> returns <code>200 OK</code> or <code>204 No Content</code></li>
+            <li><code>DELETE</code> returns <code>204 No Content</code></li>
+            <li>Validation errors return <code>422 Unprocessable Entity</code></li>
+          </ul>
+        </div>
+        <div class="bp-card">
+          <h3>Idempotency Matters</h3>
+          <p>Design APIs so retrying a request produces the same result. This is critical for reliability.</p>
+          <ul>
+            <li><code>PUT</code> and <code>DELETE</code> are idempotent by design</li>
+            <li>Use idempotency keys for <code>POST</code> (e.g., <code>Idempotency-Key</code> header)</li>
+            <li>Retrying an idempotent request should never create duplicates</li>
+            <li>Clients rely on this for safe retries after network failures</li>
+          </ul>
+        </div>
+        <div class="bp-card">
+          <h3>Version Your API</h3>
+          <p>Always version your REST APIs to avoid breaking existing clients when evolving.</p>
+          <ul>
+            <li>URL path: <code>/api/v1/users</code></li>
+            <li>Header: <code>Accept: application/vnd.api.v1+json</code></li>
+            <li>Query param: <code>/users?version=1</code> (less common)</li>
+            <li>Never break existing versions -- deprecate gracefully</li>
+          </ul>
+        </div>
+        <div class="bp-card">
+          <h3>Handle Errors Consistently</h3>
+          <p>Return structured error responses so clients can handle failures predictably.</p>
+          <ul>
+            <li>Use a consistent error response format (JSON)</li>
+            <li>Include: <code>status</code>, <code>error</code>, <code>message</code>, <code>details</code></li>
+            <li>Distinguish client errors (4xx) from server errors (5xx)</li>
+            <li>Include a correlation/request ID for debugging</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    const HTTP_METHODS = [
+      {
+        method: "GET",
+        cat: "common",
+        short: "Retrieve a resource or collection of resources.",
+        description: "The GET method requests a representation of the specified resource. GET requests should only retrieve data and should have no other effect on the data. This is the most common HTTP method and the foundation of data retrieval on the web. Responses to GET requests are cacheable by default.",
+        whenToUse: [
+          "Fetching a web page, API resource, or file",
+          "Listing a collection of resources (e.g., all users)",
+          "Retrieving a single resource by ID (e.g., user #42)",
+          "Searching with query parameters (e.g., /search?q=term)",
+          "Any read-only operation that does not change server state"
+        ],
+        safe: true,
+        idempotent: true,
+        requestBody: false,
+        responseBody: true,
+        cacheable: true,
+        curlExample: `# Fetch a single resource
+curl -X GET https://api.example.com/users/42 \\
+  -H "Accept: application/json"
+
+# Fetch a collection with query params
+curl -X GET "https://api.example.com/users?page=1&limit=10" \\
+  -H "Authorization: Bearer YOUR_TOKEN"`,
+        fetchExample: `// Fetch a single resource
+const response = await fetch('https://api.example.com/users/42', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json',
+    'Authorization': 'Bearer YOUR_TOKEN'
+  }
+});
+const user = await response.json();
+console.log(user);
+
+// Fetch a collection
+const list = await fetch('https://api.example.com/users?page=1&limit=10');
+const users = await list.json();`
+      },
+      {
+        method: "POST",
+        cat: "common",
+        short: "Create a new resource or trigger a process.",
+        description: "The POST method submits an entity to the specified resource, often causing a change in state or side effects on the server. It is primarily used for creating new resources, but also for submitting form data, triggering server-side operations, or any action that is not idempotent. POST requests are not cacheable by default and are not idempotent -- sending the same POST request twice may create two resources.",
+        whenToUse: [
+          "Creating a new resource (e.g., a new user or order)",
+          "Submitting form data (login, registration, contact forms)",
+          "Uploading files to the server",
+          "Triggering a server-side action (e.g., send email, run a job)",
+          "Any operation that is not idempotent or changes server state"
+        ],
+        safe: false,
+        idempotent: false,
+        requestBody: true,
+        responseBody: true,
+        cacheable: false,
+        curlExample: `# Create a new resource (JSON)
+curl -X POST https://api.example.com/users \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_TOKEN" \\
+  -d '{"name": "Jane Doe", "email": "jane@example.com"}'
+
+# Submit form data
+curl -X POST https://api.example.com/login \\
+  -d "username=jane&password=secret123"
+
+# Upload a file
+curl -X POST https://api.example.com/upload \\
+  -F "file=@photo.jpg"`,
+        fetchExample: `// Create a new resource
+const response = await fetch('https://api.example.com/users', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_TOKEN'
+  },
+  body: JSON.stringify({
+    name: 'Jane Doe',
+    email: 'jane@example.com'
+  })
+});
+const newUser = await response.json();
+// Check for 201 Created
+console.log(response.status, newUser);
+
+// Upload a file
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+await fetch('https://api.example.com/upload', {
+  method: 'POST',
+  body: formData
+});`
+      },
+      {
+        method: "PUT",
+        cat: "common",
+        short: "Replace an entire resource with the provided data.",
+        description: "The PUT method replaces all current representations of the target resource with the request payload. If the resource does not exist, PUT can create it (though this depends on server implementation). PUT is idempotent -- calling it multiple times with the same data produces the same result. The client must send a complete representation of the resource; omitted fields are typically set to defaults or null.",
+        whenToUse: [
+          "Replacing an entire resource with a new version",
+          "Updating a resource when you have the complete object",
+          "Creating a resource at a specific URI (if server supports it)",
+          "When idempotency is required for the update operation",
+          "Replacing configuration or settings entirely"
+        ],
+        safe: false,
+        idempotent: true,
+        requestBody: true,
+        responseBody: "optional",
+        cacheable: false,
+        curlExample: `# Replace an entire resource
+curl -X PUT https://api.example.com/users/42 \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_TOKEN" \\
+  -d '{
+    "name": "Jane Doe",
+    "email": "jane_updated@example.com",
+    "role": "admin",
+    "active": true
+  }'
+
+# Create/replace at a specific URI
+curl -X PUT https://api.example.com/config/app-settings \\
+  -H "Content-Type: application/json" \\
+  -d '{"theme": "dark", "lang": "en", "notifications": true}'`,
+        fetchExample: `// Replace an entire resource
+const response = await fetch('https://api.example.com/users/42', {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_TOKEN'
+  },
+  body: JSON.stringify({
+    name: 'Jane Doe',
+    email: 'jane_updated@example.com',
+    role: 'admin',
+    active: true
+  })
+});
+
+if (response.ok) {
+  const updated = await response.json();
+  console.log('Updated:', updated);
+}`
+      },
+      {
+        method: "PATCH",
+        cat: "common",
+        short: "Apply partial modifications to a resource.",
+        description: "The PATCH method applies partial modifications to a resource. Unlike PUT, which requires sending the full resource, PATCH only sends the fields that need to change. This makes it more bandwidth-efficient for partial updates. PATCH is not necessarily idempotent, though it can be implemented as such. It is the preferred method when you only need to update one or a few fields of a resource.",
+        whenToUse: [
+          "Updating specific fields of a resource (e.g., just the email)",
+          "Partial updates when you don't have the full object",
+          "Toggling a single boolean field (e.g., active status)",
+          "Incrementing a counter or modifying a subset of data",
+          "When bandwidth efficiency matters (sending only changes)"
+        ],
+        safe: false,
+        idempotent: false,
+        requestBody: true,
+        responseBody: true,
+        cacheable: false,
+        curlExample: `# Partial update -- change only the email
+curl -X PATCH https://api.example.com/users/42 \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_TOKEN" \\
+  -d '{"email": "new_email@example.com"}'
+
+# JSON Patch format (RFC 6902)
+curl -X PATCH https://api.example.com/users/42 \\
+  -H "Content-Type: application/json-patch+json" \\
+  -d '[
+    {"op": "replace", "path": "/email", "value": "new@example.com"},
+    {"op": "add", "path": "/nickname", "value": "JD"}
+  ]'`,
+        fetchExample: `// Partial update -- only changed fields
+const response = await fetch('https://api.example.com/users/42', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_TOKEN'
+  },
+  body: JSON.stringify({
+    email: 'new_email@example.com'
+  })
+});
+const updated = await response.json();
+console.log(updated);
+
+// JSON Patch format (RFC 6902)
+await fetch('https://api.example.com/users/42', {
+  method: 'PATCH',
+  headers: { 'Content-Type': 'application/json-patch+json' },
+  body: JSON.stringify([
+    { op: 'replace', path: '/email', value: 'new@example.com' }
+  ])
+});`
+      },
+      {
+        method: "DELETE",
+        cat: "common",
+        short: "Remove a resource from the server.",
+        description: "The DELETE method deletes the specified resource. It is idempotent -- deleting a resource that has already been deleted should return the same result (typically 204 or 404). A successful deletion usually returns 204 No Content (no body) or 200 OK (with a confirmation body). DELETE requests generally do not have a request body, though some APIs accept one for additional parameters.",
+        whenToUse: [
+          "Removing a resource permanently (e.g., delete a user)",
+          "Cancelling a subscription or revoking access",
+          "Clearing a cache or session",
+          "Removing an item from a collection",
+          "Any destructive operation that removes server-side data"
+        ],
+        safe: false,
+        idempotent: true,
+        requestBody: "optional",
+        responseBody: "optional",
+        cacheable: false,
+        curlExample: `# Delete a resource
+curl -X DELETE https://api.example.com/users/42 \\
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Delete with confirmation in response
+curl -X DELETE https://api.example.com/posts/99 \\
+  -H "Authorization: Bearer YOUR_TOKEN" \\
+  -v
+
+# Bulk delete (some APIs support body)
+curl -X DELETE https://api.example.com/users \\
+  -H "Content-Type: application/json" \\
+  -d '{"ids": [1, 2, 3]}'`,
+        fetchExample: `// Delete a resource
+const response = await fetch('https://api.example.com/users/42', {
+  method: 'DELETE',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN'
+  }
+});
+
+if (response.status === 204) {
+  console.log('Deleted successfully (no content)');
+} else if (response.ok) {
+  const result = await response.json();
+  console.log('Deleted:', result);
+}
+
+// Delete and handle 404 gracefully
+try {
+  const res = await fetch('https://api.example.com/users/42', {
+    method: 'DELETE'
+  });
+  if (res.status === 404) console.log('Already deleted');
+} catch (err) {
+  console.error('Network error:', err);
+}`
+      },
+      {
+        method: "HEAD",
+        cat: "other",
+        short: "Same as GET but returns only headers, no body.",
+        description: "The HEAD method is identical to GET, except the server must not return a body in the response. The headers returned should be identical to those of a GET request. HEAD is useful for checking what a GET request will return before actually making it -- for example, checking resource existence, content type, content length, or last-modified date without downloading the full content.",
+        whenToUse: [
+          "Checking if a resource exists (without downloading it)",
+          "Checking the Content-Length before downloading a large file",
+          "Verifying Content-Type of a resource",
+          "Checking Last-Modified or ETag for cache validation",
+          "Monitoring URL availability (health checks)"
+        ],
+        safe: true,
+        idempotent: true,
+        requestBody: false,
+        responseBody: false,
+        cacheable: true,
+        curlExample: `# Check resource existence and headers
+curl -I https://api.example.com/files/report.pdf
+
+# Check content length before download
+curl --head https://cdn.example.com/large-video.mp4
+
+# Check if resource was modified (cache validation)
+curl -I https://api.example.com/users/42 \\
+  -H "If-Modified-Since: Wed, 21 Oct 2024 07:28:00 GMT"`,
+        fetchExample: `// Check if a resource exists
+const response = await fetch('https://api.example.com/files/report.pdf', {
+  method: 'HEAD'
+});
+console.log('Exists:', response.ok);
+console.log('Size:', response.headers.get('Content-Length'));
+console.log('Type:', response.headers.get('Content-Type'));
+
+// Cache validation
+const res = await fetch('https://api.example.com/data', {
+  method: 'HEAD'
+});
+const lastModified = res.headers.get('Last-Modified');
+const etag = res.headers.get('ETag');
+console.log('Last Modified:', lastModified);
+console.log('ETag:', etag);`
+      },
+      {
+        method: "OPTIONS",
+        cat: "other",
+        short: "Describe the communication options for the target resource.",
+        description: "The OPTIONS method is used to describe the communication options for the target resource. It is most commonly seen as a CORS preflight request, where the browser automatically sends an OPTIONS request before a cross-origin request to check which methods and headers are permitted. The server responds with allowed methods, headers, and origins. OPTIONS requests are safe and idempotent.",
+        whenToUse: [
+          "CORS preflight requests (sent automatically by browsers)",
+          "Discovering which HTTP methods a server supports",
+          "Checking allowed headers for cross-origin requests",
+          "API discovery and self-documentation",
+          "Testing server CORS configuration"
+        ],
+        safe: true,
+        idempotent: true,
+        requestBody: false,
+        responseBody: "optional",
+        cacheable: false,
+        curlExample: `# Check allowed methods for a resource
+curl -X OPTIONS https://api.example.com/users \\
+  -H "Origin: https://myapp.com" \\
+  -H "Access-Control-Request-Method: POST" \\
+  -H "Access-Control-Request-Headers: Content-Type, Authorization" \\
+  -v
+
+# Simple OPTIONS request
+curl -X OPTIONS https://api.example.com/users -i
+
+# Check CORS headers specifically
+curl -X OPTIONS https://api.example.com/data \\
+  -H "Origin: https://frontend.example.com" \\
+  -H "Access-Control-Request-Method: DELETE" \\
+  -v 2>&1 | grep -i "access-control"`,
+        fetchExample: `// Manual OPTIONS request (browsers do this automatically for CORS)
+const response = await fetch('https://api.example.com/users', {
+  method: 'OPTIONS'
+});
+console.log('Allowed:', response.headers.get('Allow'));
+console.log('CORS Methods:', response.headers.get('Access-Control-Allow-Methods'));
+console.log('CORS Headers:', response.headers.get('Access-Control-Allow-Headers'));
+
+// Note: For cross-origin requests, the browser sends
+// OPTIONS preflight automatically. You rarely need to
+// send OPTIONS manually in frontend code.`
+      },
+      {
+        method: "CONNECT",
+        cat: "other",
+        short: "Establish a tunnel to the server (used for HTTPS proxies).",
+        description: "The CONNECT method establishes a tunnel to the server identified by the target resource. It is primarily used to open a TCP tunnel through an HTTP proxy, most commonly for HTTPS connections through a proxy server. When a client wants to reach an HTTPS server through a proxy, it sends a CONNECT request to the proxy, which then establishes the TCP connection to the target server and relays data in both directions.",
+        whenToUse: [
+          "Establishing HTTPS connections through an HTTP proxy",
+          "Creating TCP tunnels via proxy servers",
+          "SSL/TLS tunneling through corporate proxies",
+          "WebSocket connections through HTTP proxies"
+        ],
+        safe: false,
+        idempotent: false,
+        requestBody: false,
+        responseBody: true,
+        cacheable: false,
+        curlExample: `# Connect through a proxy (curl handles this automatically)
+curl -x http://proxy.example.com:8080 https://api.example.com/secure
+
+# Explicit CONNECT via proxy
+curl --proxy http://proxy.example.com:8080 \\
+  --proxytunnel \\
+  https://api.example.com/secure
+
+# Debug proxy tunnel
+curl -x http://proxy.example.com:8080 \\
+  -v https://api.example.com/secure 2>&1 | grep "CONNECT"`,
+        fetchExample: `// CONNECT is handled at the transport layer.
+// In browsers, you cannot send CONNECT requests directly
+// via fetch() -- the browser handles proxy tunneling
+// automatically based on system/browser proxy settings.
+
+// In Node.js, you can use the 'http' module:
+const http = require('http');
+const req = http.request({
+  host: 'proxy.example.com',
+  port: 8080,
+  method: 'CONNECT',
+  path: 'api.example.com:443'
+});
+
+req.on('connect', (res, socket) => {
+  console.log('Tunnel established:', res.statusCode);
+  // Use socket for TLS connection to target
+});
+req.end();`
+      },
+      {
+        method: "TRACE",
+        cat: "other",
+        short: "Perform a message loop-back test along the path to the resource.",
+        description: "The TRACE method performs a message loop-back test along the path to the target resource. The server echoes back the received request so the client can see what intermediate servers (proxies, gateways) have added or changed. This is useful for debugging but is a security risk because it can expose sensitive headers (like Authorization). Most production servers disable TRACE to prevent Cross-Site Tracing (XST) attacks.",
+        whenToUse: [
+          "Debugging proxy and gateway behavior (development only)",
+          "Checking what headers are added by intermediaries",
+          "Testing if TRACE is disabled (security audit)",
+          "Network path debugging and diagnostics"
+        ],
+        safe: true,
+        idempotent: true,
+        requestBody: false,
+        responseBody: true,
+        cacheable: false,
+        curlExample: `# Send a TRACE request
+curl -X TRACE https://api.example.com/ -v
+
+# TRACE with custom header to test proxy modification
+curl -X TRACE https://api.example.com/ \\
+  -H "X-Custom-Header: test-value" \\
+  -v
+
+# Check if TRACE is disabled (security test)
+# Expect 405 Method Not Allowed on secure servers
+curl -X TRACE https://api.example.com/ -o /dev/null -w "%{http_code}"`,
+        fetchExample: `// Most browsers block TRACE requests for security (XST prevention)
+// This will typically fail in browser environments:
+try {
+  const response = await fetch('https://api.example.com/', {
+    method: 'TRACE'
+  });
+  console.log('Status:', response.status);
+  const body = await response.text();
+  console.log('Echoed request:', body);
+} catch (err) {
+  // Expected: browsers block TRACE
+  console.log('TRACE blocked by browser (security):', err.message);
+}
+
+// In Node.js, TRACE works normally:
+// const res = await fetch(url, { method: 'TRACE' });`
+      }
+    ];
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let expandedMethods = new Set();
+
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const methodList = document.getElementById('methodList');
+    const noResults = document.getElementById('noResults');
+    const categoryTabs = document.getElementById('categoryTabs');
+
+    // Category tab click
+    categoryTabs.addEventListener('click', e => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      categoryTabs.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeCategory = tab.dataset.cat;
+      render();
+    });
+
+    // Search input
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      render();
+    });
+
+    function toggleMethod(method) {
+      if (expandedMethods.has(method)) {
+        expandedMethods.delete(method);
+      } else {
+        expandedMethods.add(method);
+      }
+      render();
+    }
+
+    function getFilteredMethods() {
+      return HTTP_METHODS.filter(m => {
+        // Category filter
+        if (activeCategory === 'safe' && !m.safe) return false;
+        if (activeCategory === 'idempotent' && !m.idempotent) return false;
+        if (activeCategory === 'body' && m.requestBody === false) return false;
+        if (activeCategory === 'common' && m.cat !== 'common') return false;
+
+        // Search filter
+        if (searchQuery) {
+          const q = searchQuery;
+          const methodL = m.method.toLowerCase();
+          const shortL = m.short.toLowerCase();
+          const descL = m.description.toLowerCase();
+          const whenStr = m.whenToUse.join(' ').toLowerCase();
+          const propsStr = [
+            m.safe ? 'safe' : '',
+            m.idempotent ? 'idempotent' : '',
+            m.requestBody ? 'body request' : '',
+            m.cacheable ? 'cacheable' : ''
+          ].join(' ');
+          if (!methodL.includes(q) && !shortL.includes(q) && !descL.includes(q) && !whenStr.includes(q) && !propsStr.includes(q)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function propDisplay(val) {
+      if (val === true) return { text: 'Yes', cls: 'prop-yes' };
+      if (val === false) return { text: 'No', cls: 'prop-no' };
+      return { text: 'Optional', cls: 'prop-optional' };
+    }
+
+    function tblDisplay(val) {
+      if (val === true) return '<span class="tbl-yes">Yes</span>';
+      if (val === false) return '<span class="tbl-no">No</span>';
+      return '<span class="tbl-opt">Optional</span>';
+    }
+
+    let codeTabState = {};
+
+    function switchCodeTab(method, lang) {
+      codeTabState[method] = lang;
+      const wrapper = document.querySelector(`[data-method-code="${method}"]`);
+      if (!wrapper) return;
+      wrapper.querySelectorAll('.code-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.lang === lang);
+      });
+      wrapper.querySelectorAll('.code-block').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === lang);
+      });
+    }
+
+    function copyCode(method) {
+      const lang = codeTabState[method] || 'curl';
+      const m = HTTP_METHODS.find(x => x.method === method);
+      if (!m) return;
+      const text = lang === 'curl' ? m.curlExample : m.fetchExample;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector(`[data-method-code="${method}"] .code-block.active .copy-btn`);
+        if (btn) {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        }
+      });
+    }
+
+    function render() {
+      const filtered = getFilteredMethods();
+      searchCount.textContent = filtered.length + ' of ' + HTTP_METHODS.length + ' methods';
+
+      if (filtered.length === 0) {
+        methodList.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      let html = '';
+      filtered.forEach(m => {
+        const expanded = expandedMethods.has(m.method);
+        const cls = 'method-' + m.method.toLowerCase();
+        const safeProp = propDisplay(m.safe);
+        const idempotentProp = propDisplay(m.idempotent);
+        const reqBodyProp = propDisplay(m.requestBody);
+        const resBodyProp = propDisplay(m.responseBody);
+        const cacheableProp = propDisplay(m.cacheable);
+        const activeLang = codeTabState[m.method] || 'curl';
+
+        html += `<div class="method-card ${cls}${expanded ? ' expanded' : ''}" id="method-${m.method}">`;
+        html += `<div class="method-card-header" onclick="toggleMethod('${m.method}')">`;
+        html += `<span class="method-name">${m.method}</span>`;
+        html += `<span class="method-short">${escHtml(m.short)}</span>`;
+        html += `<span class="method-badges">`;
+        if (m.safe) html += `<span class="method-badge badge-safe">Safe</span>`;
+        if (m.idempotent) html += `<span class="method-badge badge-idempotent">Idempotent</span>`;
+        if (m.requestBody === true) html += `<span class="method-badge badge-body">Body</span>`;
+        html += `</span>`;
+        html += `<span class="method-chevron">&#9654;</span>`;
+        html += `</div>`;
+
+        html += `<div class="method-detail">`;
+
+        // Description
+        html += `<div class="detail-section"><h4>Description</h4><p>${escHtml(m.description)}</p></div>`;
+
+        // Properties grid
+        html += `<div class="detail-section"><h4>Properties</h4>`;
+        html += `<div class="props-grid">`;
+        html += `<div class="prop-item"><span class="prop-label">Safe:</span> <span class="prop-value ${safeProp.cls}">${safeProp.text}</span></div>`;
+        html += `<div class="prop-item"><span class="prop-label">Idempotent:</span> <span class="prop-value ${idempotentProp.cls}">${idempotentProp.text}</span></div>`;
+        html += `<div class="prop-item"><span class="prop-label">Request Body:</span> <span class="prop-value ${reqBodyProp.cls}">${reqBodyProp.text}</span></div>`;
+        html += `<div class="prop-item"><span class="prop-label">Response Body:</span> <span class="prop-value ${resBodyProp.cls}">${resBodyProp.text}</span></div>`;
+        html += `<div class="prop-item"><span class="prop-label">Cacheable:</span> <span class="prop-value ${cacheableProp.cls}">${cacheableProp.text}</span></div>`;
+        html += `</div></div>`;
+
+        // When to use
+        html += `<div class="detail-section"><h4>When to Use</h4><ul>`;
+        m.whenToUse.forEach(u => { html += `<li>${escHtml(u)}</li>`; });
+        html += `</ul></div>`;
+
+        // Code examples
+        html += `<div class="detail-section"><h4>Code Examples</h4>`;
+        html += `<div class="code-block-wrapper" data-method-code="${m.method}">`;
+        html += `<div class="code-tabs">`;
+        html += `<button class="code-tab${activeLang === 'curl' ? ' active' : ''}" data-lang="curl" onclick="switchCodeTab('${m.method}','curl')">curl</button>`;
+        html += `<button class="code-tab${activeLang === 'fetch' ? ' active' : ''}" data-lang="fetch" onclick="switchCodeTab('${m.method}','fetch')">fetch (JS)</button>`;
+        html += `</div>`;
+        html += `<div class="code-block${activeLang === 'curl' ? ' active' : ''}" data-lang="curl"><pre>${escHtml(m.curlExample)}</pre><button class="copy-btn" onclick="copyCode('${m.method}')">Copy</button></div>`;
+        html += `<div class="code-block${activeLang === 'fetch' ? ' active' : ''}" data-lang="fetch"><pre>${escHtml(m.fetchExample)}</pre><button class="copy-btn" onclick="copyCode('${m.method}')">Copy</button></div>`;
+        html += `</div></div>`;
+
+        html += `</div></div>`;
+      });
+
+      methodList.innerHTML = html;
+    }
+
+    // Build comparison table
+    function buildComparisonTable() {
+      const tbody = document.getElementById('comparisonBody');
+      let html = '';
+      const primaryUse = {
+        'GET': 'Retrieve resources',
+        'POST': 'Create resources',
+        'PUT': 'Replace resources',
+        'PATCH': 'Partial update',
+        'DELETE': 'Remove resources',
+        'HEAD': 'Check headers only',
+        'OPTIONS': 'CORS preflight / discovery',
+        'CONNECT': 'TCP tunnel (proxy)',
+        'TRACE': 'Loop-back debug'
+      };
+      HTTP_METHODS.forEach(m => {
+        html += `<tr>`;
+        html += `<td style="color: var(--accent);">${m.method}</td>`;
+        html += `<td>${tblDisplay(m.safe)}</td>`;
+        html += `<td>${tblDisplay(m.idempotent)}</td>`;
+        html += `<td>${tblDisplay(m.requestBody)}</td>`;
+        html += `<td>${tblDisplay(m.responseBody)}</td>`;
+        html += `<td>${tblDisplay(m.cacheable)}</td>`;
+        html += `<td>${primaryUse[m.method] || ''}</td>`;
+        html += `</tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // Keyboard shortcut: focus search on key press
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    // Initial render
+    buildComparisonTable();
+    render();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
