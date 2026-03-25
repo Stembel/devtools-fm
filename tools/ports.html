@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Ports Reference - Complete Port Number Guide | DevTools.fm</title>
+  <meta name="description" content="Complete network ports reference for DevOps and network engineers. Search 100+ common ports by number or service name. TCP/UDP protocols, security ratings, and category filters for Web, Email, Database, SSH, DNS, and more.">
+  <link rel="canonical" href="https://zerokit.dev/tools/ports.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .port-ranges {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .port-range-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: help;
+      position: relative;
+    }
+    .port-range-badge strong {
+      font-family: var(--mono);
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+    .port-range-badge[title]:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .category-tab .tab-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .security-legend {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .security-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .security-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .security-dot.secure { background: #4ade80; }
+    .security-dot.caution { background: #facc15; }
+    .security-dot.insecure { background: #f87171; }
+
+    .category-section {
+      margin-bottom: 32px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .cat-web .category-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .cat-email .category-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .cat-database .category-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .cat-remote .category-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-dns .category-badge { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+    .cat-filetransfer .category-badge { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .cat-development .category-badge { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .cat-messaging .category-badge { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+    .cat-monitoring .category-badge { background: rgba(20, 184, 166, 0.15); color: #2dd4bf; }
+    .cat-gaming .category-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .cat-iot .category-badge { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+    .cat-security .category-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .cat-other .category-badge { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+
+    .cat-web .category-header { border-bottom-color: rgba(59, 130, 246, 0.2); }
+    .cat-email .category-header { border-bottom-color: rgba(168, 85, 247, 0.2); }
+    .cat-database .category-header { border-bottom-color: rgba(234, 179, 8, 0.2); }
+    .cat-remote .category-header { border-bottom-color: rgba(34, 197, 94, 0.2); }
+    .cat-dns .category-header { border-bottom-color: rgba(6, 182, 212, 0.2); }
+    .cat-filetransfer .category-header { border-bottom-color: rgba(249, 115, 22, 0.2); }
+    .cat-development .category-header { border-bottom-color: rgba(236, 72, 153, 0.2); }
+    .cat-messaging .category-header { border-bottom-color: rgba(139, 92, 246, 0.2); }
+    .cat-monitoring .category-header { border-bottom-color: rgba(20, 184, 166, 0.2); }
+    .cat-gaming .category-header { border-bottom-color: rgba(239, 68, 68, 0.2); }
+    .cat-iot .category-header { border-bottom-color: rgba(251, 191, 36, 0.2); }
+    .cat-security .category-header { border-bottom-color: rgba(16, 185, 129, 0.2); }
+    .cat-other .category-header { border-bottom-color: rgba(148, 163, 184, 0.2); }
+
+    .port-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .port-card:hover {
+      border-color: var(--text-muted);
+    }
+    .port-card.expanded {
+      border-color: var(--accent);
+    }
+
+    .port-card-header {
+      display: grid;
+      grid-template-columns: 72px 1fr auto auto auto;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .port-number {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .port-service {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .port-protocol {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .port-security {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .port-security.secure { background: #4ade80; box-shadow: 0 0 6px rgba(74, 222, 128, 0.4); }
+    .port-security.caution { background: #facc15; box-shadow: 0 0 6px rgba(250, 204, 21, 0.4); }
+    .port-security.insecure { background: #f87171; box-shadow: 0 0 6px rgba(248, 113, 113, 0.4); }
+    .port-chevron {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .port-card.expanded .port-chevron {
+      transform: rotate(90deg);
+    }
+
+    .port-detail {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .port-card.expanded .port-detail {
+      display: block;
+    }
+    .detail-section {
+      margin-top: 16px;
+    }
+    .detail-section h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .detail-section p {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .detail-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .detail-section ul li {
+      font-size: 0.85rem;
+      color: var(--text);
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+      line-height: 1.6;
+    }
+    .detail-section ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-code {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    .quick-jump {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .quick-jump:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+    .quick-jump.visible {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .port-card-header {
+        grid-template-columns: 60px 1fr auto auto auto;
+        gap: 8px;
+        padding: 12px 16px;
+      }
+      .port-number {
+        font-size: 0.95rem;
+      }
+      .port-detail {
+        padding: 0 16px 16px;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      .port-ranges {
+        gap: 8px;
+      }
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .port-card-header {
+        grid-template-columns: 50px 1fr auto auto;
+        gap: 6px;
+      }
+      .port-protocol {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Network Ports Reference</h1>
+    <p class="description">Comprehensive reference for 100+ common network ports. Search by port number or service name, filter by category, and check security ratings. Built for DevOps and network engineers.</p>
+
+    <div class="port-ranges">
+      <div class="port-range-badge" title="Assigned by IANA for well-known services like HTTP, SSH, DNS. Require root/admin privileges to bind on most systems.">
+        <strong>0 &ndash; 1023</strong> Well Known Ports
+      </div>
+      <div class="port-range-badge" title="Assigned by IANA for registered services. Can be used by user processes. Includes many database and application servers.">
+        <strong>1024 &ndash; 49151</strong> Registered Ports
+      </div>
+      <div class="port-range-badge" title="Not assigned. Used for temporary/ephemeral connections. Automatically assigned by OS for client-side connections.">
+        <strong>49152 &ndash; 65535</strong> Dynamic / Ephemeral
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by port number or service name... (e.g. 443, ssh, postgres)" autofocus>
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="security-legend">
+      <span class="security-legend-item"><span class="security-dot secure"></span> Secure / Encrypted</span>
+      <span class="security-legend-item"><span class="security-dot caution"></span> Can Be Secured</span>
+      <span class="security-legend-item"><span class="security-dot insecure"></span> Insecure / Deprecated</span>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs"></div>
+
+    <div id="portList"></div>
+
+    <div class="no-results" id="noResults" style="display:none">
+      <div class="nr-code">?</div>
+      <p>No ports found matching your search.</p>
+      <p style="margin-top:8px;font-size:0.8rem">Try a port number (e.g. 8080) or service name (e.g. redis)</p>
+    </div>
+  </main>
+
+  <button class="quick-jump" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593; Top</button>
+
+  <script>
+    const CATEGORIES = {
+      web: { label: 'Web', icon: '' },
+      email: { label: 'Email', icon: '' },
+      database: { label: 'Database', icon: '' },
+      remote: { label: 'SSH / Remote', icon: '' },
+      dns: { label: 'DNS / Network', icon: '' },
+      filetransfer: { label: 'File Transfer', icon: '' },
+      development: { label: 'Development', icon: '' },
+      messaging: { label: 'Messaging / Queue', icon: '' },
+      monitoring: { label: 'Monitoring', icon: '' },
+      gaming: { label: 'Gaming', icon: '' },
+      iot: { label: 'IoT / Embedded', icon: '' },
+      security: { label: 'Security / Auth', icon: '' },
+      other: { label: 'Other', icon: '' }
+    };
+
+    // security: "secure" (green), "caution" (yellow), "insecure" (red)
+    const PORTS = [
+      // Web
+      { port: 80, protocol: 'TCP', service: 'HTTP', cat: 'web', security: 'insecure',
+        description: 'Hypertext Transfer Protocol. The foundation of the web, used for unencrypted web traffic.',
+        notes: ['Traffic is sent in plaintext - susceptible to eavesdropping and MITM attacks', 'Should redirect to HTTPS (port 443) in production', 'Still used for initial connection before redirect and for internal/dev servers'],
+        common: ['Web servers (Apache, Nginx, IIS)', 'Load balancers', 'Reverse proxies', 'HTTP-based APIs'] },
+      { port: 443, protocol: 'TCP', service: 'HTTPS', cat: 'web', security: 'secure',
+        description: 'HTTP over TLS/SSL. Encrypted web traffic, the standard for all modern websites.',
+        notes: ['Encrypted via TLS - protects data in transit', 'Required for HTTP/2 and HTTP/3 in browsers', 'Modern best practice: serve all web content over HTTPS'],
+        common: ['All production web servers', 'REST APIs', 'WebSocket (wss://)', 'CDN endpoints'] },
+      { port: 8080, protocol: 'TCP', service: 'HTTP Alternate', cat: 'web', security: 'caution',
+        description: 'Common alternative HTTP port. Often used for web proxies, development servers, and secondary web services.',
+        notes: ['Does not require root privileges to bind (unlike port 80)', 'Frequently used by Tomcat, Jenkins, and other Java web servers', 'Should still use TLS when exposed to the internet'],
+        common: ['Apache Tomcat', 'Jenkins CI', 'Web proxies', 'Development servers'] },
+      { port: 8443, protocol: 'TCP', service: 'HTTPS Alternate', cat: 'web', security: 'secure',
+        description: 'Common alternative HTTPS port. Used when port 443 is unavailable or for secondary secure services.',
+        notes: ['Typically uses TLS encryption like standard HTTPS', 'Often used for admin interfaces or secondary services', 'Common in container and microservice architectures'],
+        common: ['Tomcat HTTPS', 'Admin panels', 'Alternative secure web services'] },
+      { port: 8888, protocol: 'TCP', service: 'HTTP Alternate', cat: 'web', security: 'caution',
+        description: 'Another alternative HTTP port commonly used for web-based development tools and admin interfaces.',
+        notes: ['Popular with Jupyter Notebook and similar tools', 'No encryption by default', 'Should be firewalled in production'],
+        common: ['Jupyter Notebook', 'CDDB protocol', 'Web admin panels', 'Development tools'] },
+      { port: 3128, protocol: 'TCP', service: 'Squid Proxy', cat: 'web', security: 'caution',
+        description: 'Default port for Squid proxy server. Used for web caching and forwarding HTTP requests.',
+        notes: ['Should require authentication when exposed', 'Often used in corporate environments for web filtering', 'Can be configured for HTTPS interception'],
+        common: ['Squid proxy', 'HTTP caching', 'Corporate web gateways'] },
+
+      // Email
+      { port: 25, protocol: 'TCP', service: 'SMTP', cat: 'email', security: 'insecure',
+        description: 'Simple Mail Transfer Protocol. Used for sending emails between mail servers.',
+        notes: ['Unencrypted by default - often upgraded via STARTTLS', 'Many ISPs block port 25 to prevent spam', 'Use port 587 for mail submission from clients', 'Should use STARTTLS or port 465 for encryption'],
+        common: ['Mail server to mail server delivery', 'Postfix', 'Sendmail', 'Exchange Server'] },
+      { port: 465, protocol: 'TCP', service: 'SMTPS', cat: 'email', security: 'secure',
+        description: 'SMTP over implicit TLS/SSL. Secure mail submission port, re-standardized in RFC 8314.',
+        notes: ['Encrypted from the start (implicit TLS)', 'Preferred over STARTTLS on port 587 for client submission', 'Re-assigned as official submission port in 2018'],
+        common: ['Secure mail submission', 'Email clients (Outlook, Thunderbird)', 'Automated email sending'] },
+      { port: 587, protocol: 'TCP', service: 'SMTP Submission', cat: 'email', security: 'caution',
+        description: 'Mail submission port for email clients. Designed for authenticated, optionally encrypted email submission.',
+        notes: ['Requires authentication (unlike port 25)', 'Supports STARTTLS for encryption upgrade', 'Recommended for email client to server communication', 'Port 465 with implicit TLS is now preferred'],
+        common: ['Email clients', 'Application mail sending', 'Authenticated SMTP relay'] },
+      { port: 110, protocol: 'TCP', service: 'POP3', cat: 'email', security: 'insecure',
+        description: 'Post Office Protocol v3. Downloads emails from server to client, typically removing them from server.',
+        notes: ['Unencrypted - credentials sent in plaintext', 'Use POP3S (port 995) instead', 'Downloads and usually deletes mail from server', 'Less flexible than IMAP for multi-device access'],
+        common: ['Legacy email clients', 'Simple mail retrieval'] },
+      { port: 995, protocol: 'TCP', service: 'POP3S', cat: 'email', security: 'secure',
+        description: 'POP3 over TLS/SSL. Encrypted version of POP3 for secure mail retrieval.',
+        notes: ['Encrypted via TLS - protects credentials and email content', 'Preferred over plain POP3', 'Still downloads and removes mail from server by default'],
+        common: ['Secure email retrieval', 'Email clients'] },
+      { port: 143, protocol: 'TCP', service: 'IMAP', cat: 'email', security: 'insecure',
+        description: 'Internet Message Access Protocol. Accesses email on remote server, keeping messages on server.',
+        notes: ['Unencrypted by default - use IMAPS (port 993) instead', 'Supports STARTTLS for encryption upgrade', 'Better than POP3 for multi-device access', 'Keeps emails on server, syncs across devices'],
+        common: ['Email clients', 'Webmail backends', 'Multi-device email access'] },
+      { port: 993, protocol: 'TCP', service: 'IMAPS', cat: 'email', security: 'secure',
+        description: 'IMAP over TLS/SSL. Encrypted email access protocol, the modern standard for email retrieval.',
+        notes: ['Encrypted via TLS', 'Recommended for all IMAP connections', 'Supports server-side search, folders, and flags'],
+        common: ['Modern email clients', 'Webmail (Gmail, Outlook)', 'Mobile email apps'] },
+
+      // Database
+      { port: 3306, protocol: 'TCP', service: 'MySQL', cat: 'database', security: 'caution',
+        description: 'MySQL and MariaDB database server default port.',
+        notes: ['Supports TLS encryption but not enabled by default', 'Never expose directly to the internet', 'Use SSH tunnels or VPN for remote access', 'Also used by MariaDB, Percona Server'],
+        common: ['MySQL Server', 'MariaDB', 'Percona', 'Amazon RDS (MySQL)'] },
+      { port: 5432, protocol: 'TCP', service: 'PostgreSQL', cat: 'database', security: 'caution',
+        description: 'PostgreSQL database server default port.',
+        notes: ['Supports SSL/TLS connections via sslmode parameter', 'Use pg_hba.conf for access control', 'Never expose directly to public internet', 'Supports SCRAM-SHA-256 authentication'],
+        common: ['PostgreSQL', 'Amazon RDS (PostgreSQL)', 'Supabase', 'TimescaleDB'] },
+      { port: 27017, protocol: 'TCP', service: 'MongoDB', cat: 'database', security: 'caution',
+        description: 'MongoDB database server default port.',
+        notes: ['Enable authentication - many breaches from unauthenticated MongoDB', 'Supports TLS/SSL connections', 'Use --auth flag and create admin user', 'Bind to localhost unless remote access is needed'],
+        common: ['MongoDB', 'MongoDB Atlas', 'Mongoose ODM'] },
+      { port: 6379, protocol: 'TCP', service: 'Redis', cat: 'database', security: 'insecure',
+        description: 'Redis in-memory data store default port.',
+        notes: ['No authentication by default - CRITICAL security risk if exposed', 'Use requirepass and ACL in redis.conf', 'Bind to 127.0.0.1 unless absolutely necessary', 'Supports TLS since Redis 6.0', 'Has been widely exploited when left open'],
+        common: ['Redis', 'Redis Sentinel', 'Session storage', 'Caching layer', 'Message broker'] },
+      { port: 11211, protocol: 'TCP/UDP', service: 'Memcached', cat: 'database', security: 'insecure',
+        description: 'Memcached distributed caching system default port.',
+        notes: ['No authentication mechanism', 'Must be firewalled - has been used in DDoS amplification attacks', 'Bind to localhost or internal network only', 'UDP should be disabled if not needed'],
+        common: ['Memcached', 'Web application caching', 'Session storage'] },
+      { port: 1433, protocol: 'TCP', service: 'MS SQL Server', cat: 'database', security: 'caution',
+        description: 'Microsoft SQL Server default instance port.',
+        notes: ['Supports encrypted connections via TLS', 'Use Windows Authentication when possible', 'Commonly targeted by attackers - use strong passwords', 'SQL Browser service uses UDP 1434'],
+        common: ['Microsoft SQL Server', 'Azure SQL', '.NET applications'] },
+      { port: 1521, protocol: 'TCP', service: 'Oracle DB', cat: 'database', security: 'caution',
+        description: 'Oracle Database TNS Listener default port.',
+        notes: ['Supports TLS/SSL encryption', 'Use Oracle Net Services for access control', 'TNS Listener can expose version information', 'Commonly targeted in enterprise environments'],
+        common: ['Oracle Database', 'Oracle RAC', 'Enterprise applications'] },
+      { port: 9200, protocol: 'TCP', service: 'Elasticsearch', cat: 'database', security: 'caution',
+        description: 'Elasticsearch REST API default port. Port 9300 used for node-to-node communication.',
+        notes: ['No authentication in older versions (before 8.x)', 'X-Pack Security or OpenSearch provides auth and TLS', 'Never expose to public internet without authentication', 'Has been involved in many data breaches'],
+        common: ['Elasticsearch', 'OpenSearch', 'ELK Stack', 'Log analytics'] },
+      { port: 5984, protocol: 'TCP', service: 'CouchDB', cat: 'database', security: 'caution',
+        description: 'Apache CouchDB HTTP API default port.',
+        notes: ['REST API - authenticate all requests', 'Admin party mode (no auth) is dangerous', 'Supports TLS via reverse proxy', 'Enable admin user on first setup'],
+        common: ['CouchDB', 'PouchDB sync', 'Offline-first apps'] },
+      { port: 9042, protocol: 'TCP', service: 'Cassandra', cat: 'database', security: 'caution',
+        description: 'Apache Cassandra CQL native protocol default port.',
+        notes: ['Supports client-to-node TLS encryption', 'Enable authentication in cassandra.yaml', 'Port 7000/7001 for inter-node communication', 'Use cassandra-rackdc.properties for DC-aware routing'],
+        common: ['Apache Cassandra', 'ScyllaDB', 'DataStax', 'Time-series data'] },
+      { port: 26257, protocol: 'TCP', service: 'CockroachDB', cat: 'database', security: 'secure',
+        description: 'CockroachDB SQL interface default port.',
+        notes: ['TLS enabled by default', 'Uses PostgreSQL wire protocol', 'Port 8080 for admin UI', 'Distributed SQL database'],
+        common: ['CockroachDB', 'Distributed SQL'] },
+      { port: 8529, protocol: 'TCP', service: 'ArangoDB', cat: 'database', security: 'caution',
+        description: 'ArangoDB multi-model database default port.',
+        notes: ['Supports TLS encryption', 'Authentication enabled by default since 3.x', 'Multi-model: document, graph, key-value'],
+        common: ['ArangoDB', 'Graph queries', 'Multi-model databases'] },
+
+      // SSH / Remote Access
+      { port: 22, protocol: 'TCP', service: 'SSH', cat: 'remote', security: 'secure',
+        description: 'Secure Shell. Encrypted remote login, command execution, and tunneling protocol.',
+        notes: ['Encrypted by design - key-based auth recommended over passwords', 'Use fail2ban or similar to prevent brute force', 'Consider changing to non-standard port to reduce noise', 'Also used for SCP, SFTP, and SSH tunneling'],
+        common: ['Remote server administration', 'Git over SSH', 'SFTP file transfer', 'SSH tunneling / port forwarding'] },
+      { port: 23, protocol: 'TCP', service: 'Telnet', cat: 'remote', security: 'insecure',
+        description: 'Telnet protocol for unencrypted remote access. Completely insecure and deprecated.',
+        notes: ['NEVER use for remote access - all traffic including passwords sent in plaintext', 'Replaced by SSH', 'Still found on legacy network equipment', 'Disable on all systems where possible'],
+        common: ['Legacy network equipment', 'Some embedded systems', 'Network debugging (telnet as TCP client)'] },
+      { port: 3389, protocol: 'TCP/UDP', service: 'RDP', cat: 'remote', security: 'caution',
+        description: 'Remote Desktop Protocol. Microsoft remote desktop access to Windows systems.',
+        notes: ['Supports NLA (Network Level Authentication) and TLS', 'Never expose directly to internet - use VPN or RD Gateway', 'Frequent target for brute force and BlueKeep-type exploits', 'Enable NLA and use strong passwords/MFA'],
+        common: ['Windows Remote Desktop', 'Azure Virtual Desktop', 'Remote Windows administration'] },
+      { port: 5900, protocol: 'TCP', service: 'VNC', cat: 'remote', security: 'insecure',
+        description: 'Virtual Network Computing. Remote desktop sharing protocol (base port, display :0).',
+        notes: ['Weak encryption or none by default', 'Password limited to 8 characters in many implementations', 'Always tunnel through SSH or VPN', 'Display :1 = port 5901, :2 = 5902, etc.'],
+        common: ['VNC Server/Viewer', 'TigerVNC', 'RealVNC', 'macOS Screen Sharing'] },
+      { port: 5938, protocol: 'TCP/UDP', service: 'TeamViewer', cat: 'remote', security: 'secure',
+        description: 'TeamViewer remote access software.',
+        notes: ['Uses AES-256 encryption', 'Proprietary protocol', 'Should be disabled when not in use', 'Enable 2FA for TeamViewer accounts'],
+        common: ['TeamViewer', 'Remote support', 'Unattended access'] },
+      { port: 2222, protocol: 'TCP', service: 'SSH Alternate', cat: 'remote', security: 'secure',
+        description: 'Common alternative SSH port used to reduce automated attack noise.',
+        notes: ['Same SSH security as port 22', 'Reduces brute-force attempt volume', 'Used by Docker containers and custom SSH configs', 'Still requires proper key-based auth and hardening'],
+        common: ['Alternative SSH', 'Docker SSH containers', 'Honeypots'] },
+
+      // DNS / Network
+      { port: 53, protocol: 'TCP/UDP', service: 'DNS', cat: 'dns', security: 'caution',
+        description: 'Domain Name System. Translates domain names to IP addresses. UDP for queries, TCP for zone transfers and large responses.',
+        notes: ['UDP for standard queries, TCP for zone transfers (AXFR) and responses > 512 bytes', 'DNS queries are unencrypted by default', 'Use DNS over HTTPS (DoH port 443) or DNS over TLS (DoT port 853) for privacy', 'Restrict zone transfers to authorized servers only'],
+        common: ['BIND', 'Unbound', 'dnsmasq', 'CoreDNS', 'PowerDNS'] },
+      { port: 853, protocol: 'TCP', service: 'DNS over TLS', cat: 'dns', security: 'secure',
+        description: 'DNS over TLS (DoT). Encrypts DNS queries between client and resolver for privacy.',
+        notes: ['Provides encryption and authentication for DNS', 'Alternative to DNS over HTTPS (DoH)', 'Supported by major recursive resolvers', 'Easy to block by firewalls (dedicated port)'],
+        common: ['Cloudflare 1.1.1.1', 'Google DNS', 'Quad9', 'Android Private DNS'] },
+      { port: 67, protocol: 'UDP', service: 'DHCP Server', cat: 'dns', security: 'caution',
+        description: 'Dynamic Host Configuration Protocol server port. Assigns IP addresses to devices on a network.',
+        notes: ['Server listens on port 67, client uses port 68', 'Rogue DHCP servers can redirect traffic (MITM)', 'Use DHCP snooping on managed switches', 'Consider static IP assignment for servers'],
+        common: ['ISC DHCP', 'Windows DHCP Server', 'dnsmasq', 'Router DHCP'] },
+      { port: 68, protocol: 'UDP', service: 'DHCP Client', cat: 'dns', security: 'caution',
+        description: 'DHCP client port. Receives IP configuration from DHCP server.',
+        notes: ['Used by client devices to receive IP assignments', 'Part of the DHCP discovery process (DORA)', 'Client sends from port 68 to server on port 67'],
+        common: ['All DHCP-enabled devices', 'Network bootstrapping'] },
+      { port: 123, protocol: 'UDP', service: 'NTP', cat: 'dns', security: 'caution',
+        description: 'Network Time Protocol. Synchronizes clocks across computer networks.',
+        notes: ['Critical for TLS certificates, logging, and authentication', 'Can be used in DDoS amplification attacks', 'Use NTS (Network Time Security) for authenticated NTP', 'Restrict to trusted NTP servers'],
+        common: ['ntpd', 'chrony', 'systemd-timesyncd', 'Windows Time Service'] },
+      { port: 161, protocol: 'UDP', service: 'SNMP', cat: 'dns', security: 'insecure',
+        description: 'Simple Network Management Protocol. Monitors and manages network devices.',
+        notes: ['SNMPv1/v2c use community strings (effectively passwords) in plaintext', 'Use SNMPv3 with authentication and encryption', 'Default community strings (public/private) are a common vulnerability', 'Port 162 for SNMP traps'],
+        common: ['Network monitoring (Nagios, Zabbix)', 'Router/switch management', 'Printer management'] },
+      { port: 514, protocol: 'UDP', service: 'Syslog', cat: 'dns', security: 'insecure',
+        description: 'Syslog protocol for sending log messages. TCP port 514 or 6514 (TLS) also used.',
+        notes: ['UDP syslog is unencrypted and unreliable', 'Use TCP with TLS (port 6514) for secure logging', 'rsyslog and syslog-ng support encrypted transport', 'Critical for centralized log management'],
+        common: ['rsyslog', 'syslog-ng', 'Graylog', 'Splunk', 'ELK Stack'] },
+      { port: 6514, protocol: 'TCP', service: 'Syslog over TLS', cat: 'dns', security: 'secure',
+        description: 'Syslog over TLS. Encrypted and reliable log transport.',
+        notes: ['Provides encryption and reliable delivery', 'RFC 5425 standard', 'Recommended for all production logging'],
+        common: ['rsyslog TLS', 'syslog-ng TLS', 'Centralized logging'] },
+
+      // File Transfer
+      { port: 21, protocol: 'TCP', service: 'FTP Control', cat: 'filetransfer', security: 'insecure',
+        description: 'File Transfer Protocol control channel. Commands and responses are sent on this port.',
+        notes: ['Credentials sent in plaintext - easily intercepted', 'Use SFTP (SSH, port 22) or FTPS instead', 'Active mode uses port 20 for data, passive mode uses random high ports', 'Still common but should be replaced with secure alternatives'],
+        common: ['Legacy file sharing', 'Web hosting uploads', 'Firmware updates on old devices'] },
+      { port: 20, protocol: 'TCP', service: 'FTP Data', cat: 'filetransfer', security: 'insecure',
+        description: 'FTP data transfer port (active mode). File contents are transferred on this port.',
+        notes: ['Only used in FTP active mode', 'Passive mode uses random high ports instead', 'Same security concerns as port 21'],
+        common: ['FTP active mode data transfer'] },
+      { port: 990, protocol: 'TCP', service: 'FTPS', cat: 'filetransfer', security: 'secure',
+        description: 'FTP over implicit TLS/SSL. Encrypted file transfer using the FTP protocol.',
+        notes: ['Implicit TLS - encrypted from the start', 'Alternative: explicit FTPS uses port 21 with AUTH TLS command', 'Still uses passive mode data ports that need firewall rules', 'SFTP (SSH) is often simpler to configure'],
+        common: ['Secure FTP servers', 'Enterprise file transfer'] },
+      { port: 69, protocol: 'UDP', service: 'TFTP', cat: 'filetransfer', security: 'insecure',
+        description: 'Trivial File Transfer Protocol. Simple, unauthenticated file transfer.',
+        notes: ['No authentication, no encryption, no directory listing', 'Used primarily for network booting and firmware updates', 'Should only be available on isolated management networks', 'Very small and simple protocol - fits in firmware easily'],
+        common: ['PXE network booting', 'Router/switch firmware updates', 'VoIP phone provisioning'] },
+      { port: 445, protocol: 'TCP', service: 'SMB', cat: 'filetransfer', security: 'caution',
+        description: 'Server Message Block. Windows file and printer sharing protocol (SMB over TCP).',
+        notes: ['Target of many exploits (WannaCry, EternalBlue, Petya)', 'Block at perimeter firewall - never expose to internet', 'Use SMBv3 with encryption for internal use', 'Disable SMBv1 on all systems'],
+        common: ['Windows file sharing', 'Active Directory', 'Samba (Linux)', 'Network attached storage'] },
+      { port: 137, protocol: 'UDP', service: 'NetBIOS Name', cat: 'filetransfer', security: 'insecure',
+        description: 'NetBIOS Name Service. Name registration and resolution for Windows networking.',
+        notes: ['Legacy protocol - disable if not needed', 'Information leak risk', 'Part of NetBIOS over TCP/IP (NBT)', 'Block at firewall along with 138, 139'],
+        common: ['Legacy Windows networking', 'Windows name resolution'] },
+      { port: 139, protocol: 'TCP', service: 'NetBIOS Session', cat: 'filetransfer', security: 'insecure',
+        description: 'NetBIOS Session Service. Legacy SMB over NetBIOS, predecessor to direct SMB (port 445).',
+        notes: ['Legacy protocol - use port 445 (direct SMB) instead', 'Should be disabled on modern systems', 'Was used by WannaCry and similar ransomware'],
+        common: ['Legacy Windows file sharing', 'Old printers/scanners'] },
+      { port: 873, protocol: 'TCP', service: 'rsync', cat: 'filetransfer', security: 'caution',
+        description: 'rsync daemon mode for efficient file synchronization.',
+        notes: ['No encryption by default in daemon mode', 'Prefer rsync over SSH for encrypted transfers', 'Use rsyncd.conf for access control', 'Supports module-based access restrictions'],
+        common: ['File synchronization', 'Backup systems', 'Mirror servers'] },
+      { port: 2049, protocol: 'TCP/UDP', service: 'NFS', cat: 'filetransfer', security: 'caution',
+        description: 'Network File System. Unix/Linux network file sharing protocol.',
+        notes: ['NFSv4 uses only TCP port 2049 (simpler firewall rules)', 'Earlier versions need portmapper (111) and additional ports', 'Use Kerberos authentication with NFSv4 for security', 'Restrict exports to specific IP ranges'],
+        common: ['Linux/Unix file sharing', 'Kubernetes persistent volumes', 'NAS devices'] },
+
+      // Development
+      { port: 3000, protocol: 'TCP', service: 'Dev Server', cat: 'development', security: 'caution',
+        description: 'Common development server port. Used by React, Express, Grafana, and many other tools.',
+        notes: ['Default for create-react-app, Next.js, Express.js, Rails', 'Also used by Grafana dashboard (production)', 'Never expose dev servers to the internet', 'Typically auto-increments if port is in use (3001, 3002...)'],
+        common: ['React (create-react-app)', 'Next.js', 'Express.js', 'Ruby on Rails', 'Grafana'] },
+      { port: 4200, protocol: 'TCP', service: 'Angular Dev', cat: 'development', security: 'caution',
+        description: 'Angular CLI development server default port.',
+        notes: ['Default for ng serve', 'Hot module replacement enabled', 'For development only - use a proper web server in production'],
+        common: ['Angular CLI', 'Angular development'] },
+      { port: 5000, protocol: 'TCP', service: 'Dev Server', cat: 'development', security: 'caution',
+        description: 'Common development server port. Used by Flask, ASP.NET, and Docker Registry.',
+        notes: ['Flask default development port', 'Also used by ASP.NET Core, Docker Registry', 'macOS Monterey+: AirPlay Receiver uses this port (disable in System Preferences)', 'Never use Flask dev server in production'],
+        common: ['Flask', 'ASP.NET Core', 'Docker Registry', 'Python HTTP servers'] },
+      { port: 5173, protocol: 'TCP', service: 'Vite Dev', cat: 'development', security: 'caution',
+        description: 'Vite development server default port.',
+        notes: ['Default for Vite (Vue, React, Svelte, etc.)', 'HMR (Hot Module Replacement) built in', 'Preview mode uses port 4173'],
+        common: ['Vite', 'Vue 3', 'SvelteKit', 'Modern frontend development'] },
+      { port: 8000, protocol: 'TCP', service: 'Dev Server', cat: 'development', security: 'caution',
+        description: 'Common alternative development server port.',
+        notes: ['Django default development port', 'PHP built-in server commonly uses this', 'Python http.server default port'],
+        common: ['Django', 'PHP built-in server', 'Python http.server', 'Hugo'] },
+      { port: 8001, protocol: 'TCP', service: 'Dev Server Alt', cat: 'development', security: 'caution',
+        description: 'Alternative development server port, used when 8000 is occupied.',
+        notes: ['Common fallback for development servers', 'Used by some admin interfaces'],
+        common: ['Django admin', 'Alternative dev servers', 'Kong Admin API'] },
+      { port: 9000, protocol: 'TCP', service: 'PHP-FPM / Dev', cat: 'development', security: 'caution',
+        description: 'PHP-FPM default port. Also used by SonarQube and various development tools.',
+        notes: ['PHP-FPM commonly uses Unix socket instead of TCP port', 'Also used by SonarQube, MinIO, ClickHouse', 'Should only listen on localhost or internal network'],
+        common: ['PHP-FPM', 'SonarQube', 'MinIO', 'ClickHouse HTTP'] },
+      { port: 4000, protocol: 'TCP', service: 'Dev Server', cat: 'development', security: 'caution',
+        description: 'Common development port used by Jekyll, Phoenix, and various frameworks.',
+        notes: ['Jekyll default server port', 'Elixir Phoenix default port', 'Gatsby develop default port'],
+        common: ['Jekyll', 'Phoenix (Elixir)', 'Gatsby', 'RemixIDE'] },
+      { port: 1313, protocol: 'TCP', service: 'Hugo Dev', cat: 'development', security: 'caution',
+        description: 'Hugo static site generator development server default port.',
+        notes: ['Default for hugo server', 'Live reload built in', 'Development use only'],
+        common: ['Hugo', 'Static site development'] },
+      { port: 35729, protocol: 'TCP', service: 'LiveReload', cat: 'development', security: 'caution',
+        description: 'LiveReload protocol port for automatic browser refresh during development.',
+        notes: ['Used by various dev servers for live reload', 'WebSocket-based protocol', 'Development use only'],
+        common: ['LiveReload', 'BrowserSync', 'Webpack Dev Server'] },
+      { port: 24678, protocol: 'TCP', service: 'Vite HMR', cat: 'development', security: 'caution',
+        description: 'Vite Hot Module Replacement WebSocket port.',
+        notes: ['Used by Vite for HMR communication', 'WebSocket connection', 'Development use only'],
+        common: ['Vite HMR', 'Vite dev server'] },
+
+      // Messaging / Queue
+      { port: 5672, protocol: 'TCP', service: 'AMQP', cat: 'messaging', security: 'caution',
+        description: 'Advanced Message Queuing Protocol. Used by RabbitMQ and other message brokers.',
+        notes: ['RabbitMQ default port', 'Supports TLS on port 5671', 'Enable authentication and vhost isolation', 'Management UI typically on port 15672'],
+        common: ['RabbitMQ', 'Apache Qpid', 'Azure Service Bus'] },
+      { port: 5671, protocol: 'TCP', service: 'AMQPS', cat: 'messaging', security: 'secure',
+        description: 'AMQP over TLS. Encrypted message queue communication.',
+        notes: ['TLS-encrypted AMQP connections', 'Recommended for production RabbitMQ', 'Certificate-based authentication supported'],
+        common: ['RabbitMQ TLS', 'Secure message queuing'] },
+      { port: 9092, protocol: 'TCP', service: 'Kafka', cat: 'messaging', security: 'caution',
+        description: 'Apache Kafka default broker port for client connections.',
+        notes: ['Supports SASL authentication and TLS encryption', 'Port 9093 often used for inter-broker communication', 'Use SASL_SSL for secure production setup', 'ZooKeeper (being replaced) uses port 2181'],
+        common: ['Apache Kafka', 'Confluent Platform', 'Event streaming'] },
+      { port: 1883, protocol: 'TCP', service: 'MQTT', cat: 'messaging', security: 'insecure',
+        description: 'Message Queuing Telemetry Transport. Lightweight pub/sub messaging for IoT.',
+        notes: ['Unencrypted by default', 'Use port 8883 for MQTT over TLS', 'Enable authentication - anonymous access is common misconfiguration', 'Lightweight protocol ideal for constrained devices'],
+        common: ['Mosquitto', 'HiveMQ', 'IoT devices', 'Home automation'] },
+      { port: 8883, protocol: 'TCP', service: 'MQTT over TLS', cat: 'messaging', security: 'secure',
+        description: 'MQTT over TLS/SSL. Encrypted IoT messaging protocol.',
+        notes: ['Encrypted MQTT connections', 'Required for production IoT deployments', 'Supports client certificate authentication'],
+        common: ['Secure MQTT', 'AWS IoT Core', 'Azure IoT Hub'] },
+      { port: 4222, protocol: 'TCP', service: 'NATS', cat: 'messaging', security: 'caution',
+        description: 'NATS messaging system default client port.',
+        notes: ['High-performance messaging', 'Supports TLS and authentication', 'Port 6222 for cluster routing, 8222 for monitoring'],
+        common: ['NATS', 'NATS Streaming', 'NATS JetStream'] },
+      { port: 6650, protocol: 'TCP', service: 'Pulsar', cat: 'messaging', security: 'caution',
+        description: 'Apache Pulsar binary protocol default port.',
+        notes: ['Supports TLS on port 6651', 'Token-based and TLS authentication', 'Port 8080 for admin REST API'],
+        common: ['Apache Pulsar', 'StreamNative'] },
+      { port: 61616, protocol: 'TCP', service: 'ActiveMQ', cat: 'messaging', security: 'caution',
+        description: 'Apache ActiveMQ OpenWire protocol default port.',
+        notes: ['Supports SSL/TLS transport', 'Enable authentication and authorization', 'Web console on port 8161', 'AMQP on 5672, STOMP on 61613'],
+        common: ['Apache ActiveMQ', 'ActiveMQ Artemis', 'JMS applications'] },
+      { port: 2181, protocol: 'TCP', service: 'ZooKeeper', cat: 'messaging', security: 'caution',
+        description: 'Apache ZooKeeper client port for distributed coordination.',
+        notes: ['Used by Kafka, Hadoop, and other distributed systems', 'Supports SASL authentication since 3.4', 'Being replaced by KRaft in newer Kafka versions', 'Ports 2888/3888 for leader election'],
+        common: ['Apache Kafka (legacy)', 'Apache Hadoop', 'Distributed locking'] },
+
+      // Monitoring
+      { port: 9090, protocol: 'TCP', service: 'Prometheus', cat: 'monitoring', security: 'caution',
+        description: 'Prometheus monitoring system default port.',
+        notes: ['Web UI and API on this port', 'No authentication by default - use reverse proxy with auth', 'Also used by Openfire XMPP server', 'Scrapes targets on their respective ports'],
+        common: ['Prometheus', 'Metrics collection', 'Alerting'] },
+      { port: 9100, protocol: 'TCP', service: 'Node Exporter', cat: 'monitoring', security: 'caution',
+        description: 'Prometheus Node Exporter default port for host metrics.',
+        notes: ['Exposes system metrics (CPU, memory, disk, network)', 'No authentication by default', 'Restrict access to Prometheus server only', 'Also legacy printer port (JetDirect)'],
+        common: ['Prometheus Node Exporter', 'System monitoring'] },
+      { port: 8086, protocol: 'TCP', service: 'InfluxDB', cat: 'monitoring', security: 'caution',
+        description: 'InfluxDB time-series database HTTP API port.',
+        notes: ['REST API for reading and writing time-series data', 'Supports authentication and TLS', 'InfluxDB 2.x includes built-in UI'],
+        common: ['InfluxDB', 'Telegraf', 'TICK Stack'] },
+      { port: 3100, protocol: 'TCP', service: 'Loki', cat: 'monitoring', security: 'caution',
+        description: 'Grafana Loki log aggregation system default port.',
+        notes: ['HTTP API for log ingestion and queries', 'Pairs with Grafana for visualization', 'Use reverse proxy with TLS and auth in production'],
+        common: ['Grafana Loki', 'Promtail', 'Log aggregation'] },
+      { port: 16686, protocol: 'TCP', service: 'Jaeger', cat: 'monitoring', security: 'caution',
+        description: 'Jaeger tracing UI default port.',
+        notes: ['Web UI for distributed tracing', 'Collector on port 14268 (HTTP) or 14250 (gRPC)', 'Part of the CNCF observability ecosystem'],
+        common: ['Jaeger', 'Distributed tracing', 'OpenTelemetry'] },
+      { port: 9411, protocol: 'TCP', service: 'Zipkin', cat: 'monitoring', security: 'caution',
+        description: 'Zipkin distributed tracing system default port.',
+        notes: ['HTTP API and web UI', 'No built-in authentication', 'Use reverse proxy for production deployments'],
+        common: ['Zipkin', 'Distributed tracing', 'Spring Cloud Sleuth'] },
+      { port: 8125, protocol: 'UDP', service: 'StatsD', cat: 'monitoring', security: 'caution',
+        description: 'StatsD metrics daemon default port.',
+        notes: ['UDP-based metrics collection', 'No authentication - bind to localhost', 'Lightweight metrics aggregation'],
+        common: ['StatsD', 'Datadog Agent', 'Custom metrics'] },
+
+      // Gaming
+      { port: 25565, protocol: 'TCP', service: 'Minecraft', cat: 'gaming', security: 'caution',
+        description: 'Minecraft Java Edition server default port.',
+        notes: ['Supports server-list ping on same port', 'Use whitelist and proper authentication', 'Plugins can add additional security'],
+        common: ['Minecraft Java Edition', 'Spigot', 'Paper', 'Bukkit'] },
+      { port: 19132, protocol: 'UDP', service: 'Minecraft Bedrock', cat: 'gaming', security: 'caution',
+        description: 'Minecraft Bedrock Edition server default port.',
+        notes: ['UDP-based protocol', 'Cross-platform (mobile, console, Windows 10)', 'Different protocol from Java Edition'],
+        common: ['Minecraft Bedrock Edition', 'Bedrock Dedicated Server'] },
+      { port: 27015, protocol: 'TCP/UDP', service: 'Source Engine', cat: 'gaming', security: 'caution',
+        description: 'Valve Source Engine game server default port (CS:GO, TF2, etc.).',
+        notes: ['UDP for game traffic, TCP for RCON', 'RCON password should be strong and unique', 'Source Query protocol for server browser'],
+        common: ['CS:GO / CS2', 'Team Fortress 2', 'Garry\'s Mod', 'Left 4 Dead 2'] },
+      { port: 7777, protocol: 'TCP/UDP', service: 'Game Server', cat: 'gaming', security: 'caution',
+        description: 'Common game server port used by Terraria, Unreal Engine, and others.',
+        notes: ['Default for several game engines and servers', 'No standard security mechanism', 'Often needs additional ports for queries'],
+        common: ['Terraria', 'Unreal Engine', 'SCP: Secret Laboratory'] },
+      { port: 2302, protocol: 'UDP', service: 'Arma / DayZ', cat: 'gaming', security: 'caution',
+        description: 'Arma series and DayZ default game port.',
+        notes: ['Uses Steam Query on port 2303+', 'BattlEye anti-cheat on port 2306', 'Multiple ports needed for full functionality'],
+        common: ['Arma 3', 'DayZ', 'Bohemia Interactive games'] },
+
+      // IoT / Embedded
+      { port: 502, protocol: 'TCP', service: 'Modbus', cat: 'iot', security: 'insecure',
+        description: 'Modbus TCP industrial communication protocol.',
+        notes: ['No authentication or encryption', 'CRITICAL: Used in industrial control systems (ICS/SCADA)', 'Never expose to internet - must be on isolated network', 'Firewall with strict allowlisting'],
+        common: ['PLCs', 'SCADA systems', 'Industrial automation', 'Building management'] },
+      { port: 1880, protocol: 'TCP', service: 'Node-RED', cat: 'iot', security: 'caution',
+        description: 'Node-RED flow-based programming tool default port.',
+        notes: ['Web-based editor for IoT flows', 'Enable authentication in settings.js', 'Use HTTPS reverse proxy in production', 'Popular for home automation'],
+        common: ['Node-RED', 'IoT automation', 'Home Assistant integrations'] },
+      { port: 8266, protocol: 'TCP', service: 'ESP OTA', cat: 'iot', security: 'insecure',
+        description: 'ESP8266/ESP32 OTA (Over The Air) update port.',
+        notes: ['Used for wireless firmware updates', 'No authentication by default', 'Should be password protected', 'Only enable during update cycles'],
+        common: ['ESP8266', 'ESP32', 'Arduino OTA', 'PlatformIO'] },
+      { port: 5683, protocol: 'UDP', service: 'CoAP', cat: 'iot', security: 'caution',
+        description: 'Constrained Application Protocol. RESTful protocol for IoT devices.',
+        notes: ['Designed for constrained devices and networks', 'DTLS on port 5684 for security', 'CoAP over TCP also defined (RFC 8323)', 'Similar to HTTP but for IoT'],
+        common: ['IoT devices', 'Smart home', 'LwM2M'] },
+      { port: 1900, protocol: 'UDP', service: 'SSDP/UPnP', cat: 'iot', security: 'insecure',
+        description: 'Simple Service Discovery Protocol for UPnP device discovery.',
+        notes: ['Used for automatic device discovery on local networks', 'UPnP can open ports automatically - security risk', 'Disable UPnP on routers if not needed', 'Can be used for DDoS reflection attacks'],
+        common: ['Smart TVs', 'Media servers (Plex, DLNA)', 'Printers', 'IoT devices'] },
+
+      // Security / Auth
+      { port: 88, protocol: 'TCP/UDP', service: 'Kerberos', cat: 'security', security: 'secure',
+        description: 'Kerberos authentication protocol. Used by Active Directory and Unix/Linux realms.',
+        notes: ['Encrypted ticket-based authentication', 'Foundation of Active Directory authentication', 'Requires accurate time synchronization (NTP)', 'Uses port 749 for kadmin'],
+        common: ['Active Directory', 'MIT Kerberos', 'Heimdal', 'LDAP authentication'] },
+      { port: 389, protocol: 'TCP/UDP', service: 'LDAP', cat: 'security', security: 'caution',
+        description: 'Lightweight Directory Access Protocol. Directory services for user/resource lookup.',
+        notes: ['Unencrypted by default - use STARTTLS or LDAPS (port 636)', 'Foundation for Active Directory lookups', 'Supports SASL authentication mechanisms', 'Critical for enterprise identity management'],
+        common: ['Active Directory', 'OpenLDAP', 'FreeIPA', '389 Directory Server'] },
+      { port: 636, protocol: 'TCP', service: 'LDAPS', cat: 'security', security: 'secure',
+        description: 'LDAP over TLS/SSL. Encrypted directory service access.',
+        notes: ['Implicit TLS encryption', 'Preferred over STARTTLS on port 389', 'Required for secure AD authentication'],
+        common: ['Active Directory', 'OpenLDAP', 'Enterprise SSO'] },
+      { port: 1812, protocol: 'UDP', service: 'RADIUS Auth', cat: 'security', security: 'caution',
+        description: 'RADIUS authentication port. Network access control for WiFi, VPN, and dial-up.',
+        notes: ['Password encrypted but protocol has known weaknesses', 'Use RadSec (RADIUS over TLS) for better security', 'Port 1813 for RADIUS accounting', 'Central to 802.1X network authentication'],
+        common: ['FreeRADIUS', 'WiFi (WPA Enterprise)', 'VPN authentication', 'Network access control'] },
+      { port: 1194, protocol: 'UDP', service: 'OpenVPN', cat: 'security', security: 'secure',
+        description: 'OpenVPN default port. Encrypted VPN tunnel.',
+        notes: ['Can also use TCP (often port 443 to bypass firewalls)', 'TLS-based encryption with certificate authentication', 'UDP preferred for performance', 'Can be configured on any port'],
+        common: ['OpenVPN', 'VPN servers', 'Site-to-site VPN'] },
+      { port: 51820, protocol: 'UDP', service: 'WireGuard', cat: 'security', security: 'secure',
+        description: 'WireGuard VPN default port. Modern, high-performance VPN protocol.',
+        notes: ['State-of-the-art cryptography (Curve25519, ChaCha20, Poly1305)', 'Much simpler and faster than OpenVPN/IPSec', 'Built into Linux kernel since 5.6', 'Minimal attack surface (~4000 lines of code)'],
+        common: ['WireGuard', 'Tailscale', 'Mullvad VPN', 'Private Internet Access'] },
+      { port: 500, protocol: 'UDP', service: 'IKE/IPSec', cat: 'security', security: 'secure',
+        description: 'Internet Key Exchange for IPSec VPN tunnel negotiation.',
+        notes: ['Used with port 4500 (NAT-T) for IPSec', 'Foundation of site-to-site VPNs', 'IKEv2 preferred over IKEv1', 'Supports certificate and pre-shared key auth'],
+        common: ['IPSec VPN', 'Site-to-site tunnels', 'L2TP/IPSec', 'IKEv2 VPN'] },
+      { port: 4500, protocol: 'UDP', service: 'IPSec NAT-T', cat: 'security', security: 'secure',
+        description: 'IPSec NAT Traversal. Allows IPSec through NAT devices.',
+        notes: ['Required when either VPN endpoint is behind NAT', 'Works with IKE (port 500)', 'Encapsulates ESP in UDP'],
+        common: ['IPSec VPN behind NAT', 'Mobile VPN clients'] },
+
+      // Other
+      { port: 111, protocol: 'TCP/UDP', service: 'Portmapper/rpcbind', cat: 'other', security: 'insecure',
+        description: 'ONC RPC portmapper. Maps RPC services to network ports.',
+        notes: ['Used by NFS (v2/v3), NIS, and other RPC services', 'Information disclosure risk - reveals running services', 'NFSv4 does not require portmapper', 'Block at perimeter firewall'],
+        common: ['NFS (v2/v3)', 'NIS/YP', 'RPC services'] },
+      { port: 179, protocol: 'TCP', service: 'BGP', cat: 'other', security: 'caution',
+        description: 'Border Gateway Protocol. Core internet routing protocol between autonomous systems.',
+        notes: ['Critical infrastructure protocol', 'Supports TCP MD5 authentication and RPKI', 'Route hijacking is a real threat', 'Use TTL security (GTSM) and prefix filtering'],
+        common: ['Internet backbone routing', 'ISP peering', 'Large enterprise networks'] },
+      { port: 631, protocol: 'TCP', service: 'IPP/CUPS', cat: 'other', security: 'caution',
+        description: 'Internet Printing Protocol. Used by CUPS and network printers.',
+        notes: ['CUPS admin interface on this port', 'Restrict access to local network', 'Supports TLS encryption', 'Do not expose to internet'],
+        common: ['CUPS (Linux/macOS printing)', 'Network printers', 'AirPrint'] },
+      { port: 5353, protocol: 'UDP', service: 'mDNS', cat: 'other', security: 'caution',
+        description: 'Multicast DNS. Local network service discovery (Bonjour/Avahi).',
+        notes: ['Used for .local domain resolution', 'Apple Bonjour, Linux Avahi', 'Should only be on local networks', 'Can leak hostname information'],
+        common: ['AirPlay', 'AirPrint', 'Chromecast', 'Home automation'] },
+      { port: 1080, protocol: 'TCP', service: 'SOCKS Proxy', cat: 'other', security: 'caution',
+        description: 'SOCKS proxy protocol default port.',
+        notes: ['SOCKS5 supports authentication and UDP', 'Often used for SSH dynamic port forwarding (-D flag)', 'Can be used to bypass firewalls', 'No encryption by default - tunnel through SSH'],
+        common: ['SSH SOCKS proxy', 'Tor', 'Shadowsocks', 'SOCKS5 proxies'] },
+      { port: 9090, protocol: 'TCP', service: 'Cockpit', cat: 'other', security: 'caution',
+        description: 'Cockpit web-based server management interface (also Prometheus).',
+        notes: ['Web UI for Linux server management', 'Uses system PAM authentication', 'Supports TLS', 'Also used by Prometheus (see Monitoring)'],
+        common: ['Cockpit (RHEL/Fedora)', 'Linux server management'] },
+      { port: 6660, protocol: 'TCP', service: 'IRC', cat: 'other', security: 'insecure',
+        description: 'Internet Relay Chat. Ports 6660-6669 commonly used, 6697 for TLS.',
+        notes: ['Plaintext protocol on standard ports', 'Use port 6697 for IRC over TLS', 'Still used by open source communities', 'Many networks migrating to Matrix/Slack'],
+        common: ['IRC networks', 'Libera.Chat', 'Open source communities'] },
+      { port: 6697, protocol: 'TCP', service: 'IRC over TLS', cat: 'other', security: 'secure',
+        description: 'IRC over TLS/SSL. Encrypted IRC connections.',
+        notes: ['Standard port for encrypted IRC', 'Supported by all modern IRC clients and servers', 'Certificate verification recommended'],
+        common: ['Secure IRC', 'Libera.Chat', 'OFTC'] },
+      { port: 2375, protocol: 'TCP', service: 'Docker (unenc)', cat: 'other', security: 'insecure',
+        description: 'Docker daemon API without TLS. Remote Docker management.',
+        notes: ['CRITICAL: No authentication or encryption', 'Exposing this port = giving root access to anyone', 'Use port 2376 with TLS client certificates', 'NEVER bind to 0.0.0.0 without TLS'],
+        common: ['Docker daemon API', 'Docker remote management'] },
+      { port: 2376, protocol: 'TCP', service: 'Docker (TLS)', cat: 'other', security: 'secure',
+        description: 'Docker daemon API with TLS. Secure remote Docker management.',
+        notes: ['Requires TLS client certificate authentication', 'Secure alternative to port 2375', 'Used by Docker Machine and remote Docker contexts'],
+        common: ['Docker TLS API', 'Docker Machine', 'Remote Docker'] },
+      { port: 6443, protocol: 'TCP', service: 'Kubernetes API', cat: 'other', security: 'secure',
+        description: 'Kubernetes API server default HTTPS port.',
+        notes: ['TLS encrypted by default', 'RBAC for authorization', 'Certificate-based authentication', 'Never expose without proper auth'],
+        common: ['Kubernetes API server', 'kubectl', 'k3s', 'EKS/GKE/AKS'] },
+      { port: 2379, protocol: 'TCP', service: 'etcd Client', cat: 'other', security: 'caution',
+        description: 'etcd distributed key-value store client port.',
+        notes: ['Used by Kubernetes for cluster state', 'Enable TLS and client certificate auth', 'Port 2380 for peer communication', 'Contains sensitive cluster data'],
+        common: ['Kubernetes etcd', 'CoreOS', 'Distributed configuration'] },
+      { port: 10250, protocol: 'TCP', service: 'Kubelet API', cat: 'other', security: 'caution',
+        description: 'Kubernetes Kubelet API HTTPS port.',
+        notes: ['Should require authentication', 'Anonymous auth should be disabled', 'Exposes pod and node information', 'Port 10255 for read-only (deprecated)'],
+        common: ['Kubernetes kubelet', 'Node management', 'Pod logs/exec'] },
+      { port: 8200, protocol: 'TCP', service: 'Vault', cat: 'security', security: 'secure',
+        description: 'HashiCorp Vault secrets management default port.',
+        notes: ['TLS recommended in production', 'Token-based and multi-factor authentication', 'Audit logging built in', 'Manages secrets, certificates, and encryption keys'],
+        common: ['HashiCorp Vault', 'Secrets management', 'PKI'] },
+      { port: 8500, protocol: 'TCP', service: 'Consul', cat: 'other', security: 'caution',
+        description: 'HashiCorp Consul HTTP API and web UI port.',
+        notes: ['Service mesh and service discovery', 'Enable ACLs and TLS in production', 'Port 8501 for HTTPS, 8600 for DNS', 'Gossip protocol on port 8301/8302'],
+        common: ['HashiCorp Consul', 'Service discovery', 'Key-value store'] },
+    ];
+
+    const CAT_ORDER = ['web', 'email', 'database', 'remote', 'dns', 'filetransfer', 'development', 'messaging', 'monitoring', 'gaming', 'iot', 'security', 'other'];
+
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const portList = document.getElementById('portList');
+    const noResults = document.getElementById('noResults');
+    const backToTop = document.getElementById('backToTop');
+
+    let activeCategory = 'all';
+    let expandedPorts = new Set();
+
+    // Build category tabs
+    function buildTabs() {
+      let html = `<button class="category-tab active" data-cat="all">All <span class="tab-count">${PORTS.length}</span></button>`;
+      CAT_ORDER.forEach(cat => {
+        const count = PORTS.filter(p => p.cat === cat).length;
+        if (count === 0) return;
+        html += `<button class="category-tab" data-cat="${cat}">${CATEGORIES[cat].label} <span class="tab-count">${count}</span></button>`;
+      });
+      categoryTabs.innerHTML = html;
+
+      categoryTabs.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          categoryTabs.querySelector('.active').classList.remove('active');
+          tab.classList.add('active');
+          activeCategory = tab.dataset.cat;
+          render();
+        });
+      });
+    }
+
+    function getFilteredPorts() {
+      const q = searchInput.value.trim().toLowerCase();
+      return PORTS.filter(p => {
+        if (activeCategory !== 'all' && p.cat !== activeCategory) return false;
+        if (!q) return true;
+        return String(p.port).includes(q) ||
+               p.service.toLowerCase().includes(q) ||
+               p.protocol.toLowerCase().includes(q) ||
+               p.description.toLowerCase().includes(q) ||
+               (p.common && p.common.some(c => c.toLowerCase().includes(q)));
+      });
+    }
+
+    function togglePort(port) {
+      if (expandedPorts.has(port)) {
+        expandedPorts.delete(port);
+      } else {
+        expandedPorts.add(port);
+      }
+      render();
+    }
+    // Expose to onclick
+    window.togglePort = togglePort;
+
+    function render() {
+      const filtered = getFilteredPorts();
+      searchCount.textContent = filtered.length + ' of ' + PORTS.length + ' ports';
+
+      if (filtered.length === 0) {
+        portList.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      // Group by category
+      const groups = {};
+      filtered.forEach(p => {
+        if (!groups[p.cat]) groups[p.cat] = [];
+        groups[p.cat].push(p);
+      });
+
+      let html = '';
+      CAT_ORDER.forEach(cat => {
+        if (!groups[cat]) return;
+        const info = CATEGORIES[cat];
+        html += `<div class="category-section cat-${cat}">`;
+        html += `<div class="category-header">`;
+        html += `<span class="category-badge">${info.label}</span>`;
+        html += `<h2>${groups[cat].length} port${groups[cat].length !== 1 ? 's' : ''}</h2>`;
+        html += `</div>`;
+
+        groups[cat].forEach(p => {
+          const expanded = expandedPorts.has(p.port + '-' + p.cat);
+          const uid = p.port + '-' + p.cat;
+          html += `<div class="port-card${expanded ? ' expanded' : ''}" id="port-${uid}">`;
+          html += `<div class="port-card-header" onclick="togglePort('${uid}')">`;
+          html += `<span class="port-number">${p.port}</span>`;
+          html += `<span class="port-service">${escHtml(p.service)}</span>`;
+          html += `<span class="port-protocol">${escHtml(p.protocol)}</span>`;
+          html += `<span class="port-security ${p.security}" title="${p.security === 'secure' ? 'Secure / Encrypted' : p.security === 'caution' ? 'Can Be Secured' : 'Insecure / Deprecated'}"></span>`;
+          html += `<span class="port-chevron">&#9654;</span>`;
+          html += `</div>`;
+          html += `<div class="port-detail">`;
+          html += `<div class="detail-grid">`;
+          html += `<div class="detail-section"><h4>Description</h4><p>${escHtml(p.description)}</p></div>`;
+          html += `<div class="detail-section"><h4>Port Info</h4><p>`;
+          html += `<strong>Port:</strong> ${p.port}<br>`;
+          html += `<strong>Protocol:</strong> ${p.protocol}<br>`;
+          html += `<strong>Range:</strong> ${p.port <= 1023 ? 'Well Known (0-1023)' : p.port <= 49151 ? 'Registered (1024-49151)' : 'Dynamic (49152-65535)'}<br>`;
+          html += `<strong>Security:</strong> <span style="color:${p.security === 'secure' ? '#4ade80' : p.security === 'caution' ? '#facc15' : '#f87171'}">${p.security === 'secure' ? 'Secure / Encrypted' : p.security === 'caution' ? 'Can Be Secured' : 'Insecure / Deprecated'}</span>`;
+          html += `</p></div>`;
+          html += `</div>`;
+          if (p.notes && p.notes.length) {
+            html += `<div class="detail-section"><h4>Security Notes</h4><ul>`;
+            p.notes.forEach(n => { html += `<li>${escHtml(n)}</li>`; });
+            html += `</ul></div>`;
+          }
+          if (p.common && p.common.length) {
+            html += `<div class="detail-section"><h4>Common Services</h4><ul>`;
+            p.common.forEach(c => { html += `<li>${escHtml(c)}</li>`; });
+            html += `</ul></div>`;
+          }
+          html += `</div></div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      portList.innerHTML = html;
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // Search input handling
+    searchInput.addEventListener('input', render);
+
+    // Keyboard shortcut: type a number anywhere to focus search
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        searchInput.focus();
+      }
+    });
+
+    // Back to top button
+    window.addEventListener('scroll', () => {
+      backToTop.classList.toggle('visible', window.scrollY > 400);
+    });
+
+    // URL hash support
+    function handleHash() {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && /^\d+$/.test(hash)) {
+        searchInput.value = hash;
+        render();
+        const portNum = parseInt(hash);
+        const match = PORTS.find(p => p.port === portNum);
+        if (match) {
+          const uid = match.port + '-' + match.cat;
+          expandedPorts.add(uid);
+          render();
+          setTimeout(() => {
+            const el = document.getElementById('port-' + uid);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
+      }
+    }
+
+    // Initial render
+    buildTabs();
+    render();
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
