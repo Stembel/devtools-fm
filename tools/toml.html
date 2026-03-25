@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOML to JSON Converter - Convert TOML JSON Online | ZeroKit.dev</title>
+  <meta name="description" content="Convert between TOML and JSON instantly. Validate TOML, format JSON. Free online TOML/JSON converter with support for tables, arrays, inline tables and dates.">
+  <link rel="canonical" href="https://zerokit.dev/tools/toml.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>TOML &harr; JSON Converter</h1>
+    <p class="description">Convert between TOML and JSON formats. Validate and format instantly in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="tomlToJson()">TOML &rarr; JSON</button>
+        <button class="btn btn-primary" onclick="jsonToToml()">JSON &rarr; TOML</button>
+        <button class="btn" onclick="formatOutput()">Format</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input (TOML or JSON)</div>
+        <textarea class="tool-textarea" id="input" spellcheck="false"></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Converted output will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $i = document.getElementById('input');
+    const $o = document.getElementById('output');
+    const $s = document.getElementById('status');
+
+    // Pre-fill with sample Cargo.toml style data
+    $i.value = `[package]
+name = "my-awesome-app"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alice <alice@example.com>", "Bob <bob@example.com>"]
+description = "A sample Rust project"
+license = "MIT"
+publish = false
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+clap = "4.0"
+
+[dependencies.reqwest]
+version = "0.11"
+features = ["json", "rustls-tls"]
+default-features = false
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bin]]
+name = "myapp"
+path = "src/main.rs"
+
+[[bin]]
+name = "mytool"
+path = "src/tool.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[server]
+host = "0.0.0.0"
+port = 8080
+debug = false
+max_connections = 1000
+timeout = 30.5
+created = 2024-01-15T10:30:00Z`;
+
+    // ───────────────────────────────────────────────
+    // Pure JS TOML Parser
+    // ───────────────────────────────────────────────
+    function parseTOML(src) {
+      const root = {};
+      let current = root;
+      let currentPath = [];
+      const lines = src.split('\n');
+      const arrayTables = {};   // track which paths are arrays of tables
+
+      for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+        let line = lines[lineNum];
+
+        // Strip comments (respecting strings)
+        line = stripComment(line);
+        line = line.trimEnd();
+
+        if (line.trim() === '') continue;
+
+        const trimmed = line.trim();
+
+        // Array of tables [[...]]
+        if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
+          const keyStr = trimmed.slice(2, -2).trim();
+          if (!keyStr) throw new SyntaxError(`Empty array table name at line ${lineNum + 1}`);
+          const keys = parseKeyPath(keyStr, lineNum);
+          const pathStr = keys.join('.');
+
+          // Navigate to parent, creating objects as needed
+          let target = root;
+          for (let i = 0; i < keys.length - 1; i++) {
+            const k = keys[i];
+            if (target[k] === undefined) {
+              target[k] = {};
+            } else if (Array.isArray(target[k])) {
+              target = target[k][target[k].length - 1];
+              continue;
+            }
+            target = target[k];
+          }
+
+          const lastKey = keys[keys.length - 1];
+          if (target[lastKey] === undefined) {
+            target[lastKey] = [];
+          }
+          if (!Array.isArray(target[lastKey])) {
+            throw new SyntaxError(`Key "${lastKey}" is not an array at line ${lineNum + 1}`);
+          }
+          const newObj = {};
+          target[lastKey].push(newObj);
+          current = newObj;
+          currentPath = keys.slice();
+          arrayTables[pathStr] = true;
+          continue;
+        }
+
+        // Table header [...]
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          const keyStr = trimmed.slice(1, -1).trim();
+          if (!keyStr) throw new SyntaxError(`Empty table name at line ${lineNum + 1}`);
+          const keys = parseKeyPath(keyStr, lineNum);
+
+          // Navigate/create the nested path from root
+          let target = root;
+          for (let i = 0; i < keys.length; i++) {
+            const k = keys[i];
+            if (target[k] === undefined) {
+              target[k] = {};
+            } else if (Array.isArray(target[k])) {
+              // point to last element in array of tables
+              target = target[k][target[k].length - 1];
+              continue;
+            }
+            target = target[k];
+          }
+
+          current = target;
+          currentPath = keys.slice();
+          continue;
+        }
+
+        // Key = Value
+        const eqIdx = findEquals(trimmed, lineNum);
+        if (eqIdx === -1) {
+          throw new SyntaxError(`Expected key = value at line ${lineNum + 1}: "${trimmed}"`);
+        }
+
+        const rawKey = trimmed.slice(0, eqIdx).trim();
+        const rawVal = trimmed.slice(eqIdx + 1).trim();
+
+        if (!rawKey) throw new SyntaxError(`Empty key at line ${lineNum + 1}`);
+
+        const keys = parseKeyPath(rawKey, lineNum);
+        const value = parseTomlValue(rawVal, lineNum);
+
+        // Set value in current table, creating intermediate tables for dotted keys
+        let target = current;
+        for (let i = 0; i < keys.length - 1; i++) {
+          const k = keys[i];
+          if (target[k] === undefined) target[k] = {};
+          target = target[k];
+        }
+        const lastKey = keys[keys.length - 1];
+        if (target[lastKey] !== undefined && typeof target[lastKey] === 'object' && !Array.isArray(target[lastKey])) {
+          // Merging into existing table (dotted key continuation) - allowed in TOML
+          // Only throw if it's a plain value overwrite
+        }
+        target[lastKey] = value;
+      }
+
+      return root;
+    }
+
+    function stripComment(line) {
+      let inStr = false;
+      let strChar = '';
+      let i = 0;
+      while (i < line.length) {
+        const ch = line[i];
+        if (inStr) {
+          if (ch === '\\') { i += 2; continue; }
+          if (ch === strChar) inStr = false;
+        } else {
+          if (ch === '"' || ch === "'") {
+            // Check for triple quotes
+            if (line.slice(i, i + 3) === '"""' || line.slice(i, i + 3) === "'''") {
+              // Multi-line strings: don't strip in single line context, just skip
+              const triple = line.slice(i, i + 3);
+              const endIdx = line.indexOf(triple, i + 3);
+              if (endIdx !== -1) { i = endIdx + 3; continue; }
+              return line; // unfinished multiline, return as-is
+            }
+            inStr = true;
+            strChar = ch;
+          }
+          if (ch === '#') return line.slice(0, i);
+        }
+        i++;
+      }
+      return line;
+    }
+
+    function findEquals(line, lineNum) {
+      let inStr = false;
+      let strChar = '';
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inStr) {
+          if (ch === '\\') { i++; continue; }
+          if (ch === strChar) inStr = false;
+        } else {
+          if (ch === '"' || ch === "'") { inStr = true; strChar = ch; }
+          if (ch === '=') return i;
+        }
+      }
+      return -1;
+    }
+
+    function parseKeyPath(keyStr, lineNum) {
+      const keys = [];
+      let i = 0;
+      while (i < keyStr.length) {
+        // Skip whitespace
+        while (i < keyStr.length && keyStr[i] === ' ') i++;
+        if (i >= keyStr.length) break;
+
+        if (keyStr[i] === '"') {
+          // Quoted key
+          i++; // skip opening quote
+          let key = '';
+          while (i < keyStr.length && keyStr[i] !== '"') {
+            if (keyStr[i] === '\\') { i++; key += keyStr[i] || ''; }
+            else key += keyStr[i];
+            i++;
+          }
+          i++; // skip closing quote
+          keys.push(key);
+        } else if (keyStr[i] === "'") {
+          i++;
+          let key = '';
+          while (i < keyStr.length && keyStr[i] !== "'") { key += keyStr[i]; i++; }
+          i++;
+          keys.push(key);
+        } else {
+          // Bare key
+          let key = '';
+          while (i < keyStr.length && keyStr[i] !== '.' && keyStr[i] !== ' ') {
+            key += keyStr[i]; i++;
+          }
+          if (key) keys.push(key);
+        }
+        // Skip whitespace and dot separator
+        while (i < keyStr.length && keyStr[i] === ' ') i++;
+        if (i < keyStr.length && keyStr[i] === '.') i++;
+      }
+      if (keys.length === 0) throw new SyntaxError(`Invalid key at line ${lineNum + 1}`);
+      return keys;
+    }
+
+    function parseTomlValue(raw, lineNum) {
+      raw = raw.trim();
+      if (!raw.length) throw new SyntaxError(`Empty value at line ${lineNum + 1}`);
+
+      // Boolean
+      if (raw === 'true') return true;
+      if (raw === 'false') return false;
+
+      // Strings
+      if (raw.startsWith('"""')) {
+        const end = raw.indexOf('"""', 3);
+        if (end === -1) throw new SyntaxError(`Unterminated multi-line string at line ${lineNum + 1}`);
+        return unescapeStr(raw.slice(3, end));
+      }
+      if (raw.startsWith("'''")) {
+        const end = raw.indexOf("'''", 3);
+        if (end === -1) throw new SyntaxError(`Unterminated multi-line literal string at line ${lineNum + 1}`);
+        return raw.slice(3, end);
+      }
+      if (raw.startsWith('"') && raw.endsWith('"') && raw.length >= 2) {
+        return unescapeStr(raw.slice(1, -1));
+      }
+      if (raw.startsWith("'") && raw.endsWith("'") && raw.length >= 2) {
+        return raw.slice(1, -1); // literal string, no escape processing
+      }
+
+      // Inline table { ... }
+      if (raw.startsWith('{')) {
+        return parseInlineTable(raw, lineNum);
+      }
+
+      // Array [ ... ]
+      if (raw.startsWith('[')) {
+        return parseTomlArray(raw, lineNum);
+      }
+
+      // Date/Time patterns
+      // Full datetime: 2024-01-15T10:30:00Z or with offset
+      if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}/.test(raw)) {
+        return raw; // Keep as string representation
+      }
+      // Local date: 2024-01-15
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        return raw;
+      }
+      // Local time: 10:30:00
+      if (/^\d{2}:\d{2}:\d{2}/.test(raw)) {
+        return raw;
+      }
+
+      // Integer (decimal, hex, octal, binary)
+      if (/^[+-]?0x[0-9a-fA-F_]+$/.test(raw)) return parseInt(raw.replace(/_/g, ''), 16);
+      if (/^[+-]?0o[0-7_]+$/.test(raw)) return parseInt(raw.replace(/_/g, '').replace('0o', ''), 8);
+      if (/^[+-]?0b[01_]+$/.test(raw)) return parseInt(raw.replace(/_/g, '').replace('0b', ''), 2);
+      if (/^[+-]?\d[\d_]*$/.test(raw)) return parseInt(raw.replace(/_/g, ''), 10);
+
+      // Float (including inf, nan)
+      if (raw === 'inf' || raw === '+inf') return Infinity;
+      if (raw === '-inf') return -Infinity;
+      if (raw === 'nan' || raw === '+nan' || raw === '-nan') return NaN;
+      if (/^[+-]?\d[\d_]*(\.\d[\d_]*)?([eE][+-]?\d[\d_]*)?$/.test(raw) && (raw.includes('.') || raw.toLowerCase().includes('e'))) {
+        return parseFloat(raw.replace(/_/g, ''));
+      }
+
+      throw new SyntaxError(`Invalid value "${raw}" at line ${lineNum + 1}`);
+    }
+
+    function unescapeStr(s) {
+      return s.replace(/\\(.)/g, (_, ch) => {
+        switch (ch) {
+          case 'n': return '\n';
+          case 't': return '\t';
+          case 'r': return '\r';
+          case '\\': return '\\';
+          case '"': return '"';
+          case 'b': return '\b';
+          case 'f': return '\f';
+          default: return '\\' + ch;
+        }
+      });
+    }
+
+    function parseInlineTable(raw, lineNum) {
+      // Remove outer braces
+      if (!raw.endsWith('}')) throw new SyntaxError(`Unterminated inline table at line ${lineNum + 1}`);
+      const inner = raw.slice(1, -1).trim();
+      if (inner === '') return {};
+
+      const obj = {};
+      const pairs = splitTopLevel(inner, ',');
+      for (const pair of pairs) {
+        const trimmed = pair.trim();
+        if (!trimmed) continue;
+        const eqIdx = findEquals(trimmed, lineNum);
+        if (eqIdx === -1) throw new SyntaxError(`Invalid inline table entry at line ${lineNum + 1}`);
+        const key = trimmed.slice(0, eqIdx).trim();
+        const val = trimmed.slice(eqIdx + 1).trim();
+        const keys = parseKeyPath(key, lineNum);
+
+        let target = obj;
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (target[keys[i]] === undefined) target[keys[i]] = {};
+          target = target[keys[i]];
+        }
+        target[keys[keys.length - 1]] = parseTomlValue(val, lineNum);
+      }
+      return obj;
+    }
+
+    function parseTomlArray(raw, lineNum) {
+      if (!raw.endsWith(']')) throw new SyntaxError(`Unterminated array at line ${lineNum + 1}`);
+      const inner = raw.slice(1, -1).trim();
+      if (inner === '') return [];
+
+      const items = splitTopLevel(inner, ',');
+      return items.filter(s => s.trim() !== '').map(item => parseTomlValue(item.trim(), lineNum));
+    }
+
+    function splitTopLevel(str, delimiter) {
+      const parts = [];
+      let depth = 0;
+      let inStr = false;
+      let strChar = '';
+      let current = '';
+
+      for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        if (inStr) {
+          current += ch;
+          if (ch === '\\') { current += str[++i] || ''; continue; }
+          if (ch === strChar) inStr = false;
+          continue;
+        }
+        if (ch === '"' || ch === "'") { inStr = true; strChar = ch; current += ch; continue; }
+        if (ch === '[' || ch === '{') { depth++; current += ch; continue; }
+        if (ch === ']' || ch === '}') { depth--; current += ch; continue; }
+        if (ch === delimiter && depth === 0) {
+          parts.push(current);
+          current = '';
+          continue;
+        }
+        current += ch;
+      }
+      if (current.trim()) parts.push(current);
+      return parts;
+    }
+
+    // ───────────────────────────────────────────────
+    // JSON to TOML Serializer
+    // ───────────────────────────────────────────────
+    function jsonToTomlStr(obj, path = []) {
+      if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+        return formatTomlValue(obj);
+      }
+
+      let result = '';
+      const simpleKeys = [];
+      const tableKeys = [];
+      const arrayOfTablesKeys = [];
+
+      for (const [key, val] of Object.entries(obj)) {
+        if (isArrayOfTables(val)) {
+          arrayOfTablesKeys.push(key);
+        } else if (isPlainObject(val) && !isInlineTable(val)) {
+          tableKeys.push(key);
+        } else {
+          simpleKeys.push(key);
+        }
+      }
+
+      // Simple key=value pairs first
+      for (const key of simpleKeys) {
+        result += `${escapeTomlKey(key)} = ${formatTomlValue(obj[key])}\n`;
+      }
+
+      // Sub-tables
+      for (const key of tableKeys) {
+        const newPath = [...path, key];
+        result += '\n';
+        result += `[${newPath.map(escapeTomlKey).join('.')}]\n`;
+        result += jsonToTomlStr(obj[key], newPath);
+      }
+
+      // Array of tables
+      for (const key of arrayOfTablesKeys) {
+        const newPath = [...path, key];
+        for (const item of obj[key]) {
+          result += '\n';
+          result += `[[${newPath.map(escapeTomlKey).join('.')}]]\n`;
+          result += jsonToTomlStr(item, newPath);
+        }
+      }
+
+      return result;
+    }
+
+    function isPlainObject(val) {
+      return typeof val === 'object' && val !== null && !Array.isArray(val);
+    }
+
+    function isArrayOfTables(val) {
+      return Array.isArray(val) && val.length > 0 && val.every(item => isPlainObject(item));
+    }
+
+    function isInlineTable(obj) {
+      // Use inline table only if all values are primitives and it's very small
+      const entries = Object.entries(obj);
+      if (entries.length > 3) return false;
+      return entries.every(([_, v]) => typeof v !== 'object' || v === null);
+    }
+
+    function escapeTomlKey(key) {
+      if (/^[A-Za-z0-9_-]+$/.test(key)) return key;
+      return '"' + key.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+    }
+
+    function formatTomlValue(val) {
+      if (val === null || val === undefined) return '""'; // TOML has no null, use empty string
+      if (typeof val === 'boolean') return val.toString();
+      if (typeof val === 'number') {
+        if (Number.isNaN(val)) return 'nan';
+        if (val === Infinity) return 'inf';
+        if (val === -Infinity) return '-inf';
+        if (Number.isInteger(val)) return val.toString();
+        return val.toString();
+      }
+      if (typeof val === 'string') {
+        // Check if it looks like a date/time, keep unquoted is not valid in TOML values...
+        // Actually dates in TOML values are unquoted
+        if (/^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}:\d{2}.*)?$/.test(val)) return val;
+        if (/^\d{2}:\d{2}:\d{2}/.test(val)) return val;
+        return '"' + val.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\t/g, '\\t').replace(/\r/g, '\\r') + '"';
+      }
+      if (Array.isArray(val)) {
+        if (val.length === 0) return '[]';
+        const items = val.map(v => formatTomlValue(v));
+        const oneLine = '[' + items.join(', ') + ']';
+        if (oneLine.length < 80) return oneLine;
+        return '[\n  ' + items.join(',\n  ') + ',\n]';
+      }
+      if (isPlainObject(val)) {
+        const pairs = Object.entries(val).map(([k, v]) => `${escapeTomlKey(k)} = ${formatTomlValue(v)}`);
+        return '{ ' + pairs.join(', ') + ' }';
+      }
+      return String(val);
+    }
+
+    // ───────────────────────────────────────────────
+    // Real-time conversion
+    // ───────────────────────────────────────────────
+    let convertTimer = null;
+    let lastDirection = 'toml'; // track last manual conversion direction
+
+    $i.addEventListener('input', () => {
+      clearTimeout(convertTimer);
+      convertTimer = setTimeout(() => {
+        autoConvert();
+      }, 400);
+    });
+
+    function autoConvert() {
+      const raw = $i.value.trim();
+      if (!raw) { $o.value = ''; $s.textContent = ''; $s.className = ''; return; }
+
+      // Try to detect input format
+      if (looksLikeJSON(raw)) {
+        doJsonToToml(raw);
+      } else {
+        doTomlToJson(raw);
+      }
+    }
+
+    function looksLikeJSON(str) {
+      const t = str.trim();
+      return (t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'));
+    }
+
+    function doTomlToJson(raw) {
+      try {
+        const obj = parseTOML(raw);
+        $o.value = JSON.stringify(obj, null, 2);
+        $s.textContent = 'Converted to JSON';
+        $s.className = 'status status-success';
+      } catch (e) {
+        $o.value = '';
+        $s.textContent = e.message;
+        $s.className = 'status status-error';
+      }
+    }
+
+    function doJsonToToml(raw) {
+      try {
+        const obj = JSON.parse(raw);
+        $o.value = jsonToTomlStr(obj).trim();
+        $s.textContent = 'Converted to TOML';
+        $s.className = 'status status-success';
+      } catch (e) {
+        $o.value = '';
+        $s.textContent = 'JSON parse error: ' + e.message;
+        $s.className = 'status status-error';
+      }
+    }
+
+    // ───────────────────────────────────────────────
+    // Button handlers
+    // ───────────────────────────────────────────────
+    function tomlToJson() {
+      const raw = $i.value.trim();
+      if (!raw) return;
+      lastDirection = 'toml';
+      doTomlToJson(raw);
+    }
+
+    function jsonToToml() {
+      const raw = $i.value.trim();
+      if (!raw) return;
+      lastDirection = 'json';
+      doJsonToToml(raw);
+    }
+
+    function formatOutput() {
+      const raw = $o.value.trim();
+      if (!raw) return;
+      try {
+        // Try formatting as JSON
+        const obj = JSON.parse(raw);
+        $o.value = JSON.stringify(obj, null, 2);
+        $s.textContent = 'Formatted JSON';
+        $s.className = 'status status-success';
+      } catch (e) {
+        // Output is TOML, try re-parsing and re-serializing
+        try {
+          const obj = parseTOML(raw);
+          $o.value = jsonToTomlStr(obj).trim();
+          $s.textContent = 'Formatted TOML';
+          $s.className = 'status status-success';
+        } catch (e2) {
+          $s.textContent = 'Cannot format: ' + e2.message;
+          $s.className = 'status status-error';
+        }
+      }
+    }
+
+    function copyOutput() {
+      if ($o.value) {
+        navigator.clipboard.writeText($o.value);
+        $s.textContent = 'Copied!';
+        $s.className = 'status status-success';
+      }
+    }
+
+    function clearAll() { $i.value = ''; $o.value = ''; $s.textContent = ''; $s.className = ''; }
+
+    // Trigger initial conversion
+    autoConvert();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

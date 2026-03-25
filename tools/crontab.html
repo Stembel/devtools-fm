@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crontab Tester - Explain & Test Cron Expressions | ZeroKit.dev</title>
+  <meta name="description" content="Test and explain cron expressions. See human-readable descriptions, next execution times, calendar view, and validate crontab syntax. Supports 5 and 6 field formats.">
+  <link rel="canonical" href="https://zerokit.dev/tools/crontab.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Crontab Expression Tester</h1>
+    <p class="description">Test, validate, and understand existing cron expressions. See human-readable explanations and upcoming execution times.</p>
+
+    <!-- Cron Input -->
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+      <input type="text" id="cronInput" value="*/15 9-17 * * 1-5" placeholder="Enter cron expression (5 or 6 fields)" style="flex:1;min-width:260px;padding:12px 16px;font-family:var(--mono);font-size:1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);outline:none;text-align:center;letter-spacing:2px" spellcheck="false">
+      <button class="btn btn-primary" onclick="testExpression()">Test</button>
+    </div>
+
+    <!-- Field Labels -->
+    <div id="fieldLabels" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:24px">
+      <div class="cron-field-label"><span class="field-value"></span><span class="field-name">Minute</span></div>
+      <div class="cron-field-label"><span class="field-value"></span><span class="field-name">Hour</span></div>
+      <div class="cron-field-label"><span class="field-value"></span><span class="field-name">Day (Month)</span></div>
+      <div class="cron-field-label"><span class="field-value"></span><span class="field-name">Month</span></div>
+      <div class="cron-field-label"><span class="field-value"></span><span class="field-name">Day (Week)</span></div>
+    </div>
+
+    <!-- Validation / Description -->
+    <div id="validation" style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;font-size:1rem;display:none"></div>
+    <div id="description" style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px;font-size:1rem;color:var(--accent)"></div>
+
+    <!-- Options Row -->
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+      <label style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:6px">
+        Show next
+        <input type="number" id="numRuns" value="10" min="1" max="50" style="width:60px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:0.85rem;font-family:var(--font)">
+        executions
+      </label>
+      <label style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:6px">
+        Timezone
+        <select id="tzSelect" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:0.85rem;font-family:var(--font)">
+        </select>
+      </label>
+    </div>
+
+    <!-- Next Runs -->
+    <h3 style="margin-bottom:12px;color:var(--text-muted);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Next Execution Times</h3>
+    <div id="nextRuns" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:var(--mono);font-size:0.85rem;line-height:2;margin-bottom:24px"></div>
+
+    <!-- Calendar View -->
+    <h3 style="margin-bottom:12px;color:var(--text-muted);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Calendar View &mdash; <span id="calendarMonth"></span></h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn" onclick="changeMonth(-1)">&larr; Prev</button>
+      <button class="btn" onclick="changeMonth(1)">Next &rarr;</button>
+    </div>
+    <div id="calendar" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:24px"></div>
+
+    <!-- Quick Examples -->
+    <h3 style="margin-bottom:12px;color:var(--text-muted);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Quick Examples</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;margin-bottom:24px" id="examples">
+    </div>
+
+    <!-- Syntax Reference -->
+    <h3 style="margin-bottom:12px;color:var(--text-muted);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Cron Syntax Reference</h3>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:0.85rem;line-height:1.8;margin-bottom:24px">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--mono)">
+        <span style="color:var(--accent)">*</span><span style="color:var(--text-muted)">Any value</span>
+        <span style="color:var(--accent)">,</span><span style="color:var(--text-muted)">Value list separator (e.g. 1,3,5)</span>
+        <span style="color:var(--accent)">-</span><span style="color:var(--text-muted)">Range of values (e.g. 1-5)</span>
+        <span style="color:var(--accent)">/</span><span style="color:var(--text-muted)">Step values (e.g. */15)</span>
+        <span style="color:var(--accent)">L</span><span style="color:var(--text-muted)">Last day of month or last X day of month (e.g. L, 5L)</span>
+        <span style="color:var(--accent)">W</span><span style="color:var(--text-muted)">Nearest weekday to given day (e.g. 15W)</span>
+        <span style="color:var(--accent)">#</span><span style="color:var(--text-muted)">Nth weekday of month (e.g. 5#3 = 3rd Friday)</span>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <style>
+    .cron-field-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .cron-field-label .field-value {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-height: 1.4em;
+    }
+    .cron-field-label .field-name {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cron-field-label.has-error {
+      border-color: var(--error);
+    }
+    .cron-field-label.has-error .field-value {
+      color: var(--error);
+    }
+    #fieldLabels.six-fields {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .cal-header {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 8px 4px;
+    }
+    .cal-day {
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      position: relative;
+    }
+    .cal-day.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .cal-day.today {
+      border: 1px solid var(--accent);
+    }
+    .cal-day.empty {
+      visibility: hidden;
+    }
+    .cal-day .fire-count {
+      font-size: 0.6rem;
+      color: var(--accent);
+      display: block;
+      margin-top: 2px;
+      opacity: 0.8;
+    }
+    .example-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .example-card:hover {
+      border-color: var(--accent);
+    }
+    .example-card .expr {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    .example-card .expl {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .run-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .run-index {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      min-width: 24px;
+      text-align: right;
+    }
+    .run-time {
+      color: var(--text);
+    }
+    .run-relative {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-left: auto;
+    }
+    @media(max-width:768px) {
+      #fieldLabels { grid-template-columns: repeat(3, 1fr) !important; }
+      .cal-grid { font-size: 0.7rem; }
+      .cal-day { padding: 6px 2px; }
+    }
+  </style>
+
+  <script>
+    // ---- Timezone Setup ----
+    const COMMON_TZ = [
+      'UTC',
+      'America/New_York',
+      'America/Chicago',
+      'America/Denver',
+      'America/Los_Angeles',
+      'America/Sao_Paulo',
+      'Europe/London',
+      'Europe/Berlin',
+      'Europe/Paris',
+      'Europe/Moscow',
+      'Asia/Dubai',
+      'Asia/Kolkata',
+      'Asia/Shanghai',
+      'Asia/Tokyo',
+      'Asia/Singapore',
+      'Australia/Sydney',
+      'Pacific/Auckland'
+    ];
+
+    const tzSelect = document.getElementById('tzSelect');
+    const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Build timezone dropdown
+    const allTz = new Set([localTz, ...COMMON_TZ]);
+    allTz.forEach(tz => {
+      const opt = document.createElement('option');
+      opt.value = tz;
+      opt.textContent = tz.replace(/_/g, ' ');
+      if (tz === localTz) opt.textContent += ' (local)';
+      tzSelect.appendChild(opt);
+    });
+    tzSelect.value = localTz;
+
+    // ---- State ----
+    let calYear, calMonth;
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+
+    // ---- Constants ----
+    const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    const EXAMPLES = [
+      { expr: '* * * * *', desc: 'Every minute' },
+      { expr: '*/5 * * * *', desc: 'Every 5 minutes' },
+      { expr: '0 * * * *', desc: 'Every hour at minute 0' },
+      { expr: '0 0 * * *', desc: 'Daily at midnight' },
+      { expr: '0 9 * * 1-5', desc: 'Weekdays at 9:00 AM' },
+      { expr: '*/15 9-17 * * 1-5', desc: 'Every 15 min, 9-5, weekdays' },
+      { expr: '0 0 * * 0', desc: 'Weekly on Sunday at midnight' },
+      { expr: '0 0 1 * *', desc: 'First day of every month' },
+      { expr: '0 0 1 1 *', desc: 'Yearly on January 1st' },
+      { expr: '30 4 1,15 * *', desc: '4:30 AM on 1st and 15th' },
+      { expr: '0 22 * * 1-5', desc: 'Weekdays at 10:00 PM' },
+      { expr: '0 */6 * * *', desc: 'Every 6 hours' },
+      { expr: '5 4 * * 0', desc: 'Sunday at 4:05 AM' },
+      { expr: '0 0 L * *', desc: 'Last day of every month' },
+      { expr: '0 9 * * 5#1', desc: 'First Friday of month at 9 AM' },
+      { expr: '0 9 15W * *', desc: 'Nearest weekday to 15th at 9 AM' },
+    ];
+
+    // ---- Render Examples ----
+    const examplesEl = document.getElementById('examples');
+    EXAMPLES.forEach(ex => {
+      const card = document.createElement('div');
+      card.className = 'example-card';
+      card.innerHTML = `<span class="expr">${ex.expr}</span><span class="expl">${ex.desc}</span>`;
+      card.onclick = () => { document.getElementById('cronInput').value = ex.expr; testExpression(); };
+      examplesEl.appendChild(card);
+    });
+
+    // ---- Validation ----
+    function validateField(val, min, max, name, allowSpecial) {
+      if (val === '*') return null;
+
+      // Handle step: */n or range/n
+      if (val.includes('/')) {
+        const [base, step] = val.split('/');
+        if (step === '' || isNaN(step) || parseInt(step) < 1) return `Invalid step value "${step}" in ${name}`;
+        if (base !== '*' && !base.includes('-')) {
+          if (isNaN(base)) return `Invalid base "${base}" in step for ${name}`;
+          const n = parseInt(base);
+          if (n < min || n > max) return `${name} value ${n} out of range (${min}-${max})`;
+        }
+        if (base.includes('-')) {
+          const rangeErr = validateRange(base, min, max, name);
+          if (rangeErr) return rangeErr;
+        }
+        return null;
+      }
+
+      // Handle L, W, # specials
+      if (allowSpecial) {
+        if (val === 'L' || val === 'LW') return null;
+        if (/^\d+L$/.test(val)) return null;
+        if (/^\d+W$/.test(val)) {
+          const n = parseInt(val);
+          if (n < 1 || n > 31) return `${name} W-value ${n} out of range (1-31)`;
+          return null;
+        }
+        if (val.includes('#')) {
+          const [dow, nth] = val.split('#');
+          if (isNaN(dow) || isNaN(nth)) return `Invalid # syntax in ${name}`;
+          const d = parseInt(dow), n = parseInt(nth);
+          if (d < 0 || d > 7) return `Day-of-week ${d} out of range (0-7) in ${name}`;
+          if (n < 1 || n > 5) return `Nth value ${n} out of range (1-5) in ${name}`;
+          return null;
+        }
+      }
+
+      // Handle list: 1,3,5
+      if (val.includes(',')) {
+        const parts = val.split(',');
+        for (const p of parts) {
+          const err = validateField(p.trim(), min, max, name, allowSpecial);
+          if (err) return err;
+        }
+        return null;
+      }
+
+      // Handle range: 1-5
+      if (val.includes('-')) {
+        return validateRange(val, min, max, name);
+      }
+
+      // Plain number
+      if (isNaN(val)) return `Invalid value "${val}" in ${name}`;
+      const n = parseInt(val);
+      if (n < min || n > max) return `${name} value ${n} out of range (${min}-${max})`;
+      return null;
+    }
+
+    function validateRange(val, min, max, name) {
+      const [a, b] = val.split('-');
+      if (a === '' || b === '' || isNaN(a) || isNaN(b)) return `Invalid range "${val}" in ${name}`;
+      const na = parseInt(a), nb = parseInt(b);
+      if (na < min || na > max) return `${name} range start ${na} out of range (${min}-${max})`;
+      if (nb < min || nb > max) return `${name} range end ${nb} out of range (${min}-${max})`;
+      return null;
+    }
+
+    function validateCron(expr) {
+      const parts = expr.trim().split(/\s+/);
+      if (parts.length < 5 || parts.length > 6) {
+        return { valid: false, errors: [`Expected 5 or 6 fields, got ${parts.length}`], fields: parts, is6: false };
+      }
+
+      const is6 = parts.length === 6;
+      const errors = [];
+      const fieldErrors = new Array(parts.length).fill(null);
+
+      // field definitions: [min, max, name, allowSpecial]
+      const defs5 = [
+        [0, 59, 'Minute', false],
+        [0, 23, 'Hour', false],
+        [1, 31, 'Day of Month', true],
+        [1, 12, 'Month', false],
+        [0, 7, 'Day of Week', true],
+      ];
+      const defs6 = [
+        [0, 59, 'Second', false],
+        ...defs5
+      ];
+
+      const defs = is6 ? defs6 : defs5;
+
+      for (let i = 0; i < parts.length; i++) {
+        const [min, max, name, allowSpecial] = defs[i];
+        const err = validateField(parts[i], min, max, name, allowSpecial);
+        if (err) {
+          errors.push(err);
+          fieldErrors[i] = err;
+        }
+      }
+
+      return { valid: errors.length === 0, errors, fields: parts, is6, fieldErrors };
+    }
+
+    // ---- Human-Readable Description ----
+    function describeCron(expr) {
+      const parts = expr.trim().split(/\s+/);
+      const is6 = parts.length === 6;
+      const offset = is6 ? 1 : 0;
+      const sec = is6 ? parts[0] : null;
+      const min = parts[offset];
+      const hr = parts[offset + 1];
+      const dom = parts[offset + 2];
+      const mon = parts[offset + 3];
+      const dow = parts[offset + 4];
+
+      const desc = [];
+
+      // Second (if 6-field)
+      if (is6) {
+        if (sec === '*') desc.push('Every second');
+        else if (sec.startsWith('*/')) desc.push(`Every ${sec.slice(2)} seconds`);
+        else if (sec === '0') { /* default, skip */ }
+        else desc.push(`At second ${sec}`);
+      }
+
+      // Time description
+      if (min === '*' && hr === '*') {
+        if (!is6 || sec === '*') desc.push('Every minute');
+        else desc.push('every minute');
+      } else if (min === '*' && hr !== '*') {
+        desc.push(`every minute during hour ${describeHour(hr)}`);
+      } else if (min.startsWith('*/')) {
+        if (hr === '*') {
+          desc.push(`Every ${min.slice(2)} minutes`);
+        } else if (hr.includes('-')) {
+          desc.push(`Every ${min.slice(2)} minutes, between ${describeHour(hr)}`);
+        } else if (hr.startsWith('*/')) {
+          desc.push(`Every ${min.slice(2)} minutes, every ${hr.slice(2)} hours`);
+        } else {
+          desc.push(`Every ${min.slice(2)} minutes, at hour ${describeHour(hr)}`);
+        }
+      } else if (hr.startsWith('*/')) {
+        desc.push(`At minute ${min}, every ${hr.slice(2)} hours`);
+      } else if (hr === '*') {
+        desc.push(`At minute ${min} of every hour`);
+      } else {
+        // Specific time
+        const hours = expandField(hr, 0, 23);
+        const mins = expandField(min, 0, 59);
+        if (hours.length <= 3 && mins.length === 1) {
+          const timeStrs = hours.map(h => {
+            const hh = String(h).padStart(2, '0');
+            const mm = String(mins[0]).padStart(2, '0');
+            return `${hh}:${mm}`;
+          });
+          desc.push(`At ${timeStrs.join(', ')}`);
+        } else {
+          desc.push(`At minute ${min}, hour ${describeHour(hr)}`);
+        }
+      }
+
+      // Day of month
+      if (dom !== '*') {
+        if (dom === 'L') {
+          desc.push('on the last day of the month');
+        } else if (dom === 'LW') {
+          desc.push('on the last weekday of the month');
+        } else if (dom.endsWith('W')) {
+          desc.push(`on the nearest weekday to the ${ordinal(parseInt(dom))} of the month`);
+        } else if (dom.includes(',')) {
+          desc.push(`on day ${dom} of the month`);
+        } else if (dom.includes('-')) {
+          const [a, b] = dom.split('-');
+          desc.push(`on days ${a} through ${b} of the month`);
+        } else if (dom.startsWith('*/')) {
+          desc.push(`every ${dom.slice(2)} days`);
+        } else {
+          desc.push(`on the ${ordinal(parseInt(dom))} of the month`);
+        }
+      }
+
+      // Month
+      if (mon !== '*') {
+        if (mon.startsWith('*/')) {
+          desc.push(`every ${mon.slice(2)} months`);
+        } else if (mon.includes(',')) {
+          const ms = mon.split(',').map(m => MONTHS[parseInt(m)] || m);
+          desc.push(`in ${ms.join(', ')}`);
+        } else if (mon.includes('-')) {
+          const [a, b] = mon.split('-');
+          desc.push(`from ${MONTHS[parseInt(a)] || a} through ${MONTHS[parseInt(b)] || b}`);
+        } else {
+          const m = parseInt(mon);
+          desc.push(`in ${MONTHS[m] || 'month ' + mon}`);
+        }
+      }
+
+      // Day of week
+      if (dow !== '*') {
+        if (dow.includes('#')) {
+          const [d, n] = dow.split('#');
+          const dayName = DAYS[parseInt(d)] || `day ${d}`;
+          desc.push(`on the ${ordinal(parseInt(n))} ${dayName} of the month`);
+        } else if (dow.endsWith('L')) {
+          const d = parseInt(dow);
+          const dayName = DAYS[d] || `day ${d}`;
+          desc.push(`on the last ${dayName} of the month`);
+        } else if (dow === '1-5') {
+          desc.push('on weekdays (Mon-Fri)');
+        } else if (dow === '0,6' || dow === '6,0') {
+          desc.push('on weekends (Sat-Sun)');
+        } else if (dow.includes('-')) {
+          const [a, b] = dow.split('-');
+          desc.push(`on ${DAYS[parseInt(a)] || a} through ${DAYS[parseInt(b)] || b}`);
+        } else if (dow.includes(',')) {
+          const ds = dow.split(',').map(d => DAYS[parseInt(d)] || d);
+          desc.push(`on ${ds.join(', ')}`);
+        } else {
+          const d = parseInt(dow);
+          if (d === 7) desc.push('on Sunday');
+          else desc.push(`on ${DAYS[d] || dow}`);
+        }
+      }
+
+      return desc.join(', ') || expr;
+    }
+
+    function describeHour(hr) {
+      if (hr.includes('-')) {
+        const [a, b] = hr.split('-');
+        return `${formatHour(parseInt(a))}-${formatHour(parseInt(b))}`;
+      }
+      if (hr.includes(',')) {
+        return hr.split(',').map(h => formatHour(parseInt(h))).join(', ');
+      }
+      return formatHour(parseInt(hr));
+    }
+
+    function formatHour(h) {
+      if (isNaN(h)) return h;
+      if (h === 0) return '12 AM';
+      if (h < 12) return `${h} AM`;
+      if (h === 12) return '12 PM';
+      return `${h - 12} PM`;
+    }
+
+    function ordinal(n) {
+      const s = ['th', 'st', 'nd', 'rd'];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+
+    // ---- Field Expansion ----
+    function expandField(field, min, max) {
+      if (field === '*') {
+        const arr = [];
+        for (let i = min; i <= max; i++) arr.push(i);
+        return arr;
+      }
+      if (field.includes(',')) {
+        const results = new Set();
+        field.split(',').forEach(part => {
+          expandField(part.trim(), min, max).forEach(v => results.add(v));
+        });
+        return [...results].sort((a, b) => a - b);
+      }
+      if (field.includes('/')) {
+        const [base, step] = field.split('/');
+        const s = parseInt(step);
+        let start = min;
+        let end = max;
+        if (base !== '*') {
+          if (base.includes('-')) {
+            const [a, b] = base.split('-').map(Number);
+            start = a;
+            end = b;
+          } else {
+            start = parseInt(base);
+          }
+        }
+        const arr = [];
+        for (let i = start; i <= end; i += s) arr.push(i);
+        return arr;
+      }
+      if (field.includes('-')) {
+        const [a, b] = field.split('-').map(Number);
+        const arr = [];
+        if (a <= b) {
+          for (let i = a; i <= b; i++) arr.push(i);
+        } else {
+          // wrap around
+          for (let i = a; i <= max; i++) arr.push(i);
+          for (let i = min; i <= b; i++) arr.push(i);
+        }
+        return arr;
+      }
+      const n = parseInt(field);
+      if (!isNaN(n)) return [n];
+      return [];
+    }
+
+    // ---- Next Run Calculator ----
+    function getNextRuns(expr, count, tz) {
+      const parts = expr.trim().split(/\s+/);
+      const is6 = parts.length === 6;
+      const offset = is6 ? 1 : 0;
+      const minF = parts[offset];
+      const hrF = parts[offset + 1];
+      const domF = parts[offset + 2];
+      const monF = parts[offset + 3];
+      const dowF = parts[offset + 4];
+
+      // Check for special chars that our simple matcher can't handle for next-runs
+      const hasSpecial = [domF, dowF].some(f => /[LW#]/.test(f));
+
+      function matches(val, field, min, max) {
+        if (field === '*') return true;
+        const expanded = expandField(field, min, max);
+        return expanded.includes(val);
+      }
+
+      function matchesDow(val, field) {
+        if (field === '*') return true;
+        // Normalize: 7 = 0 (both mean Sunday)
+        if (field.includes('#') || field.endsWith('L')) return false; // can't simply match these
+        const expanded = expandField(field, 0, 7);
+        return expanded.includes(val) || (val === 0 && expanded.includes(7)) || (val === 7 && expanded.includes(0));
+      }
+
+      function matchesDom(val, field, date) {
+        if (field === '*') return true;
+        if (field === 'L') {
+          const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+          return val === lastDay;
+        }
+        if (field === 'LW') {
+          let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+          while (lastDay.getDay() === 0 || lastDay.getDay() === 6) {
+            lastDay.setDate(lastDay.getDate() - 1);
+          }
+          return val === lastDay.getDate();
+        }
+        if (field.endsWith('W')) {
+          const target = parseInt(field);
+          const d = new Date(date.getFullYear(), date.getMonth(), target);
+          let actual = target;
+          if (d.getDay() === 0) actual = target + 1; // Sun -> Mon
+          if (d.getDay() === 6) actual = target - 1; // Sat -> Fri
+          return val === actual;
+        }
+        const expanded = expandField(field, 1, 31);
+        return expanded.includes(val);
+      }
+
+      function matchesDowSpecial(date, field) {
+        if (field === '*') return true;
+        if (field.includes('#')) {
+          const [dStr, nStr] = field.split('#');
+          const targetDow = parseInt(dStr);
+          const nth = parseInt(nStr);
+          const y = date.getFullYear(), m = date.getMonth();
+          let count = 0;
+          for (let day = 1; day <= date.getDate(); day++) {
+            const d = new Date(y, m, day);
+            if (d.getDay() === targetDow) count++;
+          }
+          return date.getDay() === targetDow && count === nth;
+        }
+        if (field.endsWith('L') && !field.includes('-')) {
+          const targetDow = parseInt(field);
+          const y = date.getFullYear(), m = date.getMonth();
+          const lastDay = new Date(y, m + 1, 0).getDate();
+          for (let day = lastDay; day >= lastDay - 6; day--) {
+            const d = new Date(y, m, day);
+            if (d.getDay() === targetDow) {
+              return date.getDate() === day;
+            }
+          }
+          return false;
+        }
+        return matchesDow(date.getDay(), field);
+      }
+
+      const runs = [];
+      const d = new Date();
+      d.setSeconds(0, 0);
+      d.setMinutes(d.getMinutes() + 1);
+
+      const maxIterations = 525600 * 2; // 2 years of minutes
+      for (let i = 0; i < maxIterations && runs.length < count; i++) {
+        const dateInTz = new Date(d.toLocaleString('en-US', { timeZone: tz }));
+
+        if (matches(dateInTz.getMinutes(), minF, 0, 59) &&
+            matches(dateInTz.getHours(), hrF, 0, 23) &&
+            matchesDom(dateInTz.getDate(), domF, dateInTz) &&
+            matches(dateInTz.getMonth() + 1, monF, 1, 12) &&
+            matchesDowSpecial(dateInTz, dowF)) {
+          runs.push(new Date(d));
+        }
+        d.setMinutes(d.getMinutes() + 1);
+      }
+      return runs;
+    }
+
+    // ---- Calendar ----
+    function getFireDays(expr, year, month) {
+      const parts = expr.trim().split(/\s+/);
+      const is6 = parts.length === 6;
+      const offset = is6 ? 1 : 0;
+      const domF = parts[offset + 2];
+      const monF = parts[offset + 3];
+      const dowF = parts[offset + 4];
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const fireDays = {};
+
+      // Check if this month matches
+      const monthNum = month + 1;
+      const monthExpanded = expandField(monF, 1, 12);
+      if (!monthExpanded.includes(monthNum) && monF !== '*') return fireDays;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dow = date.getDay();
+
+        let domMatch = false;
+        if (domF === '*') {
+          domMatch = true;
+        } else if (domF === 'L') {
+          domMatch = day === daysInMonth;
+        } else if (domF === 'LW') {
+          let lastWd = new Date(year, month + 1, 0);
+          while (lastWd.getDay() === 0 || lastWd.getDay() === 6) lastWd.setDate(lastWd.getDate() - 1);
+          domMatch = day === lastWd.getDate();
+        } else if (domF.endsWith('W')) {
+          const target = parseInt(domF);
+          const d = new Date(year, month, target);
+          let actual = target;
+          if (d.getDay() === 0) actual = target + 1;
+          if (d.getDay() === 6) actual = target - 1;
+          domMatch = day === actual;
+        } else {
+          const expanded = expandField(domF, 1, 31);
+          domMatch = expanded.includes(day);
+        }
+
+        let dowMatch = false;
+        if (dowF === '*') {
+          dowMatch = true;
+        } else if (dowF.includes('#')) {
+          const [dStr, nStr] = dowF.split('#');
+          const targetDow = parseInt(dStr);
+          const nth = parseInt(nStr);
+          let count = 0;
+          for (let d = 1; d <= day; d++) {
+            if (new Date(year, month, d).getDay() === targetDow) count++;
+          }
+          dowMatch = dow === targetDow && count === nth;
+        } else if (dowF.endsWith('L') && !dowF.includes('-')) {
+          const targetDow = parseInt(dowF);
+          for (let d = daysInMonth; d >= daysInMonth - 6; d--) {
+            if (new Date(year, month, d).getDay() === targetDow) {
+              dowMatch = day === d;
+              break;
+            }
+          }
+        } else {
+          const expanded = expandField(dowF, 0, 7);
+          dowMatch = expanded.includes(dow) || (dow === 0 && expanded.includes(7));
+        }
+
+        if (domMatch && dowMatch) {
+          // Count how many times per day
+          const minF = parts[offset];
+          const hrF = parts[offset + 1];
+          const minsExpanded = expandField(minF, 0, 59);
+          const hrsExpanded = expandField(hrF, 0, 23);
+          fireDays[day] = minsExpanded.length * hrsExpanded.length;
+        }
+      }
+
+      return fireDays;
+    }
+
+    function renderCalendar(expr) {
+      const calendarEl = document.getElementById('calendar');
+      const monthLabel = document.getElementById('calendarMonth');
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      monthLabel.textContent = `${monthNames[calMonth]} ${calYear}`;
+
+      const validation = validateCron(expr);
+      if (!validation.valid) {
+        calendarEl.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:16px">Fix expression errors to see calendar</div>';
+        return;
+      }
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const fireDays = getFireDays(expr, calYear, calMonth);
+      const today = new Date();
+
+      let html = '<div class="cal-grid">';
+      DAYS_SHORT.forEach(d => { html += `<div class="cal-header">${d}</div>`; });
+
+      // Empty cells before first day
+      for (let i = 0; i < firstDay; i++) {
+        html += '<div class="cal-day empty"></div>';
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const isActive = fireDays[day] !== undefined;
+        const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === day;
+        let cls = 'cal-day';
+        if (isActive) cls += ' active';
+        if (isToday) cls += ' today';
+
+        let countStr = '';
+        if (isActive && fireDays[day] > 1) {
+          const c = fireDays[day];
+          countStr = `<span class="fire-count">${c >= 1440 ? '1440+' : c}x</span>`;
+        } else if (isActive) {
+          countStr = `<span class="fire-count">1x</span>`;
+        }
+
+        html += `<div class="${cls}">${day}${countStr}</div>`;
+      }
+
+      html += '</div>';
+      calendarEl.innerHTML = html;
+    }
+
+    function changeMonth(delta) {
+      calMonth += delta;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      const expr = document.getElementById('cronInput').value.trim();
+      renderCalendar(expr);
+    }
+
+    // ---- Field Labels ----
+    function updateFieldLabels(validation) {
+      const container = document.getElementById('fieldLabels');
+      const { fields, is6, fieldErrors } = validation;
+
+      const names5 = ['Minute', 'Hour', 'Day (Month)', 'Month', 'Day (Week)'];
+      const names6 = ['Second', 'Minute', 'Hour', 'Day (Month)', 'Month', 'Day (Week)'];
+      const names = is6 ? names6 : names5;
+
+      container.className = is6 ? 'six-fields' : '';
+      container.style.gridTemplateColumns = `repeat(${fields.length}, 1fr)`;
+
+      let html = '';
+      for (let i = 0; i < fields.length; i++) {
+        const hasErr = fieldErrors && fieldErrors[i];
+        html += `<div class="cron-field-label${hasErr ? ' has-error' : ''}">`;
+        html += `<span class="field-value">${fields[i]}</span>`;
+        html += `<span class="field-name">${names[i] || ''}</span>`;
+        html += '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    // ---- Relative Time ----
+    function relativeTime(target, from) {
+      const diff = target - from;
+      const mins = Math.floor(diff / 60000);
+      if (mins < 60) return `in ${mins}m`;
+      const hrs = Math.floor(mins / 60);
+      const remMins = mins % 60;
+      if (hrs < 24) return `in ${hrs}h ${remMins}m`;
+      const days = Math.floor(hrs / 24);
+      const remHrs = hrs % 24;
+      if (days < 30) return `in ${days}d ${remHrs}h`;
+      const months = Math.floor(days / 30);
+      return `in ~${months}mo`;
+    }
+
+    // ---- Main Test Function ----
+    function testExpression() {
+      const expr = document.getElementById('cronInput').value.trim();
+      const count = parseInt(document.getElementById('numRuns').value) || 10;
+      const tz = tzSelect.value;
+      const validationEl = document.getElementById('validation');
+      const descEl = document.getElementById('description');
+      const runsEl = document.getElementById('nextRuns');
+
+      // Validate
+      const validation = validateCron(expr);
+      updateFieldLabels(validation);
+
+      if (!validation.valid) {
+        validationEl.style.display = 'block';
+        validationEl.style.color = 'var(--error)';
+        validationEl.style.borderColor = 'var(--error)';
+        validationEl.style.background = 'rgba(239, 68, 68, 0.05)';
+        validationEl.innerHTML = '<strong>Validation Errors:</strong><br>' + validation.errors.map(e => '&bull; ' + e).join('<br>');
+        descEl.textContent = '';
+        runsEl.innerHTML = '<span style="color:var(--text-muted)">Fix errors above to see execution times</span>';
+        renderCalendar(expr);
+        return;
+      }
+
+      validationEl.style.display = 'block';
+      validationEl.style.color = 'var(--success)';
+      validationEl.style.borderColor = 'var(--success)';
+      validationEl.style.background = 'rgba(34, 197, 94, 0.05)';
+      validationEl.innerHTML = 'Valid cron expression' + (validation.is6 ? ' (6-field format with seconds)' : ' (standard 5-field format)');
+
+      // Describe
+      descEl.textContent = describeCron(expr);
+
+      // Next runs
+      const runs = getNextRuns(expr, count, tz);
+      const nowMs = Date.now();
+      if (runs.length) {
+        runsEl.innerHTML = runs.map((d, i) => {
+          const formatted = d.toLocaleString('en-US', {
+            timeZone: tz,
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          });
+          return `<div class="run-item"><span class="run-index">${i + 1}.</span><span class="run-time">${formatted}</span><span class="run-relative">${relativeTime(d, new Date(nowMs))}</span></div>`;
+        }).join('');
+      } else {
+        runsEl.innerHTML = '<span style="color:var(--text-muted)">No executions found within the next 2 years</span>';
+      }
+
+      // Calendar
+      renderCalendar(expr);
+    }
+
+    // ---- Event Listeners ----
+    document.getElementById('cronInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') testExpression();
+    });
+
+    document.getElementById('numRuns').addEventListener('change', testExpression);
+    tzSelect.addEventListener('change', testExpression);
+
+    // ---- Initial Parse ----
+    testExpression();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

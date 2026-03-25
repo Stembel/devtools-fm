@@ -163,6 +163,16 @@
       { id: 'cssgrid', name: 'CSS Grid Generator', icon: 'GR' },
       { id: 'favicon', name: 'Favicon Generator', icon: 'FV' },
       { id: 'htaccess', name: '.htaccess Generator', icon: '.ht' },
+      { id: 'borderradius', name: 'Border Radius', icon: 'BR' },
+      { id: 'placeholder', name: 'Placeholder Image', icon: 'PH' },
+      { id: 'aspectratio', name: 'Aspect Ratio', icon: '16:9' },
+      { id: 'ogpreview', name: 'OG Preview', icon: 'OG' },
+      { id: 'textbinary', name: 'Text to Binary', icon: '01' },
+      { id: 'svgoptimizer', name: 'SVG Optimizer', icon: 'SVG' },
+      { id: 'cssanimation', name: 'CSS Animation', icon: 'AN' },
+      { id: 'jwtbuilder', name: 'JWT Builder', icon: 'JW+' },
+      { id: 'toml', name: 'TOML Converter', icon: 'TML' },
+      { id: 'crontab', name: 'Crontab Tester', icon: 'CT' },
     ];
 
     const others = allTools.filter(t => t.id !== currentTool);

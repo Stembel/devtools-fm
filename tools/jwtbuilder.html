@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Builder - Generate JSON Web Tokens Online | ZeroKit.dev</title>
+  <meta name="description" content="Build and sign JSON Web Tokens from scratch. Set header, payload claims, expiration, and sign with HMAC. Free, runs in your browser.">
+  <link rel="canonical" href="https://zerokit.dev/tools/jwtbuilder.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .jwt-tabs { display: flex; gap: 0; margin-bottom: 16px; }
+    .jwt-tab {
+      padding: 10px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .jwt-tab:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .jwt-tab:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+    .jwt-tab:not(:first-child) { border-left: none; }
+    .jwt-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .jwt-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--accent); }
+    .form-select { font-family: var(--font); cursor: pointer; }
+    .form-select option { background: var(--surface); }
+
+    .inline-row { display: flex; gap: 12px; }
+    .inline-row .form-group { flex: 1; }
+
+    .claims-list { display: flex; flex-direction: column; gap: 8px; }
+    .claim-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .claim-row .form-input { flex: 1; }
+    .claim-remove {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--error);
+      cursor: pointer;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .claim-remove:hover { background: rgba(239, 68, 68, 0.1); border-color: var(--error); }
+
+    .quick-claims { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .quick-claim {
+      padding: 4px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .quick-claim:hover { border-color: var(--accent); color: var(--accent); }
+
+    .expiry-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .expiry-btn {
+      padding: 6px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .expiry-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .expiry-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .jwt-output-box {
+      width: 100%;
+      min-height: 100px;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      color: var(--success);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+    .jwt-output-box::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 16px 0;
+    }
+
+    .verify-result {
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--mono);
+      display: none;
+    }
+    .verify-valid { background: rgba(34, 197, 94, 0.1); color: var(--success); display: block; }
+    .verify-invalid { background: rgba(239, 68, 68, 0.1); color: var(--error); display: block; }
+
+    .panel-body { padding: 16px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>JWT Builder</h1>
+    <p class="description">Build, sign, and verify JSON Web Tokens. Everything runs in your browser -- your keys never leave.</p>
+
+    <div class="jwt-tabs">
+      <button class="jwt-tab active" onclick="switchTab('build')">Build</button>
+      <button class="jwt-tab" onclick="switchTab('verify')">Verify</button>
+    </div>
+
+    <!-- BUILD TAB -->
+    <div id="tab-build" class="tab-content active">
+      <div class="tool-layout" style="margin-bottom: 16px;">
+        <!-- Header Panel -->
+        <div class="tool-panel">
+          <div class="panel-header">Header</div>
+          <div class="panel-body">
+            <div class="inline-row">
+              <div class="form-group">
+                <label>Algorithm</label>
+                <select id="alg" class="form-select" onchange="generate()">
+                  <option value="HS256" selected>HS256</option>
+                  <option value="HS384">HS384</option>
+                  <option value="HS512">HS512</option>
+                  <option value="RS256">RS256 (header only)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Type</label>
+                <select id="typ" class="form-select" onchange="generate()">
+                  <option value="JWT" selected>JWT</option>
+                  <option value="JWS">JWS</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Header Preview</label>
+              <textarea class="form-input" id="header-preview" readonly style="min-height: 60px; resize: vertical; font-family: var(--mono); font-size: 0.8rem;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payload Panel -->
+        <div class="tool-panel">
+          <div class="panel-header">Payload Claims</div>
+          <div class="panel-body">
+            <div class="quick-claims">
+              <button class="quick-claim" onclick="addClaim('iss','')">+ iss</button>
+              <button class="quick-claim" onclick="addClaim('sub','')">+ sub</button>
+              <button class="quick-claim" onclick="addClaim('aud','')">+ aud</button>
+              <button class="quick-claim" onclick="addClaim('exp','')">+ exp</button>
+              <button class="quick-claim" onclick="addClaim('iat','')">+ iat</button>
+              <button class="quick-claim" onclick="addClaim('nbf','')">+ nbf</button>
+              <button class="quick-claim" onclick="addClaim('jti','')">+ jti</button>
+            </div>
+            <div id="claims-list" class="claims-list"></div>
+            <button class="btn" style="margin-top: 12px;" onclick="addClaim('','')">+ Add Claim</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiration -->
+      <div class="tool-panel" style="margin-bottom: 16px;">
+        <div class="panel-header">Expiration Shortcut</div>
+        <div class="panel-body">
+          <div class="expiry-row">
+            <button class="expiry-btn" onclick="setExpiry(3600)">1 hour</button>
+            <button class="expiry-btn" onclick="setExpiry(86400)">24 hours</button>
+            <button class="expiry-btn" onclick="setExpiry(604800)">7 days</button>
+            <button class="expiry-btn" onclick="setExpiry(2592000)">30 days</button>
+            <button class="expiry-btn" onclick="setExpiry(31536000)">1 year</button>
+            <button class="expiry-btn" onclick="setCustomExpiry()">Custom...</button>
+          </div>
+          <div id="custom-expiry" style="display: none;">
+            <div class="inline-row">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label>Expires at (UTC)</label>
+                <input type="datetime-local" id="custom-expiry-input" class="form-input" onchange="setExpiryFromInput()" style="font-family: var(--font);">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secret Key -->
+      <div class="tool-panel" style="margin-bottom: 16px;">
+        <div class="panel-header">Signing Secret</div>
+        <div class="panel-body">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Secret Key (HMAC)</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="secret" class="form-input" placeholder="your-256-bit-secret" oninput="generate()" style="flex: 1;">
+              <button class="btn" onclick="generateSecret()" title="Generate random secret">Random</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-bar">
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="generate()">Generate JWT</button>
+          <button class="btn" onclick="copyJWT()">Copy JWT</button>
+          <button class="btn" onclick="resetBuilder()">Clear All</button>
+        </div>
+        <span id="build-status"></span>
+      </div>
+
+      <!-- JWT Output -->
+      <div class="tool-panel">
+        <div class="panel-header">Generated JWT</div>
+        <textarea class="jwt-output-box" id="jwt-output" readonly placeholder="JWT will appear here after signing..."></textarea>
+      </div>
+
+      <!-- Decoded Preview -->
+      <div id="decoded-preview" style="margin-top: 16px; display: none;">
+        <div class="tool-layout">
+          <div class="tool-panel">
+            <div class="panel-header">Decoded Header</div>
+            <textarea class="tool-textarea" id="decoded-header" readonly style="min-height: 120px;"></textarea>
+          </div>
+          <div class="tool-panel">
+            <div class="panel-header">Decoded Payload</div>
+            <textarea class="tool-textarea" id="decoded-payload" readonly style="min-height: 120px;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VERIFY TAB -->
+    <div id="tab-verify" class="tab-content">
+      <div class="tool-panel" style="margin-bottom: 16px;">
+        <div class="panel-header">JWT Token</div>
+        <textarea class="tool-textarea" id="verify-input" style="min-height: 120px;" placeholder="Paste a JWT token to verify... (eyJhbGciOi...)" oninput="verifyJWT()"></textarea>
+      </div>
+
+      <div class="tool-panel" style="margin-bottom: 16px;">
+        <div class="panel-header">Secret Key</div>
+        <div class="panel-body">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>HMAC Secret</label>
+            <input type="text" id="verify-secret" class="form-input" placeholder="Enter the secret key used to sign this token" oninput="verifyJWT()">
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="verifyJWT()">Verify Signature</button>
+        </div>
+      </div>
+
+      <div id="verify-result" class="verify-result"></div>
+
+      <div id="verify-error" class="status status-error" style="display:none; margin-top: 8px;"></div>
+
+      <div id="verify-decoded" style="margin-top: 16px; display: none;">
+        <div class="tool-layout">
+          <div class="tool-panel">
+            <div class="panel-header">Header</div>
+            <textarea class="tool-textarea" id="verify-header" readonly style="min-height: 160px;"></textarea>
+          </div>
+          <div class="tool-panel">
+            <div class="panel-header">Payload</div>
+            <textarea class="tool-textarea" id="verify-payload" readonly style="min-height: 160px;"></textarea>
+          </div>
+        </div>
+
+        <div id="verify-claims" style="margin-top: 16px; display: none;">
+          <div class="tool-panel">
+            <div class="panel-header">Token Info</div>
+            <div id="verify-claims-info" style="padding: 16px; font-family: var(--mono); font-size: 0.85rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // --- Utility: Base64URL encode/decode ---
+    function b64urlEncode(str) {
+      return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function b64urlEncodeBytes(bytes) {
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function b64urlDecode(str) {
+      str = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (str.length % 4) str += '=';
+      return atob(str);
+    }
+
+    // --- HMAC Signing via Web Crypto ---
+    async function hmacSign(algorithm, secret, data) {
+      const algMap = { 'HS256': 'SHA-256', 'HS384': 'SHA-384', 'HS512': 'SHA-512' };
+      const shaAlg = algMap[algorithm];
+      if (!shaAlg) return null;
+
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        'raw', enc.encode(secret), { name: 'HMAC', hash: shaAlg }, false, ['sign']
+      );
+      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(data));
+      return b64urlEncodeBytes(new Uint8Array(sig));
+    }
+
+    async function hmacVerify(algorithm, secret, data, signature) {
+      const algMap = { 'HS256': 'SHA-256', 'HS384': 'SHA-384', 'HS512': 'SHA-512' };
+      const shaAlg = algMap[algorithm];
+      if (!shaAlg) return false;
+
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        'raw', enc.encode(secret), { name: 'HMAC', hash: shaAlg }, false, ['verify']
+      );
+      // Decode the signature from base64url
+      const sigStr = b64urlDecode(signature);
+      const sigBytes = new Uint8Array(sigStr.length);
+      for (let i = 0; i < sigStr.length; i++) sigBytes[i] = sigStr.charCodeAt(i);
+
+      return await crypto.subtle.verify('HMAC', key, sigBytes, enc.encode(data));
+    }
+
+    // --- Claims Management ---
+    let claims = [];
+    let claimIdCounter = 0;
+
+    function addClaim(key, value) {
+      // If key is a known timestamp claim, set smart defaults
+      const now = Math.floor(Date.now() / 1000);
+      if (key === 'iat') value = String(now);
+      if (key === 'nbf') value = String(now);
+      if (key === 'exp') value = String(now + 3600);
+      if (key === 'jti') value = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substr(2);
+
+      // Check if claim key already exists
+      if (key) {
+        const existing = claims.find(c => c.key === key);
+        if (existing) {
+          existing.value = value;
+          renderClaims();
+          generate();
+          return;
+        }
+      }
+
+      claims.push({ id: claimIdCounter++, key, value });
+      renderClaims();
+      generate();
+    }
+
+    function removeClaim(id) {
+      claims = claims.filter(c => c.id !== id);
+      renderClaims();
+      generate();
+    }
+
+    function updateClaim(id, field, val) {
+      const claim = claims.find(c => c.id === id);
+      if (claim) claim[field] = val;
+      generate();
+    }
+
+    function renderClaims() {
+      const container = document.getElementById('claims-list');
+      container.innerHTML = claims.map(c => `
+        <div class="claim-row">
+          <input type="text" class="form-input" placeholder="key" value="${escapeAttr(c.key)}"
+                 oninput="updateClaim(${c.id},'key',this.value)" style="max-width: 140px;">
+          <input type="text" class="form-input" placeholder="value" value="${escapeAttr(c.value)}"
+                 oninput="updateClaim(${c.id},'value',this.value)">
+          <button class="claim-remove" onclick="removeClaim(${c.id})" title="Remove claim">&times;</button>
+        </div>
+      `).join('');
+    }
+
+    function escapeAttr(s) {
+      return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // --- Expiration Shortcuts ---
+    function setExpiry(seconds) {
+      const exp = Math.floor(Date.now() / 1000) + seconds;
+      // Clear active states
+      document.querySelectorAll('.expiry-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('custom-expiry').style.display = 'none';
+
+      // Add or update exp claim
+      addClaim('exp', String(exp));
+
+      // Also add iat if not present
+      if (!claims.find(c => c.key === 'iat')) {
+        addClaim('iat', String(Math.floor(Date.now() / 1000)));
+      }
+    }
+
+    function setCustomExpiry() {
+      document.querySelectorAll('.expiry-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('custom-expiry').style.display = 'block';
+      // Set default to 1 hour from now
+      const d = new Date(Date.now() + 3600000);
+      document.getElementById('custom-expiry-input').value = d.toISOString().slice(0, 16);
+    }
+
+    function setExpiryFromInput() {
+      const input = document.getElementById('custom-expiry-input').value;
+      if (!input) return;
+      const ts = Math.floor(new Date(input).getTime() / 1000);
+      addClaim('exp', String(ts));
+      if (!claims.find(c => c.key === 'iat')) {
+        addClaim('iat', String(Math.floor(Date.now() / 1000)));
+      }
+    }
+
+    // --- Secret Key ---
+    function generateSecret() {
+      const arr = new Uint8Array(32);
+      crypto.getRandomValues(arr);
+      const secret = b64urlEncodeBytes(arr);
+      document.getElementById('secret').value = secret;
+      generate();
+    }
+
+    // --- JWT Generation ---
+    async function generate() {
+      const alg = document.getElementById('alg').value;
+      const typ = document.getElementById('typ').value;
+      const secret = document.getElementById('secret').value;
+
+      // Build header
+      const header = { alg: alg.replace(' (header only)', ''), typ };
+      document.getElementById('header-preview').value = JSON.stringify(header, null, 2);
+
+      // Build payload
+      const payload = {};
+      claims.forEach(c => {
+        if (c.key.trim()) {
+          // Try to parse numbers and booleans
+          let val = c.value;
+          if (/^\d+$/.test(val)) val = parseInt(val, 10);
+          else if (val === 'true') val = true;
+          else if (val === 'false') val = false;
+          else {
+            try {
+              const parsed = JSON.parse(val);
+              if (typeof parsed === 'object') val = parsed;
+            } catch(e) {}
+          }
+          payload[c.key.trim()] = val;
+        }
+      });
+
+      // Encode
+      const headerB64 = b64urlEncode(JSON.stringify(header));
+      const payloadB64 = b64urlEncode(JSON.stringify(payload));
+      const unsigned = headerB64 + '.' + payloadB64;
+
+      const actualAlg = alg.replace(' (header only)', '');
+      if (['HS256', 'HS384', 'HS512'].includes(actualAlg) && secret) {
+        const sig = await hmacSign(actualAlg, secret, unsigned);
+        const jwt = unsigned + '.' + sig;
+        document.getElementById('jwt-output').value = jwt;
+
+        // Show decoded preview
+        document.getElementById('decoded-preview').style.display = 'block';
+        document.getElementById('decoded-header').value = JSON.stringify(header, null, 2);
+        document.getElementById('decoded-payload').value = JSON.stringify(payload, null, 2);
+        showStatus('build-status', 'Generated', true);
+      } else if (actualAlg === 'RS256') {
+        document.getElementById('jwt-output').value = unsigned + '.{RS256_SIGNATURE_REQUIRES_PRIVATE_KEY}';
+        document.getElementById('decoded-preview').style.display = 'block';
+        document.getElementById('decoded-header').value = JSON.stringify(header, null, 2);
+        document.getElementById('decoded-payload').value = JSON.stringify(payload, null, 2);
+        showStatus('build-status', 'RS256 signing not supported in browser -- header/payload encoded', false);
+      } else {
+        // No secret, show unsigned
+        document.getElementById('jwt-output').value = unsigned + '.';
+        document.getElementById('decoded-preview').style.display = 'block';
+        document.getElementById('decoded-header').value = JSON.stringify(header, null, 2);
+        document.getElementById('decoded-payload').value = JSON.stringify(payload, null, 2);
+        showStatus('build-status', 'Enter a secret key to sign', false);
+      }
+    }
+
+    function showStatus(id, msg, success) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = success ? 'status status-success' : 'status status-error';
+      if (success) setTimeout(() => { el.textContent = ''; el.className = ''; }, 2000);
+    }
+
+    function copyJWT() {
+      const val = document.getElementById('jwt-output').value;
+      if (val) {
+        navigator.clipboard.writeText(val);
+        showStatus('build-status', 'Copied!', true);
+      }
+    }
+
+    function resetBuilder() {
+      claims = [];
+      claimIdCounter = 0;
+      renderClaims();
+      document.getElementById('secret').value = '';
+      document.getElementById('alg').value = 'HS256';
+      document.getElementById('typ').value = 'JWT';
+      document.getElementById('jwt-output').value = '';
+      document.getElementById('decoded-preview').style.display = 'none';
+      document.getElementById('header-preview').value = '';
+      document.getElementById('custom-expiry').style.display = 'none';
+      document.querySelectorAll('.expiry-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('build-status').textContent = '';
+      generate();
+    }
+
+    // --- Tab Switching ---
+    function switchTab(tab) {
+      document.querySelectorAll('.jwt-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    // --- Verify Tab ---
+    async function verifyJWT() {
+      const token = document.getElementById('verify-input').value.trim();
+      const secret = document.getElementById('verify-secret').value;
+      const resultEl = document.getElementById('verify-result');
+      const errorEl = document.getElementById('verify-error');
+      const decodedEl = document.getElementById('verify-decoded');
+      const claimsEl = document.getElementById('verify-claims');
+      const claimsInfoEl = document.getElementById('verify-claims-info');
+
+      errorEl.style.display = 'none';
+      resultEl.className = 'verify-result';
+      resultEl.style.display = 'none';
+
+      if (!token) {
+        decodedEl.style.display = 'none';
+        claimsEl.style.display = 'none';
+        return;
+      }
+
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        errorEl.textContent = 'Invalid JWT: expected 3 parts separated by dots';
+        errorEl.style.display = 'block';
+        decodedEl.style.display = 'none';
+        return;
+      }
+
+      try {
+        const header = JSON.parse(b64urlDecode(parts[0]));
+        const payload = JSON.parse(b64urlDecode(parts[1]));
+
+        document.getElementById('verify-header').value = JSON.stringify(header, null, 2);
+        document.getElementById('verify-payload').value = JSON.stringify(payload, null, 2);
+        decodedEl.style.display = 'block';
+
+        // Show token info
+        let info = [];
+        if (header.alg) info.push('Algorithm: ' + header.alg);
+        if (header.typ) info.push('Type: ' + header.typ);
+        if (payload.iss) info.push('Issuer: ' + payload.iss);
+        if (payload.sub) info.push('Subject: ' + payload.sub);
+        if (payload.aud) info.push('Audience: ' + (Array.isArray(payload.aud) ? payload.aud.join(', ') : payload.aud));
+        if (payload.iat) {
+          const d = new Date(payload.iat * 1000);
+          info.push('Issued: ' + d.toISOString());
+        }
+        if (payload.exp) {
+          const d = new Date(payload.exp * 1000);
+          const expired = d < new Date();
+          info.push('Expires: ' + d.toISOString() + (expired ? ' (EXPIRED)' : ' (valid)'));
+        }
+        if (payload.nbf) {
+          const d = new Date(payload.nbf * 1000);
+          info.push('Not Before: ' + d.toISOString());
+        }
+
+        if (info.length > 0) {
+          claimsInfoEl.innerHTML = info.map(i =>
+            '<div style="padding: 4px 0;' + (i.includes('EXPIRED') ? ' color: var(--error);' : '') + '">' + i + '</div>'
+          ).join('');
+          claimsEl.style.display = 'block';
+        } else {
+          claimsEl.style.display = 'none';
+        }
+
+        // Verify signature if secret provided
+        if (secret && ['HS256', 'HS384', 'HS512'].includes(header.alg)) {
+          const dataToVerify = parts[0] + '.' + parts[1];
+          const valid = await hmacVerify(header.alg, secret, dataToVerify, parts[2]);
+          if (valid) {
+            resultEl.textContent = 'Signature is VALID';
+            resultEl.className = 'verify-result verify-valid';
+          } else {
+            resultEl.textContent = 'Signature is INVALID';
+            resultEl.className = 'verify-result verify-invalid';
+          }
+        } else if (secret && header.alg === 'RS256') {
+          resultEl.textContent = 'RS256 verification is not supported in-browser';
+          resultEl.className = 'verify-result verify-invalid';
+        } else if (!secret) {
+          resultEl.textContent = 'Enter a secret key to verify the signature';
+          resultEl.className = 'verify-result';
+          resultEl.style.display = 'block';
+          resultEl.style.background = 'rgba(99, 102, 241, 0.1)';
+          resultEl.style.color = 'var(--accent)';
+        }
+      } catch (e) {
+        errorEl.textContent = 'Decode error: ' + e.message;
+        errorEl.style.display = 'block';
+        decodedEl.style.display = 'none';
+        claimsEl.style.display = 'none';
+      }
+    }
+
+    // --- Initialize ---
+    generate();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
