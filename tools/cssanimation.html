@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Animation Generator - Keyframe Builder Online | ZeroKit.dev</title>
+  <meta name="description" content="Create CSS animations visually with a keyframe editor. Adjust transform, opacity, and colors per keyframe. Copy @keyframes CSS code instantly. Free online animation generator.">
+  <link rel="canonical" href="https://zerokit.dev/tools/cssanimation.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .anim-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .anim-preview-area { display: flex; align-items: center; justify-content: center; min-height: 300px; background: #1a1a2e; position: relative; overflow: hidden; }
+    .anim-element { width: 80px; height: 80px; background: var(--accent); border-radius: 12px; }
+    .anim-controls { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .anim-controls .control-group { display: flex; flex-direction: column; gap: 4px; }
+    .anim-controls .control-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .anim-controls .control-row { display: flex; gap: 8px; align-items: center; }
+    .anim-controls select, .anim-controls input[type="number"], .anim-controls input[type="text"] {
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+      padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; font-family: var(--font); outline: none;
+    }
+    .anim-controls select:focus, .anim-controls input:focus { border-color: var(--accent); }
+    .anim-controls input[type="number"] { width: 70px; }
+    .anim-controls input[type="text"] { flex: 1; font-family: var(--mono); }
+
+    /* Keyframe timeline */
+    .keyframe-timeline { padding: 16px; }
+    .timeline-bar { position: relative; height: 32px; background: var(--surface-2); border-radius: 4px; margin-bottom: 12px; cursor: pointer; }
+    .timeline-marker {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+      width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+      border: 2px solid var(--text); cursor: pointer; z-index: 2; transition: background 0.15s;
+    }
+    .timeline-marker:hover, .timeline-marker.active { background: var(--accent-hover); box-shadow: 0 0 8px var(--accent); }
+    .timeline-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); font-family: var(--mono); padding: 0 4px; }
+
+    /* Keyframe editor */
+    .keyframe-editor { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .keyframe-editor .kf-title { font-size: 0.85rem; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+    .kf-prop-row { display: flex; gap: 8px; align-items: center; }
+    .kf-prop-row label { font-size: 0.75rem; color: var(--text-muted); min-width: 90px; }
+    .kf-prop-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+    .kf-prop-row input[type="color"] { width: 32px; height: 28px; border: none; cursor: pointer; border-radius: 4px; }
+    .kf-prop-row .kf-value { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); min-width: 50px; text-align: right; }
+    .kf-prop-row input[type="number"] {
+      width: 65px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+      padding: 4px 6px; border-radius: 4px; font-size: 0.8rem; font-family: var(--mono); outline: none;
+    }
+
+    /* Preset buttons */
+    .preset-grid { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 0 8px; }
+    .preset-btn {
+      padding: 5px 12px; background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 4px; font-size: 0.75rem; cursor: pointer;
+      font-family: var(--font); transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Playback controls */
+    .playback-controls { display: flex; gap: 8px; align-items: center; padding: 8px 0; }
+    .playback-controls .btn { padding: 6px 14px; }
+
+    /* CSS output */
+    .css-out { padding: 16px; }
+    .css-out pre {
+      background: var(--surface-2); padding: 12px; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.78rem; color: var(--text);
+      white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; line-height: 1.5;
+    }
+
+    /* Keyframe point buttons */
+    .kf-points { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+    .kf-point-btn {
+      padding: 3px 10px; background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 4px; font-size: 0.7rem; cursor: pointer;
+      font-family: var(--mono); transition: all 0.15s;
+    }
+    .kf-point-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+    .kf-point-btn:hover { border-color: var(--accent); }
+    .kf-add-btn { background: none; border: 1px dashed var(--border); color: var(--text-muted); cursor: pointer; padding: 3px 10px; border-radius: 4px; font-size: 0.7rem; }
+    .kf-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .kf-remove-btn { background: none; border: none; color: var(--error); cursor: pointer; font-size: 0.85rem; margin-left: auto; padding: 2px 6px; }
+    .kf-remove-btn:hover { opacity: 0.7; }
+
+    @media (max-width: 768px) {
+      .anim-layout { grid-template-columns: 1fr; }
+      .kf-prop-row label { min-width: 70px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Animation Generator</h1>
+    <p class="description">Build CSS keyframe animations visually. Edit keyframes, preview live, and copy the generated code.</p>
+
+    <div class="anim-layout">
+      <!-- Left Column: Controls -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <!-- Presets -->
+        <div class="tool-panel">
+          <div class="panel-header">Presets</div>
+          <div style="padding:12px 16px;">
+            <div class="preset-grid" id="presetGrid"></div>
+          </div>
+        </div>
+
+        <!-- Animation Settings -->
+        <div class="tool-panel">
+          <div class="panel-header">Animation Settings</div>
+          <div class="anim-controls">
+            <div class="control-group">
+              <label>Animation Name</label>
+              <input type="text" id="animName" value="myAnimation" oninput="rebuildAnimation()">
+            </div>
+            <div class="control-row">
+              <div class="control-group" style="flex:1;">
+                <label>Duration (s)</label>
+                <input type="number" id="animDuration" value="1" min="0.1" max="20" step="0.1" style="width:100%" oninput="rebuildAnimation()">
+              </div>
+              <div class="control-group" style="flex:1;">
+                <label>Delay (s)</label>
+                <input type="number" id="animDelay" value="0" min="0" max="10" step="0.1" style="width:100%" oninput="rebuildAnimation()">
+              </div>
+              <div class="control-group" style="flex:1;">
+                <label>Iterations</label>
+                <input type="text" id="animIterations" value="infinite" style="width:100%; font-family:var(--mono)" oninput="rebuildAnimation()">
+              </div>
+            </div>
+            <div class="control-row">
+              <div class="control-group" style="flex:1;">
+                <label>Timing Function</label>
+                <select id="animTiming" style="width:100%" onchange="handleTimingChange()">
+                  <option value="ease">ease</option>
+                  <option value="linear">linear</option>
+                  <option value="ease-in">ease-in</option>
+                  <option value="ease-out">ease-out</option>
+                  <option value="ease-in-out" selected>ease-in-out</option>
+                  <option value="cubic-bezier">cubic-bezier</option>
+                </select>
+              </div>
+              <div class="control-group" style="flex:1;">
+                <label>Direction</label>
+                <select id="animDirection" style="width:100%" onchange="rebuildAnimation()">
+                  <option value="normal">normal</option>
+                  <option value="reverse">reverse</option>
+                  <option value="alternate" selected>alternate</option>
+                  <option value="alternate-reverse">alternate-reverse</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-row">
+              <div class="control-group" style="flex:1;">
+                <label>Fill Mode</label>
+                <select id="animFill" style="width:100%" onchange="rebuildAnimation()">
+                  <option value="none">none</option>
+                  <option value="forwards" selected>forwards</option>
+                  <option value="backwards">backwards</option>
+                  <option value="both">both</option>
+                </select>
+              </div>
+              <div class="control-group" id="cubicGroup" style="flex:1; display:none;">
+                <label>cubic-bezier()</label>
+                <input type="text" id="cubicBezier" value="0.25, 0.1, 0.25, 1.0" oninput="rebuildAnimation()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyframe Editor -->
+        <div class="tool-panel">
+          <div class="panel-header">
+            Keyframes
+            <button class="btn" onclick="addKeyframePrompt()" style="padding:3px 10px; font-size:0.75rem;">+ Add</button>
+          </div>
+          <div style="padding:12px 16px;">
+            <div class="kf-points" id="kfPoints"></div>
+          </div>
+          <div class="keyframe-editor" id="kfEditor"></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Preview + Output -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="tool-panel" style="display:flex; flex-direction:column;">
+          <div class="panel-header">Preview</div>
+          <div class="anim-preview-area" style="flex:1;" id="previewArea">
+            <div class="anim-element" id="animElement"></div>
+          </div>
+          <div style="padding:12px 16px;">
+            <div class="playback-controls">
+              <button class="btn btn-primary" id="playBtn" onclick="togglePlay()">&#9654; Play</button>
+              <button class="btn" onclick="restartAnimation()">&#8634; Restart</button>
+              <span style="font-size:0.75rem; color:var(--text-muted); margin-left:auto;" id="playState">Playing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-panel">
+          <div class="panel-header">
+            Generated CSS
+            <button class="btn" onclick="copyCSS()" style="padding:3px 10px; font-size:0.75rem;">Copy CSS</button>
+          </div>
+          <div class="css-out">
+            <pre id="cssOutput"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // ---- State ----
+    let keyframes = {
+      0:   { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' },
+      100: { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' }
+    };
+    let activeKf = 0;
+    let isPlaying = true;
+    let styleEl = null;
+
+    // ---- Presets ----
+    const presets = {
+      'Bounce': {
+        settings: { duration: 1, delay: 0, timing: 'ease', direction: 'alternate', fill: 'both', iterations: 'infinite', name: 'bounce' },
+        keyframes: {
+          0:   { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          25:  { translateX: 0, translateY: -40, rotate: 0, scale: 1.1, opacity: 1, bgColor: '#6366f1' },
+          50:  { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          75:  { translateX: 0, translateY: -20, rotate: 0, scale: 1.05, opacity: 1, bgColor: '#6366f1' },
+          100: { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' }
+        }
+      },
+      'Fade In': {
+        settings: { duration: 1, delay: 0, timing: 'ease-in', direction: 'normal', fill: 'forwards', iterations: '1', name: 'fadeIn' },
+        keyframes: {
+          0:   { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 0, bgColor: '#6366f1' },
+          100: { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' }
+        }
+      },
+      'Slide In': {
+        settings: { duration: 0.6, delay: 0, timing: 'ease-out', direction: 'normal', fill: 'forwards', iterations: '1', name: 'slideIn' },
+        keyframes: {
+          0:   { translateX: -120, translateY: 0, rotate: 0, scale: 1, opacity: 0, bgColor: '#6366f1' },
+          100: { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' }
+        }
+      },
+      'Pulse': {
+        settings: { duration: 1, delay: 0, timing: 'ease-in-out', direction: 'alternate', fill: 'both', iterations: 'infinite', name: 'pulse' },
+        keyframes: {
+          0:   { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          50:  { translateX: 0, translateY: 0, rotate: 0, scale: 1.2, opacity: 0.7, bgColor: '#818cf8' },
+          100: { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' }
+        }
+      },
+      'Shake': {
+        settings: { duration: 0.5, delay: 0, timing: 'ease-in-out', direction: 'normal', fill: 'none', iterations: 'infinite', name: 'shake' },
+        keyframes: {
+          0:   { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          25:  { translateX: -10, translateY: 0, rotate: -5, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          50:  { translateX: 10, translateY: 0, rotate: 5, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          75:  { translateX: -10, translateY: 0, rotate: -5, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          100: { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' }
+        }
+      },
+      'Spin': {
+        settings: { duration: 1, delay: 0, timing: 'linear', direction: 'normal', fill: 'none', iterations: 'infinite', name: 'spin' },
+        keyframes: {
+          0:   { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          100: { translateX: 0, translateY: 0, rotate: 360, scale: 1, opacity: 1, bgColor: '#6366f1' }
+        }
+      },
+      'Flip': {
+        settings: { duration: 0.8, delay: 0, timing: 'ease-in-out', direction: 'alternate', fill: 'both', iterations: 'infinite', name: 'flip' },
+        keyframes: {
+          0:   { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' },
+          50:  { translateX: 0, translateY: 0, rotate: 180, scale: 0.8, opacity: 0.6, bgColor: '#818cf8' },
+          100: { translateX: 0, translateY: 0, rotate: 360, scale: 1, opacity: 1, bgColor: '#6366f1' }
+        }
+      }
+    };
+
+    // ---- Init ----
+    function init() {
+      renderPresets();
+      renderKfPoints();
+      renderKfEditor();
+      rebuildAnimation();
+    }
+
+    // ---- Presets Rendering ----
+    function renderPresets() {
+      const grid = document.getElementById('presetGrid');
+      grid.innerHTML = '';
+      Object.keys(presets).forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'preset-btn';
+        btn.textContent = name;
+        btn.onclick = () => applyPreset(name);
+        grid.appendChild(btn);
+      });
+    }
+
+    function applyPreset(name) {
+      const p = presets[name];
+      keyframes = JSON.parse(JSON.stringify(p.keyframes));
+      document.getElementById('animName').value = p.settings.name;
+      document.getElementById('animDuration').value = p.settings.duration;
+      document.getElementById('animDelay').value = p.settings.delay;
+      document.getElementById('animIterations').value = p.settings.iterations;
+      document.getElementById('animDirection').value = p.settings.direction;
+      document.getElementById('animFill').value = p.settings.fill;
+      if (p.settings.timing.startsWith('cubic-bezier')) {
+        document.getElementById('animTiming').value = 'cubic-bezier';
+        document.getElementById('cubicBezier').value = p.settings.timing.replace('cubic-bezier(','').replace(')','');
+        document.getElementById('cubicGroup').style.display = '';
+      } else {
+        document.getElementById('animTiming').value = p.settings.timing;
+        document.getElementById('cubicGroup').style.display = 'none';
+      }
+      activeKf = parseInt(Object.keys(keyframes)[0]);
+      renderKfPoints();
+      renderKfEditor();
+      rebuildAnimation();
+    }
+
+    // ---- Keyframe Points ----
+    function renderKfPoints() {
+      const container = document.getElementById('kfPoints');
+      container.innerHTML = '';
+      const sorted = Object.keys(keyframes).map(Number).sort((a,b) => a - b);
+      sorted.forEach(pct => {
+        const btn = document.createElement('button');
+        btn.className = 'kf-point-btn' + (pct === activeKf ? ' active' : '');
+        btn.textContent = pct + '%';
+        btn.onclick = () => { activeKf = pct; renderKfPoints(); renderKfEditor(); };
+        container.appendChild(btn);
+      });
+    }
+
+    function addKeyframePrompt() {
+      const existing = Object.keys(keyframes).map(Number).sort((a,b) => a - b);
+      // Find a good default: pick a gap
+      const candidates = [25, 50, 75, 10, 20, 30, 40, 60, 70, 80, 90];
+      let newPct = null;
+      for (const c of candidates) {
+        if (!(c in keyframes)) { newPct = c; break; }
+      }
+      if (newPct === null) {
+        // Try any percent not used
+        for (let i = 1; i < 100; i++) {
+          if (!(i in keyframes)) { newPct = i; break; }
+        }
+      }
+      if (newPct === null) return;
+
+      // Interpolate from neighbors
+      const lower = existing.filter(p => p < newPct).pop() || 0;
+      const upper = existing.find(p => p > newPct) || 100;
+      const lk = keyframes[lower] || getDefaultKf();
+      const uk = keyframes[upper] || getDefaultKf();
+      const t = (newPct - lower) / (upper - lower);
+
+      keyframes[newPct] = {
+        translateX: Math.round(lerp(lk.translateX, uk.translateX, t)),
+        translateY: Math.round(lerp(lk.translateY, uk.translateY, t)),
+        rotate: Math.round(lerp(lk.rotate, uk.rotate, t)),
+        scale: Math.round(lerp(lk.scale, uk.scale, t) * 100) / 100,
+        opacity: Math.round(lerp(lk.opacity, uk.opacity, t) * 100) / 100,
+        bgColor: lk.bgColor
+      };
+      activeKf = newPct;
+      renderKfPoints();
+      renderKfEditor();
+      rebuildAnimation();
+    }
+
+    function removeKeyframe(pct) {
+      if (pct === 0 || pct === 100) return; // don't remove start/end
+      delete keyframes[pct];
+      const sorted = Object.keys(keyframes).map(Number).sort((a,b) => a - b);
+      activeKf = sorted[0];
+      renderKfPoints();
+      renderKfEditor();
+      rebuildAnimation();
+    }
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function getDefaultKf() {
+      return { translateX: 0, translateY: 0, rotate: 0, scale: 1, opacity: 1, bgColor: '#6366f1' };
+    }
+
+    // ---- Keyframe Editor ----
+    function renderKfEditor() {
+      const editor = document.getElementById('kfEditor');
+      const kf = keyframes[activeKf];
+      if (!kf) { editor.innerHTML = '<p style="color:var(--text-muted); font-size:0.8rem;">Select a keyframe point above.</p>'; return; }
+
+      const canRemove = activeKf !== 0 && activeKf !== 100;
+
+      editor.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="kf-title">Keyframe: ${activeKf}%</span>
+          ${canRemove ? `<button class="kf-remove-btn" onclick="removeKeyframe(${activeKf})" title="Remove keyframe">&times;</button>` : ''}
+        </div>
+        <div class="kf-prop-row">
+          <label>Translate X</label>
+          <input type="range" min="-150" max="150" value="${kf.translateX}" oninput="updateKfProp('translateX', Number(this.value), this)">
+          <span class="kf-value" id="kfValTranslateX">${kf.translateX}px</span>
+        </div>
+        <div class="kf-prop-row">
+          <label>Translate Y</label>
+          <input type="range" min="-150" max="150" value="${kf.translateY}" oninput="updateKfProp('translateY', Number(this.value), this)">
+          <span class="kf-value" id="kfValTranslateY">${kf.translateY}px</span>
+        </div>
+        <div class="kf-prop-row">
+          <label>Rotate</label>
+          <input type="range" min="-360" max="360" value="${kf.rotate}" oninput="updateKfProp('rotate', Number(this.value), this)">
+          <span class="kf-value" id="kfValRotate">${kf.rotate}deg</span>
+        </div>
+        <div class="kf-prop-row">
+          <label>Scale</label>
+          <input type="range" min="0" max="300" value="${Math.round(kf.scale * 100)}" oninput="updateKfProp('scale', Number(this.value)/100, this)">
+          <span class="kf-value" id="kfValScale">${kf.scale}</span>
+        </div>
+        <div class="kf-prop-row">
+          <label>Opacity</label>
+          <input type="range" min="0" max="100" value="${Math.round(kf.opacity * 100)}" oninput="updateKfProp('opacity', Number(this.value)/100, this)">
+          <span class="kf-value" id="kfValOpacity">${kf.opacity}</span>
+        </div>
+        <div class="kf-prop-row">
+          <label>Background</label>
+          <input type="color" value="${kf.bgColor}" oninput="updateKfProp('bgColor', this.value, this)">
+          <span class="kf-value" id="kfValBgColor">${kf.bgColor}</span>
+        </div>
+      `;
+    }
+
+    function updateKfProp(prop, value, el) {
+      keyframes[activeKf][prop] = value;
+      // Update display value
+      const labels = {
+        translateX: value + 'px',
+        translateY: value + 'px',
+        rotate: value + 'deg',
+        scale: value,
+        opacity: value,
+        bgColor: value
+      };
+      const valEl = document.getElementById('kfVal' + prop.charAt(0).toUpperCase() + prop.slice(1));
+      if (valEl) valEl.textContent = labels[prop];
+      rebuildAnimation();
+    }
+
+    // ---- Timing ----
+    function handleTimingChange() {
+      const val = document.getElementById('animTiming').value;
+      document.getElementById('cubicGroup').style.display = val === 'cubic-bezier' ? '' : 'none';
+      rebuildAnimation();
+    }
+
+    function getTimingValue() {
+      const val = document.getElementById('animTiming').value;
+      if (val === 'cubic-bezier') {
+        return 'cubic-bezier(' + document.getElementById('cubicBezier').value + ')';
+      }
+      return val;
+    }
+
+    // ---- Build Animation ----
+    function rebuildAnimation() {
+      const name = document.getElementById('animName').value || 'myAnimation';
+      const duration = document.getElementById('animDuration').value;
+      const delay = document.getElementById('animDelay').value;
+      const iterations = document.getElementById('animIterations').value;
+      const timing = getTimingValue();
+      const direction = document.getElementById('animDirection').value;
+      const fill = document.getElementById('animFill').value;
+
+      // Build @keyframes
+      const sorted = Object.keys(keyframes).map(Number).sort((a,b) => a - b);
+      let kfCSS = `@keyframes ${name} {\n`;
+      sorted.forEach(pct => {
+        const kf = keyframes[pct];
+        const transform = buildTransform(kf);
+        kfCSS += `  ${pct}% {\n`;
+        if (transform) kfCSS += `    transform: ${transform};\n`;
+        kfCSS += `    opacity: ${kf.opacity};\n`;
+        kfCSS += `    background-color: ${kf.bgColor};\n`;
+        kfCSS += `  }\n`;
+      });
+      kfCSS += `}`;
+
+      // Build animation shorthand
+      const animProp = `animation: ${name} ${duration}s ${timing} ${delay}s ${iterations} ${direction} ${fill};`;
+
+      const fullCSS = kfCSS + '\n\n' + `.element {\n  ${animProp}\n}`;
+
+      // Update output
+      document.getElementById('cssOutput').textContent = fullCSS;
+
+      // Inject live style
+      injectAnimation(name, kfCSS, animProp);
+    }
+
+    function buildTransform(kf) {
+      const parts = [];
+      if (kf.translateX !== 0 || kf.translateY !== 0) {
+        parts.push(`translate(${kf.translateX}px, ${kf.translateY}px)`);
+      }
+      if (kf.rotate !== 0) {
+        parts.push(`rotate(${kf.rotate}deg)`);
+      }
+      if (kf.scale !== 1) {
+        parts.push(`scale(${kf.scale})`);
+      }
+      return parts.length ? parts.join(' ') : '';
+    }
+
+    function injectAnimation(name, kfCSS, animProp) {
+      if (styleEl) styleEl.remove();
+      styleEl = document.createElement('style');
+      styleEl.textContent = kfCSS + `\n#animElement { ${animProp} }`;
+      document.head.appendChild(styleEl);
+
+      if (isPlaying) {
+        const el = document.getElementById('animElement');
+        el.style.animationPlayState = 'running';
+      }
+    }
+
+    // ---- Playback ----
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      const el = document.getElementById('animElement');
+      const btn = document.getElementById('playBtn');
+      const state = document.getElementById('playState');
+      if (isPlaying) {
+        el.style.animationPlayState = 'running';
+        btn.innerHTML = '&#9646;&#9646; Pause';
+        state.textContent = 'Playing';
+      } else {
+        el.style.animationPlayState = 'paused';
+        btn.innerHTML = '&#9654; Play';
+        state.textContent = 'Paused';
+      }
+    }
+
+    function restartAnimation() {
+      const el = document.getElementById('animElement');
+      el.style.animation = 'none';
+      // Force reflow
+      void el.offsetHeight;
+      el.style.animation = '';
+      isPlaying = true;
+      el.style.animationPlayState = 'running';
+      document.getElementById('playBtn').innerHTML = '&#9646;&#9646; Pause';
+      document.getElementById('playState').textContent = 'Playing';
+      rebuildAnimation();
+    }
+
+    // ---- Copy ----
+    function copyCSS() {
+      const text = document.getElementById('cssOutput').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const el = document.getElementById('cssOutput');
+        const orig = el.textContent;
+        el.textContent = 'Copied!';
+        setTimeout(() => el.textContent = orig, 1000);
+      });
+    }
+
+    // ---- Start ----
+    init();
+    // Set initial play state display
+    document.getElementById('playBtn').innerHTML = '&#9646;&#9646; Pause';
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG Optimizer - Compress & Minify SVG Online | ZeroKit.dev</title>
+  <meta name="description" content="Optimize, compress, and minify SVG files online. Remove metadata, comments, editor data, and more. Free, fast, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/svgoptimizer.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 24px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+    }
+    .options-grid label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .options-grid label:hover { color: var(--text); }
+    .options-grid input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .precision-row {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .precision-row input[type="range"] {
+      flex: 1;
+      max-width: 200px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .precision-value {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      min-width: 20px;
+    }
+    .stats-bar {
+      display: flex;
+      gap: 24px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .stat-value.saved { color: var(--success); }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .preview-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .preview-panel .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .preview-area {
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: repeating-conic-gradient(var(--surface-2) 0% 25%, transparent 0% 50%) 50% / 16px 16px;
+    }
+    .preview-area svg, .preview-area img {
+      max-width: 100%;
+      max-height: 250px;
+    }
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      margin-bottom: 8px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .upload-zone input { display: none; }
+    @media (max-width: 768px) {
+      .options-grid { grid-template-columns: 1fr; }
+      .preview-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>SVG Optimizer</h1>
+    <p class="description">Optimize and compress SVG files by removing unnecessary data. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="optimize()">Optimize</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="downloadSVG()">Download</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      Drop an SVG file here or click to upload
+      <input type="file" id="fileInput" accept=".svg,image/svg+xml">
+    </div>
+
+    <div class="options-grid">
+      <label><input type="checkbox" id="optComments" checked> Remove comments</label>
+      <label><input type="checkbox" id="optMetadata" checked> Remove metadata</label>
+      <label><input type="checkbox" id="optEditorData" checked> Remove editor data</label>
+      <label><input type="checkbox" id="optEmptyGroups" checked> Remove empty groups</label>
+      <label><input type="checkbox" id="optCollapseGroups" checked> Collapse groups</label>
+      <label><input type="checkbox" id="optHidden" checked> Remove hidden elements</label>
+      <label><input type="checkbox" id="optMinify" checked> Minify (remove whitespace)</label>
+      <label><input type="checkbox" id="optDefaults" checked> Remove default attribute values</label>
+      <label><input type="checkbox" id="optColors" checked> Shorten colors (#RRGGBB &rarr; #RGB)</label>
+      <div class="precision-row">
+        <label for="optPrecision">Round numeric values &mdash; precision:</label>
+        <input type="range" id="optPrecision" min="0" max="8" value="3">
+        <span class="precision-value" id="precisionDisplay">3</span>
+      </div>
+    </div>
+
+    <div id="statsBar" class="stats-bar" style="display:none;">
+      <div class="stat-item">
+        <span class="stat-label">Original</span>
+        <span class="stat-value" id="statOriginal">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Optimized</span>
+        <span class="stat-value" id="statOptimized">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Saved</span>
+        <span class="stat-value saved" id="statSaved">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Reduction</span>
+        <span class="stat-value saved" id="statPercent">-</span>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input SVG</div>
+        <textarea class="tool-textarea" id="input" placeholder="Paste your SVG code here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Optimized SVG
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Optimized output will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="preview-grid">
+      <div class="preview-panel">
+        <div class="panel-header">Original Preview</div>
+        <div class="preview-area" id="previewOriginal"></div>
+      </div>
+      <div class="preview-panel">
+        <div class="panel-header">Optimized Preview</div>
+        <div class="preview-area" id="previewOptimized"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $fileInput = document.getElementById('fileInput');
+    const $uploadZone = document.getElementById('uploadZone');
+    const $statsBar = document.getElementById('statsBar');
+    const $precisionSlider = document.getElementById('optPrecision');
+    const $precisionDisplay = document.getElementById('precisionDisplay');
+
+    $precisionSlider.addEventListener('input', () => {
+      $precisionDisplay.textContent = $precisionSlider.value;
+    });
+
+    // File upload
+    $fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) readFile(file);
+    });
+
+    // Drag and drop
+    $uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      $uploadZone.classList.add('drag-over');
+    });
+    $uploadZone.addEventListener('dragleave', () => {
+      $uploadZone.classList.remove('drag-over');
+    });
+    $uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      $uploadZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) readFile(file);
+    });
+
+    function readFile(file) {
+      if (!file.name.endsWith('.svg') && file.type !== 'image/svg+xml') {
+        showStatus('Please upload an SVG file', false);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        $input.value = e.target.result;
+        optimize();
+      };
+      reader.readAsText(file);
+    }
+
+    // Auto-optimize on paste
+    $input.addEventListener('paste', () => setTimeout(optimize, 50));
+
+    function opt(id) { return document.getElementById(id).checked; }
+
+    function optimize() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+
+      if (!raw.includes('<svg')) {
+        showStatus('Not valid SVG', false);
+        return;
+      }
+
+      let svg = raw;
+      const originalSize = new Blob([raw]).size;
+
+      try {
+        // Remove comments
+        if (opt('optComments')) {
+          svg = svg.replace(/<!--[\s\S]*?-->/g, '');
+        }
+
+        // Remove metadata
+        if (opt('optMetadata')) {
+          svg = svg.replace(/<metadata[\s\S]*?<\/metadata>/gi, '');
+          svg = svg.replace(/<\?xml[^?]*\?>/gi, '');
+          svg = svg.replace(/<!DOCTYPE[^>]*>/gi, '');
+        }
+
+        // Remove editor data (Inkscape, Illustrator, Sketch, etc.)
+        if (opt('optEditorData')) {
+          // Remove Inkscape/Sodipodi namespaced attributes
+          svg = svg.replace(/\s+(inkscape|sodipodi|sketch|illustrator):[a-z\-]+="[^"]*"/gi, '');
+          // Remove xmlns declarations for editor namespaces
+          svg = svg.replace(/\s+xmlns:(inkscape|sodipodi|sketch|illustrator|dc|cc|rdf)="[^"]*"/gi, '');
+          // Remove Inkscape/Sodipodi elements
+          svg = svg.replace(/<(inkscape|sodipodi):[^>]*\/>/gi, '');
+          svg = svg.replace(/<(inkscape|sodipodi):[^>]*>[\s\S]*?<\/(inkscape|sodipodi):[^>]*>/gi, '');
+          // Remove namedview elements
+          svg = svg.replace(/<sodipodi:namedview[\s\S]*?\/>/gi, '');
+          svg = svg.replace(/<sodipodi:namedview[\s\S]*?<\/sodipodi:namedview>/gi, '');
+          // Remove RDF metadata
+          svg = svg.replace(/<rdf:RDF[\s\S]*?<\/rdf:RDF>/gi, '');
+          // Remove Illustrator-specific processing instructions
+          svg = svg.replace(/<\?aid [^?]*\?>/gi, '');
+          // Remove data-name attributes (common in Illustrator exports)
+          svg = svg.replace(/\s+data-name="[^"]*"/gi, '');
+          // Remove Sketch-specific attributes
+          svg = svg.replace(/\s+sketch:type="[^"]*"/gi, '');
+        }
+
+        // Remove hidden elements
+        if (opt('optHidden')) {
+          svg = svg.replace(/<[^>]+display\s*=\s*"none"[^>]*\/>/gi, '');
+          svg = svg.replace(/<[^>]+display\s*=\s*"none"[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+          svg = svg.replace(/<[^>]+visibility\s*=\s*"hidden"[^>]*\/>/gi, '');
+          svg = svg.replace(/<[^>]+visibility\s*=\s*"hidden"[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        }
+
+        // Remove empty groups
+        if (opt('optEmptyGroups')) {
+          let prev;
+          do {
+            prev = svg;
+            svg = svg.replace(/<g[^>]*>\s*<\/g>/gi, '');
+          } while (svg !== prev);
+        }
+
+        // Collapse groups (single-child groups with no attributes beyond id/class)
+        if (opt('optCollapseGroups')) {
+          let prev;
+          do {
+            prev = svg;
+            svg = svg.replace(/<g>\s*((?:(?!<g[\s>])(?!<\/g>)[\s\S])*?)\s*<\/g>/gi, '$1');
+          } while (svg !== prev);
+        }
+
+        // Remove default attribute values
+        if (opt('optDefaults')) {
+          svg = svg.replace(/\s+fill-opacity="1"/gi, '');
+          svg = svg.replace(/\s+stroke-opacity="1"/gi, '');
+          svg = svg.replace(/\s+opacity="1"/gi, '');
+          svg = svg.replace(/\s+fill-rule="nonzero"/gi, '');
+          svg = svg.replace(/\s+clip-rule="nonzero"/gi, '');
+          svg = svg.replace(/\s+stroke="none"/gi, '');
+          svg = svg.replace(/\s+stroke-width="1"/gi, '');
+          svg = svg.replace(/\s+stroke-dashoffset="0"/gi, '');
+          svg = svg.replace(/\s+stroke-linecap="butt"/gi, '');
+          svg = svg.replace(/\s+stroke-linejoin="miter"/gi, '');
+          svg = svg.replace(/\s+stroke-miterlimit="4"/gi, '');
+          svg = svg.replace(/\s+font-style="normal"/gi, '');
+          svg = svg.replace(/\s+font-weight="normal"/gi, '');
+          svg = svg.replace(/\s+font-variant="normal"/gi, '');
+          svg = svg.replace(/\s+text-decoration="none"/gi, '');
+          svg = svg.replace(/\s+text-anchor="start"/gi, '');
+          svg = svg.replace(/\s+baseline-shift="baseline"/gi, '');
+          svg = svg.replace(/\s+color-interpolation="sRGB"/gi, '');
+          svg = svg.replace(/\s+overflow="visible"/gi, '');
+        }
+
+        // Shorten colors
+        if (opt('optColors')) {
+          // #RRGGBB to #RGB when possible
+          svg = svg.replace(/#([0-9a-fA-F])\1([0-9a-fA-F])\2([0-9a-fA-F])\3/g, '#$1$2$3');
+          // Named colors to shorter hex equivalents
+          const colorMap = {
+            'white': '#fff', 'black': '#000', 'red': '#f00',
+            'blue': '#00f', 'green': '#008000', 'yellow': '#ff0',
+            'cyan': '#0ff', 'magenta': '#f0f', 'silver': '#c0c0c0',
+            'gray': '#808080', 'grey': '#808080', 'maroon': '#800000',
+            'olive': '#808000', 'lime': '#0f0', 'aqua': '#0ff',
+            'teal': '#008080', 'navy': '#000080', 'fuchsia': '#f0f',
+            'purple': '#800080'
+          };
+          for (const [name, hex] of Object.entries(colorMap)) {
+            if (hex.length < name.length) {
+              svg = svg.replace(new RegExp('(fill|stroke|color|stop-color|flood-color|lighting-color)="' + name + '"', 'gi'),
+                (m, attr) => attr + '="' + hex + '"');
+            }
+          }
+        }
+
+        // Round numeric values
+        const precision = parseInt($precisionSlider.value);
+        if (precision < 8) {
+          // Round numbers in d attributes (path data)
+          svg = svg.replace(/\bd="([^"]+)"/g, (match, d) => {
+            const rounded = d.replace(/-?\d+\.\d+/g, (num) => {
+              const r = parseFloat(parseFloat(num).toFixed(precision));
+              return String(r);
+            });
+            return 'd="' + rounded + '"';
+          });
+          // Round numbers in transform attributes
+          svg = svg.replace(/\btransform="([^"]+)"/g, (match, t) => {
+            const rounded = t.replace(/-?\d+\.\d+/g, (num) => {
+              const r = parseFloat(parseFloat(num).toFixed(precision));
+              return String(r);
+            });
+            return 'transform="' + rounded + '"';
+          });
+          // Round viewBox numbers
+          svg = svg.replace(/\bviewBox="([^"]+)"/g, (match, vb) => {
+            const rounded = vb.replace(/-?\d+\.\d+/g, (num) => {
+              const r = parseFloat(parseFloat(num).toFixed(precision));
+              return String(r);
+            });
+            return 'viewBox="' + rounded + '"';
+          });
+          // Round numeric attribute values (x, y, width, height, cx, cy, r, rx, ry, etc.)
+          svg = svg.replace(/\b(x|y|x1|y1|x2|y2|cx|cy|r|rx|ry|width|height|dx|dy|offset|points)="([^"]+)"/g, (match, attr, val) => {
+            const rounded = val.replace(/-?\d+\.\d+/g, (num) => {
+              const r = parseFloat(parseFloat(num).toFixed(precision));
+              return String(r);
+            });
+            return attr + '="' + rounded + '"';
+          });
+        }
+
+        // Minify (must be last)
+        if (opt('optMinify')) {
+          // Remove newlines and excessive whitespace
+          svg = svg.replace(/\n/g, '');
+          svg = svg.replace(/\r/g, '');
+          svg = svg.replace(/\t/g, ' ');
+          // Collapse multiple spaces to single
+          svg = svg.replace(/\s{2,}/g, ' ');
+          // Remove spaces between tags
+          svg = svg.replace(/>\s+</g, '><');
+          // Remove leading/trailing spaces in tags
+          svg = svg.replace(/\s+>/g, '>');
+          svg = svg.replace(/\s+\/>/g, '/>');
+          svg = svg.trim();
+        }
+
+        // Clean up any resulting empty lines
+        if (!opt('optMinify')) {
+          svg = svg.replace(/\n\s*\n/g, '\n');
+        }
+
+        $output.value = svg;
+
+        const optimizedSize = new Blob([svg]).size;
+        const saved = originalSize - optimizedSize;
+        const percent = originalSize > 0 ? ((saved / originalSize) * 100).toFixed(1) : 0;
+
+        // Update stats
+        $statsBar.style.display = 'flex';
+        document.getElementById('statOriginal').textContent = formatBytes(originalSize);
+        document.getElementById('statOptimized').textContent = formatBytes(optimizedSize);
+        document.getElementById('statSaved').textContent = formatBytes(saved);
+        document.getElementById('statPercent').textContent = percent + '%';
+
+        // Update previews
+        renderPreview('previewOriginal', raw);
+        renderPreview('previewOptimized', svg);
+
+        showStatus('Optimized (' + percent + '% smaller)', true);
+      } catch (e) {
+        showStatus('Error: ' + e.message, false);
+      }
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function renderPreview(containerId, svgString) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (!svgString || !svgString.includes('<svg')) return;
+
+      // Use a blob URL for safe rendering
+      const blob = new Blob([svgString], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const img = document.createElement('img');
+      img.onload = () => URL.revokeObjectURL(url);
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Preview unavailable</span>';
+      };
+      img.src = url;
+      img.alt = 'SVG Preview';
+      container.appendChild(img);
+    }
+
+    function copyOutput() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function downloadSVG() {
+      const content = $output.value;
+      if (!content) return;
+      const blob = new Blob([content], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'optimized.svg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showStatus('Downloaded!', true);
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $status.textContent = '';
+      $status.className = '';
+      $statsBar.style.display = 'none';
+      document.getElementById('previewOriginal').innerHTML = '';
+      document.getElementById('previewOptimized').innerHTML = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placeholder Image Generator - Create Dummy Images | ZeroKit.dev</title>
+  <meta name="description" content="Generate placeholder images with custom dimensions, colors, text, and formats. Download as PNG, JPEG, WebP, or SVG. Free online tool, runs in your browser.">
+  <link rel="canonical" href="https://zerokit.dev/tools/placeholder.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .placeholder-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .placeholder-controls { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .control-group { display: flex; flex-direction: column; gap: 6px; }
+    .control-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .control-group select,
+    .control-group input[type="text"],
+    .control-group input[type="number"],
+    .control-group input[type="color"] { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 4px; font-family: var(--font); font-size: 0.85rem; outline: none; }
+    .control-group select:focus,
+    .control-group input:focus { border-color: var(--accent); }
+    .control-group input[type="color"] { width: 48px; height: 36px; padding: 2px; cursor: pointer; }
+
+    .dimension-row { display: flex; gap: 12px; align-items: flex-end; }
+    .dimension-row .control-group { flex: 1; }
+    .dimension-sep { display: flex; align-items: center; padding-bottom: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; }
+
+    .color-row { display: flex; gap: 12px; align-items: flex-end; }
+    .color-row .control-group { flex: 1; }
+
+    .font-row { display: flex; gap: 12px; align-items: flex-end; }
+    .font-row .control-group:first-child { flex: 2; }
+    .font-row .control-group:last-child { flex: 1; }
+
+    .presets-section { display: flex; flex-direction: column; gap: 10px; }
+    .preset-category { font-size: 0.75rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+    .preset-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .preset-btn { padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; color: var(--text-muted); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.15s; }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+
+    .preview-area { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .canvas-wrapper { display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; }
+    .canvas-wrapper canvas { border: 1px solid var(--border); border-radius: 4px; max-width: 100%; height: auto; }
+
+    .preview-info { font-size: 0.75rem; color: var(--text-muted); font-family: var(--mono); text-align: center; }
+
+    .download-section { width: 100%; display: flex; flex-direction: column; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .download-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+    .url-section { width: 100%; }
+    .url-output { width: 100%; background: var(--surface-2); padding: 10px 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.75rem; color: var(--text); overflow-x: auto; white-space: nowrap; cursor: pointer; transition: background 0.15s; border: 1px solid var(--border); }
+    .url-output:hover { background: var(--border); }
+    .url-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+
+    @media (max-width: 768px) {
+      .placeholder-layout { grid-template-columns: 1fr; }
+      .dimension-row { flex-wrap: wrap; }
+      .color-row { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Placeholder Image Generator</h1>
+    <p class="description">Generate placeholder images with custom dimensions, colors, and text. Download in multiple formats. Everything runs locally in your browser.</p>
+
+    <div class="placeholder-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Settings</div>
+        <div class="placeholder-controls">
+
+          <div class="dimension-row">
+            <div class="control-group">
+              <label>Width (px)</label>
+              <input type="number" id="imgWidth" value="800" min="1" max="4096" oninput="render()">
+            </div>
+            <div class="dimension-sep">&times;</div>
+            <div class="control-group">
+              <label>Height (px)</label>
+              <input type="number" id="imgHeight" value="600" min="1" max="4096" oninput="render()">
+            </div>
+          </div>
+
+          <div class="color-row">
+            <div class="control-group">
+              <label>Background</label>
+              <input type="color" id="bgColor" value="#cccccc" oninput="render()">
+            </div>
+            <div class="control-group">
+              <label>Text Color</label>
+              <input type="color" id="textColor" value="#666666" oninput="render()">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Custom Text</label>
+            <input type="text" id="customText" placeholder="{width}x{height}" oninput="render()">
+          </div>
+
+          <div class="font-row">
+            <div class="control-group">
+              <label>Font Size (px)</label>
+              <input type="number" id="fontSize" value="0" min="0" max="999" oninput="render()">
+              <span style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">0 = auto</span>
+            </div>
+            <div class="control-group">
+              <label>Format</label>
+              <select id="format" onchange="render()">
+                <option value="png" selected>PNG</option>
+                <option value="jpeg">JPEG</option>
+                <option value="webp">WebP</option>
+                <option value="svg">SVG</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="presets-section">
+            <div class="control-group">
+              <label>Quick Presets</label>
+            </div>
+
+            <div class="preset-category">Social Media</div>
+            <div class="preset-btns">
+              <button class="preset-btn" onclick="applyPreset(1200, 630)">1200&times;630</button>
+              <button class="preset-btn" onclick="applyPreset(1080, 1080)">1080&times;1080</button>
+              <button class="preset-btn" onclick="applyPreset(1920, 1080)">1920&times;1080</button>
+            </div>
+
+            <div class="preset-category">App Icons</div>
+            <div class="preset-btns">
+              <button class="preset-btn" onclick="applyPreset(512, 512)">512&times;512</button>
+              <button class="preset-btn" onclick="applyPreset(192, 192)">192&times;192</button>
+            </div>
+
+            <div class="preset-category">Thumbnails</div>
+            <div class="preset-btns">
+              <button class="preset-btn" onclick="applyPreset(320, 180)">320&times;180</button>
+              <button class="preset-btn" onclick="applyPreset(640, 360)">640&times;360</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tool-panel">
+        <div class="panel-header">
+          Preview
+          <span id="status"></span>
+        </div>
+        <div class="preview-area">
+          <div class="canvas-wrapper">
+            <canvas id="previewCanvas"></canvas>
+          </div>
+
+          <div class="preview-info" id="previewInfo">800 &times; 600 px &mdash; PNG</div>
+
+          <div class="download-section">
+            <div class="download-btns">
+              <button class="btn btn-primary" onclick="downloadImage()">Download Image</button>
+              <button class="btn" onclick="copyDataUrl()">Copy Data URL</button>
+            </div>
+          </div>
+
+          <div class="url-section">
+            <div class="url-label">Shareable URL (click to copy)</div>
+            <div class="url-output" id="shareUrl" onclick="copyShareUrl()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // DOM refs
+    const $width = document.getElementById('imgWidth');
+    const $height = document.getElementById('imgHeight');
+    const $bgColor = document.getElementById('bgColor');
+    const $textColor = document.getElementById('textColor');
+    const $customText = document.getElementById('customText');
+    const $fontSize = document.getElementById('fontSize');
+    const $format = document.getElementById('format');
+    const $canvas = document.getElementById('previewCanvas');
+    const $info = document.getElementById('previewInfo');
+    const $shareUrl = document.getElementById('shareUrl');
+    const $status = document.getElementById('status');
+    const ctx = $canvas.getContext('2d');
+
+    function getWidth() { return Math.max(1, Math.min(4096, parseInt($width.value) || 800)); }
+    function getHeight() { return Math.max(1, Math.min(4096, parseInt($height.value) || 600)); }
+
+    function getDisplayText() {
+      const w = getWidth();
+      const h = getHeight();
+      const custom = $customText.value.trim();
+      if (custom) return custom;
+      return w + '\u00d7' + h;
+    }
+
+    function getAutoFontSize(w, h) {
+      const userSize = parseInt($fontSize.value) || 0;
+      if (userSize > 0) return userSize;
+      // Auto: scale based on the smaller dimension
+      const minDim = Math.min(w, h);
+      return Math.max(12, Math.floor(minDim / 8));
+    }
+
+    function render() {
+      const w = getWidth();
+      const h = getHeight();
+      const bg = $bgColor.value;
+      const tc = $textColor.value;
+      const text = getDisplayText();
+      const fs = getAutoFontSize(w, h);
+
+      // Set canvas dimensions
+      $canvas.width = w;
+      $canvas.height = h;
+
+      // Draw background
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw text
+      ctx.fillStyle = tc;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `600 ${fs}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+
+      // Word wrap if text is too wide
+      const maxWidth = w * 0.9;
+      const measured = ctx.measureText(text);
+      if (measured.width > maxWidth && text.length > 10) {
+        // Simple wrap: split in half
+        const mid = Math.floor(text.length / 2);
+        let splitIdx = text.lastIndexOf(' ', mid);
+        if (splitIdx === -1) splitIdx = mid;
+        const line1 = text.substring(0, splitIdx).trim();
+        const line2 = text.substring(splitIdx).trim();
+        const lineHeight = fs * 1.3;
+        ctx.fillText(line1, w / 2, h / 2 - lineHeight / 2, maxWidth);
+        ctx.fillText(line2, w / 2, h / 2 + lineHeight / 2, maxWidth);
+      } else {
+        ctx.fillText(text, w / 2, h / 2, maxWidth);
+      }
+
+      // Draw subtle border (1px inset)
+      ctx.strokeStyle = tc;
+      ctx.globalAlpha = 0.15;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, w - 2, h - 2);
+      ctx.globalAlpha = 1;
+
+      // Update info
+      const fmt = $format.value.toUpperCase();
+      $info.innerHTML = w + ' &times; ' + h + ' px &mdash; ' + fmt;
+
+      // Update shareable URL
+      updateShareUrl();
+    }
+
+    function updateShareUrl() {
+      const w = getWidth();
+      const h = getHeight();
+      const bg = $bgColor.value.replace('#', '');
+      const tc = $textColor.value.replace('#', '');
+      const text = $customText.value.trim();
+      const fs = parseInt($fontSize.value) || 0;
+      const fmt = $format.value;
+
+      const params = new URLSearchParams();
+      params.set('w', w);
+      params.set('h', h);
+      if (bg !== 'cccccc') params.set('bg', bg);
+      if (tc !== '666666') params.set('tc', tc);
+      if (text) params.set('text', text);
+      if (fs > 0) params.set('fs', fs);
+      if (fmt !== 'png') params.set('fmt', fmt);
+
+      const url = window.location.origin + window.location.pathname + '?' + params.toString();
+      $shareUrl.textContent = url;
+    }
+
+    function applyPreset(w, h) {
+      $width.value = w;
+      $height.value = h;
+      render();
+    }
+
+    // Download
+    function downloadImage() {
+      const w = getWidth();
+      const h = getHeight();
+      const fmt = $format.value;
+      const filename = 'placeholder-' + w + 'x' + h;
+
+      if (fmt === 'svg') {
+        downloadSVG(filename);
+        return;
+      }
+
+      const mimeMap = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' };
+      const extMap = { png: '.png', jpeg: '.jpg', webp: '.webp' };
+      const mime = mimeMap[fmt] || 'image/png';
+      const ext = extMap[fmt] || '.png';
+
+      const link = document.createElement('a');
+      link.download = filename + ext;
+      link.href = $canvas.toDataURL(mime, 0.92);
+      link.click();
+      showStatus('Downloaded!', true);
+    }
+
+    function downloadSVG(filename) {
+      const w = getWidth();
+      const h = getHeight();
+      const bg = $bgColor.value;
+      const tc = $textColor.value;
+      const text = escapeXml(getDisplayText());
+      const fs = getAutoFontSize(w, h);
+
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+      svg += `<rect width="${w}" height="${h}" fill="${bg}"/>`;
+      svg += `<rect x="1" y="1" width="${w - 2}" height="${h - 2}" fill="none" stroke="${tc}" stroke-opacity="0.15" stroke-width="2"/>`;
+      svg += `<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="${tc}" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="600" font-size="${fs}">${text}</text>`;
+      svg += '</svg>';
+
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const link = document.createElement('a');
+      link.download = filename + '.svg';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showStatus('Downloaded!', true);
+    }
+
+    function escapeXml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function copyDataUrl() {
+      const fmt = $format.value;
+      if (fmt === 'svg') {
+        const w = getWidth();
+        const h = getHeight();
+        const bg = $bgColor.value;
+        const tc = $textColor.value;
+        const text = escapeXml(getDisplayText());
+        const fs = getAutoFontSize(w, h);
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+        svg += `<rect width="${w}" height="${h}" fill="${bg}"/>`;
+        svg += `<text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="${tc}" font-family="Inter, sans-serif" font-weight="600" font-size="${fs}">${text}</text>`;
+        svg += '</svg>';
+        const dataUrl = 'data:image/svg+xml;base64,' + btoa(svg);
+        navigator.clipboard.writeText(dataUrl);
+      } else {
+        const mimeMap = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' };
+        navigator.clipboard.writeText($canvas.toDataURL(mimeMap[fmt] || 'image/png', 0.92));
+      }
+      showStatus('Copied!', true);
+    }
+
+    function copyShareUrl() {
+      const url = $shareUrl.textContent;
+      navigator.clipboard.writeText(url);
+      showStatus('URL copied!', true);
+      // Brief highlight
+      $shareUrl.style.outline = '2px solid var(--success)';
+      $shareUrl.style.outlineOffset = '2px';
+      setTimeout(() => { $shareUrl.style.outline = ''; $shareUrl.style.outlineOffset = ''; }, 800);
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+      setTimeout(() => { $status.textContent = ''; $status.className = ''; }, 2000);
+    }
+
+    // Load state from URL params
+    function loadFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('w')) $width.value = parseInt(params.get('w')) || 800;
+      if (params.has('h')) $height.value = parseInt(params.get('h')) || 600;
+      if (params.has('bg')) $bgColor.value = '#' + params.get('bg');
+      if (params.has('tc')) $textColor.value = '#' + params.get('tc');
+      if (params.has('text')) $customText.value = params.get('text');
+      if (params.has('fs')) $fontSize.value = parseInt(params.get('fs')) || 0;
+      if (params.has('fmt')) $format.value = params.get('fmt');
+    }
+
+    // Init
+    loadFromUrl();
+    render();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

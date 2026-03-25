@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aspect Ratio Calculator - Screen & Image Ratio Tool | ZeroKit.dev</title>
+  <meta name="description" content="Calculate aspect ratios, resize dimensions proportionally, and find the perfect resolution. Presets for screens, video, and social media. Free online tool.">
+  <link rel="canonical" href="https://zerokit.dev/tools/aspectratio.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .ar-section { margin-bottom: 16px; }
+    .ar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .ar-field { display: flex; flex-direction: column; gap: 4px; }
+    .ar-field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .ar-field input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .ar-field input:focus { border-color: var(--accent); }
+    .ar-field input:read-only { color: var(--accent); background: rgba(99, 102, 241, 0.08); }
+    .ar-result {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+    .ar-ratio-display {
+      text-align: center;
+    }
+    .ar-ratio-display .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .ar-ratio-display .value {
+      font-family: var(--mono);
+      font-size: 1.75rem;
+      color: var(--accent);
+      background: var(--surface-2);
+      padding: 12px 28px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .ar-ratio-display .value:hover { background: var(--border); }
+    .ar-preview-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .ar-preview-rect {
+      border: 2px solid var(--accent);
+      border-radius: 4px;
+      background: rgba(99, 102, 241, 0.08);
+      position: relative;
+      transition: width 0.3s, height 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .ar-presets { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px; }
+    .ar-presets button {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    .ar-presets button:hover, .ar-presets button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .ar-lock-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 0 12px;
+    }
+    .ar-lock-row label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .ar-lock-row input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .ar-inputs-area { padding: 16px; }
+    .ar-resize-area { padding: 16px; }
+    .ar-resize-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .ar-resize-arrow {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      padding: 4px 0;
+    }
+    .ar-table-wrap { overflow-x: auto; }
+    .ar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .ar-table th {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .ar-table td {
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: var(--mono);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .ar-table tr:last-child td { border-bottom: none; }
+    .ar-table tr:hover td { background: var(--surface-2); }
+    .ar-table .muted { color: var(--text-muted); font-family: var(--font); }
+    .ar-social-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; padding: 16px; }
+    .ar-social-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .ar-social-card:hover { border-color: var(--accent); }
+    .ar-social-card .platform {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .ar-social-card .dims {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+    }
+    .ar-social-card .use {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .ar-grid { grid-template-columns: 1fr; }
+      .ar-resize-grid { grid-template-columns: 1fr; }
+      .ar-social-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Aspect Ratio Calculator</h1>
+    <p class="description">Calculate aspect ratios, lock proportions, resize dimensions, and find the perfect resolution for screens, video, and social media.</p>
+
+    <!-- Ratio Calculator -->
+    <div class="tool-panel ar-section">
+      <div class="panel-header">Calculate Ratio</div>
+      <div class="ar-inputs-area">
+        <div class="ar-lock-row">
+          <label><input type="checkbox" id="lockRatio" onchange="onLockChange()"> Lock ratio &mdash; enter one dimension to calculate the other</label>
+        </div>
+        <div class="ar-grid">
+          <div class="ar-field">
+            <label>Width (px)</label>
+            <input type="number" id="arWidth" value="1920" min="1" oninput="onDimensionInput('width')">
+          </div>
+          <div class="ar-field">
+            <label>Height (px)</label>
+            <input type="number" id="arHeight" value="1080" min="1" oninput="onDimensionInput('height')">
+          </div>
+        </div>
+      </div>
+      <div class="ar-result">
+        <div class="ar-ratio-display">
+          <div class="label">Aspect Ratio</div>
+          <div class="value" id="ratioResult" onclick="copyText(this)">16:9</div>
+        </div>
+        <div class="ar-ratio-display">
+          <div class="label">Decimal</div>
+          <div class="value" id="decimalResult" onclick="copyText(this)">1.778</div>
+        </div>
+        <div class="ar-ratio-display">
+          <div class="label">Pixels</div>
+          <div class="value" id="pixelResult" onclick="copyText(this)">2,073,600</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Preview -->
+    <div class="tool-panel ar-section">
+      <div class="panel-header">Visual Preview</div>
+      <div class="ar-preview-box">
+        <div class="ar-preview-rect" id="previewRect">16:9</div>
+      </div>
+    </div>
+
+    <!-- Common Presets -->
+    <div class="tool-panel ar-section">
+      <div class="panel-header">Common Ratio Presets</div>
+      <div class="ar-presets" id="presetBtns">
+        <button onclick="applyPreset(16,9)" class="active">16:9</button>
+        <button onclick="applyPreset(4,3)">4:3</button>
+        <button onclick="applyPreset(1,1)">1:1</button>
+        <button onclick="applyPreset(21,9)">21:9</button>
+        <button onclick="applyPreset(9,16)">9:16</button>
+        <button onclick="applyPreset(3,2)">3:2</button>
+        <button onclick="applyPreset(5,4)">5:4</button>
+        <button onclick="applyPreset(32,9)">32:9</button>
+        <button onclick="applyPreset(2,1)">2:1</button>
+        <button onclick="applyPreset(1,2)">1:2</button>
+      </div>
+    </div>
+
+    <!-- Resize Calculator -->
+    <div class="tool-panel ar-section">
+      <div class="panel-header">Resize Calculator</div>
+      <div class="ar-resize-area">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Enter current dimensions and a target width or height to calculate the other dimension while maintaining the aspect ratio.</p>
+        <div class="ar-resize-grid">
+          <div class="ar-field">
+            <label>Current Width</label>
+            <input type="number" id="resizeCurW" value="1920" min="1" oninput="calcResize()">
+          </div>
+          <div class="ar-field">
+            <label>Current Height</label>
+            <input type="number" id="resizeCurH" value="1080" min="1" oninput="calcResize()">
+          </div>
+          <div class="ar-resize-arrow">&#8595; resize to &#8595;</div>
+          <div class="ar-field">
+            <label>Target Width</label>
+            <input type="number" id="resizeTargetW" min="1" placeholder="Enter width..." oninput="calcResizeFromW()">
+          </div>
+          <div class="ar-field">
+            <label>Target Height</label>
+            <input type="number" id="resizeTargetH" min="1" placeholder="Enter height..." oninput="calcResizeFromH()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen / Video Resolutions -->
+    <div class="tool-panel ar-section">
+      <div class="panel-header">Common Screen &amp; Video Resolutions</div>
+      <div class="ar-table-wrap">
+        <table class="ar-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Resolution</th>
+              <th>Ratio</th>
+              <th>Megapixels</th>
+              <th>Use</th>
+            </tr>
+          </thead>
+          <tbody id="resTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Social Media Presets -->
+    <div class="tool-panel ar-section">
+      <div class="panel-header">Social Media Image Sizes</div>
+      <div class="ar-social-grid" id="socialGrid"></div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // === Elements ===
+    const $w = document.getElementById('arWidth');
+    const $h = document.getElementById('arHeight');
+    const $lock = document.getElementById('lockRatio');
+    const $ratio = document.getElementById('ratioResult');
+    const $decimal = document.getElementById('decimalResult');
+    const $pixels = document.getElementById('pixelResult');
+    const $preview = document.getElementById('previewRect');
+
+    let lockedRatio = null; // { w, h } simplified ratio when locked
+
+    // === GCD ===
+    function gcd(a, b) {
+      a = Math.abs(Math.round(a));
+      b = Math.abs(Math.round(b));
+      while (b) { [a, b] = [b, a % b]; }
+      return a;
+    }
+
+    // === Simplify Ratio ===
+    function simplify(w, h) {
+      if (!w || !h) return { rw: 0, rh: 0 };
+      const d = gcd(w, h);
+      return { rw: w / d, rh: h / d };
+    }
+
+    // === Friendly Ratio ===
+    // Tries to find a well-known ratio close to the exact one
+    function friendlyRatio(w, h) {
+      const { rw, rh } = simplify(w, h);
+      const knownRatios = [
+        [16, 9], [4, 3], [1, 1], [21, 9], [9, 16], [3, 2],
+        [5, 4], [32, 9], [2, 1], [1, 2], [3, 4], [2, 3],
+        [16, 10], [5, 3], [17, 9], [18, 9], [19.5, 9], [4, 5]
+      ];
+      const dec = w / h;
+      for (const [kw, kh] of knownRatios) {
+        if (Math.abs(dec - kw / kh) < 0.01) return `${kw}:${kh}`;
+      }
+      // If simplified ratio components are small enough, show them
+      if (rw <= 100 && rh <= 100) return `${rw}:${rh}`;
+      // Otherwise show approximate decimal
+      return `${rw}:${rh}`;
+    }
+
+    // === Update Display ===
+    function updateDisplay() {
+      const w = parseInt($w.value) || 0;
+      const h = parseInt($h.value) || 0;
+      if (w <= 0 || h <= 0) return;
+
+      $ratio.textContent = friendlyRatio(w, h);
+      $decimal.textContent = (w / h).toFixed(3);
+      $pixels.textContent = (w * h).toLocaleString();
+      updatePreview(w, h);
+      highlightPreset(w, h);
+    }
+
+    // === Preview ===
+    function updatePreview(w, h) {
+      const maxW = 360, maxH = 200;
+      let pw, ph;
+      if (w / h > maxW / maxH) {
+        pw = maxW;
+        ph = Math.round(maxW * h / w);
+      } else {
+        ph = maxH;
+        pw = Math.round(maxH * w / h);
+      }
+      pw = Math.max(pw, 30);
+      ph = Math.max(ph, 30);
+      $preview.style.width = pw + 'px';
+      $preview.style.height = ph + 'px';
+      $preview.textContent = friendlyRatio(w, h);
+    }
+
+    // === Highlight Active Preset ===
+    function highlightPreset(w, h) {
+      const dec = w / h;
+      const btns = document.querySelectorAll('#presetBtns button');
+      btns.forEach(btn => {
+        const txt = btn.textContent;
+        const [pw, ph] = txt.split(':').map(Number);
+        btn.classList.toggle('active', Math.abs(dec - pw / ph) < 0.01);
+      });
+    }
+
+    // === Dimension Input Handler ===
+    function onDimensionInput(changed) {
+      if ($lock.checked && lockedRatio) {
+        if (changed === 'width') {
+          const w = parseInt($w.value) || 0;
+          if (w > 0) $h.value = Math.round(w * lockedRatio.h / lockedRatio.w);
+        } else {
+          const h = parseInt($h.value) || 0;
+          if (h > 0) $w.value = Math.round(h * lockedRatio.w / lockedRatio.h);
+        }
+      }
+      updateDisplay();
+    }
+
+    // === Lock Change ===
+    function onLockChange() {
+      if ($lock.checked) {
+        const w = parseInt($w.value) || 0;
+        const h = parseInt($h.value) || 0;
+        if (w > 0 && h > 0) {
+          const { rw, rh } = simplify(w, h);
+          lockedRatio = { w: rw, h: rh };
+        }
+      } else {
+        lockedRatio = null;
+      }
+    }
+
+    // === Apply Preset ===
+    function applyPreset(rw, rh) {
+      // Set ratio, keep width, calculate height
+      const w = parseInt($w.value) || 1920;
+      const newH = Math.round(w * rh / rw);
+      $w.value = w;
+      $h.value = newH;
+      lockedRatio = { w: rw, h: rh };
+      $lock.checked = true;
+      updateDisplay();
+    }
+
+    // === Resize Calculator ===
+    function calcResize() {
+      // When current dims change, clear targets
+      document.getElementById('resizeTargetW').value = '';
+      document.getElementById('resizeTargetH').value = '';
+    }
+
+    function calcResizeFromW() {
+      const cw = parseInt(document.getElementById('resizeCurW').value) || 0;
+      const ch = parseInt(document.getElementById('resizeCurH').value) || 0;
+      const tw = parseInt(document.getElementById('resizeTargetW').value) || 0;
+      if (cw > 0 && ch > 0 && tw > 0) {
+        document.getElementById('resizeTargetH').value = Math.round(tw * ch / cw);
+      }
+    }
+
+    function calcResizeFromH() {
+      const cw = parseInt(document.getElementById('resizeCurW').value) || 0;
+      const ch = parseInt(document.getElementById('resizeCurH').value) || 0;
+      const th = parseInt(document.getElementById('resizeTargetH').value) || 0;
+      if (cw > 0 && ch > 0 && th > 0) {
+        document.getElementById('resizeTargetW').value = Math.round(th * cw / ch);
+      }
+    }
+
+    // === Copy Utility ===
+    function copyText(el) {
+      navigator.clipboard.writeText(el.textContent);
+      const orig = el.textContent;
+      el.textContent = 'Copied!';
+      setTimeout(() => el.textContent = orig, 800);
+    }
+
+    // === Resolution Reference Table ===
+    const resolutions = [
+      ['SD (480p)', 640, 480, '4:3', 'Legacy TV / DVD'],
+      ['HD (720p)', 1280, 720, '16:9', 'YouTube / Streaming'],
+      ['Full HD (1080p)', 1920, 1080, '16:9', 'Standard Monitor / Blu-ray'],
+      ['2K / QHD (1440p)', 2560, 1440, '16:9', 'Gaming Monitor'],
+      ['4K UHD (2160p)', 3840, 2160, '16:9', 'Premium Display / Netflix 4K'],
+      ['8K UHD (4320p)', 7680, 4320, '16:9', 'Future-proof / Cinema'],
+      ['Ultrawide QHD', 3440, 1440, '21:9', 'Ultrawide Monitor'],
+      ['Super Ultrawide', 5120, 1440, '32:9', 'Super Ultrawide Monitor'],
+      ['DCI 2K', 2048, 1080, '17:9', 'Digital Cinema'],
+      ['DCI 4K', 4096, 2160, '17:9', 'Digital Cinema'],
+      ['WXGA', 1366, 768, '16:9', 'Laptop'],
+      ['WUXGA', 1920, 1200, '16:10', 'Productivity Monitor'],
+      ['MacBook Air 13"', 2560, 1664, '3:2', 'Apple Laptop'],
+      ['MacBook Pro 16"', 3456, 2234, '3:2', 'Apple Laptop'],
+      ['iPad Pro 12.9"', 2048, 2732, '3:4', 'Apple Tablet'],
+      ['iPhone 15 Pro', 1179, 2556, '9:19.5', 'Apple Phone'],
+      ['Instagram Square', 1080, 1080, '1:1', 'Social Media'],
+      ['Instagram Story', 1080, 1920, '9:16', 'Social Media / TikTok'],
+    ];
+
+    (function buildResTable() {
+      const tbody = document.getElementById('resTable');
+      resolutions.forEach(([name, w, h, ratio, use]) => {
+        const mp = ((w * h) / 1e6).toFixed(1);
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = () => {
+          $w.value = w;
+          $h.value = h;
+          updateDisplay();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        tr.innerHTML = `<td class="muted">${name}</td><td>${w} x ${h}</td><td>${ratio}</td><td>${mp} MP</td><td class="muted">${use}</td>`;
+        tbody.appendChild(tr);
+      });
+    })();
+
+    // === Social Media Presets ===
+    const socialSizes = [
+      { platform: 'Facebook', use: 'Cover Photo', w: 820, h: 312 },
+      { platform: 'Facebook', use: 'Post Image', w: 1200, h: 630 },
+      { platform: 'Facebook', use: 'Profile Photo', w: 170, h: 170 },
+      { platform: 'Instagram', use: 'Square Post', w: 1080, h: 1080 },
+      { platform: 'Instagram', use: 'Portrait Post', w: 1080, h: 1350 },
+      { platform: 'Instagram', use: 'Story / Reel', w: 1080, h: 1920 },
+      { platform: 'Twitter / X', use: 'Post Image', w: 1600, h: 900 },
+      { platform: 'Twitter / X', use: 'Header Photo', w: 1500, h: 500 },
+      { platform: 'Twitter / X', use: 'Profile Photo', w: 400, h: 400 },
+      { platform: 'YouTube', use: 'Thumbnail', w: 1280, h: 720 },
+      { platform: 'YouTube', use: 'Channel Banner', w: 2560, h: 1440 },
+      { platform: 'LinkedIn', use: 'Post Image', w: 1200, h: 627 },
+      { platform: 'LinkedIn', use: 'Cover Photo', w: 1584, h: 396 },
+      { platform: 'TikTok', use: 'Video', w: 1080, h: 1920 },
+      { platform: 'Pinterest', use: 'Pin', w: 1000, h: 1500 },
+      { platform: 'Twitch', use: 'Profile Banner', w: 1200, h: 480 },
+    ];
+
+    (function buildSocialGrid() {
+      const grid = document.getElementById('socialGrid');
+      socialSizes.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'ar-social-card';
+        card.onclick = () => {
+          $w.value = s.w;
+          $h.value = s.h;
+          $lock.checked = false;
+          lockedRatio = null;
+          updateDisplay();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        card.innerHTML = `<div class="platform">${s.platform}</div><div class="dims">${s.w} x ${s.h}</div><div class="use">${s.use}</div>`;
+        grid.appendChild(card);
+      });
+    })();
+
+    // === Initialize ===
+    updateDisplay();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Border Radius Generator - Visual Radius Builder | ZeroKit.dev</title>
+  <meta name="description" content="Create CSS border-radius visually with per-corner controls. Build pills, circles, squircles, and organic shapes. Copy CSS code instantly. Free online border radius generator.">
+  <link rel="canonical" href="https://zerokit.dev/tools/borderradius.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .br-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .br-preview-area { display: flex; align-items: center; justify-content: center; min-height: 350px; background: #1a1a2e; position: relative; }
+    .br-box { width: 180px; height: 180px; background: var(--accent); transition: border-radius 0.15s, width 0.15s, height 0.15s, background 0.15s; }
+    .br-controls { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .slider-group { display: flex; flex-direction: column; gap: 4px; }
+    .slider-group .slider-header { display: flex; justify-content: space-between; align-items: center; }
+    .slider-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .slider-group .slider-value { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); }
+    .slider-group input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .br-row { display: flex; gap: 12px; align-items: center; }
+    .br-row input[type="color"] { width: 36px; height: 30px; border: none; cursor: pointer; border-radius: 4px; }
+    .br-row label { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .css-out { padding: 16px; }
+    .css-out pre { background: var(--surface-2); padding: 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; color: var(--text); cursor: pointer; white-space: pre-wrap; word-break: break-all; }
+    .br-presets { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 0 8px; }
+    .br-preset { min-width: 64px; height: 32px; background: var(--surface-2); border-radius: 4px; cursor: pointer; border: 1px solid var(--border); transition: border-color 0.15s; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); font-family: var(--font); display: flex; align-items: center; justify-content: center; padding: 0 10px; }
+    .br-preset:hover, .br-preset.active { border-color: var(--accent); color: var(--accent); }
+    .corner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .corner-group { background: var(--surface-2); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .corner-group .corner-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+    .corner-group input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .corner-group .slider-value { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); text-align: right; }
+    .link-toggle { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 0; }
+    .link-toggle button { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+    .link-toggle button.linked { border-color: var(--accent); color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+    .link-toggle button:hover { border-color: var(--accent); }
+    .advanced-toggle { font-size: 0.8rem; color: var(--text-muted); cursor: pointer; background: none; border: none; font-family: var(--font); padding: 4px 0; transition: color 0.15s; }
+    .advanced-toggle:hover { color: var(--text); }
+    .advanced-section { display: none; }
+    .advanced-section.visible { display: block; }
+    .hv-corner { display: flex; gap: 6px; }
+    .hv-corner .hv-input { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .hv-corner .hv-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .hv-corner input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .section-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; padding-top: 4px; }
+    .size-controls { display: flex; gap: 12px; }
+    .size-controls .size-field { flex: 1; }
+    .size-controls .size-field label { display: block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+    .size-controls .size-field input[type="number"] { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 6px 8px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; outline: none; }
+    .size-controls .size-field input[type="number"]:focus { border-color: var(--accent); }
+    .copy-btn { width: 100%; padding: 8px; background: var(--accent); border: none; border-radius: 6px; color: white; font-weight: 600; font-size: 0.8rem; cursor: pointer; font-family: var(--font); transition: background 0.15s; }
+    .copy-btn:hover { background: var(--accent-hover); }
+    @media (max-width: 768px) { .br-layout { grid-template-columns: 1fr; } .corner-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Border Radius Generator</h1>
+    <p class="description">Design border-radius visually with per-corner control. Build pills, circles, organic shapes, and more. Copy CSS with one click.</p>
+
+    <div class="br-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Controls</div>
+        <div class="br-controls">
+          <div class="section-label">Presets</div>
+          <div class="br-presets" id="presets"></div>
+
+          <div class="link-toggle">
+            <button id="linkBtn" class="linked" onclick="toggleLink()">
+              <svg id="linkIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span id="linkLabel">Linked</span>
+            </button>
+          </div>
+
+          <!-- Linked single slider -->
+          <div id="linkedControl">
+            <div class="slider-group">
+              <div class="slider-header"><label>All Corners</label><span class="slider-value" id="allVal">12px</span></div>
+              <input type="range" id="allCorners" min="0" max="150" value="12" oninput="updateAllCorners(this.value)">
+            </div>
+          </div>
+
+          <!-- Individual corner sliders -->
+          <div id="individualControls" style="display:none;">
+            <div class="corner-grid">
+              <div class="corner-group">
+                <span class="corner-label">Top Left</span>
+                <div class="slider-header"><span></span><span class="slider-value" id="tlVal">12px</span></div>
+                <input type="range" id="tl" min="0" max="150" value="12" oninput="updateCorner()">
+              </div>
+              <div class="corner-group">
+                <span class="corner-label">Top Right</span>
+                <div class="slider-header"><span></span><span class="slider-value" id="trVal">12px</span></div>
+                <input type="range" id="tr" min="0" max="150" value="12" oninput="updateCorner()">
+              </div>
+              <div class="corner-group">
+                <span class="corner-label">Bottom Right</span>
+                <div class="slider-header"><span></span><span class="slider-value" id="brVal">12px</span></div>
+                <input type="range" id="br" min="0" max="150" value="12" oninput="updateCorner()">
+              </div>
+              <div class="corner-group">
+                <span class="corner-label">Bottom Left</span>
+                <div class="slider-header"><span></span><span class="slider-value" id="blVal">12px</span></div>
+                <input type="range" id="bl" min="0" max="150" value="12" oninput="updateCorner()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced: horizontal/vertical per corner -->
+          <button class="advanced-toggle" id="advToggle" onclick="toggleAdvanced()">&#9654; Advanced (H/V per corner)</button>
+          <div class="advanced-section" id="advSection">
+            <div class="corner-grid">
+              <div class="corner-group">
+                <span class="corner-label">Top Left</span>
+                <div class="hv-corner">
+                  <div class="hv-input">
+                    <span class="hv-label">H</span>
+                    <input type="range" id="tlH" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                  <div class="hv-input">
+                    <span class="hv-label">V</span>
+                    <input type="range" id="tlV" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                </div>
+                <span class="slider-value" id="tlHVVal">12px / 12px</span>
+              </div>
+              <div class="corner-group">
+                <span class="corner-label">Top Right</span>
+                <div class="hv-corner">
+                  <div class="hv-input">
+                    <span class="hv-label">H</span>
+                    <input type="range" id="trH" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                  <div class="hv-input">
+                    <span class="hv-label">V</span>
+                    <input type="range" id="trV" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                </div>
+                <span class="slider-value" id="trHVVal">12px / 12px</span>
+              </div>
+              <div class="corner-group">
+                <span class="corner-label">Bottom Right</span>
+                <div class="hv-corner">
+                  <div class="hv-input">
+                    <span class="hv-label">H</span>
+                    <input type="range" id="brH" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                  <div class="hv-input">
+                    <span class="hv-label">V</span>
+                    <input type="range" id="brV" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                </div>
+                <span class="slider-value" id="brHVVal">12px / 12px</span>
+              </div>
+              <div class="corner-group">
+                <span class="corner-label">Bottom Left</span>
+                <div class="hv-corner">
+                  <div class="hv-input">
+                    <span class="hv-label">H</span>
+                    <input type="range" id="blH" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                  <div class="hv-input">
+                    <span class="hv-label">V</span>
+                    <input type="range" id="blV" min="0" max="150" value="12" oninput="updateAdvanced()">
+                  </div>
+                </div>
+                <span class="slider-value" id="blHVVal">12px / 12px</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-label">Preview Box</div>
+          <div class="size-controls">
+            <div class="size-field">
+              <label>Width (px)</label>
+              <input type="number" id="boxWidth" value="180" min="40" max="400" oninput="updateBoxSize()">
+            </div>
+            <div class="size-field">
+              <label>Height (px)</label>
+              <input type="number" id="boxHeight" value="180" min="40" max="400" oninput="updateBoxSize()">
+            </div>
+          </div>
+          <div class="br-row">
+            <input type="color" id="boxColor" value="#6366f1" onchange="updateBoxColor()">
+            <label>Box Color</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-panel" style="display:flex; flex-direction:column;">
+        <div class="panel-header">Preview</div>
+        <div class="br-preview-area" style="flex:1;">
+          <div class="br-box" id="previewBox"></div>
+        </div>
+        <div class="css-out">
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Generated CSS</div>
+          <pre id="cssOutput"></pre>
+          <div style="margin-top:8px;">
+            <button class="copy-btn" onclick="copyCSS()">Copy CSS</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // State
+    let linked = true;
+    let advancedMode = false;
+
+    // Corner values (simple mode)
+    const corners = { tl: 12, tr: 12, br: 12, bl: 12 };
+    // Corner values (advanced H/V mode)
+    const cornersHV = {
+      tlH: 12, tlV: 12,
+      trH: 12, trV: 12,
+      brH: 12, brV: 12,
+      blH: 12, blV: 12
+    };
+
+    // Presets
+    const presetData = [
+      { name: 'Pill', tl: 150, tr: 150, br: 150, bl: 150, adv: false },
+      { name: 'Circle', tl: 50, tr: 50, br: 50, bl: 50, adv: false, unit: '%' },
+      { name: 'Squircle', tl: 30, tr: 30, br: 30, bl: 30, adv: false },
+      { name: 'Leaf', tl: 0, tr: 80, br: 0, bl: 80, adv: false },
+      { name: 'Drop', tlH: 0, tlV: 0, trH: 100, trV: 100, brH: 100, brV: 100, blH: 100, blV: 100, adv: true },
+    ];
+
+    function renderPresets() {
+      const container = document.getElementById('presets');
+      presetData.forEach((p, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'br-preset';
+        btn.textContent = p.name;
+        btn.onclick = () => applyPreset(p);
+        container.appendChild(btn);
+      });
+    }
+
+    function applyPreset(p) {
+      if (p.adv) {
+        // Switch to advanced mode
+        if (!advancedMode) toggleAdvanced();
+        if (linked) toggleLink();
+
+        cornersHV.tlH = p.tlH; cornersHV.tlV = p.tlV;
+        cornersHV.trH = p.trH; cornersHV.trV = p.trV;
+        cornersHV.brH = p.brH; cornersHV.brV = p.brV;
+        cornersHV.blH = p.blH; cornersHV.blV = p.blV;
+
+        document.getElementById('tlH').value = p.tlH;
+        document.getElementById('tlV').value = p.tlV;
+        document.getElementById('trH').value = p.trH;
+        document.getElementById('trV').value = p.trV;
+        document.getElementById('brH').value = p.brH;
+        document.getElementById('brV').value = p.brV;
+        document.getElementById('blH').value = p.blH;
+        document.getElementById('blV').value = p.blV;
+
+        updateAdvanced();
+      } else {
+        // Switch to simple mode if in advanced
+        if (advancedMode) toggleAdvanced();
+
+        if (p.unit === '%') {
+          // Circle: 50% — set sliders to 50 but render as %
+          corners.tl = p.tl; corners.tr = p.tr; corners.br = p.br; corners.bl = p.bl;
+        } else {
+          corners.tl = p.tl; corners.tr = p.tr; corners.br = p.br; corners.bl = p.bl;
+        }
+
+        // Check if all corners same — if so, link
+        if (p.tl === p.tr && p.tr === p.br && p.br === p.bl) {
+          if (!linked) toggleLink();
+          document.getElementById('allCorners').value = p.tl;
+          syncSimpleSliders(p.tl);
+        } else {
+          if (linked) toggleLink();
+          document.getElementById('tl').value = p.tl;
+          document.getElementById('tr').value = p.tr;
+          document.getElementById('br').value = p.br;
+          document.getElementById('bl').value = p.bl;
+        }
+
+        // Sync advanced sliders too
+        cornersHV.tlH = p.tl; cornersHV.tlV = p.tl;
+        cornersHV.trH = p.tr; cornersHV.trV = p.tr;
+        cornersHV.brH = p.br; cornersHV.brV = p.br;
+        cornersHV.blH = p.bl; cornersHV.blV = p.bl;
+        syncAdvSliders();
+
+        if (p.unit === '%') {
+          applyRadiusPercent(p.tl, p.tr, p.br, p.bl);
+        } else {
+          applyRadius();
+        }
+      }
+      highlightPreset(p.name);
+    }
+
+    function highlightPreset(name) {
+      document.querySelectorAll('.br-preset').forEach(b => {
+        b.classList.toggle('active', b.textContent === name);
+      });
+    }
+
+    function clearPresetHighlight() {
+      document.querySelectorAll('.br-preset').forEach(b => b.classList.remove('active'));
+    }
+
+    function toggleLink() {
+      linked = !linked;
+      const btn = document.getElementById('linkBtn');
+      const label = document.getElementById('linkLabel');
+      if (linked) {
+        btn.classList.add('linked');
+        label.textContent = 'Linked';
+        document.getElementById('linkedControl').style.display = '';
+        document.getElementById('individualControls').style.display = 'none';
+        // Sync to current tl value
+        const val = corners.tl;
+        document.getElementById('allCorners').value = val;
+        syncSimpleSliders(val);
+        updateAllCorners(val);
+      } else {
+        btn.classList.remove('linked');
+        label.textContent = 'Unlinked';
+        document.getElementById('linkedControl').style.display = 'none';
+        document.getElementById('individualControls').style.display = '';
+        // Set individual sliders to current values
+        document.getElementById('tl').value = corners.tl;
+        document.getElementById('tr').value = corners.tr;
+        document.getElementById('br').value = corners.br;
+        document.getElementById('bl').value = corners.bl;
+        updateCorner();
+      }
+    }
+
+    function toggleAdvanced() {
+      advancedMode = !advancedMode;
+      const section = document.getElementById('advSection');
+      const toggle = document.getElementById('advToggle');
+      if (advancedMode) {
+        section.classList.add('visible');
+        toggle.innerHTML = '&#9660; Advanced (H/V per corner)';
+        // Sync advanced sliders from simple values
+        syncAdvSliders();
+      } else {
+        section.classList.remove('visible');
+        toggle.innerHTML = '&#9654; Advanced (H/V per corner)';
+      }
+    }
+
+    function syncAdvSliders() {
+      document.getElementById('tlH').value = cornersHV.tlH;
+      document.getElementById('tlV').value = cornersHV.tlV;
+      document.getElementById('trH').value = cornersHV.trH;
+      document.getElementById('trV').value = cornersHV.trV;
+      document.getElementById('brH').value = cornersHV.brH;
+      document.getElementById('brV').value = cornersHV.brV;
+      document.getElementById('blH').value = cornersHV.blH;
+      document.getElementById('blV').value = cornersHV.blV;
+      updateAdvancedLabels();
+    }
+
+    function syncSimpleSliders(val) {
+      corners.tl = val; corners.tr = val; corners.br = val; corners.bl = val;
+      document.getElementById('tl').value = val;
+      document.getElementById('tr').value = val;
+      document.getElementById('br').value = val;
+      document.getElementById('bl').value = val;
+    }
+
+    function updateAllCorners(val) {
+      val = parseInt(val);
+      document.getElementById('allVal').textContent = val + 'px';
+      syncSimpleSliders(val);
+      cornersHV.tlH = val; cornersHV.tlV = val;
+      cornersHV.trH = val; cornersHV.trV = val;
+      cornersHV.brH = val; cornersHV.brV = val;
+      cornersHV.blH = val; cornersHV.blV = val;
+      syncAdvSliders();
+      applyRadius();
+      clearPresetHighlight();
+    }
+
+    function updateCorner() {
+      corners.tl = parseInt(document.getElementById('tl').value);
+      corners.tr = parseInt(document.getElementById('tr').value);
+      corners.br = parseInt(document.getElementById('br').value);
+      corners.bl = parseInt(document.getElementById('bl').value);
+
+      document.getElementById('tlVal').textContent = corners.tl + 'px';
+      document.getElementById('trVal').textContent = corners.tr + 'px';
+      document.getElementById('brVal').textContent = corners.br + 'px';
+      document.getElementById('blVal').textContent = corners.bl + 'px';
+
+      // Sync advanced sliders
+      cornersHV.tlH = corners.tl; cornersHV.tlV = corners.tl;
+      cornersHV.trH = corners.tr; cornersHV.trV = corners.tr;
+      cornersHV.brH = corners.br; cornersHV.brV = corners.br;
+      cornersHV.blH = corners.bl; cornersHV.blV = corners.bl;
+      syncAdvSliders();
+      applyRadius();
+      clearPresetHighlight();
+    }
+
+    function updateAdvanced() {
+      cornersHV.tlH = parseInt(document.getElementById('tlH').value);
+      cornersHV.tlV = parseInt(document.getElementById('tlV').value);
+      cornersHV.trH = parseInt(document.getElementById('trH').value);
+      cornersHV.trV = parseInt(document.getElementById('trV').value);
+      cornersHV.brH = parseInt(document.getElementById('brH').value);
+      cornersHV.brV = parseInt(document.getElementById('brV').value);
+      cornersHV.blH = parseInt(document.getElementById('blH').value);
+      cornersHV.blV = parseInt(document.getElementById('blV').value);
+      updateAdvancedLabels();
+      applyAdvancedRadius();
+      clearPresetHighlight();
+    }
+
+    function updateAdvancedLabels() {
+      document.getElementById('tlHVVal').textContent = cornersHV.tlH + 'px / ' + cornersHV.tlV + 'px';
+      document.getElementById('trHVVal').textContent = cornersHV.trH + 'px / ' + cornersHV.trV + 'px';
+      document.getElementById('brHVVal').textContent = cornersHV.brH + 'px / ' + cornersHV.brV + 'px';
+      document.getElementById('blHVVal').textContent = cornersHV.blH + 'px / ' + cornersHV.blV + 'px';
+    }
+
+    function getBorderRadiusCSS() {
+      if (advancedMode) {
+        const h = cornersHV;
+        const hSame = h.tlH === h.trH && h.trH === h.brH && h.brH === h.blH;
+        const vSame = h.tlV === h.trV && h.trV === h.brV && h.brV === h.blV;
+        const allHV = hSame && vSame && h.tlH === h.tlV;
+
+        if (allHV) {
+          return `border-radius: ${h.tlH}px;`;
+        }
+        // Check if H and V are the same per-corner (no slash needed)
+        if (h.tlH === h.tlV && h.trH === h.trV && h.brH === h.brV && h.blH === h.blV) {
+          return `border-radius: ${h.tlH}px ${h.trH}px ${h.brH}px ${h.blH}px;`;
+        }
+        return `border-radius: ${h.tlH}px ${h.trH}px ${h.brH}px ${h.blH}px / ${h.tlV}px ${h.trV}px ${h.brV}px ${h.blV}px;`;
+      }
+
+      const { tl, tr, br, bl } = corners;
+      if (tl === tr && tr === br && br === bl) {
+        return `border-radius: ${tl}px;`;
+      }
+      if (tl === br && tr === bl) {
+        return `border-radius: ${tl}px ${tr}px;`;
+      }
+      if (tr === bl) {
+        return `border-radius: ${tl}px ${tr}px ${br}px;`;
+      }
+      return `border-radius: ${tl}px ${tr}px ${br}px ${bl}px;`;
+    }
+
+    function applyRadius() {
+      const box = document.getElementById('previewBox');
+      box.style.borderRadius = `${corners.tl}px ${corners.tr}px ${corners.br}px ${corners.bl}px`;
+      updateCSSOutput();
+    }
+
+    function applyRadiusPercent(tl, tr, br, bl) {
+      const box = document.getElementById('previewBox');
+      box.style.borderRadius = `${tl}% ${tr}% ${br}% ${bl}%`;
+      document.getElementById('cssOutput').textContent = `border-radius: ${tl}% ${tr}% ${br}% ${bl}%;`;
+    }
+
+    function applyAdvancedRadius() {
+      const h = cornersHV;
+      const box = document.getElementById('previewBox');
+      box.style.borderRadius = `${h.tlH}px ${h.trH}px ${h.brH}px ${h.blH}px / ${h.tlV}px ${h.trV}px ${h.brV}px ${h.blV}px`;
+      updateCSSOutput();
+    }
+
+    function updateCSSOutput() {
+      document.getElementById('cssOutput').textContent = getBorderRadiusCSS();
+    }
+
+    function updateBoxSize() {
+      const w = parseInt(document.getElementById('boxWidth').value) || 180;
+      const h = parseInt(document.getElementById('boxHeight').value) || 180;
+      const box = document.getElementById('previewBox');
+      box.style.width = w + 'px';
+      box.style.height = h + 'px';
+    }
+
+    function updateBoxColor() {
+      const color = document.getElementById('boxColor').value;
+      document.getElementById('previewBox').style.background = color;
+    }
+
+    function copyCSS() {
+      const text = document.getElementById('cssOutput').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = 'var(--success)';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.background = '';
+        }, 1200);
+      });
+    }
+
+    // Init
+    renderPresets();
+    applyRadius();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

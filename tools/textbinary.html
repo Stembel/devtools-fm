@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text to Binary Converter - Convert Text Binary Online | ZeroKit.dev</title>
+  <meta name="description" content="Convert text to binary and binary to text online. View decimal, hex, and octal for each character. Supports ASCII and UTF-8 encoding. Free, fast, runs in your browser.">
+  <link rel="canonical" href="https://zerokit.dev/tools/textbinary.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .mode-toggle {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .mode-toggle button {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mode-toggle button.active {
+      background: var(--accent);
+      color: white;
+    }
+    .mode-toggle button:hover:not(.active) {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+    .breakdown-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      position: sticky;
+      top: 0;
+    }
+    .breakdown-table td {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .breakdown-table tr:hover td {
+      background: var(--surface-2);
+    }
+    .breakdown-table .char-col {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-align: center;
+      min-width: 40px;
+    }
+    .breakdown-wrap {
+      max-height: 400px;
+      overflow-y: auto;
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      padding: 10px 16px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .stats-row span {
+      color: var(--text);
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Text to Binary Converter</h1>
+    <p class="description">Convert text to binary and binary back to text. View decimal, hex, and octal for each character. Everything runs locally in your browser.</p>
+
+    <div class="mode-toggle">
+      <button id="modeText" class="active" onclick="setMode('text')">Text to Binary</button>
+      <button id="modeBinary" onclick="setMode('binary')">Binary to Text</button>
+    </div>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="convert()">Convert</button>
+        <button class="btn" onclick="copyOutput()">Copy Output</button>
+        <button class="btn" onclick="swap()">Swap</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Encoding:
+          <select id="encoding" onchange="convert()">
+            <option value="utf8" selected>UTF-8</option>
+            <option value="ascii">ASCII</option>
+          </select>
+        </label>
+        <label>Bit grouping:
+          <select id="bitGroup" onchange="convert()">
+            <option value="8" selected>8-bit</option>
+            <option value="7">7-bit (ASCII)</option>
+          </select>
+        </label>
+        <label>Separator:
+          <select id="separator" onchange="convert()">
+            <option value="space" selected>Space</option>
+            <option value="none">None</option>
+            <option value="dash">Dash</option>
+            <option value="newline">Newline</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header" id="inputLabel">Input (Text)</div>
+        <textarea class="tool-textarea" id="input" placeholder="Type or paste text here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Converted output will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="tool-panel" style="margin-top: 16px;">
+      <div class="panel-header">Character Breakdown <span style="font-weight:400; font-size:0.75rem; color: var(--text-muted);">(click any value to copy)</span></div>
+      <div class="breakdown-wrap">
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th>Char</th>
+              <th>Binary</th>
+              <th>Decimal</th>
+              <th>Hex</th>
+              <th>Octal</th>
+            </tr>
+          </thead>
+          <tbody id="breakdown"></tbody>
+        </table>
+      </div>
+      <div class="stats-row" id="stats"></div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $breakdown = document.getElementById('breakdown');
+    const $stats = document.getElementById('stats');
+    const $inputLabel = document.getElementById('inputLabel');
+    const $encoding = document.getElementById('encoding');
+    const $bitGroup = document.getElementById('bitGroup');
+    const $separator = document.getElementById('separator');
+
+    let mode = 'text'; // 'text' or 'binary'
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('modeText').classList.toggle('active', m === 'text');
+      document.getElementById('modeBinary').classList.toggle('active', m === 'binary');
+      $inputLabel.textContent = m === 'text' ? 'Input (Text)' : 'Input (Binary)';
+      $input.placeholder = m === 'text' ? 'Type or paste text here...' : 'Paste binary string here (e.g. 01001000 01101001)...';
+      convert();
+    }
+
+    function getSeparator() {
+      const v = $separator.value;
+      if (v === 'space') return ' ';
+      if (v === 'none') return '';
+      if (v === 'dash') return '-';
+      if (v === 'newline') return '\n';
+      return ' ';
+    }
+
+    function textToBytes(text) {
+      const enc = $encoding.value;
+      if (enc === 'utf8') {
+        return Array.from(new TextEncoder().encode(text));
+      } else {
+        // ASCII: clamp to 0-127
+        const bytes = [];
+        for (let i = 0; i < text.length; i++) {
+          const code = text.charCodeAt(i);
+          bytes.push(code > 127 ? 63 : code); // 63 = '?'
+        }
+        return bytes;
+      }
+    }
+
+    function bytesToBinary(bytes) {
+      const bits = parseInt($bitGroup.value);
+      return bytes.map(b => b.toString(2).padStart(bits, '0'));
+    }
+
+    function binaryToBytes(binaryStr) {
+      // Clean input: strip everything except 0 and 1, then split into groups
+      const clean = binaryStr.replace(/[^01]/g, '');
+      if (clean.length === 0) return [];
+      const bits = parseInt($bitGroup.value);
+      const bytes = [];
+      for (let i = 0; i < clean.length; i += bits) {
+        const chunk = clean.substring(i, i + bits);
+        if (chunk.length > 0) {
+          bytes.push(parseInt(chunk, 2));
+        }
+      }
+      return bytes;
+    }
+
+    function bytesToText(bytes) {
+      const enc = $encoding.value;
+      if (enc === 'utf8') {
+        return new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(bytes));
+      } else {
+        return bytes.map(b => String.fromCharCode(b)).join('');
+      }
+    }
+
+    function displayChar(byte) {
+      if (byte < 32 || byte === 127) {
+        const names = {
+          0:'NUL',1:'SOH',2:'STX',3:'ETX',4:'EOT',5:'ENQ',6:'ACK',7:'BEL',
+          8:'BS',9:'TAB',10:'LF',11:'VT',12:'FF',13:'CR',14:'SO',15:'SI',
+          16:'DLE',17:'DC1',18:'DC2',19:'DC3',20:'DC4',21:'NAK',22:'SYN',23:'ETB',
+          24:'CAN',25:'EM',26:'SUB',27:'ESC',28:'FS',29:'GS',30:'RS',31:'US',
+          127:'DEL'
+        };
+        return names[byte] || '?';
+      }
+      return String.fromCharCode(byte);
+    }
+
+    function convert() {
+      const raw = $input.value;
+      if (!raw) {
+        $output.value = '';
+        $breakdown.innerHTML = '';
+        $stats.innerHTML = '';
+        $status.textContent = '';
+        $status.className = '';
+        return;
+      }
+
+      try {
+        if (mode === 'text') {
+          // Text -> Binary
+          const bytes = textToBytes(raw);
+          const binaryArr = bytesToBinary(bytes);
+          const sep = getSeparator();
+          $output.value = binaryArr.join(sep);
+          buildBreakdown(bytes, binaryArr);
+          showStatus(bytes.length + ' byte' + (bytes.length !== 1 ? 's' : '') + ' encoded', true);
+        } else {
+          // Binary -> Text
+          const bytes = binaryToBytes(raw);
+          if (bytes.length === 0) {
+            $output.value = '';
+            $breakdown.innerHTML = '';
+            $stats.innerHTML = '';
+            showStatus('No valid binary input', false);
+            return;
+          }
+          const text = bytesToText(bytes);
+          $output.value = text;
+          const binaryArr = bytesToBinary(bytes);
+          buildBreakdown(bytes, binaryArr);
+          showStatus(bytes.length + ' byte' + (bytes.length !== 1 ? 's' : '') + ' decoded', true);
+        }
+      } catch (e) {
+        showStatus(e.message, false);
+      }
+    }
+
+    function buildBreakdown(bytes, binaryArr) {
+      let html = '';
+      for (let i = 0; i < bytes.length; i++) {
+        const b = bytes[i];
+        const ch = displayChar(b);
+        const isControl = b < 32 || b === 127;
+        html += '<tr>';
+        html += '<td class="char-col"' + (isControl ? ' style="font-size:0.7rem;opacity:0.6;"' : '') + '>' + escapeHtml(ch) + '</td>';
+        html += '<td onclick="copyCell(this)" style="cursor:pointer;">' + binaryArr[i] + '</td>';
+        html += '<td onclick="copyCell(this)" style="cursor:pointer;">' + b + '</td>';
+        html += '<td onclick="copyCell(this)" style="cursor:pointer;">0x' + b.toString(16).toUpperCase().padStart(2, '0') + '</td>';
+        html += '<td onclick="copyCell(this)" style="cursor:pointer;">' + b.toString(8).padStart(3, '0') + '</td>';
+        html += '</tr>';
+      }
+      $breakdown.innerHTML = html;
+
+      // Stats
+      const totalBits = binaryArr.reduce((s, b) => s + b.length, 0);
+      $stats.innerHTML =
+        'Characters: <span>' + bytes.length + '</span> &nbsp; ' +
+        'Total bits: <span>' + totalBits + '</span> &nbsp; ' +
+        'Total bytes: <span>' + bytes.length + '</span>';
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function copyCell(el) {
+      navigator.clipboard.writeText(el.textContent);
+      const orig = el.textContent;
+      el.textContent = 'Copied!';
+      el.style.color = 'var(--success)';
+      setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 800);
+    }
+
+    function copyOutput() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function swap() {
+      const t = $input.value;
+      $input.value = $output.value;
+      $output.value = t;
+      setMode(mode === 'text' ? 'binary' : 'text');
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $breakdown.innerHTML = '';
+      $stats.innerHTML = '';
+      $status.textContent = '';
+      $status.className = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    // Real-time conversion as you type
+    $input.addEventListener('input', convert);
+    // Auto-convert on paste
+    $input.addEventListener('paste', () => setTimeout(convert, 50));
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
