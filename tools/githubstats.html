@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Stats Card Generator - Visual Profile Stats | ZeroKit.dev</title>
+  <meta name="description" content="Generate a beautiful, shareable GitHub stats card showing your public repos, stars, followers, top language, and more. Free, no signup required.">
+  <link rel="canonical" href="https://zerokit.dev/tools/githubstats.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .input-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .input-row input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .input-row input:focus {
+      border-color: var(--accent);
+    }
+    .input-row input::placeholder {
+      color: var(--text-muted);
+    }
+    .input-row button {
+      padding: 12px 28px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .input-row button:hover {
+      opacity: 0.9;
+    }
+    .input-row button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Rate limit bar */
+    .rate-limit-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .rate-limit-bar.visible {
+      display: flex;
+    }
+    .rate-limit-bar .bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--surface-2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .rate-limit-bar .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .rate-limit-bar .bar-fill.warn {
+      background: #f59e0b;
+    }
+    .rate-limit-bar .bar-fill.critical {
+      background: #ef4444;
+    }
+
+    /* Error / empty states */
+    .status-msg {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .status-msg.error {
+      color: #ef4444;
+    }
+
+    /* Card container */
+    .card-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* The stats card itself */
+    .stats-card {
+      width: 100%;
+      max-width: 520px;
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    .stats-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .card-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid #30363d;
+      flex-shrink: 0;
+      object-fit: cover;
+      background: #21262d;
+    }
+    .card-identity h2 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #e6edf3;
+      line-height: 1.2;
+    }
+    .card-identity .card-login {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-top: 2px;
+    }
+    .card-identity .card-bio {
+      font-size: 0.78rem;
+      color: #8b949e;
+      margin-top: 6px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-cell {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+    .stat-cell .stat-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #e6edf3;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-cell .stat-label {
+      font-size: 0.68rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+    }
+
+    .card-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.82rem;
+      color: #8b949e;
+    }
+    .card-detail-row:last-child {
+      padding-bottom: 0;
+    }
+    .card-detail-row .detail-icon {
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+      color: #6366f1;
+    }
+    .card-detail-row .detail-value {
+      color: #e6edf3;
+      font-weight: 600;
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .card-footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.68rem;
+      color: #484f58;
+    }
+
+    /* Action buttons */
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .card-actions button {
+      padding: 10px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-actions button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Language bar */
+    .lang-bar-wrap {
+      margin-bottom: 20px;
+    }
+    .lang-bar-label {
+      font-size: 0.72rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .lang-bar {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .lang-bar span {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    .lang-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .lang-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      color: #8b949e;
+    }
+    .lang-legend-item .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Toast */
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .input-row {
+        flex-direction: column;
+      }
+      .card-stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .stats-card {
+        padding: 20px;
+      }
+      .card-header {
+        gap: 12px;
+      }
+      .card-avatar {
+        width: 56px;
+        height: 56px;
+      }
+      .card-identity h2 {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>GitHub Stats Card Generator</h1>
+    <p class="description">Generate a beautiful, shareable stats card for any GitHub profile. Enter a username, explore the stats, and download or copy for your README.</p>
+
+    <div class="input-row">
+      <input type="text" id="username-input" placeholder="Enter GitHub username (e.g. torvalds)" spellcheck="false" autocomplete="off">
+      <button id="generate-btn" onclick="generate()">Generate Card</button>
+    </div>
+
+    <div class="rate-limit-bar" id="rate-limit-bar">
+      <span id="rate-label">API: --/60</span>
+      <div class="bar-track"><div class="bar-fill" id="rate-fill" style="width:100%"></div></div>
+      <span id="rate-reset"></span>
+    </div>
+
+    <div id="output-area">
+      <div class="status-msg" id="empty-state">Enter a GitHub username above and click <strong>Generate Card</strong> to create your stats card.</div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <div class="copy-toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    // ---- State ----
+    let currentData = null;
+
+    const usernameInput = document.getElementById('username-input');
+    const generateBtn = document.getElementById('generate-btn');
+    const outputArea = document.getElementById('output-area');
+
+    usernameInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') generate();
+    });
+
+    // ---- Language colors (GitHub official subset) ----
+    const langColors = {
+      JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5',
+      Java: '#b07219', Go: '#00ADD8', Rust: '#dea584',
+      'C++': '#f34b7d', C: '#555555', 'C#': '#178600',
+      Ruby: '#701516', PHP: '#4F5D95', Swift: '#F05138',
+      Kotlin: '#A97BFF', Dart: '#00B4AB', Scala: '#c22d40',
+      Shell: '#89e051', Lua: '#000080', Perl: '#0298c3',
+      R: '#198CE7', Haskell: '#5e5086', Elixir: '#6e4a7e',
+      Clojure: '#db5855', HTML: '#e34c26', CSS: '#563d7c',
+      Vue: '#41b883', Svelte: '#ff3e00', Jupyter: '#DA5B0B',
+      SCSS: '#c6538c', Vim: '#199f4b', Zig: '#ec915c',
+      Nix: '#7e7eff', OCaml: '#3be133', Erlang: '#B83998',
+      Objective: '#438eff', Assembly: '#6E4C13',
+    };
+    function getLangColor(lang) {
+      return langColors[lang] || '#8b949e';
+    }
+
+    // ---- Format helpers ----
+    function fmtNum(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+      return String(n);
+    }
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    }
+
+    // ---- Rate limit tracking ----
+    function updateRateLimit(headers) {
+      const remaining = headers.get('x-ratelimit-remaining');
+      const limit = headers.get('x-ratelimit-limit');
+      const reset = headers.get('x-ratelimit-reset');
+      if (remaining === null) return;
+
+      const bar = document.getElementById('rate-limit-bar');
+      const label = document.getElementById('rate-label');
+      const fill = document.getElementById('rate-fill');
+      const resetEl = document.getElementById('rate-reset');
+
+      bar.classList.add('visible');
+      const rem = parseInt(remaining, 10);
+      const lim = parseInt(limit, 10);
+      const pct = (rem / lim) * 100;
+
+      label.textContent = 'API: ' + rem + '/' + lim;
+      fill.style.width = pct + '%';
+      fill.className = 'bar-fill';
+      if (pct < 20) fill.classList.add('critical');
+      else if (pct < 50) fill.classList.add('warn');
+
+      if (reset) {
+        const resetTime = new Date(parseInt(reset, 10) * 1000);
+        const mins = Math.max(0, Math.ceil((resetTime - Date.now()) / 60000));
+        resetEl.textContent = 'Resets in ' + mins + 'min';
+      }
+    }
+
+    // ---- Fetch data ----
+    async function generate() {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        usernameInput.focus();
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.textContent = 'Loading...';
+      outputArea.innerHTML = '<div class="status-msg">Fetching data for <strong>' + escHtml(username) + '</strong>...</div>';
+
+      try {
+        // Fetch user profile
+        const userResp = await fetch('https://api.github.com/users/' + encodeURIComponent(username));
+        updateRateLimit(userResp.headers);
+
+        if (userResp.status === 404) {
+          throw new Error('User "' + username + '" not found.');
+        }
+        if (userResp.status === 403) {
+          throw new Error('API rate limit exceeded. Please wait a few minutes and try again.');
+        }
+        if (!userResp.ok) {
+          throw new Error('GitHub API error: ' + userResp.status);
+        }
+
+        const user = await userResp.json();
+
+        // Fetch repos (up to 100 for language + star stats)
+        const reposResp = await fetch('https://api.github.com/users/' + encodeURIComponent(username) + '/repos?per_page=100&sort=pushed&type=owner');
+        updateRateLimit(reposResp.headers);
+
+        let repos = [];
+        if (reposResp.ok) {
+          repos = await reposResp.json();
+        }
+
+        // Calculate language stats
+        const langBytes = {};
+        let totalStars = 0;
+        for (const repo of repos) {
+          if (repo.fork) continue;
+          totalStars += repo.stargazers_count || 0;
+          if (repo.language) {
+            langBytes[repo.language] = (langBytes[repo.language] || 0) + (repo.size || 1);
+          }
+        }
+
+        // Sort languages by usage
+        const langEntries = Object.entries(langBytes).sort((a, b) => b[1] - a[1]);
+        const totalSize = langEntries.reduce((s, e) => s + e[1], 0);
+        const topLangs = langEntries.slice(0, 6).map(([name, size]) => ({
+          name,
+          pct: totalSize > 0 ? ((size / totalSize) * 100).toFixed(1) : 0,
+          color: getLangColor(name)
+        }));
+
+        // If more than 6, group the rest as "Other"
+        if (langEntries.length > 6) {
+          const otherSize = langEntries.slice(6).reduce((s, e) => s + e[1], 0);
+          topLangs.push({
+            name: 'Other',
+            pct: totalSize > 0 ? ((otherSize / totalSize) * 100).toFixed(1) : 0,
+            color: '#484f58'
+          });
+        }
+
+        currentData = { user, repos, totalStars, topLangs };
+        renderCard(currentData);
+
+      } catch (err) {
+        outputArea.innerHTML = '<div class="status-msg error">' + escHtml(err.message) + '</div>';
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Generate Card';
+      }
+    }
+
+    // ---- Render ----
+    function renderCard(data) {
+      const { user, totalStars, topLangs } = data;
+      const topLang = topLangs.length > 0 ? topLangs[0].name : 'N/A';
+
+      // Language bar segments
+      let langBarHtml = '';
+      let langLegendHtml = '';
+      if (topLangs.length > 0) {
+        langBarHtml = topLangs.map(l =>
+          '<span style="width:' + l.pct + '%;background:' + l.color + '" title="' + escHtml(l.name) + ' ' + l.pct + '%"></span>'
+        ).join('');
+        langLegendHtml = topLangs.map(l =>
+          '<div class="lang-legend-item"><span class="dot" style="background:' + l.color + '"></span>' + escHtml(l.name) + ' ' + l.pct + '%</div>'
+        ).join('');
+      }
+
+      const bio = user.bio ? '<div class="card-bio">' + escHtml(user.bio) + '</div>' : '';
+      const displayName = user.name || user.login;
+
+      const html = '<div class="card-wrapper">' +
+        '<div class="stats-card" id="stats-card">' +
+          '<div class="card-header">' +
+            '<img class="card-avatar" src="' + escHtml(user.avatar_url) + '" alt="' + escHtml(user.login) + '" crossorigin="anonymous">' +
+            '<div class="card-identity">' +
+              '<h2>' + escHtml(displayName) + '</h2>' +
+              '<div class="card-login">@' + escHtml(user.login) + '</div>' +
+              bio +
+            '</div>' +
+          '</div>' +
+
+          '<div class="card-stats-grid">' +
+            '<div class="stat-cell"><div class="stat-value">' + fmtNum(user.public_repos) + '</div><div class="stat-label">Repos</div></div>' +
+            '<div class="stat-cell"><div class="stat-value">' + fmtNum(totalStars) + '</div><div class="stat-label">Stars</div></div>' +
+            '<div class="stat-cell"><div class="stat-value">' + fmtNum(user.followers) + '</div><div class="stat-label">Followers</div></div>' +
+          '</div>' +
+
+          (topLangs.length > 0 ? (
+            '<div class="lang-bar-wrap">' +
+              '<div class="lang-bar-label">Top Languages</div>' +
+              '<div class="lang-bar">' + langBarHtml + '</div>' +
+              '<div class="lang-legend">' + langLegendHtml + '</div>' +
+            '</div>'
+          ) : '') +
+
+          '<div class="card-detail-row">' +
+            '<span class="detail-icon">&#9734;</span>' +
+            '<span>Top Language</span>' +
+            '<span class="detail-value">' + escHtml(topLang) + '</span>' +
+          '</div>' +
+          '<div class="card-detail-row">' +
+            '<span class="detail-icon">&#128101;</span>' +
+            '<span>Following</span>' +
+            '<span class="detail-value">' + fmtNum(user.following) + '</span>' +
+          '</div>' +
+          '<div class="card-detail-row">' +
+            '<span class="detail-icon">&#128197;</span>' +
+            '<span>Member since</span>' +
+            '<span class="detail-value">' + fmtDate(user.created_at) + '</span>' +
+          '</div>' +
+
+          '<div class="card-footer">' +
+            '<span>Generated by ZeroKit.dev</span>' +
+            '<span>' + new Date().toLocaleDateString('en-US') + '</span>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="card-actions">' +
+          '<button onclick="downloadImage()">&#128247; Download as PNG</button>' +
+          '<button onclick="copyMarkdown()">&#128203; Copy Markdown</button>' +
+        '</div>' +
+      '</div>';
+
+      outputArea.innerHTML = html;
+    }
+
+    // ---- Download as PNG (canvas-based, no library) ----
+    async function downloadImage() {
+      const card = document.getElementById('stats-card');
+      if (!card) return;
+
+      showToast('Rendering image...');
+
+      try {
+        const canvas = await renderToCanvas(card);
+        const link = document.createElement('a');
+        link.download = (currentData ? currentData.user.login : 'github') + '-stats.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Image downloaded!');
+      } catch (err) {
+        showToast('Download failed: ' + err.message);
+      }
+    }
+
+    // Minimal DOM-to-canvas renderer (no external library)
+    async function renderToCanvas(element) {
+      const rect = element.getBoundingClientRect();
+      const scale = 2; // Retina quality
+      const w = rect.width;
+      const h = rect.height;
+
+      // Use SVG foreignObject approach
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '">' +
+        '<foreignObject width="100%" height="100%">' +
+          '<div xmlns="http://www.w3.org/1999/xhtml">' +
+            await inlineStyles(element) +
+          '</div>' +
+        '</foreignObject>' +
+      '</svg>';
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+
+      const img = new Image();
+      const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      return new Promise((resolve, reject) => {
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          resolve(canvas);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Image render failed'));
+        };
+        img.src = url;
+      });
+    }
+
+    async function inlineStyles(el) {
+      // Clone the element
+      const clone = el.cloneNode(true);
+
+      // Convert avatar to data URL to bypass CORS in SVG foreignObject
+      const avatarImg = clone.querySelector('.card-avatar');
+      if (avatarImg && currentData) {
+        try {
+          const resp = await fetch(currentData.user.avatar_url);
+          const blob = await resp.blob();
+          const dataUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+          avatarImg.src = dataUrl;
+        } catch (e) {
+          // fallback: remove avatar from render
+          avatarImg.style.display = 'none';
+        }
+      }
+
+      // Build inline CSS
+      const computed = getComputedStyle(el);
+      const styles = [];
+
+      // Copy all styles from the card elements
+      function inlineNodeStyles(original, cloned) {
+        if (original.nodeType !== 1) return;
+        const cs = getComputedStyle(original);
+        let styleStr = '';
+        for (let i = 0; i < cs.length; i++) {
+          const prop = cs[i];
+          styleStr += prop + ':' + cs.getPropertyValue(prop) + ';';
+        }
+        cloned.setAttribute('style', styleStr);
+
+        const origChildren = original.children;
+        const cloneChildren = cloned.children;
+        for (let i = 0; i < origChildren.length; i++) {
+          if (cloneChildren[i]) {
+            inlineNodeStyles(origChildren[i], cloneChildren[i]);
+          }
+        }
+      }
+
+      inlineNodeStyles(el, clone);
+
+      // Wrap in a container div
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(clone);
+      return wrapper.innerHTML;
+    }
+
+    // ---- Copy Markdown ----
+    function copyMarkdown() {
+      if (!currentData) return;
+      const { user, totalStars, topLangs } = currentData;
+      const topLang = topLangs.length > 0 ? topLangs[0].name : 'N/A';
+      const displayName = user.name || user.login;
+
+      const md = '## ' + displayName + ' (@' + user.login + ')\n\n' +
+        '![Avatar](' + user.avatar_url + '&s=100)\n\n' +
+        '| Stat | Value |\n' +
+        '|------|-------|\n' +
+        '| Public Repos | ' + user.public_repos + ' |\n' +
+        '| Total Stars | ' + totalStars + ' |\n' +
+        '| Followers | ' + user.followers + ' |\n' +
+        '| Following | ' + user.following + ' |\n' +
+        '| Top Language | ' + topLang + ' |\n' +
+        '| Member Since | ' + fmtDate(user.created_at) + ' |\n' +
+        (user.bio ? '\n> ' + user.bio + '\n' : '') +
+        '\n---\n*Generated with [ZeroKit.dev](https://zerokit.dev/tools/githubstats.html)*\n';
+
+      navigator.clipboard.writeText(md).then(() => {
+        showToast('Markdown copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy(md);
+      });
+    }
+
+    // ---- Utilities ----
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch {
+        showToast('Copy failed. Please select and copy manually.');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
