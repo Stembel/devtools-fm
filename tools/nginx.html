@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nginx Config Generator - Build nginx.conf Online | ZeroKit.dev</title>
+  <meta name="description" content="Generate nginx.conf server blocks visually. SSL, reverse proxy, gzip, security headers, PHP-FPM, WebSocket, rate limiting and more. Free, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/nginx.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .ng-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .ng-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .ng-section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    .ng-section-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .ng-field { display: flex; flex-direction: column; gap: 4px; }
+    .ng-field label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .ng-field input[type="text"], .ng-field input[type="number"], .ng-field select {
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+      padding: 8px 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.85rem; outline: none; width: 100%;
+    }
+    .ng-field input:focus, .ng-field select:focus { border-color: var(--accent); }
+    .ng-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 0; }
+    .ng-toggle input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+    .ng-toggle .toggle-label { font-size: 0.85rem; color: var(--text); }
+    .ng-toggle .toggle-desc { font-size: 0.75rem; color: var(--text-muted); }
+    .ng-sub-fields { padding-left: 26px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .ng-preview-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .ng-preview {
+      width: 100%; min-height: 500px; padding: 16px; background: transparent; border: none;
+      color: var(--text); font-family: var(--mono); font-size: 0.8rem; resize: vertical;
+      outline: none; line-height: 1.7; white-space: pre; overflow-x: auto;
+    }
+    .presets-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .presets-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .ng-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 768px) {
+      .ng-grid { grid-template-columns: 1fr; }
+      .ng-field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Nginx Config Generator</h1>
+    <p class="description">Build nginx server block configurations visually. Toggle features, set options, and copy the generated config. Everything runs locally in your browser.</p>
+
+    <div class="presets-label">Presets</div>
+    <div class="presets-bar">
+      <button class="btn" onclick="loadPreset('static')">Static Site</button>
+      <button class="btn" onclick="loadPreset('php')">PHP App</button>
+      <button class="btn" onclick="loadPreset('node')">Node.js Reverse Proxy</button>
+      <button class="btn" onclick="loadPreset('wordpress')">WordPress</button>
+    </div>
+
+    <div class="action-bar" style="padding-top:0">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="copyConfig()">Copy to Clipboard</button>
+        <button class="btn" onclick="downloadConfig()">Download</button>
+        <button class="btn" onclick="resetAll()">Reset</button>
+      </div>
+      <span id="status"></span>
+    </div>
+
+    <div class="ng-grid">
+      <!-- Left column: Options -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Basic Server -->
+        <div class="ng-section">
+          <div class="ng-section-header">Server Basics</div>
+          <div class="ng-section-body">
+            <div class="ng-field-row">
+              <div class="ng-field">
+                <label>Listen Port</label>
+                <select id="listenPort" onchange="generate()">
+                  <option value="80">80 (HTTP)</option>
+                  <option value="443">443 (HTTPS)</option>
+                </select>
+              </div>
+              <div class="ng-field">
+                <label>Server Name</label>
+                <input type="text" id="serverName" value="example.com" oninput="generate()" placeholder="example.com">
+              </div>
+            </div>
+            <div class="ng-field">
+              <label>Root Directory</label>
+              <input type="text" id="rootDir" value="/var/www/html" oninput="generate()" placeholder="/var/www/html">
+            </div>
+          </div>
+        </div>
+
+        <!-- SSL/TLS -->
+        <div class="ng-section">
+          <div class="ng-section-header">SSL / TLS</div>
+          <div class="ng-section-body">
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableSSL" onchange="onSSLToggle(); generate()">
+              <div>
+                <div class="toggle-label">Enable SSL/TLS</div>
+                <div class="toggle-desc">Listen on 443 with certificate</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="sslFields" style="display:none">
+              <div class="ng-field">
+                <label>SSL Certificate</label>
+                <input type="text" id="sslCert" value="/etc/letsencrypt/live/example.com/fullchain.pem" oninput="generate()">
+              </div>
+              <div class="ng-field">
+                <label>SSL Certificate Key</label>
+                <input type="text" id="sslKey" value="/etc/letsencrypt/live/example.com/privkey.pem" oninput="generate()">
+              </div>
+            </div>
+            <label class="ng-toggle">
+              <input type="checkbox" id="forceHTTPS" onchange="generate()">
+              <div>
+                <div class="toggle-label">Force HTTPS Redirect</div>
+                <div class="toggle-desc">Redirect all HTTP traffic to HTTPS</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Reverse Proxy -->
+        <div class="ng-section">
+          <div class="ng-section-header">Reverse Proxy</div>
+          <div class="ng-section-body">
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableProxy" onchange="toggleSub('enableProxy','proxyFields'); generate()">
+              <div>
+                <div class="toggle-label">Enable Reverse Proxy</div>
+                <div class="toggle-desc">Forward requests to an upstream server</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="proxyFields" style="display:none">
+              <div class="ng-field">
+                <label>Upstream URL</label>
+                <input type="text" id="proxyPass" value="http://127.0.0.1:3000" oninput="generate()" placeholder="http://127.0.0.1:3000">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PHP-FPM -->
+        <div class="ng-section">
+          <div class="ng-section-header">PHP-FPM</div>
+          <div class="ng-section-body">
+            <label class="ng-toggle">
+              <input type="checkbox" id="enablePHP" onchange="toggleSub('enablePHP','phpFields'); generate()">
+              <div>
+                <div class="toggle-label">Enable PHP-FPM</div>
+                <div class="toggle-desc">Process PHP files via FastCGI</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="phpFields" style="display:none">
+              <div class="ng-field">
+                <label>fastcgi_pass</label>
+                <input type="text" id="phpSocket" value="unix:/run/php/php8.2-fpm.sock" oninput="generate()" placeholder="unix:/run/php/php-fpm.sock">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WebSocket -->
+        <div class="ng-section">
+          <div class="ng-section-header">WebSocket Support</div>
+          <div class="ng-section-body">
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableWS" onchange="toggleSub('enableWS','wsFields'); generate()">
+              <div>
+                <div class="toggle-label">Enable WebSocket Proxy</div>
+                <div class="toggle-desc">Upgrade connections for WebSocket</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="wsFields" style="display:none">
+              <div class="ng-field">
+                <label>WebSocket Path</label>
+                <input type="text" id="wsPath" value="/ws" oninput="generate()" placeholder="/ws">
+              </div>
+              <div class="ng-field">
+                <label>WebSocket Upstream</label>
+                <input type="text" id="wsUpstream" value="http://127.0.0.1:3000" oninput="generate()" placeholder="http://127.0.0.1:3000">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance -->
+        <div class="ng-section">
+          <div class="ng-section-header">Performance</div>
+          <div class="ng-section-body">
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableGzip" onchange="generate()">
+              <div>
+                <div class="toggle-label">Gzip Compression</div>
+                <div class="toggle-desc">Compress text, CSS, JS, JSON, XML responses</div>
+              </div>
+            </label>
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableCache" onchange="toggleSub('enableCache','cacheFields'); generate()">
+              <div>
+                <div class="toggle-label">Static File Caching</div>
+                <div class="toggle-desc">Set Cache-Control headers for assets</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="cacheFields" style="display:none">
+              <div class="ng-field">
+                <label>Cache Duration</label>
+                <select id="cacheDuration" onchange="generate()">
+                  <option value="1h">1 Hour</option>
+                  <option value="1d">1 Day</option>
+                  <option value="7d" selected>7 Days</option>
+                  <option value="30d">30 Days</option>
+                  <option value="365d">1 Year</option>
+                </select>
+              </div>
+            </div>
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableRateLimit" onchange="toggleSub('enableRateLimit','rateLimitFields'); generate()">
+              <div>
+                <div class="toggle-label">Rate Limiting</div>
+                <div class="toggle-desc">Limit request rate per IP address</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="rateLimitFields" style="display:none">
+              <div class="ng-field-row">
+                <div class="ng-field">
+                  <label>Rate (req/sec)</label>
+                  <input type="text" id="rateLimit" value="10" oninput="generate()">
+                </div>
+                <div class="ng-field">
+                  <label>Burst</label>
+                  <input type="text" id="rateBurst" value="20" oninput="generate()">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="ng-section">
+          <div class="ng-section-header">Security Headers</div>
+          <div class="ng-section-body">
+            <label class="ng-toggle">
+              <input type="checkbox" id="headerXFrame" onchange="generate()">
+              <div>
+                <div class="toggle-label">X-Frame-Options</div>
+                <div class="toggle-desc">Prevent clickjacking (SAMEORIGIN)</div>
+              </div>
+            </label>
+            <label class="ng-toggle">
+              <input type="checkbox" id="headerCSP" onchange="toggleSub('headerCSP','cspFields'); generate()">
+              <div>
+                <div class="toggle-label">Content-Security-Policy</div>
+                <div class="toggle-desc">Control allowed resource sources</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="cspFields" style="display:none">
+              <div class="ng-field">
+                <label>CSP Directive</label>
+                <input type="text" id="cspValue" value="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" oninput="generate()">
+              </div>
+            </div>
+            <label class="ng-toggle">
+              <input type="checkbox" id="headerHSTS" onchange="generate()">
+              <div>
+                <div class="toggle-label">Strict-Transport-Security (HSTS)</div>
+                <div class="toggle-desc">Force HTTPS for 1 year, include subdomains</div>
+              </div>
+            </label>
+            <label class="ng-toggle">
+              <input type="checkbox" id="headerXContent" onchange="generate()">
+              <div>
+                <div class="toggle-label">X-Content-Type-Options</div>
+                <div class="toggle-desc">Prevent MIME-type sniffing (nosniff)</div>
+              </div>
+            </label>
+            <label class="ng-toggle">
+              <input type="checkbox" id="headerReferrer" onchange="generate()">
+              <div>
+                <div class="toggle-label">Referrer-Policy</div>
+                <div class="toggle-desc">Control referrer information (no-referrer-when-downgrade)</div>
+              </div>
+            </label>
+            <label class="ng-toggle">
+              <input type="checkbox" id="headerPermissions" onchange="generate()">
+              <div>
+                <div class="toggle-label">Permissions-Policy</div>
+                <div class="toggle-desc">Restrict browser features (camera, mic, geolocation)</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Logging & Error Pages -->
+        <div class="ng-section">
+          <div class="ng-section-header">Logging & Error Pages</div>
+          <div class="ng-section-body">
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableAccessLog" onchange="toggleSub('enableAccessLog','accessLogFields'); generate()">
+              <div>
+                <div class="toggle-label">Custom Access Log</div>
+                <div class="toggle-desc">Set a custom access log path</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="accessLogFields" style="display:none">
+              <div class="ng-field">
+                <label>Access Log Path</label>
+                <input type="text" id="accessLog" value="/var/log/nginx/example.com.access.log" oninput="generate()">
+              </div>
+            </div>
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableErrorLog" onchange="toggleSub('enableErrorLog','errorLogFields'); generate()">
+              <div>
+                <div class="toggle-label">Custom Error Log</div>
+                <div class="toggle-desc">Set a custom error log path</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="errorLogFields" style="display:none">
+              <div class="ng-field">
+                <label>Error Log Path</label>
+                <input type="text" id="errorLog" value="/var/log/nginx/example.com.error.log" oninput="generate()">
+              </div>
+            </div>
+            <label class="ng-toggle">
+              <input type="checkbox" id="enableErrorPages" onchange="toggleSub('enableErrorPages','errorPageFields'); generate()">
+              <div>
+                <div class="toggle-label">Custom Error Pages</div>
+                <div class="toggle-desc">Serve custom 404 and 50x pages</div>
+              </div>
+            </label>
+            <div class="ng-sub-fields" id="errorPageFields" style="display:none">
+              <div class="ng-field">
+                <label>404 Page</label>
+                <input type="text" id="page404" value="/404.html" oninput="generate()">
+              </div>
+              <div class="ng-field">
+                <label>50x Page</label>
+                <input type="text" id="page50x" value="/50x.html" oninput="generate()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right column: Preview -->
+      <div style="display:flex;flex-direction:column;gap:16px;position:sticky;top:16px;align-self:start">
+        <div class="ng-preview-wrap">
+          <div class="ng-section-header">
+            Generated nginx.conf
+            <span id="lineCount" style="font-weight:400;font-size:0.75rem;color:var(--text-muted)"></span>
+          </div>
+          <textarea class="ng-preview" id="output" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // Helpers
+    const $ = id => document.getElementById(id);
+    const isOn = id => $(id).checked;
+    const val = id => $(id).value.trim();
+
+    function toggleSub(checkId, subId) {
+      $(subId).style.display = $(checkId).checked ? 'flex' : 'none';
+    }
+
+    function onSSLToggle() {
+      const on = isOn('enableSSL');
+      $('sslFields').style.display = on ? 'flex' : 'none';
+      if (on) $('listenPort').value = '443';
+      else $('listenPort').value = '80';
+    }
+
+    function showStatus(msg, ok) {
+      const s = $('status');
+      s.textContent = msg;
+      s.className = ok ? 'status status-success' : 'status status-error';
+      setTimeout(() => { s.textContent = ''; s.className = ''; }, 2000);
+    }
+
+    // Config generation
+    function generate() {
+      const lines = [];
+      const indent = '    ';
+
+      const serverName = val('serverName') || 'example.com';
+      const rootDir = val('rootDir') || '/var/www/html';
+      const port = val('listenPort');
+
+      // Rate limiting zone (placed outside server block)
+      if (isOn('enableRateLimit')) {
+        lines.push('# Rate limiting zone');
+        lines.push(`limit_req_zone $binary_remote_addr zone=ratelimit:10m rate=${val('rateLimit') || '10'}r/s;`);
+        lines.push('');
+      }
+
+      // HTTPS redirect server block
+      if (isOn('forceHTTPS') && isOn('enableSSL')) {
+        lines.push('# HTTP to HTTPS redirect');
+        lines.push('server {');
+        lines.push(`${indent}listen 80;`);
+        lines.push(`${indent}listen [::]:80;`);
+        lines.push(`${indent}server_name ${serverName};`);
+        lines.push(`${indent}return 301 https://$host$request_uri;`);
+        lines.push('}');
+        lines.push('');
+      }
+
+      // Main server block
+      lines.push('server {');
+
+      // Listen
+      if (isOn('enableSSL')) {
+        lines.push(`${indent}listen 443 ssl http2;`);
+        lines.push(`${indent}listen [::]:443 ssl http2;`);
+      } else {
+        lines.push(`${indent}listen ${port};`);
+        lines.push(`${indent}listen [::]:${port};`);
+      }
+
+      lines.push(`${indent}server_name ${serverName};`);
+
+      // Root & index (skip if pure reverse proxy without PHP)
+      if (!isOn('enableProxy') || isOn('enablePHP')) {
+        lines.push(`${indent}root ${rootDir};`);
+        if (isOn('enablePHP')) {
+          lines.push(`${indent}index index.php index.html index.htm;`);
+        } else {
+          lines.push(`${indent}index index.html index.htm;`);
+        }
+      }
+
+      lines.push('');
+
+      // SSL
+      if (isOn('enableSSL')) {
+        lines.push(`${indent}# SSL configuration`);
+        lines.push(`${indent}ssl_certificate ${val('sslCert') || '/etc/letsencrypt/live/example.com/fullchain.pem'};`);
+        lines.push(`${indent}ssl_certificate_key ${val('sslKey') || '/etc/letsencrypt/live/example.com/privkey.pem'};`);
+        lines.push(`${indent}ssl_protocols TLSv1.2 TLSv1.3;`);
+        lines.push(`${indent}ssl_ciphers HIGH:!aNULL:!MD5;`);
+        lines.push(`${indent}ssl_prefer_server_ciphers on;`);
+        lines.push(`${indent}ssl_session_cache shared:SSL:10m;`);
+        lines.push(`${indent}ssl_session_timeout 10m;`);
+        lines.push('');
+      }
+
+      // Security headers
+      const hasSecHeaders = isOn('headerXFrame') || isOn('headerCSP') || isOn('headerHSTS') || isOn('headerXContent') || isOn('headerReferrer') || isOn('headerPermissions');
+      if (hasSecHeaders) {
+        lines.push(`${indent}# Security headers`);
+        if (isOn('headerXFrame')) lines.push(`${indent}add_header X-Frame-Options "SAMEORIGIN" always;`);
+        if (isOn('headerCSP')) lines.push(`${indent}add_header Content-Security-Policy "${val('cspValue') || "default-src 'self'"}" always;`);
+        if (isOn('headerHSTS')) lines.push(`${indent}add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;`);
+        if (isOn('headerXContent')) lines.push(`${indent}add_header X-Content-Type-Options "nosniff" always;`);
+        if (isOn('headerReferrer')) lines.push(`${indent}add_header Referrer-Policy "no-referrer-when-downgrade" always;`);
+        if (isOn('headerPermissions')) lines.push(`${indent}add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;`);
+        lines.push('');
+      }
+
+      // Gzip
+      if (isOn('enableGzip')) {
+        lines.push(`${indent}# Gzip compression`);
+        lines.push(`${indent}gzip on;`);
+        lines.push(`${indent}gzip_vary on;`);
+        lines.push(`${indent}gzip_proxied any;`);
+        lines.push(`${indent}gzip_comp_level 6;`);
+        lines.push(`${indent}gzip_min_length 256;`);
+        lines.push(`${indent}gzip_types`);
+        lines.push(`${indent}    text/plain`);
+        lines.push(`${indent}    text/css`);
+        lines.push(`${indent}    text/xml`);
+        lines.push(`${indent}    text/javascript`);
+        lines.push(`${indent}    application/json`);
+        lines.push(`${indent}    application/javascript`);
+        lines.push(`${indent}    application/xml`);
+        lines.push(`${indent}    application/rss+xml`);
+        lines.push(`${indent}    image/svg+xml;`);
+        lines.push('');
+      }
+
+      // Rate limiting
+      if (isOn('enableRateLimit')) {
+        lines.push(`${indent}# Rate limiting`);
+        lines.push(`${indent}limit_req zone=ratelimit burst=${val('rateBurst') || '20'} nodelay;`);
+        lines.push(`${indent}limit_req_status 429;`);
+        lines.push('');
+      }
+
+      // Access / Error logs
+      if (isOn('enableAccessLog')) {
+        lines.push(`${indent}access_log ${val('accessLog') || '/var/log/nginx/access.log'};`);
+      }
+      if (isOn('enableErrorLog')) {
+        lines.push(`${indent}error_log ${val('errorLog') || '/var/log/nginx/error.log'};`);
+      }
+      if (isOn('enableAccessLog') || isOn('enableErrorLog')) lines.push('');
+
+      // Main location block
+      if (isOn('enableProxy') && !isOn('enablePHP')) {
+        // Pure reverse proxy
+        lines.push(`${indent}location / {`);
+        lines.push(`${indent}${indent}proxy_pass ${val('proxyPass') || 'http://127.0.0.1:3000'};`);
+        lines.push(`${indent}${indent}proxy_http_version 1.1;`);
+        lines.push(`${indent}${indent}proxy_set_header Host $host;`);
+        lines.push(`${indent}${indent}proxy_set_header X-Real-IP $remote_addr;`);
+        lines.push(`${indent}${indent}proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`);
+        lines.push(`${indent}${indent}proxy_set_header X-Forwarded-Proto $scheme;`);
+        lines.push(`${indent}}`);
+        lines.push('');
+      } else {
+        // Static / PHP location
+        lines.push(`${indent}location / {`);
+        lines.push(`${indent}${indent}try_files $uri $uri/ ${isOn('enablePHP') ? '/index.php?$query_string' : '=404'};`);
+        lines.push(`${indent}}`);
+        lines.push('');
+      }
+
+      // PHP-FPM
+      if (isOn('enablePHP')) {
+        lines.push(`${indent}# PHP-FPM`);
+        lines.push(`${indent}location ~ \\.php$ {`);
+        lines.push(`${indent}${indent}include fastcgi_params;`);
+        lines.push(`${indent}${indent}fastcgi_pass ${val('phpSocket') || 'unix:/run/php/php8.2-fpm.sock'};`);
+        lines.push(`${indent}${indent}fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;`);
+        lines.push(`${indent}${indent}fastcgi_index index.php;`);
+        lines.push(`${indent}${indent}fastcgi_intercept_errors on;`);
+        lines.push(`${indent}}`);
+        lines.push('');
+      }
+
+      // WebSocket
+      if (isOn('enableWS')) {
+        const wsPath = val('wsPath') || '/ws';
+        const wsUp = val('wsUpstream') || 'http://127.0.0.1:3000';
+        lines.push(`${indent}# WebSocket support`);
+        lines.push(`${indent}location ${wsPath} {`);
+        lines.push(`${indent}${indent}proxy_pass ${wsUp};`);
+        lines.push(`${indent}${indent}proxy_http_version 1.1;`);
+        lines.push(`${indent}${indent}proxy_set_header Upgrade $http_upgrade;`);
+        lines.push(`${indent}${indent}proxy_set_header Connection "upgrade";`);
+        lines.push(`${indent}${indent}proxy_set_header Host $host;`);
+        lines.push(`${indent}${indent}proxy_set_header X-Real-IP $remote_addr;`);
+        lines.push(`${indent}${indent}proxy_read_timeout 86400;`);
+        lines.push(`${indent}}`);
+        lines.push('');
+      }
+
+      // Static file caching
+      if (isOn('enableCache')) {
+        const dur = val('cacheDuration') || '7d';
+        lines.push(`${indent}# Static file caching`);
+        lines.push(`${indent}location ~* \\.(jpg|jpeg|png|gif|ico|svg|webp|woff|woff2|ttf|eot|css|js)$ {`);
+        lines.push(`${indent}${indent}expires ${dur};`);
+        lines.push(`${indent}${indent}add_header Cache-Control "public, immutable";`);
+        lines.push(`${indent}${indent}access_log off;`);
+        lines.push(`${indent}}`);
+        lines.push('');
+      }
+
+      // Custom error pages
+      if (isOn('enableErrorPages')) {
+        lines.push(`${indent}# Custom error pages`);
+        lines.push(`${indent}error_page 404 ${val('page404') || '/404.html'};`);
+        lines.push(`${indent}error_page 500 502 503 504 ${val('page50x') || '/50x.html'};`);
+        lines.push(`${indent}location = ${val('page50x') || '/50x.html'} {`);
+        lines.push(`${indent}${indent}root ${rootDir};`);
+        lines.push(`${indent}${indent}internal;`);
+        lines.push(`${indent}}`);
+        lines.push('');
+      }
+
+      // Deny hidden files
+      lines.push(`${indent}# Deny access to hidden files`);
+      lines.push(`${indent}location ~ /\\. {`);
+      lines.push(`${indent}${indent}deny all;`);
+      lines.push(`${indent}${indent}access_log off;`);
+      lines.push(`${indent}${indent}log_not_found off;`);
+      lines.push(`${indent}}`);
+
+      lines.push('}');
+
+      const output = lines.join('\n');
+      $('output').value = output;
+      $('lineCount').textContent = `${output.split('\n').length} lines`;
+    }
+
+    // Copy
+    function copyConfig() {
+      const text = $('output').value;
+      if (!text) return;
+      navigator.clipboard.writeText(text);
+      showStatus('Copied!', true);
+    }
+
+    // Download
+    function downloadConfig() {
+      const text = $('output').value;
+      if (!text) return;
+      const name = (val('serverName') || 'nginx') + '.conf';
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showStatus('Downloaded ' + name, true);
+    }
+
+    // Reset
+    function resetAll() {
+      // Uncheck all toggles
+      document.querySelectorAll('.ng-toggle input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+      // Hide all sub-fields
+      document.querySelectorAll('.ng-sub-fields').forEach(el => { el.style.display = 'none'; });
+      // Reset text inputs
+      $('serverName').value = 'example.com';
+      $('rootDir').value = '/var/www/html';
+      $('listenPort').value = '80';
+      $('sslCert').value = '/etc/letsencrypt/live/example.com/fullchain.pem';
+      $('sslKey').value = '/etc/letsencrypt/live/example.com/privkey.pem';
+      $('proxyPass').value = 'http://127.0.0.1:3000';
+      $('phpSocket').value = 'unix:/run/php/php8.2-fpm.sock';
+      $('wsPath').value = '/ws';
+      $('wsUpstream').value = 'http://127.0.0.1:3000';
+      $('rateLimit').value = '10';
+      $('rateBurst').value = '20';
+      $('cacheDuration').value = '7d';
+      $('accessLog').value = '/var/log/nginx/example.com.access.log';
+      $('errorLog').value = '/var/log/nginx/example.com.error.log';
+      $('page404').value = '/404.html';
+      $('page50x').value = '/50x.html';
+      $('cspValue').value = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'";
+      generate();
+    }
+
+    // Presets
+    function loadPreset(name) {
+      resetAll();
+      const sn = val('serverName') || 'example.com';
+
+      if (name === 'static') {
+        $('enableSSL').checked = true; onSSLToggle();
+        $('forceHTTPS').checked = true;
+        $('enableGzip').checked = true;
+        $('enableCache').checked = true; toggleSub('enableCache','cacheFields');
+        $('cacheDuration').value = '30d';
+        $('headerXFrame').checked = true;
+        $('headerXContent').checked = true;
+        $('headerHSTS').checked = true;
+        $('enableAccessLog').checked = true; toggleSub('enableAccessLog','accessLogFields');
+
+      } else if (name === 'php') {
+        $('enableSSL').checked = true; onSSLToggle();
+        $('forceHTTPS').checked = true;
+        $('enablePHP').checked = true; toggleSub('enablePHP','phpFields');
+        $('enableGzip').checked = true;
+        $('enableCache').checked = true; toggleSub('enableCache','cacheFields');
+        $('headerXFrame').checked = true;
+        $('headerXContent').checked = true;
+        $('headerHSTS').checked = true;
+        $('enableAccessLog').checked = true; toggleSub('enableAccessLog','accessLogFields');
+        $('enableErrorLog').checked = true; toggleSub('enableErrorLog','errorLogFields');
+
+      } else if (name === 'node') {
+        $('enableSSL').checked = true; onSSLToggle();
+        $('forceHTTPS').checked = true;
+        $('enableProxy').checked = true; toggleSub('enableProxy','proxyFields');
+        $('proxyPass').value = 'http://127.0.0.1:3000';
+        $('enableWS').checked = true; toggleSub('enableWS','wsFields');
+        $('enableGzip').checked = true;
+        $('enableRateLimit').checked = true; toggleSub('enableRateLimit','rateLimitFields');
+        $('headerXFrame').checked = true;
+        $('headerXContent').checked = true;
+        $('headerHSTS').checked = true;
+        $('enableAccessLog').checked = true; toggleSub('enableAccessLog','accessLogFields');
+        $('enableErrorLog').checked = true; toggleSub('enableErrorLog','errorLogFields');
+
+      } else if (name === 'wordpress') {
+        $('rootDir').value = '/var/www/wordpress';
+        $('enableSSL').checked = true; onSSLToggle();
+        $('forceHTTPS').checked = true;
+        $('enablePHP').checked = true; toggleSub('enablePHP','phpFields');
+        $('enableGzip').checked = true;
+        $('enableCache').checked = true; toggleSub('enableCache','cacheFields');
+        $('cacheDuration').value = '7d';
+        $('enableRateLimit').checked = true; toggleSub('enableRateLimit','rateLimitFields');
+        $('rateLimit').value = '5';
+        $('rateBurst').value = '10';
+        $('headerXFrame').checked = true;
+        $('headerXContent').checked = true;
+        $('headerCSP').checked = true; toggleSub('headerCSP','cspFields');
+        $('cspValue').value = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:";
+        $('headerHSTS').checked = true;
+        $('headerReferrer').checked = true;
+        $('enableAccessLog').checked = true; toggleSub('enableAccessLog','accessLogFields');
+        $('enableErrorLog').checked = true; toggleSub('enableErrorLog','errorLogFields');
+        $('enableErrorPages').checked = true; toggleSub('enableErrorPages','errorPageFields');
+      }
+
+      generate();
+      showStatus('Loaded preset: ' + name.charAt(0).toUpperCase() + name.slice(1), true);
+    }
+
+    // Initial generation
+    generate();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

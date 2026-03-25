@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>.env File Editor - Manage Environment Variables | ZeroKit.dev</title>
+  <meta name="description" content="Edit .env files visually. Parse, validate, convert between .env, JSON, YAML, and docker-compose formats. Generate .env.example files. Free online tool.">
+  <link rel="canonical" href="https://zerokit.dev/tools/envfile.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .env-table-wrap {
+      max-height: 500px;
+      overflow-y: auto;
+      padding: 0;
+    }
+    .env-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+    .env-table th {
+      position: sticky;
+      top: 0;
+      background: var(--surface-2);
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      z-index: 1;
+    }
+    .env-table td {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .env-table tr:last-child td { border-bottom: none; }
+    .env-table tr:hover { background: rgba(99, 102, 241, 0.04); }
+    .env-table tr.row-error { background: rgba(239, 68, 68, 0.07); }
+    .env-table tr.row-comment td { color: var(--text-muted); font-style: italic; }
+    .env-input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 4px 6px;
+      border-radius: 4px;
+      outline: none;
+    }
+    .env-input:focus { border-color: var(--accent); background: var(--surface-2); }
+    .env-input.key-input { color: var(--accent); font-weight: 500; }
+    .env-input.val-masked { -webkit-text-security: disc; text-security: disc; }
+    .env-input.comment-input { color: var(--text-muted); }
+    .row-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .row-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+    .row-btn:hover { color: var(--text); background: var(--surface-2); }
+    .row-btn.btn-delete:hover { color: var(--error); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-error { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+    .badge-warn { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+    .validation-panel {
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 40px;
+      align-items: center;
+    }
+    .validation-panel:empty { display: none; }
+    .format-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+    }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 16px;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 12px;
+    }
+    .empty-state span { font-size: 2rem; }
+    .checkbox-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+    @media (max-width: 768px) {
+      .env-table th:nth-child(4), .env-table td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>.env File Editor</h1>
+    <p class="description">Parse, edit, validate, and convert environment variable files. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="parseInput()">Parse</button>
+        <button class="btn" onclick="addRow()">+ Add Variable</button>
+        <button class="btn" onclick="addCommentRow()">+ Comment</button>
+        <button class="btn" onclick="sortRows()">Sort A-Z</button>
+        <button class="btn" onclick="toggleAllVisibility()">Toggle Values</button>
+        <button class="btn" onclick="generateExample()">Generate .env.example</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="options-row">
+      <label>Output format:
+        <select id="outputFormat" class="format-select" onchange="updateOutput()">
+          <option value="env" selected>.env</option>
+          <option value="json">JSON</option>
+          <option value="yaml">YAML</option>
+          <option value="docker">docker-compose</option>
+        </select>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="quoteValues" checked onchange="updateOutput()"> Quote values
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="includeComments" checked onchange="updateOutput()"> Include comments
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input (.env content)</div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste your .env file here...
+
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=admin
+DB_PASS=secret123
+
+# API Keys
+API_KEY=sk-abc123
+NODE_ENV=production'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <button class="btn" onclick="copyOutput()" style="padding:4px 10px;font-size:0.75rem;">Copy</button>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Parsed output will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="tool-panel" style="margin-top: 16px;">
+      <div class="panel-header">
+        Editor
+        <span id="rowCount" style="font-weight:400;"></span>
+      </div>
+      <div id="validation" class="validation-panel"></div>
+      <div id="tableWrap" class="env-table-wrap">
+        <div id="emptyState" class="empty-state">
+          <span>{ }</span>
+          <p>Paste a .env file above and click <strong>Parse</strong>, or click <strong>+ Add Variable</strong> to start from scratch.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    let rows = [];
+    let allMasked = true;
+
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $tableWrap = document.getElementById('tableWrap');
+    const $emptyState = document.getElementById('emptyState');
+    const $validation = document.getElementById('validation');
+    const $rowCount = document.getElementById('rowCount');
+    const $format = document.getElementById('outputFormat');
+    const $quoteValues = document.getElementById('quoteValues');
+    const $includeComments = document.getElementById('includeComments');
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function parseEnv(text) {
+      const lines = text.split('\n');
+      const result = [];
+      for (const raw of lines) {
+        const trimmed = raw.trim();
+        if (trimmed === '') {
+          result.push({ type: 'blank' });
+          continue;
+        }
+        if (trimmed.startsWith('#')) {
+          result.push({ type: 'comment', value: trimmed.slice(1).trim() });
+          continue;
+        }
+        const eqIndex = trimmed.indexOf('=');
+        if (eqIndex === -1) {
+          result.push({ type: 'error', raw: trimmed, error: 'Missing = sign' });
+          continue;
+        }
+        const key = trimmed.slice(0, eqIndex).trim();
+        let val = trimmed.slice(eqIndex + 1).trim();
+        // Strip surrounding quotes
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        const errors = [];
+        if (!key) errors.push('Empty key');
+        if (/[^A-Za-z0-9_]/.test(key)) errors.push('Key contains invalid characters');
+        if (/^\d/.test(key)) errors.push('Key starts with a number');
+        result.push({
+          type: 'var',
+          key,
+          value: val,
+          masked: true,
+          errors
+        });
+      }
+      return result;
+    }
+
+    function parseInput() {
+      const text = $input.value.trim();
+      if (!text) return;
+      rows = parseEnv(text);
+      allMasked = true;
+      renderTable();
+      validate();
+      updateOutput();
+    }
+
+    function renderTable() {
+      const vars = rows.filter(r => r.type === 'var');
+      $rowCount.textContent = vars.length + ' variable' + (vars.length !== 1 ? 's' : '');
+
+      if (rows.length === 0) {
+        $tableWrap.innerHTML = '';
+        $tableWrap.appendChild($emptyState);
+        $rowCount.textContent = '';
+        return;
+      }
+
+      let html = '<table class="env-table"><thead><tr>' +
+        '<th style="width:30%">Key</th>' +
+        '<th style="width:45%">Value</th>' +
+        '<th style="width:10%">Status</th>' +
+        '<th style="width:15%">Actions</th>' +
+        '</tr></thead><tbody>';
+
+      rows.forEach((row, i) => {
+        if (row.type === 'blank') return;
+
+        if (row.type === 'comment') {
+          html += `<tr class="row-comment">
+            <td colspan="2"><input class="env-input comment-input" value="${escapeHtml(row.value)}" onchange="updateComment(${i}, this.value)" placeholder="Comment text..."><span style="opacity:0.4;font-size:0.75rem;margin-left:4px;"># comment</span></td>
+            <td></td>
+            <td><div class="row-actions">
+              <button class="row-btn" onclick="moveRow(${i},-1)" title="Move up">&#9650;</button>
+              <button class="row-btn" onclick="moveRow(${i},1)" title="Move down">&#9660;</button>
+              <button class="row-btn btn-delete" onclick="deleteRow(${i})" title="Delete">&#10005;</button>
+            </div></td>
+          </tr>`;
+          return;
+        }
+
+        if (row.type === 'error') {
+          html += `<tr class="row-error">
+            <td colspan="2"><code style="color:var(--error);font-size:0.8rem;">${escapeHtml(row.raw)}</code></td>
+            <td><span class="badge badge-error">Syntax Error</span></td>
+            <td><div class="row-actions">
+              <button class="row-btn btn-delete" onclick="deleteRow(${i})" title="Delete">&#10005;</button>
+            </div></td>
+          </tr>`;
+          return;
+        }
+
+        const maskedClass = row.masked ? ' val-masked' : '';
+        const eyeIcon = row.masked ? '&#9673;' : '&#9675;';
+        const hasErrors = row.errors && row.errors.length > 0;
+        const duplicateKeys = rows.filter(r => r.type === 'var' && r.key === row.key);
+        const isDuplicate = duplicateKeys.length > 1;
+        const isEmpty = row.value === '';
+        let badges = '';
+        if (hasErrors) badges += row.errors.map(e => `<span class="badge badge-error">${escapeHtml(e)}</span>`).join(' ');
+        if (isDuplicate) badges += '<span class="badge badge-error">Duplicate</span>';
+        if (isEmpty) badges += '<span class="badge badge-warn">Empty</span>';
+
+        const rowClass = (hasErrors || isDuplicate) ? ' class="row-error"' : '';
+
+        html += `<tr${rowClass}>
+          <td><input class="env-input key-input" value="${escapeHtml(row.key)}" onchange="updateKey(${i}, this.value)"></td>
+          <td><input class="env-input${maskedClass}" value="${escapeHtml(row.value)}" onchange="updateValue(${i}, this.value)" placeholder="(empty)"></td>
+          <td>${badges || '<span style="color:var(--success);font-size:0.75rem;">OK</span>'}</td>
+          <td><div class="row-actions">
+            <button class="row-btn" onclick="toggleMask(${i})" title="Toggle visibility">${eyeIcon}</button>
+            <button class="row-btn" onclick="moveRow(${i},-1)" title="Move up">&#9650;</button>
+            <button class="row-btn" onclick="moveRow(${i},1)" title="Move down">&#9660;</button>
+            <button class="row-btn btn-delete" onclick="deleteRow(${i})" title="Delete">&#10005;</button>
+          </div></td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      $tableWrap.innerHTML = html;
+    }
+
+    function validate() {
+      const issues = [];
+      const keyCounts = {};
+      rows.forEach(r => {
+        if (r.type === 'var') {
+          keyCounts[r.key] = (keyCounts[r.key] || 0) + 1;
+        }
+      });
+      for (const [key, count] of Object.entries(keyCounts)) {
+        if (count > 1) issues.push({ type: 'error', msg: `Duplicate key: ${key} (${count} times)` });
+      }
+      const emptyVars = rows.filter(r => r.type === 'var' && r.value === '');
+      if (emptyVars.length > 0) {
+        issues.push({ type: 'warn', msg: `${emptyVars.length} empty value${emptyVars.length > 1 ? 's' : ''}` });
+      }
+      const syntaxErrors = rows.filter(r => r.type === 'error');
+      if (syntaxErrors.length > 0) {
+        issues.push({ type: 'error', msg: `${syntaxErrors.length} syntax error${syntaxErrors.length > 1 ? 's' : ''}` });
+      }
+      const badKeys = rows.filter(r => r.type === 'var' && r.errors && r.errors.length > 0);
+      if (badKeys.length > 0) {
+        issues.push({ type: 'error', msg: `${badKeys.length} invalid key${badKeys.length > 1 ? 's' : ''}` });
+      }
+
+      $validation.innerHTML = issues.map(i =>
+        `<span class="badge ${i.type === 'error' ? 'badge-error' : 'badge-warn'}">${escapeHtml(i.msg)}</span>`
+      ).join('');
+    }
+
+    function updateKey(i, val) { rows[i].key = val.trim(); refresh(); }
+    function updateValue(i, val) { rows[i].value = val; refresh(); }
+    function updateComment(i, val) { rows[i].value = val; refresh(); }
+
+    function toggleMask(i) {
+      rows[i].masked = !rows[i].masked;
+      renderTable();
+    }
+
+    function toggleAllVisibility() {
+      allMasked = !allMasked;
+      rows.forEach(r => { if (r.type === 'var') r.masked = allMasked; });
+      renderTable();
+    }
+
+    function deleteRow(i) {
+      rows.splice(i, 1);
+      refresh();
+    }
+
+    function moveRow(i, dir) {
+      const newI = i + dir;
+      if (newI < 0 || newI >= rows.length) return;
+      [rows[i], rows[newI]] = [rows[newI], rows[i]];
+      refresh();
+    }
+
+    function addRow() {
+      rows.push({ type: 'var', key: '', value: '', masked: allMasked, errors: [] });
+      refresh();
+      // Focus the new key input
+      setTimeout(() => {
+        const inputs = $tableWrap.querySelectorAll('.key-input');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }, 50);
+    }
+
+    function addCommentRow() {
+      rows.push({ type: 'comment', value: '' });
+      refresh();
+      setTimeout(() => {
+        const inputs = $tableWrap.querySelectorAll('.comment-input');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }, 50);
+    }
+
+    function sortRows() {
+      // Separate comments/blanks that precede vars to keep them grouped
+      const sorted = [];
+      let pendingComments = [];
+      const varRows = [];
+
+      rows.forEach(r => {
+        if (r.type === 'comment' || r.type === 'blank') {
+          pendingComments.push(r);
+        } else {
+          varRows.push({ row: r, comments: pendingComments });
+          pendingComments = [];
+        }
+      });
+
+      varRows.sort((a, b) => {
+        const ka = (a.row.key || '').toLowerCase();
+        const kb = (b.row.key || '').toLowerCase();
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+      });
+
+      varRows.forEach(v => {
+        sorted.push(...v.comments, v.row);
+      });
+      // Trailing comments
+      sorted.push(...pendingComments);
+
+      rows = sorted;
+      refresh();
+    }
+
+    function refresh() {
+      renderTable();
+      validate();
+      updateOutput();
+    }
+
+    function getVarRows() {
+      return rows.filter(r => r.type === 'var');
+    }
+
+    function formatAsEnv(varRows, allRows, includeComments, quoteVals) {
+      const lines = [];
+      (includeComments ? allRows : allRows.filter(r => r.type !== 'comment')).forEach(r => {
+        if (r.type === 'blank') { lines.push(''); return; }
+        if (r.type === 'comment') { lines.push('# ' + r.value); return; }
+        if (r.type === 'error') { lines.push('# ERROR: ' + r.raw); return; }
+        const v = quoteVals ? `"${r.value}"` : r.value;
+        lines.push(`${r.key}=${v}`);
+      });
+      return lines.join('\n');
+    }
+
+    function formatAsJSON(varRows) {
+      const obj = {};
+      varRows.forEach(r => { obj[r.key] = r.value; });
+      return JSON.stringify(obj, null, 2);
+    }
+
+    function formatAsYAML(varRows) {
+      return varRows.map(r => {
+        const val = r.value;
+        // Quote if contains special chars
+        const needsQuote = /[:#\[\]{}|>&*!?,'"]/.test(val) || val === '' || val === 'true' || val === 'false' || val === 'null' || !isNaN(val);
+        return `${r.key}: ${needsQuote ? '"' + val.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"' : val}`;
+      }).join('\n');
+    }
+
+    function formatAsDocker(varRows, allRows, includeComments) {
+      const lines = ['environment:'];
+      (includeComments ? allRows : allRows.filter(r => r.type !== 'comment')).forEach(r => {
+        if (r.type === 'blank') return;
+        if (r.type === 'comment') { lines.push('  # ' + r.value); return; }
+        if (r.type === 'error') return;
+        lines.push(`  - ${r.key}=${r.value}`);
+      });
+      return lines.join('\n');
+    }
+
+    function updateOutput() {
+      const format = $format.value;
+      const includeComments = $includeComments.checked;
+      const quoteVals = $quoteValues.checked;
+      const varRows = getVarRows();
+
+      if (rows.length === 0) { $output.value = ''; return; }
+
+      switch (format) {
+        case 'env':
+          $output.value = formatAsEnv(varRows, rows, includeComments, quoteVals);
+          break;
+        case 'json':
+          $output.value = formatAsJSON(varRows);
+          break;
+        case 'yaml':
+          $output.value = formatAsYAML(varRows);
+          break;
+        case 'docker':
+          $output.value = formatAsDocker(varRows, rows, includeComments);
+          break;
+      }
+    }
+
+    function generateExample() {
+      if (rows.length === 0) return;
+      const lines = [];
+      rows.forEach(r => {
+        if (r.type === 'blank') { lines.push(''); return; }
+        if (r.type === 'comment') { lines.push('# ' + r.value); return; }
+        if (r.type === 'error') return;
+        lines.push(`${r.key}=`);
+      });
+      $output.value = lines.join('\n');
+
+      // Temporarily show format as env.example
+      const btn = document.querySelector('.action-bar .btn-group');
+      const toast = document.createElement('span');
+      toast.className = 'badge badge-warn';
+      toast.textContent = '.env.example generated in output';
+      toast.style.marginLeft = '8px';
+      btn.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+
+    function copyOutput() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = orig, 1500);
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      rows = [];
+      allMasked = true;
+      $validation.innerHTML = '';
+      $rowCount.textContent = '';
+      $tableWrap.innerHTML = '';
+      $tableWrap.appendChild($emptyState);
+    }
+
+    // Auto-parse on paste
+    $input.addEventListener('paste', () => setTimeout(parseInput, 50));
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

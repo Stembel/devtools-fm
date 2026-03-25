@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Blindness Simulator - Test Color Accessibility | ZeroKit.dev</title>
+  <meta name="description" content="Simulate how colors appear to people with color vision deficiencies. Test protanopia, deuteranopia, tritanopia, and more. Ensure your designs are accessible to everyone.">
+  <meta name="keywords" content="color blindness simulator, color vision deficiency, protanopia, deuteranopia, tritanopia, color accessibility, CVD simulator, colorblind test, a11y color">
+  <link rel="canonical" href="https://zerokit.dev/tools/colorblind.html">
+  <meta property="og:title" content="Color Blindness Simulator - Test Color Accessibility | ZeroKit.dev">
+  <meta property="og:description" content="Simulate how colors appear under different types of color blindness. Test accessibility for protanopia, deuteranopia, tritanopia, and more.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --surface: #141416;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --text-muted: #8b8b94;
+      --accent: #6366f1;
+      --radius: 8px;
+      --font: 'Inter', sans-serif;
+      --pass: #22c55e;
+      --fail: #ef4444;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tool-page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px 0;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .tool-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* Mode Tabs */
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 28px;
+      max-width: 340px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .mode-tab:hover:not(.active) {
+      color: var(--text);
+    }
+
+    /* Color Input Section */
+    .color-input-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+
+    .color-input-section label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .color-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-picker-wrapper {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .color-picker-wrapper input[type="color"] {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: calc(100% + 12px);
+      height: calc(100% + 12px);
+      border: none;
+      cursor: pointer;
+      background: none;
+    }
+
+    .color-text-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .color-text-input:focus {
+      border-color: var(--accent);
+    }
+
+    .color-swatch-strip {
+      width: 100%;
+      height: 32px;
+      border-radius: 4px;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      transition: background-color 0.2s;
+    }
+
+    .color-format-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Palette Mode */
+    .palette-section {
+      display: none;
+    }
+
+    .palette-section.active {
+      display: block;
+    }
+
+    .single-section.active {
+      display: block;
+    }
+
+    .single-section {
+      display: none;
+    }
+
+    .palette-input-area {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+
+    .palette-input-area label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .palette-textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text);
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.8;
+      transition: border-color 0.2s;
+    }
+
+    .palette-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .palette-textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    .palette-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .palette-swatches {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .palette-swatch-chip {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      cursor: default;
+      position: relative;
+    }
+
+    .palette-swatch-chip .chip-label {
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Simulation Grid */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .sim-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .sim-card:hover {
+      border-color: #3a3a42;
+    }
+
+    .sim-card-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sim-card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sim-card-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .sim-card-body {
+      padding: 16px;
+    }
+
+    /* Single color mode swatches */
+    .sim-swatch-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .sim-swatch {
+      width: 56px;
+      height: 56px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sim-arrow {
+      color: var(--text-muted);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .sim-swatch-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sim-hex {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      display: block;
+    }
+
+    .sim-delta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Palette mode swatches */
+    .sim-palette-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .sim-palette-chip {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* Tip */
+    .sim-tip {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sim-tip strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Original Color Display */
+    .original-display {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .original-swatch-large {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .original-info h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .original-info span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tool-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .mode-tabs {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tool-page">
+    <div class="tool-header">
+      <h1>Color Blindness Simulator</h1>
+      <p>See how colors appear to people with different types of color vision deficiency. Test single colors or full palettes for accessibility.</p>
+    </div>
+
+    <!-- Mode Tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="single">Single Color</button>
+      <button class="mode-tab" data-mode="palette">Palette Mode</button>
+    </div>
+
+    <!-- Single Color Input -->
+    <div class="single-section active" id="singleSection">
+      <div class="color-input-section">
+        <label>Pick or Enter a Color</label>
+        <div class="color-input-row">
+          <div class="color-picker-wrapper">
+            <input type="color" id="colorPicker" value="#6366f1">
+          </div>
+          <input type="text" class="color-text-input" id="colorText" value="#6366f1" spellcheck="false" autocomplete="off">
+        </div>
+        <div class="color-swatch-strip" id="colorSwatch"></div>
+        <div class="color-format-hint">HEX, RGB(r,g,b), HSL(h,s%,l%)</div>
+      </div>
+    </div>
+
+    <!-- Palette Input -->
+    <div class="palette-section" id="paletteSection">
+      <div class="palette-input-area">
+        <label>Enter Multiple Colors (one per line or comma-separated)</label>
+        <textarea class="palette-textarea" id="paletteInput" placeholder="#6366f1&#10;#22c55e&#10;#ef4444&#10;#eab308&#10;#3b82f6">#6366f1, #22c55e, #ef4444, #eab308, #3b82f6</textarea>
+        <div class="palette-hint">Supports HEX, RGB(), HSL() formats</div>
+        <div class="palette-swatches" id="paletteSwatches"></div>
+      </div>
+    </div>
+
+    <!-- Original Color Display (single mode) -->
+    <div class="original-display" id="originalDisplay">
+      <div class="original-swatch-large" id="originalSwatch"></div>
+      <div class="original-info">
+        <h3>Original Color</h3>
+        <span id="originalHex">#6366f1</span>
+      </div>
+    </div>
+
+    <!-- Simulation Results Grid -->
+    <div class="sim-grid" id="simGrid"></div>
+  </div>
+
+  <footer style="text-align:center;padding:32px 24px;color:var(--text-muted);font-size:0.8rem;">
+    <a href="../" style="color:var(--accent);text-decoration:none;">&larr; Back to all tools</a> &middot; ZeroKit.dev
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    // ========================================
+    // Color Blindness Simulator
+    // Uses standard color matrix transformations
+    // based on Brettel, Vienot & Mollon (1997)
+    // and Machado, Oliveira & Fernandes (2009)
+    // ========================================
+
+    // ---- Color Parsing Utilities ----
+
+    function parseColor(str) {
+      str = str.trim();
+
+      // HEX
+      const hexMatch = str.match(/^#?([0-9a-f]{3,8})$/i);
+      if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) {
+          hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        } else if (hex.length === 4) {
+          hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        } else if (hex.length === 6 || hex.length === 8) {
+          hex = hex.substring(0, 6);
+        } else {
+          return null;
+        }
+        return {
+          r: parseInt(hex.substring(0, 2), 16),
+          g: parseInt(hex.substring(2, 4), 16),
+          b: parseInt(hex.substring(4, 6), 16)
+        };
+      }
+
+      // RGB
+      const rgbMatch = str.match(/^rgba?\s*\(\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})/i);
+      if (rgbMatch) {
+        return {
+          r: Math.min(255, parseInt(rgbMatch[1])),
+          g: Math.min(255, parseInt(rgbMatch[2])),
+          b: Math.min(255, parseInt(rgbMatch[3]))
+        };
+      }
+
+      // HSL
+      const hslMatch = str.match(/^hsla?\s*\(\s*(\d{1,3}(?:\.\d+)?)\s*[,\s]\s*(\d{1,3}(?:\.\d+)?)%?\s*[,\s]\s*(\d{1,3}(?:\.\d+)?)%?/i);
+      if (hslMatch) {
+        return hslToRgb(
+          parseFloat(hslMatch[1]),
+          parseFloat(hslMatch[2]),
+          parseFloat(hslMatch[3])
+        );
+      }
+
+      return null;
+    }
+
+    function hslToRgb(h, s, l) {
+      h = ((h % 360) + 360) % 360;
+      s = Math.max(0, Math.min(100, s)) / 100;
+      l = Math.max(0, Math.min(100, l)) / 100;
+
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+
+      let r, g, b;
+      if (h < 60) { r = c; g = x; b = 0; }
+      else if (h < 120) { r = x; g = c; b = 0; }
+      else if (h < 180) { r = 0; g = c; b = x; }
+      else if (h < 240) { r = 0; g = x; b = c; }
+      else if (h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+
+      return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(v => {
+        const hex = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('');
+    }
+
+    // ---- sRGB Linearization ----
+
+    function srgbToLinear(c) {
+      const v = c / 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    }
+
+    function linearToSrgb(c) {
+      const v = Math.max(0, Math.min(1, c));
+      return v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+    }
+
+    // ---- Color Vision Deficiency Simulation Matrices ----
+    // Standard simulation matrices from Machado, Oliveira & Fernandes (2009)
+    // These operate in linearized RGB space.
+
+    const CVD_MATRICES = {
+      // Protanopia (red-blind, severity 1.0)
+      protanopia: [
+        0.152286,  1.052583, -0.204868,
+        0.114503,  0.786281,  0.099216,
+       -0.003882, -0.048116,  1.051998
+      ],
+      // Deuteranopia (green-blind, severity 1.0)
+      deuteranopia: [
+        0.367322,  0.860646, -0.227968,
+        0.280085,  0.672501,  0.047413,
+       -0.011820,  0.042940,  0.968881
+      ],
+      // Tritanopia (blue-blind, severity 1.0)
+      tritanopia: [
+        1.255528, -0.076749, -0.178779,
+       -0.078411,  0.930809,  0.147602,
+        0.004733,  0.691367,  0.303900
+      ],
+      // Protanomaly (red-weak, severity 0.6)
+      protanomaly: [
+        0.458064,  0.679578, -0.137642,
+        0.092785,  0.846313,  0.060902,
+       -0.007494, -0.016807,  1.024301
+      ],
+      // Deuteranomaly (green-weak, severity 0.6)
+      deuteranomaly: [
+        0.547494,  0.607765, -0.155259,
+        0.181692,  0.781742,  0.036566,
+       -0.010410,  0.027275,  0.983136
+      ],
+      // Tritanomaly (blue-weak, severity 0.6)
+      tritanomaly: [
+        1.017277,  0.027029, -0.044306,
+       -0.006113,  0.958479,  0.047634,
+        0.006379,  0.248708,  0.744913
+      ],
+      // Achromatopsia (total color blindness) - luminance only
+      achromatopsia: [
+        0.2126,  0.7152,  0.0722,
+        0.2126,  0.7152,  0.0722,
+        0.2126,  0.7152,  0.0722
+      ]
+    };
+
+    // ---- CVD Type Metadata ----
+
+    const CVD_TYPES = [
+      {
+        id: 'protanopia',
+        name: 'Protanopia',
+        tag: 'Red-Blind',
+        prevalence: '~1% of males',
+        tip: 'Avoid relying on red vs. green distinctions. Use blue/orange or add patterns, icons, or labels alongside color.'
+      },
+      {
+        id: 'deuteranopia',
+        name: 'Deuteranopia',
+        tag: 'Green-Blind',
+        prevalence: '~1.2% of males',
+        tip: 'The most common CVD. Red and green look similar. Use high-contrast pairs like blue/yellow and always supplement color with text or shapes.'
+      },
+      {
+        id: 'tritanopia',
+        name: 'Tritanopia',
+        tag: 'Blue-Blind',
+        prevalence: '~0.01%',
+        tip: 'Blue and yellow can be confused. Use red/green contrast (unusual advice!) or ensure brightness differences are strong between paired colors.'
+      },
+      {
+        id: 'protanomaly',
+        name: 'Protanomaly',
+        tag: 'Red-Weak',
+        prevalence: '~1% of males',
+        tip: 'Reds appear muted and shifted toward green. Increase saturation of reds or use blue/orange as safe alternatives.'
+      },
+      {
+        id: 'deuteranomaly',
+        name: 'Deuteranomaly',
+        tag: 'Green-Weak',
+        prevalence: '~5% of males',
+        tip: 'The most prevalent CVD overall. Greens appear shifted toward red. Avoid subtle green/red or green/brown differences in UI elements.'
+      },
+      {
+        id: 'tritanomaly',
+        name: 'Tritanomaly',
+        tag: 'Blue-Weak',
+        prevalence: '~0.01%',
+        tip: 'Blues appear greener and yellows appear lighter/pinker. Ensure blue elements have strong luminance contrast with their background.'
+      },
+      {
+        id: 'achromatopsia',
+        name: 'Achromatopsia',
+        tag: 'Total Color Blind',
+        prevalence: '~0.003%',
+        tip: 'No color perception at all. Design must work purely on luminance contrast. Every color-coded element needs a non-color indicator (icon, label, pattern).'
+      }
+    ];
+
+    // ---- Simulate CVD ----
+
+    function simulateColor(rgb, matrixKey) {
+      const matrix = CVD_MATRICES[matrixKey];
+
+      // Convert sRGB to linear
+      const lr = srgbToLinear(rgb.r);
+      const lg = srgbToLinear(rgb.g);
+      const lb = srgbToLinear(rgb.b);
+
+      // Apply 3x3 matrix
+      const sr = matrix[0] * lr + matrix[1] * lg + matrix[2] * lb;
+      const sg = matrix[3] * lr + matrix[4] * lg + matrix[5] * lb;
+      const sb = matrix[6] * lr + matrix[7] * lg + matrix[8] * lb;
+
+      // Convert back to sRGB
+      return {
+        r: Math.round(linearToSrgb(sr) * 255),
+        g: Math.round(linearToSrgb(sg) * 255),
+        b: Math.round(linearToSrgb(sb) * 255)
+      };
+    }
+
+    // ---- Color Difference (CIE76 Delta E approximation in sRGB) ----
+
+    function colorDelta(c1, c2) {
+      const dr = c1.r - c2.r;
+      const dg = c1.g - c2.g;
+      const db = c1.b - c2.b;
+      return Math.round(Math.sqrt(dr * dr + dg * dg + db * db));
+    }
+
+    // ---- DOM References ----
+
+    const colorPicker = document.getElementById('colorPicker');
+    const colorText = document.getElementById('colorText');
+    const colorSwatch = document.getElementById('colorSwatch');
+    const originalDisplay = document.getElementById('originalDisplay');
+    const originalSwatch = document.getElementById('originalSwatch');
+    const originalHex = document.getElementById('originalHex');
+    const simGrid = document.getElementById('simGrid');
+    const singleSection = document.getElementById('singleSection');
+    const paletteSection = document.getElementById('paletteSection');
+    const paletteInput = document.getElementById('paletteInput');
+    const paletteSwatches = document.getElementById('paletteSwatches');
+    const modeTabs = document.querySelectorAll('.mode-tab');
+
+    // ---- State ----
+
+    let currentMode = 'single';
+    let currentColor = { r: 99, g: 102, b: 241 };
+    let currentPalette = [];
+
+    // ---- Mode Switching ----
+
+    modeTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        modeTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentMode = tab.dataset.mode;
+
+        if (currentMode === 'single') {
+          singleSection.classList.add('active');
+          paletteSection.classList.remove('active');
+          originalDisplay.style.display = 'flex';
+          updateSingle();
+        } else {
+          singleSection.classList.remove('active');
+          paletteSection.classList.add('active');
+          originalDisplay.style.display = 'none';
+          updatePalette();
+        }
+      });
+    });
+
+    // ---- Single Color Mode ----
+
+    function updateSingle() {
+      const hex = rgbToHex(currentColor.r, currentColor.g, currentColor.b);
+
+      // Update displays
+      colorSwatch.style.backgroundColor = hex;
+      colorPicker.value = hex;
+      originalSwatch.style.backgroundColor = hex;
+      originalHex.textContent = hex + '  /  rgb(' + currentColor.r + ', ' + currentColor.g + ', ' + currentColor.b + ')';
+
+      // Build simulation cards
+      simGrid.innerHTML = '';
+      CVD_TYPES.forEach(type => {
+        const simulated = simulateColor(currentColor, type.id);
+        const simHex = rgbToHex(simulated.r, simulated.g, simulated.b);
+        const delta = colorDelta(currentColor, simulated);
+
+        const card = document.createElement('div');
+        card.className = 'sim-card';
+        card.innerHTML =
+          '<div class="sim-card-header">' +
+            '<span class="sim-card-title">' + type.name + '</span>' +
+            '<span class="sim-card-tag">' + type.tag + '</span>' +
+          '</div>' +
+          '<div class="sim-card-body">' +
+            '<div class="sim-swatch-row">' +
+              '<div class="sim-swatch" style="background-color:' + hex + '"></div>' +
+              '<span class="sim-arrow">&rarr;</span>' +
+              '<div class="sim-swatch" style="background-color:' + simHex + '"></div>' +
+              '<div class="sim-swatch-info">' +
+                '<span class="sim-hex">' + simHex + '</span>' +
+                '<span class="sim-delta">&Delta; ' + delta + ' &middot; ' + type.prevalence + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="sim-tip"><strong>Tip:</strong> ' + type.tip + '</div>' +
+          '</div>';
+
+        simGrid.appendChild(card);
+      });
+    }
+
+    // ---- Palette Mode ----
+
+    function parsePaletteColors(text) {
+      // Split by commas, newlines, or semicolons
+      const parts = text.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+      const colors = [];
+      for (const part of parts) {
+        const rgb = parseColor(part);
+        if (rgb) {
+          colors.push({ rgb, hex: rgbToHex(rgb.r, rgb.g, rgb.b), input: part });
+        }
+      }
+      return colors;
+    }
+
+    function updatePalette() {
+      const colors = parsePaletteColors(paletteInput.value);
+      currentPalette = colors;
+
+      // Show parsed palette swatches
+      paletteSwatches.innerHTML = '';
+      colors.forEach(c => {
+        const chip = document.createElement('div');
+        chip.className = 'palette-swatch-chip';
+        chip.style.backgroundColor = c.hex;
+        chip.title = c.hex;
+        paletteSwatches.appendChild(chip);
+      });
+
+      if (colors.length === 0) {
+        simGrid.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:32px;font-size:0.9rem;">Enter colors above to see simulations.</div>';
+        return;
+      }
+
+      // Build simulation cards
+      simGrid.innerHTML = '';
+      CVD_TYPES.forEach(type => {
+        const card = document.createElement('div');
+        card.className = 'sim-card';
+
+        let originalRow = '<div class="sim-palette-row">';
+        let simRow = '<div class="sim-palette-row">';
+
+        colors.forEach(c => {
+          const sim = simulateColor(c.rgb, type.id);
+          const simHex = rgbToHex(sim.r, sim.g, sim.b);
+          originalRow += '<div class="sim-palette-chip" style="background-color:' + c.hex + '" title="Original: ' + c.hex + '"></div>';
+          simRow += '<div class="sim-palette-chip" style="background-color:' + simHex + '" title="Simulated: ' + simHex + '"></div>';
+        });
+
+        originalRow += '</div>';
+        simRow += '</div>';
+
+        card.innerHTML =
+          '<div class="sim-card-header">' +
+            '<span class="sim-card-title">' + type.name + '</span>' +
+            '<span class="sim-card-tag">' + type.tag + '</span>' +
+          '</div>' +
+          '<div class="sim-card-body">' +
+            '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:4px;">Original</div>' +
+            originalRow +
+            '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:4px;margin-top:8px;">Simulated</div>' +
+            simRow +
+            '<div class="sim-tip"><strong>Tip:</strong> ' + type.tip + '</div>' +
+          '</div>';
+
+        simGrid.appendChild(card);
+      });
+    }
+
+    // ---- Event Handlers ----
+
+    colorPicker.addEventListener('input', () => {
+      const rgb = parseColor(colorPicker.value);
+      if (rgb) {
+        currentColor = rgb;
+        colorText.value = colorPicker.value;
+        updateSingle();
+      }
+    });
+
+    colorText.addEventListener('input', () => {
+      const rgb = parseColor(colorText.value);
+      if (rgb) {
+        currentColor = rgb;
+        updateSingle();
+      }
+    });
+
+    paletteInput.addEventListener('input', () => {
+      updatePalette();
+    });
+
+    // ---- Initialize ----
+    updateSingle();
+  </script>
+</body>
+</html>

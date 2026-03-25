@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON to TypeScript - Generate Types from JSON | ZeroKit.dev</title>
+  <meta name="description" content="Convert JSON to TypeScript interfaces or type aliases instantly. Handles nested objects, arrays, union types, optional fields, and ISO date detection. Free online tool.">
+  <link rel="canonical" href="https://zerokit.dev/tools/json2ts.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>JSON to TypeScript</h1>
+    <p class="description">Paste JSON to generate TypeScript interfaces or type aliases. Handles nested objects, arrays, union types, and optional fields. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="convert()">Convert</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+    <div class="options-row">
+      <label>Root name:
+        <input type="text" id="rootName" value="RootObject" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:0.85rem;font-family:var(--font);width:130px;">
+      </label>
+      <label>Style:
+        <select id="style">
+          <option value="interface">interface</option>
+          <option value="type">type alias</option>
+        </select>
+      </label>
+      <label>
+        <input type="checkbox" id="optExport" checked> export
+      </label>
+      <label>
+        <input type="checkbox" id="optAllOptional"> All optional
+      </label>
+      <label>
+        <input type="checkbox" id="optDetectDates" checked> Detect dates
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">JSON Input</div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste JSON here...
+
+{
+  "id": 1,
+  "name": "Alice",
+  "email": "alice@example.com",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "roles": ["admin", "user"],
+  "address": {
+    "street": "123 Main St",
+    "city": "Springfield",
+    "zip": null
+  }
+}'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          TypeScript Output
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="TypeScript definitions will appear here..."></textarea>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $rootName = document.getElementById('rootName');
+    const $style = document.getElementById('style');
+    const $optExport = document.getElementById('optExport');
+    const $optAllOptional = document.getElementById('optAllOptional');
+    const $optDetectDates = document.getElementById('optDetectDates');
+
+    const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?$/;
+
+    function isISODate(v) {
+      return typeof v === 'string' && ISO_DATE_RE.test(v) && !isNaN(Date.parse(v));
+    }
+
+    function pascalCase(s) {
+      return s.replace(/(^|[_\-\s])([a-z])/g, (_, __, c) => c.toUpperCase())
+              .replace(/[^a-zA-Z0-9]/g, '');
+    }
+
+    function safeKey(key) {
+      return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : `'${key.replace(/'/g, "\\'")}'`;
+    }
+
+    // Infer the TS type of a single value, collecting sub-interfaces along the way
+    function inferType(value, name, interfaces, detectDates) {
+      if (value === null || value === undefined) {
+        return 'null';
+      }
+      if (typeof value === 'string') {
+        if (detectDates && isISODate(value)) return 'Date';
+        return 'string';
+      }
+      if (typeof value === 'number') {
+        return 'number';
+      }
+      if (typeof value === 'boolean') {
+        return 'boolean';
+      }
+      if (Array.isArray(value)) {
+        if (value.length === 0) return 'unknown[]';
+        const elementTypes = new Set();
+        for (const el of value) {
+          elementTypes.add(inferType(el, name + 'Item', interfaces, detectDates));
+        }
+        const types = [...elementTypes];
+        if (types.length === 1) return types[0] + '[]';
+        return '(' + types.join(' | ') + ')[]';
+      }
+      if (typeof value === 'object') {
+        const ifaceName = pascalCase(name) || 'AnonymousObject';
+        buildInterface(value, ifaceName, interfaces, detectDates);
+        return ifaceName;
+      }
+      return 'unknown';
+    }
+
+    // Analyze an array of values (from multiple occurrences) to determine the merged type
+    function mergeTypes(values, fieldName, interfaces, detectDates) {
+      const types = new Set();
+      let hasNull = false;
+      for (const v of values) {
+        if (v === null || v === undefined) {
+          hasNull = true;
+          continue;
+        }
+        types.add(inferType(v, fieldName, interfaces, detectDates));
+      }
+      const typeArr = [...types];
+      if (typeArr.length === 0) return { type: 'unknown', optional: hasNull };
+      const combined = typeArr.length === 1 ? typeArr[0] : typeArr.join(' | ');
+      return { type: combined, optional: hasNull };
+    }
+
+    // Build one interface/type from an object, recursing into nested objects
+    function buildInterface(obj, name, interfaces, detectDates) {
+      // Don't rebuild if we already have it
+      if (interfaces.has(name)) return;
+
+      const fields = {};
+      for (const [key, value] of Object.entries(obj)) {
+        const fieldName = name + pascalCase(key);
+        const info = mergeTypes([value], fieldName, interfaces, detectDates);
+        fields[key] = info;
+      }
+      interfaces.set(name, fields);
+    }
+
+    // If we have an array of objects at root or nested, merge their shapes
+    function mergeObjectShapes(arr, name, interfaces, detectDates) {
+      // Collect all keys across all elements
+      const allKeys = new Map(); // key -> [values]
+      for (const item of arr) {
+        if (item && typeof item === 'object' && !Array.isArray(item)) {
+          for (const [k, v] of Object.entries(item)) {
+            if (!allKeys.has(k)) allKeys.set(k, []);
+            allKeys.get(k).push(v);
+          }
+          // track keys NOT present in this item
+          for (const existingKey of allKeys.keys()) {
+            if (!(existingKey in item)) {
+              allKeys.get(existingKey).push(undefined);
+            }
+          }
+        }
+      }
+
+      const fields = {};
+      for (const [key, values] of allKeys.entries()) {
+        const fieldName = name + pascalCase(key);
+        const info = mergeTypes(values, fieldName, interfaces, detectDates);
+        // If key doesn't appear in every array element, mark optional
+        if (values.length < arr.length) info.optional = true;
+        fields[key] = info;
+      }
+      interfaces.set(name, fields);
+    }
+
+    function convert() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (e) {
+        showStatus(e.message, false);
+        $output.value = '';
+        return;
+      }
+
+      const rootName = pascalCase($rootName.value.trim()) || 'RootObject';
+      const useInterface = $style.value === 'interface';
+      const addExport = $optExport.checked;
+      const allOptional = $optAllOptional.checked;
+      const detectDates = $optDetectDates.checked;
+
+      const interfaces = new Map();
+
+      // Handle root being an array of objects
+      if (Array.isArray(parsed)) {
+        const objs = parsed.filter(v => v && typeof v === 'object' && !Array.isArray(v));
+        if (objs.length > 0) {
+          mergeObjectShapes(objs, rootName, interfaces, detectDates);
+        }
+        // Also infer the array element types for non-object elements
+        const elementTypes = new Set();
+        for (const el of parsed) {
+          if (el && typeof el === 'object' && !Array.isArray(el)) {
+            elementTypes.add(rootName);
+          } else {
+            elementTypes.add(inferType(el, rootName + 'Item', interfaces, detectDates));
+          }
+        }
+        // We still generate the root type as the array element interface
+        // Add a note about it being an array
+      } else if (parsed && typeof parsed === 'object') {
+        buildInterface(parsed, rootName, interfaces, detectDates);
+      } else {
+        // Primitive at root
+        const t = inferType(parsed, rootName, interfaces, detectDates);
+        const prefix = addExport ? 'export ' : '';
+        $output.value = `${prefix}type ${rootName} = ${t};\n`;
+        showStatus('Converted', true);
+        return;
+      }
+
+      // Generate output
+      const lines = [];
+      const prefix = addExport ? 'export ' : '';
+
+      for (const [ifaceName, fields] of interfaces) {
+        if (useInterface) {
+          lines.push(`${prefix}interface ${ifaceName} {`);
+        } else {
+          lines.push(`${prefix}type ${ifaceName} = {`);
+        }
+
+        for (const [key, info] of Object.entries(fields)) {
+          const opt = (allOptional || info.optional) ? '?' : '';
+          const typeStr = info.optional && !allOptional && info.type !== 'null'
+            ? info.type + ' | null'
+            : info.type;
+          lines.push(`  ${safeKey(key)}${opt}: ${typeStr};`);
+        }
+
+        if (useInterface) {
+          lines.push('}');
+        } else {
+          lines.push('};');
+        }
+        lines.push('');
+      }
+
+      // If root was an array, add a type alias for the array
+      if (Array.isArray(parsed)) {
+        const objs = parsed.filter(v => v && typeof v === 'object' && !Array.isArray(v));
+        if (objs.length > 0 && objs.length === parsed.length) {
+          lines.push(`${prefix}type ${rootName}List = ${rootName}[];`);
+          lines.push('');
+        }
+      }
+
+      $output.value = lines.join('\n').trimEnd() + '\n';
+      const count = interfaces.size;
+      showStatus(`Converted (${count} type${count !== 1 ? 's' : ''})`, true);
+    }
+
+    function copyOutput() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $status.textContent = '';
+      $status.className = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    // Real-time conversion on input
+    let debounceTimer;
+    $input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if ($input.value.trim()) convert();
+      }, 300);
+    });
+
+    // Instant conversion on paste
+    $input.addEventListener('paste', () => setTimeout(convert, 50));
+
+    // Re-convert when options change
+    $rootName.addEventListener('input', () => { if ($input.value.trim()) convert(); });
+    $style.addEventListener('change', () => { if ($input.value.trim()) convert(); });
+    $optExport.addEventListener('change', () => { if ($input.value.trim()) convert(); });
+    $optAllOptional.addEventListener('change', () => { if ($input.value.trim()) convert(); });
+    $optDetectDates.addEventListener('change', () => { if ($input.value.trim()) convert(); });
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

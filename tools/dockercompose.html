@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker Compose Generator - Build docker-compose.yml | ZeroKit.dev</title>
+  <meta name="description" content="Visually build docker-compose.yml files with service presets, networks, volumes, and dependency management. Free, fast, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/dockercompose.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Docker Compose Generator</h1>
+    <p class="description">Visually build docker-compose.yml files with services, networks, volumes, and dependencies. Everything runs locally in your browser.</p>
+
+    <div class="dc-top-bar">
+      <div class="dc-top-left">
+        <label class="dc-version-label">Version:
+          <select id="composeVersion" class="rb-select" onchange="generate()">
+            <option value="3.8" selected>3.8</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+          </select>
+        </label>
+      </div>
+      <div class="dc-top-right">
+        <button class="btn" onclick="clearAll()">Clear All</button>
+      </div>
+    </div>
+
+    <h3 class="section-label">Service Presets</h3>
+    <div class="preset-bar">
+      <button class="btn" onclick="addPreset('postgres')">PostgreSQL</button>
+      <button class="btn" onclick="addPreset('mysql')">MySQL</button>
+      <button class="btn" onclick="addPreset('redis')">Redis</button>
+      <button class="btn" onclick="addPreset('mongodb')">MongoDB</button>
+      <button class="btn" onclick="addPreset('nginx')">Nginx</button>
+      <button class="btn" onclick="addPreset('node')">Node.js</button>
+      <button class="btn" onclick="addPreset('python')">Python</button>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel dc-builder-panel">
+        <div class="panel-header">Services Builder</div>
+        <div class="builder-area" id="builderArea">
+          <div id="servicesContainer"></div>
+          <button class="btn btn-primary" onclick="addService()" style="margin-top:4px">+ Add Service</button>
+
+          <div class="builder-section" style="margin-top:24px">
+            <h3 class="section-label">Named Volumes</h3>
+            <div id="volumesContainer"></div>
+            <button class="btn-add" onclick="addVolumeDef()">+ Add Volume</button>
+          </div>
+
+          <div class="builder-section" style="margin-top:24px">
+            <h3 class="section-label">Networks</h3>
+            <div id="networksContainer"></div>
+            <button class="btn-add" onclick="addNetworkDef()">+ Add Network</button>
+          </div>
+        </div>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          docker-compose.yml
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Generated docker-compose.yml will appear here..."></textarea>
+        <div style="padding:12px 16px;border-top:1px solid var(--border)">
+          <button class="btn btn-primary" onclick="copyOutput()">Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <style>
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .dc-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0 16px;
+      flex-wrap: wrap;
+    }
+    .dc-top-left, .dc-top-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dc-version-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dc-builder-panel {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .builder-area {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .builder-section {
+      display: flex;
+      flex-direction: column;
+    }
+    .rb-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .rb-input:focus { border-color: var(--accent); }
+    .rb-input-sm {
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      outline: none;
+      width: 100%;
+    }
+    .rb-input-sm:focus { border-color: var(--accent); }
+    .rb-select {
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .rb-select:focus { border-color: var(--accent); }
+    .rb-select-sm {
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .rb-select-sm:focus { border-color: var(--accent); }
+
+    /* Service card */
+    .service-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .service-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .service-card-header input {
+      flex: 1;
+      font-weight: 600;
+    }
+    .service-card-toggle {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .service-card-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .service-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Field groups inside service */
+    .dc-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .dc-field-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .dc-field-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .dc-field-row .rb-input-sm { flex: 1; }
+    .dc-kv-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .dc-kv-row input { flex: 1; }
+
+    /* Small buttons */
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+      white-space: nowrap;
+    }
+    .btn-sm:hover { border-color: var(--error); color: var(--error); }
+    .btn-add {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Volume / network def rows */
+    .dc-def-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .dc-def-row input { flex: 1; }
+    .dc-def-row select { min-width: 100px; }
+
+    /* depends_on pills */
+    .dc-deps-wrap {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .dc-dep-check {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .dc-dep-check input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+
+    @media(max-width:768px) {
+      .tool-layout { grid-template-columns: 1fr; }
+      .dc-builder-panel { max-height: none; }
+    }
+  </style>
+
+  <script>
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $servicesContainer = document.getElementById('servicesContainer');
+    const $volumesContainer = document.getElementById('volumesContainer');
+    const $networksContainer = document.getElementById('networksContainer');
+
+    let services = [];
+    let volumeDefs = [];
+    let networkDefs = [];
+    let idCounter = 0;
+
+    // --- Presets ---
+    const PRESETS = {
+      postgres: {
+        name: 'postgres',
+        image: 'postgres:16-alpine',
+        ports: [{ host: '5432', container: '5432' }],
+        volumes: [{ host: 'postgres_data', container: '/var/lib/postgresql/data' }],
+        envVars: [
+          { key: 'POSTGRES_USER', value: 'admin' },
+          { key: 'POSTGRES_PASSWORD', value: 'secret' },
+          { key: 'POSTGRES_DB', value: 'app' }
+        ],
+        restart: 'unless-stopped',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      },
+      mysql: {
+        name: 'mysql',
+        image: 'mysql:8',
+        ports: [{ host: '3306', container: '3306' }],
+        volumes: [{ host: 'mysql_data', container: '/var/lib/mysql' }],
+        envVars: [
+          { key: 'MYSQL_ROOT_PASSWORD', value: 'rootsecret' },
+          { key: 'MYSQL_DATABASE', value: 'app' },
+          { key: 'MYSQL_USER', value: 'admin' },
+          { key: 'MYSQL_PASSWORD', value: 'secret' }
+        ],
+        restart: 'unless-stopped',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      },
+      redis: {
+        name: 'redis',
+        image: 'redis:7-alpine',
+        ports: [{ host: '6379', container: '6379' }],
+        volumes: [{ host: 'redis_data', container: '/data' }],
+        envVars: [],
+        restart: 'unless-stopped',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      },
+      mongodb: {
+        name: 'mongodb',
+        image: 'mongo:7',
+        ports: [{ host: '27017', container: '27017' }],
+        volumes: [{ host: 'mongo_data', container: '/data/db' }],
+        envVars: [
+          { key: 'MONGO_INITDB_ROOT_USERNAME', value: 'admin' },
+          { key: 'MONGO_INITDB_ROOT_PASSWORD', value: 'secret' }
+        ],
+        restart: 'unless-stopped',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      },
+      nginx: {
+        name: 'nginx',
+        image: 'nginx:alpine',
+        ports: [{ host: '80', container: '80' }, { host: '443', container: '443' }],
+        volumes: [{ host: './nginx.conf', container: '/etc/nginx/nginx.conf:ro' }],
+        envVars: [],
+        restart: 'unless-stopped',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      },
+      node: {
+        name: 'app',
+        image: 'node:20-alpine',
+        ports: [{ host: '3000', container: '3000' }],
+        volumes: [{ host: '.', container: '/app' }],
+        envVars: [{ key: 'NODE_ENV', value: 'production' }],
+        restart: 'unless-stopped',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      },
+      python: {
+        name: 'api',
+        image: 'python:3.12-slim',
+        ports: [{ host: '8000', container: '8000' }],
+        volumes: [{ host: '.', container: '/app' }],
+        envVars: [{ key: 'PYTHONUNBUFFERED', value: '1' }],
+        restart: 'unless-stopped',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      }
+    };
+
+    // --- Helpers ---
+    function esc(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function uniqueName(base) {
+      const names = services.map(s => s.name);
+      if (!names.includes(base)) return base;
+      let i = 2;
+      while (names.includes(base + i)) i++;
+      return base + i;
+    }
+
+    function getServiceNames() {
+      return services.map(s => s.name);
+    }
+
+    // --- Service CRUD ---
+    function addService(preset) {
+      const tpl = preset ? JSON.parse(JSON.stringify(preset)) : {
+        name: uniqueName('service'),
+        image: '',
+        ports: [],
+        volumes: [],
+        envVars: [],
+        restart: 'no',
+        networks: [],
+        dependsOn: [],
+        envFile: '',
+        collapsed: false
+      };
+      tpl.id = idCounter++;
+      if (preset) tpl.name = uniqueName(tpl.name);
+      services.push(tpl);
+
+      // auto-create volume defs for named volumes
+      if (preset) {
+        tpl.volumes.forEach(v => {
+          if (v.host && !v.host.startsWith('.') && !v.host.startsWith('/') && !v.host.includes(':')) {
+            if (!volumeDefs.find(d => d.name === v.host)) {
+              volumeDefs.push({ id: idCounter++, name: v.host, driver: 'local' });
+            }
+          }
+        });
+      }
+
+      renderAll();
+      generate();
+    }
+
+    function removeService(id) {
+      services = services.filter(s => s.id !== id);
+      renderAll();
+      generate();
+    }
+
+    function toggleCollapse(id) {
+      const svc = services.find(s => s.id === id);
+      if (svc) svc.collapsed = !svc.collapsed;
+      renderAll();
+    }
+
+    function addPreset(key) {
+      addService(PRESETS[key]);
+    }
+
+    // --- Port, Volume, Env CRUD within service ---
+    function addPort(svcId) {
+      const svc = services.find(s => s.id === svcId);
+      if (svc) { svc.ports.push({ host: '', container: '' }); renderAll(); generate(); }
+    }
+    function removePort(svcId, idx) {
+      const svc = services.find(s => s.id === svcId);
+      if (svc) { svc.ports.splice(idx, 1); renderAll(); generate(); }
+    }
+    function addVolume(svcId) {
+      const svc = services.find(s => s.id === svcId);
+      if (svc) { svc.volumes.push({ host: '', container: '' }); renderAll(); generate(); }
+    }
+    function removeVolume(svcId, idx) {
+      const svc = services.find(s => s.id === svcId);
+      if (svc) { svc.volumes.splice(idx, 1); renderAll(); generate(); }
+    }
+    function addEnv(svcId) {
+      const svc = services.find(s => s.id === svcId);
+      if (svc) { svc.envVars.push({ key: '', value: '' }); renderAll(); generate(); }
+    }
+    function removeEnv(svcId, idx) {
+      const svc = services.find(s => s.id === svcId);
+      if (svc) { svc.envVars.splice(idx, 1); renderAll(); generate(); }
+    }
+
+    // --- Volume & Network definitions ---
+    function addVolumeDef() {
+      volumeDefs.push({ id: idCounter++, name: '', driver: 'local' });
+      renderAll();
+      generate();
+    }
+    function removeVolumeDef(id) {
+      volumeDefs = volumeDefs.filter(v => v.id !== id);
+      renderAll();
+      generate();
+    }
+    function addNetworkDef() {
+      networkDefs.push({ id: idCounter++, name: '', driver: 'bridge' });
+      renderAll();
+      generate();
+    }
+    function removeNetworkDef(id) {
+      networkDefs = networkDefs.filter(n => n.id !== id);
+      renderAll();
+      generate();
+    }
+
+    // --- Sync from DOM ---
+    function syncFromDOM() {
+      services.forEach(svc => {
+        const prefix = 'svc-' + svc.id;
+        const nameEl = document.getElementById(prefix + '-name');
+        const imageEl = document.getElementById(prefix + '-image');
+        const restartEl = document.getElementById(prefix + '-restart');
+        const envFileEl = document.getElementById(prefix + '-envfile');
+        if (nameEl) svc.name = nameEl.value;
+        if (imageEl) svc.image = imageEl.value;
+        if (restartEl) svc.restart = restartEl.value;
+        if (envFileEl) svc.envFile = envFileEl.value;
+
+        svc.ports.forEach((p, i) => {
+          const hEl = document.getElementById(prefix + '-port-' + i + '-host');
+          const cEl = document.getElementById(prefix + '-port-' + i + '-ctn');
+          if (hEl) p.host = hEl.value;
+          if (cEl) p.container = cEl.value;
+        });
+        svc.volumes.forEach((v, i) => {
+          const hEl = document.getElementById(prefix + '-vol-' + i + '-host');
+          const cEl = document.getElementById(prefix + '-vol-' + i + '-ctn');
+          if (hEl) v.host = hEl.value;
+          if (cEl) v.container = cEl.value;
+        });
+        svc.envVars.forEach((e, i) => {
+          const kEl = document.getElementById(prefix + '-env-' + i + '-key');
+          const vEl = document.getElementById(prefix + '-env-' + i + '-val');
+          if (kEl) e.key = kEl.value;
+          if (vEl) e.value = vEl.value;
+        });
+
+        // depends_on checkboxes
+        const allNames = getServiceNames();
+        svc.dependsOn = [];
+        allNames.forEach(n => {
+          if (n === svc.name) return;
+          const cb = document.getElementById(prefix + '-dep-' + n);
+          if (cb && cb.checked) svc.dependsOn.push(n);
+        });
+
+        // networks checkboxes
+        svc.networks = [];
+        networkDefs.forEach(nd => {
+          const cb = document.getElementById(prefix + '-net-' + nd.id);
+          if (cb && cb.checked) svc.networks.push(nd.name || ('net' + nd.id));
+        });
+      });
+
+      volumeDefs.forEach(vd => {
+        const nEl = document.getElementById('voldef-' + vd.id + '-name');
+        const dEl = document.getElementById('voldef-' + vd.id + '-driver');
+        if (nEl) vd.name = nEl.value;
+        if (dEl) vd.driver = dEl.value;
+      });
+
+      networkDefs.forEach(nd => {
+        const nEl = document.getElementById('netdef-' + nd.id + '-name');
+        const dEl = document.getElementById('netdef-' + nd.id + '-driver');
+        if (nEl) nd.name = nEl.value;
+        if (dEl) nd.driver = dEl.value;
+      });
+    }
+
+    // --- Render ---
+    function renderAll() {
+      syncFromDOM();
+      renderServices();
+      renderVolumeDefs();
+      renderNetworkDefs();
+    }
+
+    function renderServices() {
+      const allNames = getServiceNames();
+      let html = '';
+      services.forEach(svc => {
+        const p = 'svc-' + svc.id;
+        const collapsed = svc.collapsed;
+        html += '<div class="service-card">';
+        html += '<div class="service-card-header">';
+        html += '<input class="rb-input-sm" id="' + p + '-name" value="' + esc(svc.name) + '" placeholder="service name" oninput="onServiceChange()" style="font-weight:600">';
+        html += '<button class="service-card-toggle" onclick="toggleCollapse(' + svc.id + ')">' + (collapsed ? 'Expand' : 'Collapse') + '</button>';
+        html += '<button class="btn-sm" onclick="removeService(' + svc.id + ')">&times;</button>';
+        html += '</div>';
+
+        if (!collapsed) {
+          html += '<div class="service-card-body">';
+
+          // Image
+          html += '<div class="dc-field-group">';
+          html += '<span class="dc-field-label">Image</span>';
+          html += '<input class="rb-input-sm" id="' + p + '-image" value="' + esc(svc.image) + '" placeholder="e.g. nginx:alpine" oninput="generate()">';
+          html += '</div>';
+
+          // Ports
+          html += '<div class="dc-field-group">';
+          html += '<span class="dc-field-label">Ports</span>';
+          svc.ports.forEach((port, i) => {
+            html += '<div class="dc-field-row">';
+            html += '<input class="rb-input-sm" id="' + p + '-port-' + i + '-host" value="' + esc(port.host) + '" placeholder="host" oninput="generate()" style="max-width:100px">';
+            html += '<span style="color:var(--text-muted);font-size:0.8rem">:</span>';
+            html += '<input class="rb-input-sm" id="' + p + '-port-' + i + '-ctn" value="' + esc(port.container) + '" placeholder="container" oninput="generate()" style="max-width:100px">';
+            html += '<button class="btn-sm" onclick="removePort(' + svc.id + ',' + i + ')">&times;</button>';
+            html += '</div>';
+          });
+          html += '<button class="btn-add" onclick="addPort(' + svc.id + ')">+ Port</button>';
+          html += '</div>';
+
+          // Volumes
+          html += '<div class="dc-field-group">';
+          html += '<span class="dc-field-label">Volumes</span>';
+          svc.volumes.forEach((vol, i) => {
+            html += '<div class="dc-field-row">';
+            html += '<input class="rb-input-sm" id="' + p + '-vol-' + i + '-host" value="' + esc(vol.host) + '" placeholder="host/named" oninput="generate()">';
+            html += '<span style="color:var(--text-muted);font-size:0.8rem">:</span>';
+            html += '<input class="rb-input-sm" id="' + p + '-vol-' + i + '-ctn" value="' + esc(vol.container) + '" placeholder="container path" oninput="generate()">';
+            html += '<button class="btn-sm" onclick="removeVolume(' + svc.id + ',' + i + ')">&times;</button>';
+            html += '</div>';
+          });
+          html += '<button class="btn-add" onclick="addVolume(' + svc.id + ')">+ Volume</button>';
+          html += '</div>';
+
+          // Environment variables
+          html += '<div class="dc-field-group">';
+          html += '<span class="dc-field-label">Environment Variables</span>';
+          svc.envVars.forEach((env, i) => {
+            html += '<div class="dc-kv-row">';
+            html += '<input class="rb-input-sm" id="' + p + '-env-' + i + '-key" value="' + esc(env.key) + '" placeholder="KEY" oninput="generate()">';
+            html += '<span style="color:var(--text-muted);font-size:0.8rem">=</span>';
+            html += '<input class="rb-input-sm" id="' + p + '-env-' + i + '-val" value="' + esc(env.value) + '" placeholder="value" oninput="generate()">';
+            html += '<button class="btn-sm" onclick="removeEnv(' + svc.id + ',' + i + ')">&times;</button>';
+            html += '</div>';
+          });
+          html += '<button class="btn-add" onclick="addEnv(' + svc.id + ')">+ Env Var</button>';
+          html += '</div>';
+
+          // Env file
+          html += '<div class="dc-field-group">';
+          html += '<span class="dc-field-label">Env File</span>';
+          html += '<input class="rb-input-sm" id="' + p + '-envfile" value="' + esc(svc.envFile) + '" placeholder=".env (optional)" oninput="generate()">';
+          html += '</div>';
+
+          // Restart policy
+          html += '<div class="dc-field-group">';
+          html += '<span class="dc-field-label">Restart Policy</span>';
+          html += '<select class="rb-select-sm" id="' + p + '-restart" onchange="generate()">';
+          ['no', 'always', 'on-failure', 'unless-stopped'].forEach(opt => {
+            html += '<option value="' + opt + '"' + (svc.restart === opt ? ' selected' : '') + '>' + opt + '</option>';
+          });
+          html += '</select>';
+          html += '</div>';
+
+          // depends_on
+          const otherNames = allNames.filter(n => n !== svc.name);
+          if (otherNames.length > 0) {
+            html += '<div class="dc-field-group">';
+            html += '<span class="dc-field-label">Depends On</span>';
+            html += '<div class="dc-deps-wrap">';
+            otherNames.forEach(n => {
+              const checked = svc.dependsOn.includes(n) ? ' checked' : '';
+              html += '<label class="dc-dep-check"><input type="checkbox" id="' + p + '-dep-' + esc(n) + '"' + checked + ' onchange="generate()"> ' + esc(n) + '</label>';
+            });
+            html += '</div>';
+            html += '</div>';
+          }
+
+          // networks
+          if (networkDefs.length > 0) {
+            html += '<div class="dc-field-group">';
+            html += '<span class="dc-field-label">Networks</span>';
+            html += '<div class="dc-deps-wrap">';
+            networkDefs.forEach(nd => {
+              const netName = nd.name || ('net' + nd.id);
+              const checked = svc.networks.includes(netName) ? ' checked' : '';
+              html += '<label class="dc-dep-check"><input type="checkbox" id="' + p + '-net-' + nd.id + '"' + checked + ' onchange="generate()"> ' + esc(netName) + '</label>';
+            });
+            html += '</div>';
+            html += '</div>';
+          }
+
+          html += '</div>'; // service-card-body
+        }
+
+        html += '</div>'; // service-card
+      });
+      $servicesContainer.innerHTML = html;
+    }
+
+    function renderVolumeDefs() {
+      let html = '';
+      volumeDefs.forEach(vd => {
+        html += '<div class="dc-def-row">';
+        html += '<input class="rb-input-sm" id="voldef-' + vd.id + '-name" value="' + esc(vd.name) + '" placeholder="volume name" oninput="generate()">';
+        html += '<select class="rb-select-sm" id="voldef-' + vd.id + '-driver" onchange="generate()">';
+        ['local', 'nfs', 'overlay'].forEach(d => {
+          html += '<option value="' + d + '"' + (vd.driver === d ? ' selected' : '') + '>' + d + '</option>';
+        });
+        html += '</select>';
+        html += '<button class="btn-sm" onclick="removeVolumeDef(' + vd.id + ')">&times;</button>';
+        html += '</div>';
+      });
+      $volumesContainer.innerHTML = html;
+    }
+
+    function renderNetworkDefs() {
+      let html = '';
+      networkDefs.forEach(nd => {
+        html += '<div class="dc-def-row">';
+        html += '<input class="rb-input-sm" id="netdef-' + nd.id + '-name" value="' + esc(nd.name) + '" placeholder="network name" oninput="generate()">';
+        html += '<select class="rb-select-sm" id="netdef-' + nd.id + '-driver" onchange="generate()">';
+        ['bridge', 'host', 'overlay', 'none'].forEach(d => {
+          html += '<option value="' + d + '"' + (nd.driver === d ? ' selected' : '') + '>' + d + '</option>';
+        });
+        html += '</select>';
+        html += '<button class="btn-sm" onclick="removeNetworkDef(' + nd.id + ')">&times;</button>';
+        html += '</div>';
+      });
+      $networksContainer.innerHTML = html;
+    }
+
+    function onServiceChange() {
+      syncFromDOM();
+      renderServices();
+      generate();
+    }
+
+    // --- YAML Generation ---
+    function yamlStr(val) {
+      if (val === '' || val === null || val === undefined) return '""';
+      const s = String(val);
+      // quote if value contains special chars, looks like a number, or is a boolean-like word
+      if (/^(true|false|yes|no|null|on|off)$/i.test(s) || /[:#\[\]{}&*!|>'"`,@]/.test(s) || /^\d+$/.test(s) || s.includes(' ') || s === '') {
+        return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+      }
+      return s;
+    }
+
+    function generate() {
+      syncFromDOM();
+      const version = document.getElementById('composeVersion').value;
+      let lines = [];
+
+      // Version (for v2 and v3.x < 3.8 compatibility; docker compose v2+ CLI doesn't require it but it's conventional)
+      lines.push('version: "' + version + '"');
+      lines.push('');
+
+      // Services
+      if (services.length > 0) {
+        lines.push('services:');
+        services.forEach(svc => {
+          const name = svc.name || 'unnamed';
+          lines.push('  ' + name + ':');
+
+          if (svc.image) {
+            lines.push('    image: ' + yamlStr(svc.image));
+          }
+
+          if (svc.ports.length > 0) {
+            const validPorts = svc.ports.filter(p => p.host || p.container);
+            if (validPorts.length > 0) {
+              lines.push('    ports:');
+              validPorts.forEach(p => {
+                const mapping = (p.host || p.container) + (p.container && p.host ? ':' + p.container : (!p.host ? p.container : ''));
+                lines.push('      - "' + (p.host && p.container ? p.host + ':' + p.container : (p.host || p.container)) + '"');
+              });
+            }
+          }
+
+          if (svc.volumes.length > 0) {
+            const validVols = svc.volumes.filter(v => v.host || v.container);
+            if (validVols.length > 0) {
+              lines.push('    volumes:');
+              validVols.forEach(v => {
+                if (v.host && v.container) {
+                  lines.push('      - ' + v.host + ':' + v.container);
+                } else {
+                  lines.push('      - ' + (v.host || v.container));
+                }
+              });
+            }
+          }
+
+          if (svc.envVars.length > 0) {
+            const validEnvs = svc.envVars.filter(e => e.key);
+            if (validEnvs.length > 0) {
+              lines.push('    environment:');
+              validEnvs.forEach(e => {
+                lines.push('      ' + e.key + ': ' + yamlStr(e.value));
+              });
+            }
+          }
+
+          if (svc.envFile) {
+            lines.push('    env_file:');
+            lines.push('      - ' + svc.envFile);
+          }
+
+          if (svc.restart && svc.restart !== 'no') {
+            lines.push('    restart: ' + svc.restart);
+          }
+
+          if (svc.dependsOn.length > 0) {
+            // Filter to only existing services
+            const valid = svc.dependsOn.filter(d => services.some(s => s.name === d));
+            if (valid.length > 0) {
+              lines.push('    depends_on:');
+              valid.forEach(d => {
+                lines.push('      - ' + d);
+              });
+            }
+          }
+
+          if (svc.networks.length > 0) {
+            const validNets = svc.networks.filter(n => networkDefs.some(nd => (nd.name || ('net' + nd.id)) === n));
+            if (validNets.length > 0) {
+              lines.push('    networks:');
+              validNets.forEach(n => {
+                lines.push('      - ' + n);
+              });
+            }
+          }
+
+          lines.push('');
+        });
+      }
+
+      // Volumes
+      const usedVolDefs = volumeDefs.filter(vd => vd.name);
+      if (usedVolDefs.length > 0) {
+        lines.push('volumes:');
+        usedVolDefs.forEach(vd => {
+          if (vd.driver && vd.driver !== 'local') {
+            lines.push('  ' + vd.name + ':');
+            lines.push('    driver: ' + vd.driver);
+          } else {
+            lines.push('  ' + vd.name + ':');
+          }
+        });
+        lines.push('');
+      }
+
+      // Networks
+      const usedNetDefs = networkDefs.filter(nd => nd.name);
+      if (usedNetDefs.length > 0) {
+        lines.push('networks:');
+        usedNetDefs.forEach(nd => {
+          if (nd.driver && nd.driver !== 'bridge') {
+            lines.push('  ' + nd.name + ':');
+            lines.push('    driver: ' + nd.driver);
+          } else {
+            lines.push('  ' + nd.name + ':');
+          }
+        });
+        lines.push('');
+      }
+
+      // Remove trailing blank lines
+      while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+        lines.pop();
+      }
+
+      $output.value = lines.join('\n') + '\n';
+    }
+
+    // --- Copy / Clear ---
+    function copyOutput() {
+      const text = $output.value;
+      if (text) {
+        navigator.clipboard.writeText(text);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+      setTimeout(() => { $status.textContent = ''; $status.className = ''; }, 2000);
+    }
+
+    function clearAll() {
+      services = [];
+      volumeDefs = [];
+      networkDefs = [];
+      idCounter = 0;
+      renderAll();
+      generate();
+    }
+
+    // --- Init ---
+    generate();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

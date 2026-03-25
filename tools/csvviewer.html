@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Viewer & Editor - View CSV Files Online | ZeroKit.dev</title>
+  <meta name="description" content="View, sort, filter, and edit CSV/TSV files online. Auto-detect delimiters, column stats, export. Free, fast, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/csvviewer.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* CSV-specific styles */
+    .csv-input-area {
+      position: relative;
+    }
+
+    .csv-drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    .csv-drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .csv-drop-zone p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .csv-drop-zone small {
+      color: var(--text-muted);
+      opacity: 0.6;
+      font-size: 0.8rem;
+    }
+
+    .csv-drop-zone input[type="file"] {
+      display: none;
+    }
+
+    .info-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .info-bar .info-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .info-bar .info-value {
+      color: var(--text);
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Table container */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: auto;
+      max-height: 600px;
+      position: relative;
+    }
+
+    .csv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      font-family: var(--mono);
+    }
+
+    .csv-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .csv-table th {
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+      position: relative;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .csv-table th:hover {
+      color: var(--accent);
+    }
+
+    .csv-table th.sort-asc::after {
+      content: ' \u25B2';
+      color: var(--accent);
+      font-size: 0.65rem;
+    }
+
+    .csv-table th.sort-desc::after {
+      content: ' \u25BC';
+      color: var(--accent);
+      font-size: 0.65rem;
+    }
+
+    .csv-table th .col-index {
+      color: var(--text-muted);
+      opacity: 0.4;
+      font-size: 0.65rem;
+      margin-left: 4px;
+    }
+
+    .csv-table td {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .csv-table td:hover {
+      white-space: normal;
+      word-break: break-all;
+    }
+
+    .csv-table tbody tr {
+      transition: background 0.1s;
+    }
+
+    .csv-table tbody tr:hover {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .csv-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .csv-table tbody tr:nth-child(even):hover {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .row-num {
+      color: var(--text-muted);
+      opacity: 0.4;
+      text-align: right;
+      padding-right: 8px !important;
+      font-size: 0.7rem;
+      user-select: none;
+      min-width: 40px;
+    }
+
+    .highlight {
+      background: rgba(99, 102, 241, 0.2);
+      border-radius: 2px;
+    }
+
+    /* Stats panel */
+    .stats-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .stats-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+
+    .stats-toggle:hover {
+      color: var(--text);
+    }
+
+    .stats-toggle .arrow {
+      transition: transform 0.2s;
+      font-size: 0.7rem;
+    }
+
+    .stats-toggle.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 0 16px 16px;
+    }
+
+    .stat-card {
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+
+    .stat-card .stat-col-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stat-card .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      padding: 2px 0;
+    }
+
+    .stat-card .stat-label {
+      color: var(--text-muted);
+    }
+
+    .stat-card .stat-val {
+      color: var(--text);
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+
+    .stat-card .stat-type {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--accent);
+      margin-left: 6px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+
+    /* Status bar at bottom */
+    .filter-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 8px 0;
+    }
+
+    /* Override for full-width layout */
+    .full-width-panel {
+      grid-column: 1 / -1;
+    }
+
+    /* Make action-bar wrap nicely */
+    .action-bar {
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSV Viewer & Editor</h1>
+    <p class="description">Paste or upload CSV/TSV data to view, sort, filter, and analyze. Everything runs locally in your browser.</p>
+
+    <div class="csv-drop-zone" id="dropZone">
+      <p>Drop a CSV/TSV file here, or click to upload</p>
+      <small>Supports .csv, .tsv, .txt files</small>
+      <input type="file" id="fileInput" accept=".csv,.tsv,.txt,.tab">
+    </div>
+
+    <div class="tool-panel">
+      <div class="panel-header">
+        Paste Data
+        <span id="delimiter-info" style="font-weight: 400; font-size: 0.75rem;"></span>
+      </div>
+      <textarea class="tool-textarea" id="csvInput" style="min-height: 150px;" placeholder="Paste CSV, TSV, or delimited data here...
+
+name,age,city
+Alice,30,Berlin
+Bob,25,Munich
+Charlie,35,Hamburg"></textarea>
+    </div>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="parseAndRender()">Parse & View</button>
+        <button class="btn" onclick="exportCSV()">Export CSV</button>
+        <button class="btn" onclick="copyTable()">Copy Table</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Delimiter:
+          <select id="delimiterSelect">
+            <option value="auto" selected>Auto-detect</option>
+            <option value=",">Comma (,)</option>
+            <option value="&#9;">Tab</option>
+            <option value=";">Semicolon (;)</option>
+            <option value="|">Pipe (|)</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" id="hasHeader" checked>
+          First row is header
+        </label>
+      </div>
+    </div>
+
+    <div id="tableSection" style="display: none;">
+      <div class="info-bar" id="infoBar">
+        <div class="info-item">Rows: <span class="info-value" id="rowCount">0</span></div>
+        <div class="info-item">Columns: <span class="info-value" id="colCount">0</span></div>
+        <div class="info-item">Delimiter: <span class="info-value" id="delimiterDisplay">-</span></div>
+        <div class="info-item filter-status" id="filterStatus"></div>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search / filter rows...">
+        </div>
+      </div>
+
+      <div class="table-container" id="tableContainer">
+        <table class="csv-table" id="csvTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="stats-panel" id="statsPanel">
+        <div class="stats-toggle" id="statsToggle" onclick="toggleStats()">
+          Column Statistics
+          <span class="arrow">&#9660;</span>
+        </div>
+        <div class="stats-grid" id="statsGrid" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">&#9781;</div>
+      <p>Upload or paste CSV/TSV data to get started</p>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // --- State ---
+    let headers = [];
+    let rows = [];
+    let filteredRows = [];
+    let sortCol = -1;
+    let sortDir = 'asc';
+    let detectedDelimiter = ',';
+
+    // --- DOM refs ---
+    const $input = document.getElementById('csvInput');
+    const $dropZone = document.getElementById('dropZone');
+    const $fileInput = document.getElementById('fileInput');
+    const $delimiterSelect = document.getElementById('delimiterSelect');
+    const $hasHeader = document.getElementById('hasHeader');
+    const $tableSection = document.getElementById('tableSection');
+    const $emptyState = document.getElementById('emptyState');
+    const $tableHead = document.getElementById('tableHead');
+    const $tableBody = document.getElementById('tableBody');
+    const $rowCount = document.getElementById('rowCount');
+    const $colCount = document.getElementById('colCount');
+    const $delimiterDisplay = document.getElementById('delimiterDisplay');
+    const $delimiterInfo = document.getElementById('delimiter-info');
+    const $searchInput = document.getElementById('searchInput');
+    const $filterStatus = document.getElementById('filterStatus');
+    const $statsGrid = document.getElementById('statsGrid');
+    const $statsToggle = document.getElementById('statsToggle');
+
+    // --- File upload / drop ---
+    $dropZone.addEventListener('click', () => $fileInput.click());
+    $fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) readFile(e.target.files[0]);
+    });
+
+    $dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      $dropZone.classList.add('drag-over');
+    });
+
+    $dropZone.addEventListener('dragleave', () => {
+      $dropZone.classList.remove('drag-over');
+    });
+
+    $dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      $dropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]);
+    });
+
+    function readFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        $input.value = e.target.result;
+        parseAndRender();
+      };
+      reader.readAsText(file);
+    }
+
+    // --- Auto-parse on paste ---
+    $input.addEventListener('paste', () => setTimeout(parseAndRender, 50));
+
+    // --- Search ---
+    $searchInput.addEventListener('input', () => {
+      applyFilter();
+      renderTable();
+    });
+
+    // --- CSV Parser (RFC 4180 compliant) ---
+    function parseCSV(text, delimiter) {
+      const rows = [];
+      let row = [];
+      let field = '';
+      let inQuotes = false;
+      let i = 0;
+
+      while (i < text.length) {
+        const ch = text[i];
+
+        if (inQuotes) {
+          if (ch === '"') {
+            if (i + 1 < text.length && text[i + 1] === '"') {
+              field += '"';
+              i += 2;
+            } else {
+              inQuotes = false;
+              i++;
+            }
+          } else {
+            field += ch;
+            i++;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+            i++;
+          } else if (ch === delimiter) {
+            row.push(field);
+            field = '';
+            i++;
+          } else if (ch === '\r') {
+            if (i + 1 < text.length && text[i + 1] === '\n') {
+              i++;
+            }
+            row.push(field);
+            field = '';
+            rows.push(row);
+            row = [];
+            i++;
+          } else if (ch === '\n') {
+            row.push(field);
+            field = '';
+            rows.push(row);
+            row = [];
+            i++;
+          } else {
+            field += ch;
+            i++;
+          }
+        }
+      }
+
+      // Last field/row
+      if (field || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+      }
+
+      // Remove trailing empty row
+      if (rows.length > 0) {
+        const last = rows[rows.length - 1];
+        if (last.length === 1 && last[0] === '') {
+          rows.pop();
+        }
+      }
+
+      return rows;
+    }
+
+    // --- Delimiter detection ---
+    function detectDelimiter(text) {
+      const candidates = [',', '\t', ';', '|'];
+      const lines = text.split(/\r?\n/).filter(l => l.trim()).slice(0, 10);
+
+      if (lines.length === 0) return ',';
+
+      let bestDelimiter = ',';
+      let bestScore = -1;
+
+      for (const d of candidates) {
+        const counts = lines.map(line => {
+          // Count delimiters outside quotes
+          let count = 0;
+          let inQ = false;
+          for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') inQ = !inQ;
+            else if (!inQ && line[i] === d) count++;
+          }
+          return count;
+        });
+
+        // Check consistency: all lines should have the same count
+        const nonZero = counts.filter(c => c > 0);
+        if (nonZero.length === 0) continue;
+
+        const allSame = nonZero.every(c => c === nonZero[0]);
+        const score = allSame ? nonZero[0] * nonZero.length * 10 : nonZero[0];
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestDelimiter = d;
+        }
+      }
+
+      return bestDelimiter;
+    }
+
+    function delimiterName(d) {
+      if (d === ',') return 'Comma';
+      if (d === '\t') return 'Tab';
+      if (d === ';') return 'Semicolon';
+      if (d === '|') return 'Pipe';
+      return JSON.stringify(d);
+    }
+
+    // --- Main parse function ---
+    function parseAndRender() {
+      const raw = $input.value.trim();
+      if (!raw) {
+        showEmpty();
+        return;
+      }
+
+      // Determine delimiter
+      const delimChoice = $delimiterSelect.value;
+      detectedDelimiter = delimChoice === 'auto' ? detectDelimiter(raw) : delimChoice;
+
+      $delimiterInfo.textContent = 'Detected: ' + delimiterName(detectedDelimiter);
+      $delimiterDisplay.textContent = delimiterName(detectedDelimiter);
+
+      // Parse
+      const allRows = parseCSV(raw, detectedDelimiter);
+
+      if (allRows.length === 0) {
+        showEmpty();
+        return;
+      }
+
+      // Normalize column count
+      const maxCols = Math.max(...allRows.map(r => r.length));
+      allRows.forEach(r => {
+        while (r.length < maxCols) r.push('');
+      });
+
+      // Split header/data
+      if ($hasHeader.checked && allRows.length > 1) {
+        headers = allRows[0].map(h => h.trim());
+        rows = allRows.slice(1);
+      } else {
+        headers = Array.from({ length: maxCols }, (_, i) => 'Column ' + (i + 1));
+        rows = allRows;
+      }
+
+      // Reset sort
+      sortCol = -1;
+      sortDir = 'asc';
+      $searchInput.value = '';
+
+      filteredRows = rows.map((r, i) => ({ data: r, originalIndex: i }));
+
+      showTable();
+      renderTable();
+      computeStats();
+    }
+
+    function showTable() {
+      $tableSection.style.display = '';
+      $emptyState.style.display = 'none';
+    }
+
+    function showEmpty() {
+      $tableSection.style.display = 'none';
+      $emptyState.style.display = '';
+      headers = [];
+      rows = [];
+      filteredRows = [];
+    }
+
+    // --- Filter ---
+    function applyFilter() {
+      const query = $searchInput.value.trim().toLowerCase();
+      if (!query) {
+        filteredRows = rows.map((r, i) => ({ data: r, originalIndex: i }));
+        $filterStatus.textContent = '';
+      } else {
+        filteredRows = [];
+        rows.forEach((r, i) => {
+          if (r.some(cell => cell.toLowerCase().includes(query))) {
+            filteredRows.push({ data: r, originalIndex: i });
+          }
+        });
+        $filterStatus.textContent = `Showing ${filteredRows.length} of ${rows.length} rows`;
+      }
+
+      // Re-apply sort
+      if (sortCol >= 0) {
+        applySortToFiltered();
+      }
+    }
+
+    // --- Sort ---
+    function sortByColumn(colIdx) {
+      if (sortCol === colIdx) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortCol = colIdx;
+        sortDir = 'asc';
+      }
+      applySortToFiltered();
+      renderTable();
+    }
+
+    function applySortToFiltered() {
+      const col = sortCol;
+      const dir = sortDir === 'asc' ? 1 : -1;
+
+      filteredRows.sort((a, b) => {
+        let va = a.data[col] || '';
+        let vb = b.data[col] || '';
+
+        // Try numeric comparison
+        const na = parseFloat(va);
+        const nb = parseFloat(vb);
+        if (!isNaN(na) && !isNaN(nb)) {
+          return (na - nb) * dir;
+        }
+
+        // String comparison
+        return va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' }) * dir;
+      });
+    }
+
+    // --- Render table ---
+    function renderTable() {
+      // Header
+      let headHTML = '<tr><th class="row-num">#</th>';
+      headers.forEach((h, i) => {
+        let cls = '';
+        if (sortCol === i) cls = sortDir === 'asc' ? 'sort-asc' : 'sort-desc';
+        headHTML += `<th class="${cls}" onclick="sortByColumn(${i})">${escapeHTML(h)}</th>`;
+      });
+      headHTML += '</tr>';
+      $tableHead.innerHTML = headHTML;
+
+      // Body
+      const query = $searchInput.value.trim().toLowerCase();
+      let bodyHTML = '';
+      filteredRows.forEach((row, idx) => {
+        bodyHTML += `<tr><td class="row-num">${row.originalIndex + 1}</td>`;
+        row.data.forEach(cell => {
+          let display = escapeHTML(cell);
+          if (query) {
+            display = highlightMatch(display, escapeHTML(query));
+          }
+          bodyHTML += `<td title="${escapeAttr(cell)}">${display}</td>`;
+        });
+        bodyHTML += '</tr>';
+      });
+      $tableBody.innerHTML = bodyHTML;
+
+      // Info
+      $rowCount.textContent = filteredRows.length;
+      $colCount.textContent = headers.length;
+    }
+
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function highlightMatch(text, query) {
+      if (!query) return text;
+      const lowerText = text.toLowerCase();
+      const lowerQuery = query.toLowerCase();
+      let result = '';
+      let lastIdx = 0;
+      let idx = lowerText.indexOf(lowerQuery);
+      while (idx !== -1) {
+        result += text.slice(lastIdx, idx);
+        result += '<span class="highlight">' + text.slice(idx, idx + query.length) + '</span>';
+        lastIdx = idx + query.length;
+        idx = lowerText.indexOf(lowerQuery, lastIdx);
+      }
+      result += text.slice(lastIdx);
+      return result;
+    }
+
+    // --- Column statistics ---
+    function computeStats() {
+      $statsGrid.innerHTML = '';
+
+      headers.forEach((header, colIdx) => {
+        const values = rows.map(r => r[colIdx] || '');
+        const nonEmpty = values.filter(v => v.trim() !== '');
+        const unique = new Set(nonEmpty);
+
+        // Determine if numeric
+        const numericValues = [];
+        nonEmpty.forEach(v => {
+          const n = parseFloat(v);
+          if (!isNaN(n) && isFinite(n)) numericValues.push(n);
+        });
+        const isNumeric = numericValues.length > 0 && numericValues.length >= nonEmpty.length * 0.5;
+
+        let html = `<div class="stat-card">`;
+        html += `<div class="stat-col-name">${escapeHTML(header)}`;
+        html += `<span class="stat-type">${isNumeric ? 'numeric' : 'text'}</span></div>`;
+        html += `<div class="stat-row"><span class="stat-label">Count</span><span class="stat-val">${nonEmpty.length}</span></div>`;
+        html += `<div class="stat-row"><span class="stat-label">Empty</span><span class="stat-val">${values.length - nonEmpty.length}</span></div>`;
+        html += `<div class="stat-row"><span class="stat-label">Unique</span><span class="stat-val">${unique.size}</span></div>`;
+
+        if (isNumeric) {
+          const min = Math.min(...numericValues);
+          const max = Math.max(...numericValues);
+          const sum = numericValues.reduce((a, b) => a + b, 0);
+          const avg = sum / numericValues.length;
+          html += `<div class="stat-row"><span class="stat-label">Min</span><span class="stat-val">${formatNumber(min)}</span></div>`;
+          html += `<div class="stat-row"><span class="stat-label">Max</span><span class="stat-val">${formatNumber(max)}</span></div>`;
+          html += `<div class="stat-row"><span class="stat-label">Avg</span><span class="stat-val">${formatNumber(avg)}</span></div>`;
+          html += `<div class="stat-row"><span class="stat-label">Sum</span><span class="stat-val">${formatNumber(sum)}</span></div>`;
+        }
+
+        html += `</div>`;
+        $statsGrid.innerHTML += html;
+      });
+    }
+
+    function formatNumber(n) {
+      if (Number.isInteger(n)) return n.toLocaleString();
+      return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    function toggleStats() {
+      const grid = $statsGrid;
+      const toggle = $statsToggle;
+      if (grid.style.display === 'none') {
+        grid.style.display = '';
+        toggle.classList.add('open');
+      } else {
+        grid.style.display = 'none';
+        toggle.classList.remove('open');
+      }
+    }
+
+    // --- Export CSV ---
+    function exportCSV() {
+      if (!headers.length) return;
+
+      const delimiter = ',';
+      let csv = '';
+
+      // Header row
+      csv += headers.map(h => quoteField(h, delimiter)).join(delimiter) + '\n';
+
+      // Data rows (use filtered rows if filter is active)
+      const exportRows = $searchInput.value.trim() ? filteredRows.map(r => r.data) : rows;
+      exportRows.forEach(row => {
+        csv += row.map(cell => quoteField(cell, delimiter)).join(delimiter) + '\n';
+      });
+
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'export.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function quoteField(field, delimiter) {
+      if (field.includes('"') || field.includes(delimiter) || field.includes('\n') || field.includes('\r')) {
+        return '"' + field.replace(/"/g, '""') + '"';
+      }
+      return field;
+    }
+
+    // --- Copy table ---
+    function copyTable() {
+      if (!headers.length) return;
+
+      let text = headers.join('\t') + '\n';
+      const copyRows = $searchInput.value.trim() ? filteredRows.map(r => r.data) : rows;
+      copyRows.forEach(row => {
+        text += row.join('\t') + '\n';
+      });
+
+      navigator.clipboard.writeText(text);
+
+      // Flash feedback
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+
+    // --- Clear ---
+    function clearAll() {
+      $input.value = '';
+      $searchInput.value = '';
+      $delimiterInfo.textContent = '';
+      headers = [];
+      rows = [];
+      filteredRows = [];
+      sortCol = -1;
+      sortDir = 'asc';
+      showEmpty();
+    }
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

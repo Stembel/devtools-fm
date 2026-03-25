@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git Cheatsheet - Interactive Git Command Reference | ZeroKit.dev</title>
+  <meta name="description" content="Interactive Git cheatsheet with 50+ commands. Search, filter by category, copy commands instantly. Covers setup, branching, staging, committing, remote, stashing, undoing, inspecting, and tags.">
+  <link rel="canonical" href="https://zerokit.dev/tools/gitcheat.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .category-tab .tab-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .category-section {
+      margin-bottom: 32px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .cat-setup .category-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .cat-branching .category-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .cat-staging .category-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-committing .category-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .cat-remote .category-badge { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .cat-stashing .category-badge { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .cat-undoing .category-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .cat-inspecting .category-badge { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+    .cat-tags .category-badge { background: rgba(132, 204, 22, 0.15); color: #a3e635; }
+
+    .cat-setup .category-header { border-bottom-color: rgba(59, 130, 246, 0.2); }
+    .cat-branching .category-header { border-bottom-color: rgba(168, 85, 247, 0.2); }
+    .cat-staging .category-header { border-bottom-color: rgba(34, 197, 94, 0.2); }
+    .cat-committing .category-header { border-bottom-color: rgba(234, 179, 8, 0.2); }
+    .cat-remote .category-header { border-bottom-color: rgba(249, 115, 22, 0.2); }
+    .cat-stashing .category-header { border-bottom-color: rgba(236, 72, 153, 0.2); }
+    .cat-undoing .category-header { border-bottom-color: rgba(239, 68, 68, 0.2); }
+    .cat-inspecting .category-header { border-bottom-color: rgba(6, 182, 212, 0.2); }
+    .cat-tags .category-header { border-bottom-color: rgba(132, 204, 22, 0.2); }
+
+    .cmd-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .cmd-card:hover {
+      border-color: var(--text-muted);
+    }
+    .cmd-card.expanded {
+      border-color: var(--accent);
+    }
+
+    .cmd-card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cmd-syntax {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-width: 200px;
+      flex-shrink: 0;
+    }
+    .cat-setup .cmd-syntax { color: #60a5fa; }
+    .cat-branching .cmd-syntax { color: #c084fc; }
+    .cat-staging .cmd-syntax { color: #4ade80; }
+    .cat-committing .cmd-syntax { color: #facc15; }
+    .cat-remote .cmd-syntax { color: #fb923c; }
+    .cat-stashing .cmd-syntax { color: #f472b6; }
+    .cat-undoing .cmd-syntax { color: #f87171; }
+    .cat-inspecting .cmd-syntax { color: #22d3ee; }
+    .cat-tags .cmd-syntax { color: #a3e635; }
+
+    .cmd-desc {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cmd-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-family: var(--mono);
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+    .cmd-chevron {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .cmd-card.expanded .cmd-chevron {
+      transform: rotate(90deg);
+    }
+
+    .cmd-detail {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .cmd-card.expanded .cmd-detail {
+      display: block;
+    }
+    .detail-section {
+      margin-top: 16px;
+    }
+    .detail-section h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .detail-section p {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .detail-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .detail-section ul li {
+      font-size: 0.85rem;
+      color: var(--text);
+      padding: 4px 0;
+      padding-left: 16px;
+      position: relative;
+      line-height: 1.6;
+    }
+    .detail-section ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+    .flag-item code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .example-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--text);
+      overflow-x: auto;
+      white-space: pre;
+      position: relative;
+    }
+    .example-block .example-copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .example-block .example-copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .example-block .example-copy.copied {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+
+    /* Workflows section */
+    .workflows-section {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+    .workflows-section h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .workflow-card:hover {
+      border-color: var(--text-muted);
+    }
+    .workflow-card.expanded {
+      border-color: var(--accent);
+    }
+    .workflow-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .workflow-icon {
+      font-size: 1.1rem;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .workflow-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    .workflow-chevron {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .workflow-card.expanded .workflow-chevron {
+      transform: rotate(90deg);
+    }
+    .workflow-detail {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .workflow-card.expanded .workflow-detail {
+      display: block;
+    }
+    .workflow-steps {
+      margin-top: 16px;
+    }
+    .workflow-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .step-content p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    .step-content code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 12px;
+      display: block;
+      color: var(--text);
+    }
+
+    /* Git flow diagram */
+    .flow-section {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+    .flow-section h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .flow-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--text);
+    }
+    .flow-diagram .flow-header {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .flow-diagram .flow-arrow {
+      color: var(--text-muted);
+    }
+    .flow-diagram .flow-area {
+      color: #4ade80;
+      font-weight: 600;
+    }
+    .flow-diagram .flow-cmd {
+      color: #facc15;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-code {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    .scroll-top {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .scroll-top:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+    .scroll-top.visible {
+      display: flex;
+    }
+
+    @media (max-width: 768px) {
+      .cmd-card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+      }
+      .cmd-syntax {
+        min-width: auto;
+      }
+      .cmd-desc {
+        flex-basis: 100%;
+        order: 3;
+        white-space: normal;
+      }
+      .cmd-detail {
+        padding: 0 16px 16px;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      .flow-diagram {
+        font-size: 0.65rem;
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Git Cheatsheet</h1>
+    <p class="description">Interactive Git command reference with 50+ commands. Search by command or keyword, filter by category, and copy commands with one click. Includes common workflows and a Git flow diagram.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search commands... (e.g. branch, rebase, stash)" autofocus spellcheck="false">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs">
+      <button class="category-tab active" data-cat="all">All <span class="tab-count" id="countAll"></span></button>
+      <button class="category-tab" data-cat="setup">Setup <span class="tab-count" id="countSetup"></span></button>
+      <button class="category-tab" data-cat="branching">Branching <span class="tab-count" id="countBranching"></span></button>
+      <button class="category-tab" data-cat="staging">Staging <span class="tab-count" id="countStaging"></span></button>
+      <button class="category-tab" data-cat="committing">Committing <span class="tab-count" id="countCommitting"></span></button>
+      <button class="category-tab" data-cat="remote">Remote <span class="tab-count" id="countRemote"></span></button>
+      <button class="category-tab" data-cat="stashing">Stashing <span class="tab-count" id="countStashing"></span></button>
+      <button class="category-tab" data-cat="undoing">Undoing <span class="tab-count" id="countUndoing"></span></button>
+      <button class="category-tab" data-cat="inspecting">Inspecting <span class="tab-count" id="countInspecting"></span></button>
+      <button class="category-tab" data-cat="tags">Tags <span class="tab-count" id="countTags"></span></button>
+    </div>
+
+    <div id="cmdList"></div>
+    <div id="noResults" class="no-results" style="display:none">
+      <div class="nr-code">git ?</div>
+      <p>No commands match your search.</p>
+    </div>
+
+    <!-- Common Workflows -->
+    <div class="workflows-section" id="workflowsSection">
+      <h2>Common Workflows</h2>
+      <div id="workflowList"></div>
+    </div>
+
+    <!-- Git Flow Diagram -->
+    <div class="flow-section">
+      <h2>Git Areas &amp; Flow</h2>
+      <div class="flow-diagram" id="flowDiagram"></div>
+    </div>
+
+    <button class="scroll-top" id="scrollTop" title="Scroll to top">&#9650;</button>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    // ========== GIT COMMANDS DATA ==========
+    const GIT_COMMANDS = [
+      // === SETUP ===
+      {
+        cmd: "git init",
+        cat: "setup",
+        desc: "Initialize a new Git repository in the current directory.",
+        flags: [
+          { flag: "--bare", info: "Create a bare repository (no working directory)" },
+          { flag: "--initial-branch <name>", info: "Set the name of the initial branch" }
+        ],
+        example: "git init\ngit init --bare my-project.git\ngit init --initial-branch main"
+      },
+      {
+        cmd: "git clone <url>",
+        cat: "setup",
+        desc: "Clone a remote repository to your local machine.",
+        flags: [
+          { flag: "--depth <n>", info: "Shallow clone with only the last n commits" },
+          { flag: "--branch <name>", info: "Clone a specific branch" },
+          { flag: "--single-branch", info: "Clone only a single branch" },
+          { flag: "--recurse-submodules", info: "Initialize and clone submodules" }
+        ],
+        example: "git clone https://github.com/user/repo.git\ngit clone --depth 1 https://github.com/user/repo.git\ngit clone --branch develop https://github.com/user/repo.git"
+      },
+      {
+        cmd: "git config <key> <value>",
+        cat: "setup",
+        desc: "Set Git configuration values for user info, aliases, and behavior.",
+        flags: [
+          { flag: "--global", info: "Set configuration for all repositories on this machine" },
+          { flag: "--local", info: "Set configuration for current repository only" },
+          { flag: "--list", info: "List all configuration settings" },
+          { flag: "--unset", info: "Remove a configuration entry" }
+        ],
+        example: 'git config --global user.name "Your Name"\ngit config --global user.email "you@example.com"\ngit config --global init.defaultBranch main\ngit config --list'
+      },
+      {
+        cmd: "git config --global alias.<name>",
+        cat: "setup",
+        desc: "Create custom shortcut commands for frequently used Git operations.",
+        flags: [
+          { flag: "--global", info: "Make alias available across all repositories" }
+        ],
+        example: 'git config --global alias.co checkout\ngit config --global alias.br branch\ngit config --global alias.st status\ngit config --global alias.lg "log --oneline --graph --all"'
+      },
+      {
+        cmd: "git remote add <name> <url>",
+        cat: "setup",
+        desc: "Add a new remote repository connection.",
+        flags: [],
+        example: "git remote add origin https://github.com/user/repo.git\ngit remote add upstream https://github.com/original/repo.git"
+      },
+
+      // === BRANCHING ===
+      {
+        cmd: "git branch",
+        cat: "branching",
+        desc: "List, create, or delete branches.",
+        flags: [
+          { flag: "-a", info: "List both local and remote-tracking branches" },
+          { flag: "-r", info: "List remote-tracking branches only" },
+          { flag: "-d <branch>", info: "Delete a fully merged branch" },
+          { flag: "-D <branch>", info: "Force delete a branch (even unmerged)" },
+          { flag: "-m <old> <new>", info: "Rename a branch" },
+          { flag: "--merged", info: "List branches that have been merged into HEAD" },
+          { flag: "--no-merged", info: "List branches not yet merged into HEAD" },
+          { flag: "-v", info: "Show last commit on each branch" }
+        ],
+        example: "git branch\ngit branch -a\ngit branch feature/login\ngit branch -d old-branch\ngit branch -m old-name new-name"
+      },
+      {
+        cmd: "git checkout <branch>",
+        cat: "branching",
+        desc: "Switch to another branch or restore working tree files.",
+        flags: [
+          { flag: "-b <branch>", info: "Create and switch to a new branch" },
+          { flag: "-B <branch>", info: "Create/reset and switch to a branch" },
+          { flag: "--track <remote/branch>", info: "Set up tracking relationship" },
+          { flag: "-- <file>", info: "Restore a specific file from the index" }
+        ],
+        example: "git checkout main\ngit checkout -b feature/new-feature\ngit checkout -b local-branch origin/remote-branch\ngit checkout -- myfile.txt"
+      },
+      {
+        cmd: "git switch <branch>",
+        cat: "branching",
+        desc: "Switch branches (modern alternative to git checkout for branch switching).",
+        flags: [
+          { flag: "-c <branch>", info: "Create and switch to a new branch" },
+          { flag: "-C <branch>", info: "Create/reset and switch to a branch" },
+          { flag: "--detach", info: "Switch to a commit in detached HEAD state" }
+        ],
+        example: "git switch main\ngit switch -c feature/new-feature\ngit switch -c local origin/remote-branch"
+      },
+      {
+        cmd: "git merge <branch>",
+        cat: "branching",
+        desc: "Join two or more development histories together.",
+        flags: [
+          { flag: "--no-ff", info: "Create a merge commit even for fast-forward merges" },
+          { flag: "--squash", info: "Squash all commits into a single commit (does not auto-commit)" },
+          { flag: "--abort", info: "Abort the current merge and restore pre-merge state" },
+          { flag: "--continue", info: "Continue after resolving merge conflicts" },
+          { flag: "-m <msg>", info: "Set the commit message for the merge commit" }
+        ],
+        example: "git merge feature/login\ngit merge --no-ff feature/login\ngit merge --squash feature/login\ngit merge --abort"
+      },
+      {
+        cmd: "git rebase <branch>",
+        cat: "branching",
+        desc: "Reapply commits on top of another base branch.",
+        flags: [
+          { flag: "-i", info: "Interactive rebase -- edit, squash, reorder commits" },
+          { flag: "--onto <new-base>", info: "Rebase onto a different base" },
+          { flag: "--abort", info: "Abort the current rebase" },
+          { flag: "--continue", info: "Continue after resolving rebase conflicts" },
+          { flag: "--skip", info: "Skip the current commit and continue" }
+        ],
+        example: "git rebase main\ngit rebase -i HEAD~3\ngit rebase --onto main feature-base feature-branch\ngit rebase --abort"
+      },
+      {
+        cmd: "git cherry-pick <commit>",
+        cat: "branching",
+        desc: "Apply the changes from a specific commit onto the current branch.",
+        flags: [
+          { flag: "-n / --no-commit", info: "Apply changes without committing" },
+          { flag: "-x", info: "Append a line noting the source commit" },
+          { flag: "--abort", info: "Abort the cherry-pick operation" },
+          { flag: "--continue", info: "Continue after resolving conflicts" }
+        ],
+        example: "git cherry-pick abc1234\ngit cherry-pick abc1234 def5678\ngit cherry-pick -n abc1234\ngit cherry-pick --abort"
+      },
+
+      // === STAGING ===
+      {
+        cmd: "git add <file>",
+        cat: "staging",
+        desc: "Add file contents to the staging area (index).",
+        flags: [
+          { flag: ".", info: "Stage all changes in the current directory and subdirectories" },
+          { flag: "-A / --all", info: "Stage all changes in the entire working tree" },
+          { flag: "-p / --patch", info: "Interactively stage hunks of changes" },
+          { flag: "-u", info: "Stage modifications and deletions, but not new files" },
+          { flag: "-n / --dry-run", info: "Show what would be staged without actually staging" }
+        ],
+        example: "git add myfile.js\ngit add src/\ngit add -A\ngit add -p\ngit add *.css"
+      },
+      {
+        cmd: "git rm <file>",
+        cat: "staging",
+        desc: "Remove files from the working tree and the staging area.",
+        flags: [
+          { flag: "--cached", info: "Remove from staging only (keep file on disk)" },
+          { flag: "-f", info: "Force removal of modified files" },
+          { flag: "-r", info: "Recursively remove a directory" }
+        ],
+        example: "git rm oldfile.js\ngit rm --cached secret.env\ngit rm -r build/"
+      },
+      {
+        cmd: "git mv <source> <dest>",
+        cat: "staging",
+        desc: "Move or rename a file and stage the change.",
+        flags: [
+          { flag: "-f", info: "Force renaming even if destination exists" },
+          { flag: "-n", info: "Dry run -- show what would happen" }
+        ],
+        example: "git mv old-name.js new-name.js\ngit mv src/utils.js lib/utils.js"
+      },
+      {
+        cmd: "git restore <file>",
+        cat: "staging",
+        desc: "Restore working tree files (modern replacement for git checkout -- file).",
+        flags: [
+          { flag: "--staged", info: "Unstage a file (remove from index, keep changes)" },
+          { flag: "--source <commit>", info: "Restore file from a specific commit" },
+          { flag: "--worktree", info: "Restore the working tree (default)" }
+        ],
+        example: "git restore myfile.js\ngit restore --staged myfile.js\ngit restore --source HEAD~2 myfile.js"
+      },
+      {
+        cmd: "git reset <file>",
+        cat: "staging",
+        desc: "Unstage a file while keeping changes in the working directory.",
+        flags: [
+          { flag: "HEAD <file>", info: "Unstage specific file(s)" }
+        ],
+        example: "git reset HEAD myfile.js\ngit reset HEAD ."
+      },
+      {
+        cmd: "git clean",
+        cat: "staging",
+        desc: "Remove untracked files from the working tree.",
+        flags: [
+          { flag: "-f", info: "Force removal (required unless configured otherwise)" },
+          { flag: "-d", info: "Also remove untracked directories" },
+          { flag: "-n / --dry-run", info: "Show what would be removed without actually deleting" },
+          { flag: "-x", info: "Also remove ignored files" },
+          { flag: "-X", info: "Remove only ignored files" }
+        ],
+        example: "git clean -n\ngit clean -fd\ngit clean -fX"
+      },
+
+      // === COMMITTING ===
+      {
+        cmd: "git commit",
+        cat: "committing",
+        desc: "Record changes to the repository with a message.",
+        flags: [
+          { flag: "-m <msg>", info: "Set the commit message inline" },
+          { flag: "-a", info: "Automatically stage modified and deleted files" },
+          { flag: "--amend", info: "Modify the most recent commit" },
+          { flag: "--no-edit", info: "Amend without changing the commit message" },
+          { flag: "-v", info: "Show diff in commit message editor" },
+          { flag: "--allow-empty", info: "Create a commit with no changes" },
+          { flag: "-S", info: "GPG-sign the commit" }
+        ],
+        example: 'git commit -m "Add login feature"\ngit commit -am "Fix typo in header"\ngit commit --amend -m "Updated commit message"\ngit commit --amend --no-edit'
+      },
+      {
+        cmd: "git commit --fixup <commit>",
+        cat: "committing",
+        desc: "Create a fixup commit for use with autosquash rebase.",
+        flags: [
+          { flag: "--fixup=<commit>", info: "Mark this as a fixup for the specified commit" }
+        ],
+        example: "git commit --fixup abc1234\ngit rebase -i --autosquash main"
+      },
+      {
+        cmd: "git commit -S",
+        cat: "committing",
+        desc: "Create a GPG-signed commit for verified authorship.",
+        flags: [
+          { flag: "-S", info: "Sign commit with GPG key" },
+          { flag: "--gpg-sign=<key>", info: "Sign with a specific GPG key" }
+        ],
+        example: 'git commit -S -m "Signed commit"\ngit config --global commit.gpgsign true'
+      },
+
+      // === REMOTE ===
+      {
+        cmd: "git push",
+        cat: "remote",
+        desc: "Upload local branch commits to the remote repository.",
+        flags: [
+          { flag: "-u / --set-upstream", info: "Set upstream tracking reference" },
+          { flag: "--force / -f", info: "Force push (overwrites remote history)" },
+          { flag: "--force-with-lease", info: "Safer force push -- only if remote has not changed" },
+          { flag: "--tags", info: "Push all tags" },
+          { flag: "--delete", info: "Delete a remote branch" },
+          { flag: "--dry-run", info: "Show what would be pushed without actually pushing" }
+        ],
+        example: "git push\ngit push -u origin main\ngit push origin feature/login\ngit push --force-with-lease\ngit push origin --delete old-branch"
+      },
+      {
+        cmd: "git pull",
+        cat: "remote",
+        desc: "Fetch from remote and integrate changes into current branch.",
+        flags: [
+          { flag: "--rebase", info: "Rebase local commits on top of fetched commits" },
+          { flag: "--no-rebase", info: "Use merge instead of rebase" },
+          { flag: "--ff-only", info: "Only allow fast-forward merges" },
+          { flag: "--autostash", info: "Automatically stash/unstash local changes" }
+        ],
+        example: "git pull\ngit pull --rebase\ngit pull origin main\ngit pull --ff-only"
+      },
+      {
+        cmd: "git fetch",
+        cat: "remote",
+        desc: "Download objects and refs from a remote repository without merging.",
+        flags: [
+          { flag: "--all", info: "Fetch from all remotes" },
+          { flag: "--prune", info: "Remove remote-tracking refs that no longer exist" },
+          { flag: "--tags", info: "Fetch all tags" },
+          { flag: "--depth <n>", info: "Limit fetching to the specified depth" }
+        ],
+        example: "git fetch\ngit fetch origin\ngit fetch --all --prune\ngit fetch origin main"
+      },
+      {
+        cmd: "git remote",
+        cat: "remote",
+        desc: "Manage the set of tracked remote repositories.",
+        flags: [
+          { flag: "-v", info: "Show remote URLs alongside names" },
+          { flag: "add <name> <url>", info: "Add a new remote" },
+          { flag: "remove <name>", info: "Remove a remote" },
+          { flag: "rename <old> <new>", info: "Rename a remote" },
+          { flag: "set-url <name> <url>", info: "Change the URL for a remote" }
+        ],
+        example: "git remote -v\ngit remote add origin https://github.com/user/repo.git\ngit remote remove upstream\ngit remote set-url origin git@github.com:user/repo.git"
+      },
+      {
+        cmd: "git push origin --delete <branch>",
+        cat: "remote",
+        desc: "Delete a branch on the remote repository.",
+        flags: [],
+        example: "git push origin --delete feature/old-feature\ngit push origin :feature/old-feature"
+      },
+      {
+        cmd: "git submodule",
+        cat: "remote",
+        desc: "Manage Git submodules within a repository.",
+        flags: [
+          { flag: "add <url> <path>", info: "Add a new submodule" },
+          { flag: "init", info: "Initialize submodule configuration" },
+          { flag: "update", info: "Fetch and checkout submodule commits" },
+          { flag: "--recursive", info: "Apply operation recursively to nested submodules" }
+        ],
+        example: "git submodule add https://github.com/lib/tool.git vendor/tool\ngit submodule init\ngit submodule update --init --recursive"
+      },
+
+      // === STASHING ===
+      {
+        cmd: "git stash",
+        cat: "stashing",
+        desc: "Temporarily save uncommitted changes and clean the working directory.",
+        flags: [
+          { flag: "push -m <msg>", info: "Stash with a descriptive message" },
+          { flag: "-u / --include-untracked", info: "Also stash untracked files" },
+          { flag: "-a / --all", info: "Stash all files including ignored ones" },
+          { flag: "-p / --patch", info: "Interactively select hunks to stash" }
+        ],
+        example: 'git stash\ngit stash push -m "WIP: login form"\ngit stash -u\ngit stash -p'
+      },
+      {
+        cmd: "git stash pop",
+        cat: "stashing",
+        desc: "Apply the most recent stash and remove it from the stash list.",
+        flags: [
+          { flag: "stash@{n}", info: "Pop a specific stash by index" }
+        ],
+        example: "git stash pop\ngit stash pop stash@{2}"
+      },
+      {
+        cmd: "git stash apply",
+        cat: "stashing",
+        desc: "Apply a stash without removing it from the stash list.",
+        flags: [
+          { flag: "stash@{n}", info: "Apply a specific stash by index" }
+        ],
+        example: "git stash apply\ngit stash apply stash@{1}"
+      },
+      {
+        cmd: "git stash list",
+        cat: "stashing",
+        desc: "List all stashed changesets.",
+        flags: [],
+        example: "git stash list"
+      },
+      {
+        cmd: "git stash drop",
+        cat: "stashing",
+        desc: "Remove a specific stash entry from the stash list.",
+        flags: [
+          { flag: "stash@{n}", info: "Drop a specific stash by index" }
+        ],
+        example: "git stash drop\ngit stash drop stash@{2}"
+      },
+      {
+        cmd: "git stash clear",
+        cat: "stashing",
+        desc: "Remove all stash entries.",
+        flags: [],
+        example: "git stash clear"
+      },
+      {
+        cmd: "git stash show",
+        cat: "stashing",
+        desc: "Show the changes recorded in a stash entry.",
+        flags: [
+          { flag: "-p / --patch", info: "Show the full diff" },
+          { flag: "stash@{n}", info: "Show a specific stash" }
+        ],
+        example: "git stash show\ngit stash show -p\ngit stash show stash@{1}"
+      },
+
+      // === UNDOING ===
+      {
+        cmd: "git reset --soft HEAD~1",
+        cat: "undoing",
+        desc: "Undo the last commit, keeping changes staged.",
+        flags: [
+          { flag: "--soft", info: "Keep changes in staging area" },
+          { flag: "--mixed", info: "Keep changes in working directory but unstage them (default)" },
+          { flag: "--hard", info: "Discard all changes completely" }
+        ],
+        example: "git reset --soft HEAD~1\ngit reset --mixed HEAD~1\ngit reset --hard HEAD~3\ngit reset --hard origin/main"
+      },
+      {
+        cmd: "git revert <commit>",
+        cat: "undoing",
+        desc: "Create a new commit that undoes the changes of a previous commit.",
+        flags: [
+          { flag: "-n / --no-commit", info: "Revert without automatically committing" },
+          { flag: "--abort", info: "Abort the revert operation" },
+          { flag: "-m <parent>", info: "Specify mainline parent number for merge commits" }
+        ],
+        example: "git revert abc1234\ngit revert HEAD\ngit revert -n abc1234\ngit revert -m 1 <merge-commit>"
+      },
+      {
+        cmd: "git checkout -- <file>",
+        cat: "undoing",
+        desc: "Discard changes in the working directory for a specific file.",
+        flags: [],
+        example: "git checkout -- myfile.js\ngit checkout -- ."
+      },
+      {
+        cmd: "git reset HEAD <file>",
+        cat: "undoing",
+        desc: "Unstage a file while preserving its changes in the working directory.",
+        flags: [],
+        example: "git reset HEAD myfile.js\ngit reset HEAD ."
+      },
+      {
+        cmd: "git reflog",
+        cat: "undoing",
+        desc: "Show a log of all reference updates (useful for recovering lost commits).",
+        flags: [
+          { flag: "--all", info: "Show reflogs for all refs" },
+          { flag: "-n <count>", info: "Limit the number of entries" },
+          { flag: "expire", info: "Prune old reflog entries" }
+        ],
+        example: "git reflog\ngit reflog -n 20\ngit reset --hard HEAD@{5}"
+      },
+      {
+        cmd: "git bisect",
+        cat: "undoing",
+        desc: "Use binary search to find the commit that introduced a bug.",
+        flags: [
+          { flag: "start", info: "Begin a bisect session" },
+          { flag: "bad", info: "Mark current commit as bad" },
+          { flag: "good <commit>", info: "Mark a commit as good" },
+          { flag: "reset", info: "End bisect session and return to original branch" }
+        ],
+        example: "git bisect start\ngit bisect bad\ngit bisect good v1.0\n# Git checks out a commit; test it, then:\ngit bisect good  # or: git bisect bad\ngit bisect reset"
+      },
+
+      // === INSPECTING ===
+      {
+        cmd: "git status",
+        cat: "inspecting",
+        desc: "Show the state of the working tree and staging area.",
+        flags: [
+          { flag: "-s / --short", info: "Give output in short format" },
+          { flag: "-b", info: "Show branch and tracking info in short format" },
+          { flag: "--ignored", info: "Show ignored files" }
+        ],
+        example: "git status\ngit status -s\ngit status -sb"
+      },
+      {
+        cmd: "git log",
+        cat: "inspecting",
+        desc: "Show the commit history for the current branch.",
+        flags: [
+          { flag: "--oneline", info: "Compact single-line format" },
+          { flag: "--graph", info: "Show ASCII graph of branch structure" },
+          { flag: "--all", info: "Show history from all branches" },
+          { flag: "-n <count>", info: "Limit number of commits shown" },
+          { flag: "--author=<name>", info: "Filter by author" },
+          { flag: "--since / --until", info: "Filter by date range" },
+          { flag: "--grep=<pattern>", info: "Filter by commit message" },
+          { flag: "-p", info: "Show the diff for each commit" },
+          { flag: "--stat", info: "Show file change statistics" }
+        ],
+        example: 'git log --oneline -20\ngit log --graph --oneline --all\ngit log --author="John" --since="2024-01-01"\ngit log --grep="fix" --oneline\ngit log -p -- myfile.js'
+      },
+      {
+        cmd: "git diff",
+        cat: "inspecting",
+        desc: "Show changes between working directory, staging area, and commits.",
+        flags: [
+          { flag: "--staged / --cached", info: "Show staged changes (index vs HEAD)" },
+          { flag: "--stat", info: "Show summary of changes" },
+          { flag: "--name-only", info: "Show only file names" },
+          { flag: "--name-status", info: "Show file names with status (M/A/D)" },
+          { flag: "<branch1>..<branch2>", info: "Compare two branches" },
+          { flag: "--word-diff", info: "Show word-level differences" }
+        ],
+        example: "git diff\ngit diff --staged\ngit diff main..feature\ngit diff --stat\ngit diff HEAD~3 -- myfile.js"
+      },
+      {
+        cmd: "git show <commit>",
+        cat: "inspecting",
+        desc: "Show details and diff of a specific commit.",
+        flags: [
+          { flag: "--stat", info: "Show file change statistics" },
+          { flag: "--name-only", info: "Show only file names" },
+          { flag: "--format=<fmt>", info: "Custom output format" }
+        ],
+        example: "git show abc1234\ngit show HEAD\ngit show HEAD:path/to/file.js\ngit show --stat abc1234"
+      },
+      {
+        cmd: "git blame <file>",
+        cat: "inspecting",
+        desc: "Show who last modified each line of a file and when.",
+        flags: [
+          { flag: "-L <start>,<end>", info: "Annotate only a line range" },
+          { flag: "-w", info: "Ignore whitespace changes" },
+          { flag: "-C", info: "Detect lines moved/copied from other files" },
+          { flag: "--since=<date>", info: "Only show blame from a certain date" }
+        ],
+        example: "git blame myfile.js\ngit blame -L 10,20 myfile.js\ngit blame -w myfile.js"
+      },
+      {
+        cmd: "git shortlog",
+        cat: "inspecting",
+        desc: "Summarize commit output grouped by author.",
+        flags: [
+          { flag: "-s", info: "Show only commit count per author" },
+          { flag: "-n", info: "Sort by number of commits (descending)" },
+          { flag: "-e", info: "Show author email addresses" }
+        ],
+        example: "git shortlog -sn\ngit shortlog -sne\ngit shortlog --since='1 month ago'"
+      },
+      {
+        cmd: "git log --graph --oneline --all",
+        cat: "inspecting",
+        desc: "Visualize the branch structure as an ASCII graph.",
+        flags: [
+          { flag: "--decorate", info: "Show branch and tag names" },
+          { flag: "--abbrev-commit", info: "Show abbreviated commit hashes" }
+        ],
+        example: "git log --graph --oneline --all --decorate"
+      },
+      {
+        cmd: "git grep <pattern>",
+        cat: "inspecting",
+        desc: "Search for a text pattern in tracked files.",
+        flags: [
+          { flag: "-n", info: "Show line numbers" },
+          { flag: "-i", info: "Case-insensitive search" },
+          { flag: "-c", info: "Show only match count per file" },
+          { flag: "-l", info: "Show only file names" }
+        ],
+        example: 'git grep -n "TODO"\ngit grep -i "fixme" -- "*.js"\ngit grep -c "import"'
+      },
+      {
+        cmd: "git whatchanged",
+        cat: "inspecting",
+        desc: "Show what changed in each commit (similar to git log with diff).",
+        flags: [
+          { flag: "--since=<date>", info: "Show changes after a date" },
+          { flag: "-p", info: "Show the actual diff" }
+        ],
+        example: "git whatchanged --since='2 weeks ago'\ngit whatchanged -p -- myfile.js"
+      },
+
+      // === TAGS ===
+      {
+        cmd: "git tag",
+        cat: "tags",
+        desc: "List, create, or delete tags to mark specific commits.",
+        flags: [
+          { flag: "-a <name>", info: "Create an annotated tag" },
+          { flag: "-m <msg>", info: "Set the tag message" },
+          { flag: "-d <name>", info: "Delete a tag" },
+          { flag: "-l <pattern>", info: "List tags matching a pattern" },
+          { flag: "-n", info: "Show tag messages alongside names" }
+        ],
+        example: 'git tag\ngit tag -a v1.0.0 -m "Release 1.0.0"\ngit tag v1.0.0\ngit tag -d v1.0.0\ngit tag -l "v1.*"'
+      },
+      {
+        cmd: "git push --tags",
+        cat: "tags",
+        desc: "Push all local tags to the remote repository.",
+        flags: [
+          { flag: "--tags", info: "Push all tags" },
+          { flag: "--follow-tags", info: "Push annotated tags only" }
+        ],
+        example: "git push --tags\ngit push origin v1.0.0\ngit push --follow-tags"
+      },
+      {
+        cmd: "git tag -a <name> <commit>",
+        cat: "tags",
+        desc: "Tag a specific historical commit.",
+        flags: [
+          { flag: "-a", info: "Create an annotated tag" },
+          { flag: "-m <msg>", info: "Set the tag message" }
+        ],
+        example: 'git tag -a v0.9.0 abc1234 -m "Retroactive tag for beta"'
+      },
+      {
+        cmd: "git describe",
+        cat: "tags",
+        desc: "Give a human-readable name based on the nearest tag.",
+        flags: [
+          { flag: "--tags", info: "Include lightweight tags" },
+          { flag: "--always", info: "Show abbreviated commit hash if no tags found" },
+          { flag: "--abbrev=<n>", info: "Use n digits for the abbreviated hash" }
+        ],
+        example: "git describe\ngit describe --tags\ngit describe --always"
+      },
+      {
+        cmd: "git push origin --delete <tag>",
+        cat: "tags",
+        desc: "Delete a tag from the remote repository.",
+        flags: [],
+        example: "git push origin --delete v1.0.0\ngit push origin :refs/tags/v1.0.0"
+      },
+
+      // === More BRANCHING ===
+      {
+        cmd: "git worktree add <path> <branch>",
+        cat: "branching",
+        desc: "Create a linked working tree for a branch without switching.",
+        flags: [
+          { flag: "-b <branch>", info: "Create a new branch for the worktree" }
+        ],
+        example: "git worktree add ../hotfix-tree hotfix/urgent\ngit worktree add -b feature/new ../feature-tree\ngit worktree list\ngit worktree remove ../hotfix-tree"
+      },
+
+      // === More INSPECTING ===
+      {
+        cmd: "git stash branch <branch>",
+        cat: "stashing",
+        desc: "Create a new branch from a stash and apply it.",
+        flags: [],
+        example: "git stash branch feature/from-stash\ngit stash branch feature/from-stash stash@{2}"
+      },
+
+      // === More REMOTE ===
+      {
+        cmd: "git fetch --prune",
+        cat: "remote",
+        desc: "Fetch from remote and remove stale remote-tracking references.",
+        flags: [
+          { flag: "--prune", info: "Remove references to deleted remote branches" },
+          { flag: "--all", info: "Fetch from all remotes" }
+        ],
+        example: "git fetch --prune\ngit fetch --all --prune"
+      },
+
+      // === More UNDOING ===
+      {
+        cmd: "git clean -fd",
+        cat: "undoing",
+        desc: "Remove all untracked files and directories from the working tree.",
+        flags: [
+          { flag: "-f", info: "Force (required)" },
+          { flag: "-d", info: "Remove directories too" },
+          { flag: "-n", info: "Dry run first" }
+        ],
+        example: "git clean -n\ngit clean -fd"
+      },
+
+      // === More COMMITTING ===
+      {
+        cmd: "git commit --amend",
+        cat: "committing",
+        desc: "Modify the most recent commit (message and/or content).",
+        flags: [
+          { flag: "--no-edit", info: "Keep the existing commit message" },
+          { flag: "-m <msg>", info: "Replace the commit message" }
+        ],
+        example: 'git add forgotten-file.js\ngit commit --amend --no-edit\ngit commit --amend -m "Better commit message"'
+      },
+
+      // === More INSPECTING ===
+      {
+        cmd: "git log -S <string>",
+        cat: "inspecting",
+        desc: "Search commits that added or removed a specific string (pickaxe search).",
+        flags: [
+          { flag: "-S <string>", info: "Search for additions/removals of string" },
+          { flag: "-G <regex>", info: "Search for diffs matching regex" }
+        ],
+        example: 'git log -S "functionName" --oneline\ngit log -G "TODO|FIXME" --oneline'
+      },
+      {
+        cmd: "git diff --check",
+        cat: "inspecting",
+        desc: "Check for whitespace errors and conflict markers.",
+        flags: [
+          { flag: "--check", info: "Warn about whitespace issues and conflict markers" }
+        ],
+        example: "git diff --check\ngit diff --cached --check"
+      },
+
+      // === More SETUP ===
+      {
+        cmd: "git init --bare",
+        cat: "setup",
+        desc: "Create a bare repository (used as a remote/server repository).",
+        flags: [
+          { flag: "--bare", info: "No working directory, stores Git data directly" }
+        ],
+        example: "git init --bare my-project.git"
+      },
+
+      // === More BRANCHING ===
+      {
+        cmd: "git merge --no-ff <branch>",
+        cat: "branching",
+        desc: "Always create a merge commit, even for fast-forward merges.",
+        flags: [
+          { flag: "--no-ff", info: "Disable fast-forward; force merge commit" }
+        ],
+        example: "git merge --no-ff feature/login\ngit merge --no-ff --no-edit feature/login"
+      }
+    ];
+
+    const CATEGORIES = [
+      { key: 'setup', label: 'Setup', desc: 'Configuration and initialization' },
+      { key: 'branching', label: 'Branching', desc: 'Branches, merging, and rebasing' },
+      { key: 'staging', label: 'Staging', desc: 'Staging area and working directory' },
+      { key: 'committing', label: 'Committing', desc: 'Recording changes' },
+      { key: 'remote', label: 'Remote', desc: 'Remote repositories and collaboration' },
+      { key: 'stashing', label: 'Stashing', desc: 'Temporary change storage' },
+      { key: 'undoing', label: 'Undoing', desc: 'Reverting and recovering changes' },
+      { key: 'inspecting', label: 'Inspecting', desc: 'Viewing history and differences' },
+      { key: 'tags', label: 'Tags', desc: 'Tagging releases and milestones' }
+    ];
+
+    const WORKFLOWS = [
+      {
+        title: "Undo Last Commit (keep changes)",
+        icon: "&#x21A9;",
+        steps: [
+          { text: "Reset to the previous commit, keeping changes staged:", cmd: "git reset --soft HEAD~1" },
+          { text: "Or reset and unstage changes (keep in working directory):", cmd: "git reset --mixed HEAD~1" },
+          { text: "Edit your files as needed, then recommit:", cmd: 'git commit -m "New commit message"' }
+        ]
+      },
+      {
+        title: "Squash Last N Commits",
+        icon: "&#x25A0;",
+        steps: [
+          { text: "Start an interactive rebase for the last N commits:", cmd: "git rebase -i HEAD~N" },
+          { text: "In the editor, change 'pick' to 'squash' (or 's') for commits to combine.", cmd: "pick abc1234 First commit\nsquash def5678 Second commit\nsquash ghi9012 Third commit" },
+          { text: "Save and close. Edit the combined commit message when prompted.", cmd: "" },
+          { text: "Force push if already pushed to remote:", cmd: "git push --force-with-lease" }
+        ]
+      },
+      {
+        title: "Cherry-Pick a Commit from Another Branch",
+        icon: "&#x1F352;",
+        steps: [
+          { text: "Find the commit hash you want from the other branch:", cmd: "git log --oneline other-branch" },
+          { text: "Switch to your target branch:", cmd: "git switch main" },
+          { text: "Apply the commit:", cmd: "git cherry-pick abc1234" },
+          { text: "If there are conflicts, resolve them, then continue:", cmd: "git cherry-pick --continue" }
+        ]
+      },
+      {
+        title: "Rebase Feature Branch onto Main",
+        icon: "&#x21C5;",
+        steps: [
+          { text: "Switch to your feature branch:", cmd: "git switch feature/my-feature" },
+          { text: "Fetch the latest changes:", cmd: "git fetch origin" },
+          { text: "Rebase onto the updated main branch:", cmd: "git rebase origin/main" },
+          { text: "Resolve any conflicts, stage the fixes, and continue:", cmd: "git add .\ngit rebase --continue" },
+          { text: "Force push the rebased branch:", cmd: "git push --force-with-lease" }
+        ]
+      },
+      {
+        title: "Fix a Merge Conflict",
+        icon: "&#x26A0;",
+        steps: [
+          { text: "After a merge or rebase, check which files have conflicts:", cmd: "git status" },
+          { text: "Open each conflicted file and look for conflict markers:", cmd: "<<<<<<< HEAD\nyour changes\n=======\ntheir changes\n>>>>>>> branch-name" },
+          { text: "Edit the file to resolve the conflict (remove markers, keep desired code).", cmd: "" },
+          { text: "Stage the resolved files:", cmd: "git add resolved-file.js" },
+          { text: "Complete the merge or rebase:", cmd: "git merge --continue\n# or\ngit rebase --continue" }
+        ]
+      }
+    ];
+
+    // ========== STATE ==========
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let expandedCmds = new Set();
+    let expandedWorkflows = new Set();
+
+    // ========== DOM REFS ==========
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const cmdList = document.getElementById('cmdList');
+    const noResults = document.getElementById('noResults');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const workflowsSection = document.getElementById('workflowsSection');
+    const workflowList = document.getElementById('workflowList');
+    const scrollTopBtn = document.getElementById('scrollTop');
+    const flowDiagram = document.getElementById('flowDiagram');
+
+    // ========== TAB COUNTS ==========
+    document.getElementById('countAll').textContent = GIT_COMMANDS.length;
+    CATEGORIES.forEach(cat => {
+      const count = GIT_COMMANDS.filter(c => c.cat === cat.key).length;
+      const el = document.getElementById('count' + cat.key.charAt(0).toUpperCase() + cat.key.slice(1));
+      if (el) el.textContent = count;
+    });
+
+    // ========== EVENTS ==========
+    categoryTabs.addEventListener('click', e => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      categoryTabs.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeCategory = tab.dataset.cat;
+      render();
+    });
+
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      render();
+    });
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ========== COPY ==========
+    function copyCmd(text, btnId) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 1500);
+        }
+      });
+    }
+
+    function copyExample(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+
+    // ========== TOGGLE ==========
+    function toggleCmd(idx) {
+      if (expandedCmds.has(idx)) {
+        expandedCmds.delete(idx);
+      } else {
+        expandedCmds.add(idx);
+      }
+      render();
+    }
+
+    function toggleWorkflow(idx) {
+      if (expandedWorkflows.has(idx)) {
+        expandedWorkflows.delete(idx);
+      } else {
+        expandedWorkflows.add(idx);
+      }
+      renderWorkflows();
+    }
+
+    // ========== FILTERING ==========
+    function getFilteredCmds() {
+      return GIT_COMMANDS.map((c, i) => ({ ...c, _idx: i })).filter(c => {
+        if (activeCategory !== 'all' && c.cat !== activeCategory) return false;
+        if (searchQuery) {
+          const q = searchQuery;
+          const cmdL = c.cmd.toLowerCase();
+          const descL = c.desc.toLowerCase();
+          const flagsStr = c.flags.map(f => f.flag + ' ' + f.info).join(' ').toLowerCase();
+          const exampleL = c.example.toLowerCase();
+          if (!cmdL.includes(q) && !descL.includes(q) && !flagsStr.includes(q) && !exampleL.includes(q)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    // ========== RENDER ==========
+    function render() {
+      const filtered = getFilteredCmds();
+      searchCount.textContent = filtered.length + ' of ' + GIT_COMMANDS.length + ' commands';
+
+      if (filtered.length === 0) {
+        cmdList.innerHTML = '';
+        noResults.style.display = 'block';
+        workflowsSection.style.display = 'none';
+        return;
+      }
+      noResults.style.display = 'none';
+      workflowsSection.style.display = searchQuery ? 'none' : 'block';
+
+      // Group by category
+      const groups = {};
+      filtered.forEach(c => {
+        if (!groups[c.cat]) groups[c.cat] = [];
+        groups[c.cat].push(c);
+      });
+
+      let html = '';
+      const catOrder = CATEGORIES.map(c => c.key);
+      catOrder.forEach(catKey => {
+        if (!groups[catKey]) return;
+        const catInfo = CATEGORIES.find(c => c.key === catKey);
+        html += `<div class="category-section cat-${catKey}">`;
+        html += `<div class="category-header">`;
+        html += `<span class="category-badge">${escHtml(catInfo.label)}</span>`;
+        html += `<h2>${escHtml(catInfo.desc)}</h2>`;
+        html += `</div>`;
+
+        groups[catKey].forEach(c => {
+          const expanded = expandedCmds.has(c._idx);
+          const copyId = 'copy-' + c._idx;
+          html += `<div class="cmd-card cat-${c.cat}${expanded ? ' expanded' : ''}" id="cmd-${c._idx}">`;
+          html += `<div class="cmd-card-header">`;
+          html += `<span class="cmd-syntax" onclick="toggleCmd(${c._idx})">${escHtml(c.cmd)}</span>`;
+          html += `<span class="cmd-desc" onclick="toggleCmd(${c._idx})">${escHtml(c.desc)}</span>`;
+          html += `<span class="cmd-actions">`;
+          html += `<button class="copy-btn" id="${copyId}" onclick="event.stopPropagation(); copyCmd('${escAttr(c.cmd)}', '${copyId}')">Copy</button>`;
+          html += `</span>`;
+          html += `<span class="cmd-chevron" onclick="toggleCmd(${c._idx})">&#9654;</span>`;
+          html += `</div>`;
+
+          html += `<div class="cmd-detail">`;
+          html += `<div class="detail-section"><h4>Description</h4><p>${escHtml(c.desc)}</p></div>`;
+
+          if (c.flags && c.flags.length) {
+            html += `<div class="detail-section"><h4>Common Flags</h4><ul>`;
+            c.flags.forEach(f => {
+              html += `<li class="flag-item"><code>${escHtml(f.flag)}</code> &mdash; ${escHtml(f.info)}</li>`;
+            });
+            html += `</ul></div>`;
+          }
+
+          if (c.example) {
+            const exId = 'ex-copy-' + c._idx;
+            html += `<div class="detail-section"><h4>Example</h4>`;
+            html += `<div class="example-block"><button class="example-copy" id="${exId}" onclick="copyExample(\`${escTemplate(c.example)}\`, this)">Copy</button>${escHtml(c.example)}</div>`;
+            html += `</div>`;
+          }
+
+          html += `</div></div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      cmdList.innerHTML = html;
+    }
+
+    // ========== RENDER WORKFLOWS ==========
+    function renderWorkflows() {
+      let html = '';
+      WORKFLOWS.forEach((w, i) => {
+        const expanded = expandedWorkflows.has(i);
+        html += `<div class="workflow-card${expanded ? ' expanded' : ''}">`;
+        html += `<div class="workflow-header" onclick="toggleWorkflow(${i})">`;
+        html += `<span class="workflow-icon">${w.icon}</span>`;
+        html += `<span class="workflow-title">${escHtml(w.title)}</span>`;
+        html += `<span class="workflow-chevron">&#9654;</span>`;
+        html += `</div>`;
+        html += `<div class="workflow-detail">`;
+        html += `<div class="workflow-steps">`;
+        w.steps.forEach((s, j) => {
+          html += `<div class="workflow-step">`;
+          html += `<span class="step-num">${j + 1}</span>`;
+          html += `<div class="step-content">`;
+          html += `<p>${escHtml(s.text)}</p>`;
+          if (s.cmd) {
+            html += `<code>${escHtml(s.cmd)}</code>`;
+          }
+          html += `</div></div>`;
+        });
+        html += `</div></div></div>`;
+      });
+      workflowList.innerHTML = html;
+    }
+
+    // ========== GIT FLOW DIAGRAM ==========
+    function renderFlowDiagram() {
+      flowDiagram.innerHTML =
+        '<span class="flow-header">                        Git Areas &amp; Data Flow</span>\n' +
+        '\n' +
+        '<span class="flow-area"> Working Directory </span>    <span class="flow-area"> Staging Area (Index) </span>    <span class="flow-area"> Local Repository </span>    <span class="flow-area"> Remote Repository </span>\n' +
+        '        |                          |                          |                          |\n' +
+        '        |   <span class="flow-cmd">git add</span>               |                          |                          |\n' +
+        '        |------------------------&gt; |                          |                          |\n' +
+        '        |                          |   <span class="flow-cmd">git commit</span>            |                          |\n' +
+        '        |                          |------------------------&gt; |                          |\n' +
+        '        |                          |                          |   <span class="flow-cmd">git push</span>              |\n' +
+        '        |                          |                          |------------------------&gt; |\n' +
+        '        |                          |                          |                          |\n' +
+        '        |                          |                          |   <span class="flow-cmd">git fetch</span>             |\n' +
+        '        |                          |                          | &lt;------------------------|\n' +
+        '        |                          |                          |                          |\n' +
+        '        |                     <span class="flow-cmd">git pull</span> (fetch + merge)                              |\n' +
+        '        | &lt;---------------------------------------------------------------|\n' +
+        '        |                          |                          |                          |\n' +
+        '        |   <span class="flow-cmd">git restore</span>           |                          |                          |\n' +
+        '        | &lt;------------------------ |                          |                          |\n' +
+        '        |                          |   <span class="flow-cmd">git reset</span>             |                          |\n' +
+        '        |                          | &lt;------------------------ |                          |\n' +
+        '        |                          |                          |                          |\n' +
+        '        |   <span class="flow-cmd">git stash</span>             |                          |                          |\n' +
+        '        |------------&gt; <span class="flow-area">[Stash Stack]</span>             |                          |\n' +
+        '        |   <span class="flow-cmd">git stash pop</span>         |                          |                          |\n' +
+        '        | &lt;------------ <span class="flow-area">[Stash Stack]</span>             |                          |\n' +
+        '        |                          |                          |                          |';
+    }
+
+    // ========== HELPERS ==========
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function escAttr(str) {
+      return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function escTemplate(str) {
+      return str.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+    }
+
+    // Keyboard shortcut: focus search on any keypress
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    // ========== INITIAL RENDER ==========
+    render();
+    renderWorkflows();
+    renderFlowDiagram();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
