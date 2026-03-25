@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Grid Generator - Visual Grid Layout Builder | ZeroKit.dev</title>
+  <meta name="description" content="Visual CSS Grid layout builder. Define rows, columns, gaps, and template areas with a live preview. Generate and copy production-ready CSS Grid code instantly.">
+  <link rel="canonical" href="https://zerokit.dev/tools/cssgrid.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .grid-layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+    .controls-scroll { padding: 16px; display: flex; flex-direction: column; gap: 16px; max-height: 720px; overflow-y: auto; }
+    .controls-scroll::-webkit-scrollbar { width: 6px; }
+    .controls-scroll::-webkit-scrollbar-track { background: transparent; }
+    .controls-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .control-section h3 {
+      font-size: 0.75rem; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;
+    }
+
+    .control-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .control-group label {
+      font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+    }
+    .control-group select,
+    .control-group input[type="text"],
+    .control-group input[type="number"] {
+      width: 100%; background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.8rem; outline: none;
+    }
+    .control-group select:focus,
+    .control-group input:focus { border-color: var(--accent); }
+
+    .control-row { display: flex; gap: 8px; align-items: flex-end; }
+    .control-row .control-group { flex: 1; margin-bottom: 0; }
+
+    .preview-area {
+      background: var(--surface-2); border-radius: var(--radius);
+      min-height: 300px; padding: 16px; position: relative;
+    }
+
+    .grid-container {
+      min-height: 260px; border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 0; transition: all 0.2s; display: grid;
+    }
+
+    .grid-cell {
+      padding: 12px 8px; border-radius: 6px; font-family: var(--mono); font-size: 0.75rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; user-select: none;
+      text-align: center; display: flex; align-items: center; justify-content: center;
+      min-height: 48px; position: relative; border: 2px solid transparent;
+    }
+    .grid-cell:hover { filter: brightness(1.15); }
+    .grid-cell.selected { border-color: #fff; }
+    .grid-cell.span-source { border-color: #fff; border-style: dashed; }
+
+    .track-list { display: flex; flex-direction: column; gap: 4px; }
+    .track-entry {
+      display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+      background: var(--surface-2); border-radius: 4px; font-size: 0.75rem;
+    }
+    .track-entry input {
+      flex: 1; background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text); padding: 4px 8px; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.75rem; outline: none;
+    }
+    .track-entry input:focus { border-color: var(--accent); }
+    .track-entry .track-label {
+      color: var(--text-muted); font-family: var(--mono); min-width: 24px;
+    }
+    .track-entry .remove-track {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 0.85rem; padding: 2px 4px; border-radius: 3px; transition: all 0.15s;
+    }
+    .track-entry .remove-track:hover { color: var(--error); background: rgba(239,68,68,0.1); }
+
+    .item-actions { display: flex; gap: 6px; margin-bottom: 10px; }
+    .item-actions button {
+      flex: 1; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: 0.75rem;
+      cursor: pointer; font-family: var(--font); transition: all 0.15s;
+    }
+    .item-actions button:hover { border-color: var(--accent); color: var(--accent); }
+    .item-actions button.danger:hover { border-color: var(--error); color: var(--error); }
+
+    .presets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .preset-btn {
+      padding: 8px; border-radius: 4px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text); font-size: 0.7rem;
+      cursor: pointer; font-family: var(--font); transition: all 0.15s;
+      text-align: center;
+    }
+    .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .preset-btn.active { border-color: var(--accent); background: rgba(99,102,241,0.1); color: var(--accent); }
+
+    .css-output-area { margin-top: 16px; }
+    .css-output-area .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+    }
+    .css-code {
+      padding: 16px; font-family: var(--mono); font-size: 0.8rem;
+      line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--text);
+    }
+    .css-code::-webkit-scrollbar { height: 4px; }
+    .css-code::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Syntax highlighting */
+    .css-code .css-selector { color: #c084fc; }
+    .css-code .css-prop { color: #67e8f9; }
+    .css-code .css-value { color: #fbbf24; }
+    .css-code .css-brace { color: var(--text-muted); }
+    .css-code .css-comment { color: #4b5563; font-style: italic; }
+
+    .divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    .copy-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--accent); color: white; padding: 10px 24px;
+      border-radius: var(--radius); font-size: 0.85rem; font-weight: 600;
+      opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 100;
+    }
+    .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Cell span controls */
+    .span-controls {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 10px; background: var(--surface-2); border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .span-controls .span-row {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .span-controls label {
+      font-size: 0.72rem; font-weight: 600; color: var(--text-muted); min-width: 70px;
+    }
+    .span-controls input[type="number"] {
+      width: 56px; background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text); padding: 4px 6px; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.75rem; outline: none; text-align: center;
+    }
+    .span-controls input[type="number"]:focus { border-color: var(--accent); }
+
+    /* Template Areas */
+    .areas-grid {
+      display: grid; gap: 2px; margin-top: 8px;
+    }
+    .areas-grid input {
+      background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text); padding: 4px 6px; border-radius: 3px;
+      font-family: var(--mono); font-size: 0.7rem; outline: none;
+      text-align: center; width: 100%;
+    }
+    .areas-grid input:focus { border-color: var(--accent); }
+
+    .area-toggle {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .area-toggle input[type="checkbox"] { accent-color: var(--accent); }
+    .area-toggle label { font-size: 0.75rem; color: var(--text-muted); cursor: pointer; }
+
+    @media (max-width: 900px) {
+      .grid-layout { grid-template-columns: 1fr; }
+      .controls-scroll { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Grid Generator</h1>
+    <p class="description">Visual grid layout builder. Define rows, columns, gaps, and template areas with a live preview, then copy the generated CSS.</p>
+
+    <div class="grid-layout">
+      <!-- Left: Controls -->
+      <div class="tool-panel">
+        <div class="panel-header">Controls</div>
+        <div class="controls-scroll">
+
+          <!-- Presets -->
+          <div class="control-section">
+            <h3>Presets</h3>
+            <div class="presets-grid">
+              <button class="preset-btn" onclick="applyPreset('holygrail')">Holy Grail</button>
+              <button class="preset-btn" onclick="applyPreset('cards')">Card Grid</button>
+              <button class="preset-btn" onclick="applyPreset('dashboard')">Dashboard</button>
+              <button class="preset-btn" onclick="applyPreset('12col')">12-Column</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Columns -->
+          <div class="control-section">
+            <h3>Columns</h3>
+            <div class="item-actions">
+              <button onclick="addColumn()">+ Add Column</button>
+              <button class="danger" onclick="removeColumn()">- Remove</button>
+            </div>
+            <div class="track-list" id="columnList"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Rows -->
+          <div class="control-section">
+            <h3>Rows</h3>
+            <div class="item-actions">
+              <button onclick="addRow()">+ Add Row</button>
+              <button class="danger" onclick="removeRow()">- Remove</button>
+            </div>
+            <div class="track-list" id="rowList"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Gap -->
+          <div class="control-section">
+            <h3>Gap</h3>
+            <div class="control-row">
+              <div class="control-group">
+                <label>row-gap</label>
+                <input type="text" id="rowGap" value="10px" oninput="updatePreview()">
+              </div>
+              <div class="control-group">
+                <label>column-gap</label>
+                <input type="text" id="colGap" value="10px" oninput="updatePreview()">
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Alignment -->
+          <div class="control-section">
+            <h3>Alignment</h3>
+            <div class="control-group">
+              <label>justify-items</label>
+              <select id="justifyItems" onchange="updatePreview()">
+                <option value="stretch">stretch</option>
+                <option value="start">start</option>
+                <option value="end">end</option>
+                <option value="center">center</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>align-items</label>
+              <select id="alignItems" onchange="updatePreview()">
+                <option value="stretch">stretch</option>
+                <option value="start">start</option>
+                <option value="end">end</option>
+                <option value="center">center</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Selected Cell -->
+          <div class="control-section" id="cellControls" style="display:none;">
+            <h3>Selected Cell: <span id="selectedCellLabel"></span></h3>
+            <div class="span-controls">
+              <div class="span-row">
+                <label>col-start</label>
+                <input type="number" id="cellColStart" min="1" value="1" onchange="updateCellSpan()">
+                <label>col-span</label>
+                <input type="number" id="cellColSpan" min="1" value="1" onchange="updateCellSpan()">
+              </div>
+              <div class="span-row">
+                <label>row-start</label>
+                <input type="number" id="cellRowStart" min="1" value="1" onchange="updateCellSpan()">
+                <label>row-span</label>
+                <input type="number" id="cellRowSpan" min="1" value="1" onchange="updateCellSpan()">
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Template Areas -->
+          <div class="control-section">
+            <h3>Template Areas</h3>
+            <div class="area-toggle">
+              <input type="checkbox" id="useAreas" onchange="toggleAreas()">
+              <label for="useAreas">Enable grid-template-areas</label>
+            </div>
+            <div id="areasEditor" style="display:none;">
+              <p style="font-size:0.7rem;color:var(--text-muted);margin-bottom:6px;">Name each cell. Use the same name to merge areas. Use a dot (.) for empty cells.</p>
+              <div class="areas-grid" id="areasGrid"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right: Preview + CSS -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="tool-panel">
+          <div class="panel-header">Preview</div>
+          <div class="preview-area">
+            <div class="grid-container" id="gridContainer"></div>
+          </div>
+        </div>
+
+        <div class="tool-panel css-output-area">
+          <div class="panel-header">
+            <span>Generated CSS</span>
+            <button class="btn" onclick="copyCSS()">Copy CSS</button>
+          </div>
+          <div class="css-code" id="cssOutput"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copy-toast" id="toast">Copied to clipboard!</div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    // --- State ---
+    const CELL_COLORS = [
+      '#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444',
+      '#8b5cf6', '#06b6d4', '#22c55e', '#f97316', '#64748b',
+      '#a855f7', '#0ea5e9', '#84cc16', '#e11d48', '#0d9488'
+    ];
+
+    let columns = ['1fr', '1fr', '1fr'];
+    let rows = ['1fr', '1fr', '1fr'];
+    let cells = [];
+    let selectedCellIdx = null;
+    let useTemplateAreas = false;
+    let areaNames = [];
+
+    // --- Initialize ---
+    function init() {
+      rebuildCells();
+      renderColumnList();
+      renderRowList();
+      updatePreview();
+    }
+
+    function rebuildCells() {
+      const totalCells = columns.length * rows.length;
+      // Preserve existing cells, add new ones or trim
+      const newCells = [];
+      for (let r = 0; r < rows.length; r++) {
+        for (let c = 0; c < columns.length; c++) {
+          const idx = r * columns.length + c;
+          // Check if an existing cell covers this position
+          const existing = cells[idx];
+          if (existing && existing.rowStart === r + 1 && existing.colStart === c + 1) {
+            newCells.push(existing);
+          } else {
+            newCells.push({
+              rowStart: r + 1,
+              colStart: c + 1,
+              rowSpan: 1,
+              colSpan: 1,
+              color: CELL_COLORS[idx % CELL_COLORS.length],
+              label: '' + (idx + 1)
+            });
+          }
+        }
+      }
+      cells = newCells;
+      // Relabel
+      cells.forEach((cell, i) => { cell.label = '' + (i + 1); });
+      selectedCellIdx = null;
+      document.getElementById('cellControls').style.display = 'none';
+      // Rebuild area names
+      rebuildAreaNames();
+    }
+
+    function rebuildAreaNames() {
+      areaNames = [];
+      for (let r = 0; r < rows.length; r++) {
+        const row = [];
+        for (let c = 0; c < columns.length; c++) {
+          row.push('.');
+        }
+        areaNames.push(row);
+      }
+    }
+
+    // --- Columns ---
+    function addColumn() {
+      columns.push('1fr');
+      rebuildCells();
+      renderColumnList();
+      updatePreview();
+    }
+
+    function removeColumn() {
+      if (columns.length <= 1) return;
+      columns.pop();
+      rebuildCells();
+      renderColumnList();
+      updatePreview();
+    }
+
+    function updateColumnValue(idx, val) {
+      columns[idx] = val || '1fr';
+      updatePreview();
+    }
+
+    function removeColumnAt(idx) {
+      if (columns.length <= 1) return;
+      columns.splice(idx, 1);
+      rebuildCells();
+      renderColumnList();
+      updatePreview();
+    }
+
+    function renderColumnList() {
+      const list = document.getElementById('columnList');
+      list.innerHTML = '';
+      columns.forEach((col, i) => {
+        const entry = document.createElement('div');
+        entry.className = 'track-entry';
+        entry.innerHTML = `<span class="track-label">C${i + 1}</span>` +
+          `<input type="text" value="${escapeAttr(col)}" onchange="updateColumnValue(${i}, this.value)" onfocus="this.select()">` +
+          `<button class="remove-track" onclick="removeColumnAt(${i})" title="Remove column">&times;</button>`;
+        list.appendChild(entry);
+      });
+    }
+
+    // --- Rows ---
+    function addRow() {
+      rows.push('1fr');
+      rebuildCells();
+      renderRowList();
+      updatePreview();
+    }
+
+    function removeRow() {
+      if (rows.length <= 1) return;
+      rows.pop();
+      rebuildCells();
+      renderRowList();
+      updatePreview();
+    }
+
+    function updateRowValue(idx, val) {
+      rows[idx] = val || '1fr';
+      updatePreview();
+    }
+
+    function removeRowAt(idx) {
+      if (rows.length <= 1) return;
+      rows.splice(idx, 1);
+      rebuildCells();
+      renderRowList();
+      updatePreview();
+    }
+
+    function renderRowList() {
+      const list = document.getElementById('rowList');
+      list.innerHTML = '';
+      rows.forEach((row, i) => {
+        const entry = document.createElement('div');
+        entry.className = 'track-entry';
+        entry.innerHTML = `<span class="track-label">R${i + 1}</span>` +
+          `<input type="text" value="${escapeAttr(row)}" onchange="updateRowValue(${i}, this.value)" onfocus="this.select()">` +
+          `<button class="remove-track" onclick="removeRowAt(${i})" title="Remove row">&times;</button>`;
+        list.appendChild(entry);
+      });
+    }
+
+    // --- Cell Selection & Span ---
+    function selectCell(idx) {
+      selectedCellIdx = idx;
+      const cell = cells[idx];
+      if (!cell) return;
+
+      document.getElementById('cellColStart').value = cell.colStart;
+      document.getElementById('cellColSpan').value = cell.colSpan;
+      document.getElementById('cellRowStart').value = cell.rowStart;
+      document.getElementById('cellRowSpan').value = cell.rowSpan;
+      document.getElementById('selectedCellLabel').textContent = 'Cell ' + cell.label;
+      document.getElementById('cellControls').style.display = '';
+
+      renderGrid();
+    }
+
+    function updateCellSpan() {
+      if (selectedCellIdx === null) return;
+      const cell = cells[selectedCellIdx];
+      if (!cell) return;
+
+      const colStart = Math.max(1, parseInt(document.getElementById('cellColStart').value) || 1);
+      const colSpan = Math.max(1, parseInt(document.getElementById('cellColSpan').value) || 1);
+      const rowStart = Math.max(1, parseInt(document.getElementById('cellRowStart').value) || 1);
+      const rowSpan = Math.max(1, parseInt(document.getElementById('cellRowSpan').value) || 1);
+
+      // Clamp to grid boundaries
+      cell.colStart = Math.min(colStart, columns.length);
+      cell.colSpan = Math.min(colSpan, columns.length - cell.colStart + 1);
+      cell.rowStart = Math.min(rowStart, rows.length);
+      cell.rowSpan = Math.min(rowSpan, rows.length - cell.rowStart + 1);
+
+      // Update inputs to clamped values
+      document.getElementById('cellColStart').value = cell.colStart;
+      document.getElementById('cellColSpan').value = cell.colSpan;
+      document.getElementById('cellRowStart').value = cell.rowStart;
+      document.getElementById('cellRowSpan').value = cell.rowSpan;
+
+      updatePreview();
+    }
+
+    // --- Template Areas ---
+    function toggleAreas() {
+      useTemplateAreas = document.getElementById('useAreas').checked;
+      document.getElementById('areasEditor').style.display = useTemplateAreas ? '' : 'none';
+      if (useTemplateAreas) renderAreasGrid();
+      updatePreview();
+    }
+
+    function renderAreasGrid() {
+      const grid = document.getElementById('areasGrid');
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${columns.length}, 1fr)`;
+      // Ensure areaNames has right dimensions
+      while (areaNames.length < rows.length) {
+        areaNames.push(new Array(columns.length).fill('.'));
+      }
+      areaNames.length = rows.length;
+      areaNames.forEach(row => {
+        while (row.length < columns.length) row.push('.');
+        row.length = columns.length;
+      });
+
+      for (let r = 0; r < rows.length; r++) {
+        for (let c = 0; c < columns.length; c++) {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = areaNames[r][c];
+          input.dataset.row = r;
+          input.dataset.col = c;
+          input.oninput = function() {
+            areaNames[this.dataset.row][this.dataset.col] = this.value.trim() || '.';
+            updatePreview();
+          };
+          grid.appendChild(input);
+        }
+      }
+    }
+
+    // --- Rendering ---
+    function renderGrid() {
+      const container = document.getElementById('gridContainer');
+      container.innerHTML = '';
+      container.style.gridTemplateColumns = columns.join(' ');
+      container.style.gridTemplateRows = rows.join(' ');
+      container.style.rowGap = document.getElementById('rowGap').value;
+      container.style.columnGap = document.getElementById('colGap').value;
+      container.style.justifyItems = document.getElementById('justifyItems').value;
+      container.style.alignItems = document.getElementById('alignItems').value;
+
+      if (useTemplateAreas) {
+        const areas = areaNames.map(row => '"' + row.join(' ') + '"').join(' ');
+        container.style.gridTemplateAreas = areas;
+      } else {
+        container.style.gridTemplateAreas = '';
+      }
+
+      cells.forEach((cell, idx) => {
+        const el = document.createElement('div');
+        el.className = 'grid-cell' + (idx === selectedCellIdx ? ' selected' : '');
+        el.textContent = cell.label;
+        el.style.background = cell.color;
+        el.style.color = '#fff';
+
+        if (useTemplateAreas) {
+          // In areas mode, assign grid-area by the area name from the cell's position
+          const areaName = areaNames[cell.rowStart - 1] && areaNames[cell.rowStart - 1][cell.colStart - 1];
+          if (areaName && areaName !== '.') {
+            el.style.gridArea = areaName;
+          } else {
+            el.style.gridRow = cell.rowStart + ' / span ' + cell.rowSpan;
+            el.style.gridColumn = cell.colStart + ' / span ' + cell.colSpan;
+          }
+        } else {
+          el.style.gridRow = cell.rowStart + ' / span ' + cell.rowSpan;
+          el.style.gridColumn = cell.colStart + ' / span ' + cell.colSpan;
+        }
+
+        el.onclick = () => selectCell(idx);
+        container.appendChild(el);
+      });
+    }
+
+    function updatePreview() {
+      renderGrid();
+      if (useTemplateAreas) renderAreasGrid();
+      generateCSS();
+    }
+
+    // --- CSS Generation ---
+    function escapeHTML(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/"/g, '&quot;').replace(/&/g, '&amp;');
+    }
+
+    function highlight(selector, props) {
+      let html = `<span class="css-selector">${escapeHTML(selector)}</span> <span class="css-brace">{</span>\n`;
+      for (const [prop, val] of Object.entries(props)) {
+        html += `  <span class="css-prop">${escapeHTML(prop)}</span>: <span class="css-value">${escapeHTML(String(val))}</span>;\n`;
+      }
+      html += `<span class="css-brace">}</span>`;
+      return html;
+    }
+
+    function getContainerProps() {
+      const props = {
+        'display': 'grid',
+        'grid-template-columns': columns.join(' '),
+        'grid-template-rows': rows.join(' ')
+      };
+
+      if (useTemplateAreas) {
+        const areas = areaNames.map(row => '"' + row.join(' ') + '"').join('\n    ');
+        props['grid-template-areas'] = areas;
+      }
+
+      const rowGap = document.getElementById('rowGap').value;
+      const colGap = document.getElementById('colGap').value;
+      if (rowGap === colGap) {
+        props['gap'] = rowGap;
+      } else {
+        props['row-gap'] = rowGap;
+        props['column-gap'] = colGap;
+      }
+
+      const justifyItems = document.getElementById('justifyItems').value;
+      if (justifyItems !== 'stretch') props['justify-items'] = justifyItems;
+
+      const alignItems = document.getElementById('alignItems').value;
+      if (alignItems !== 'stretch') props['align-items'] = alignItems;
+
+      return props;
+    }
+
+    function getCellProps(cell) {
+      const props = {};
+      if (useTemplateAreas) {
+        const areaName = areaNames[cell.rowStart - 1] && areaNames[cell.rowStart - 1][cell.colStart - 1];
+        if (areaName && areaName !== '.') {
+          props['grid-area'] = areaName;
+          return props;
+        }
+      }
+      if (cell.colSpan > 1 || cell.colStart !== parseInt(cell.label) || cell.colStart > columns.length) {
+        props['grid-column'] = cell.colStart + ' / span ' + cell.colSpan;
+      }
+      if (cell.rowSpan > 1 || cell.rowStart !== Math.ceil(parseInt(cell.label) / columns.length) || cell.rowStart > rows.length) {
+        props['grid-row'] = cell.rowStart + ' / span ' + cell.rowSpan;
+      }
+      return props;
+    }
+
+    function hasNonDefaultPlacement(cell, idx) {
+      const expectedRow = Math.floor(idx / columns.length) + 1;
+      const expectedCol = (idx % columns.length) + 1;
+      return cell.colSpan > 1 || cell.rowSpan > 1 ||
+        cell.colStart !== expectedCol || cell.rowStart !== expectedRow;
+    }
+
+    function generateCSS() {
+      const containerProps = getContainerProps();
+      let html = `<span class="css-comment">/* Grid Container */</span>\n`;
+      html += highlight('.grid-container', containerProps);
+
+      // Show cell rules for cells with non-default placement
+      const customCells = cells.filter((cell, idx) => {
+        if (useTemplateAreas) {
+          const areaName = areaNames[cell.rowStart - 1] && areaNames[cell.rowStart - 1][cell.colStart - 1];
+          return areaName && areaName !== '.';
+        }
+        return hasNonDefaultPlacement(cell, idx);
+      });
+
+      if (customCells.length > 0) {
+        html += `\n\n<span class="css-comment">/* Grid Items */</span>`;
+        customCells.forEach(cell => {
+          const props = getCellProps(cell);
+          if (Object.keys(props).length > 0) {
+            html += `\n` + highlight(`.item-${cell.label}`, props);
+          }
+        });
+      }
+
+      document.getElementById('cssOutput').innerHTML = html;
+    }
+
+    function getPlainCSS() {
+      const containerProps = getContainerProps();
+      let css = `/* Grid Container */\n.grid-container {\n`;
+      for (const [prop, val] of Object.entries(containerProps)) {
+        if (prop === 'grid-template-areas') {
+          const areaLines = areaNames.map(row => '"' + row.join(' ') + '"');
+          css += `  grid-template-areas:\n`;
+          areaLines.forEach((line, i) => {
+            css += `    ${line}${i < areaLines.length - 1 ? '' : ';'}\n`;
+          });
+        } else {
+          css += `  ${prop}: ${val};\n`;
+        }
+      }
+      css += `}`;
+
+      const customCells = cells.filter((cell, idx) => {
+        if (useTemplateAreas) {
+          const areaName = areaNames[cell.rowStart - 1] && areaNames[cell.rowStart - 1][cell.colStart - 1];
+          return areaName && areaName !== '.';
+        }
+        return hasNonDefaultPlacement(cell, idx);
+      });
+
+      if (customCells.length > 0) {
+        css += `\n\n/* Grid Items */`;
+        customCells.forEach(cell => {
+          const props = getCellProps(cell);
+          if (Object.keys(props).length > 0) {
+            css += `\n.item-${cell.label} {\n`;
+            for (const [prop, val] of Object.entries(props)) {
+              css += `  ${prop}: ${val};\n`;
+            }
+            css += `}`;
+          }
+        });
+      }
+
+      return css;
+    }
+
+    function copyCSS() {
+      navigator.clipboard.writeText(getPlainCSS()).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 1500);
+      });
+    }
+
+    // --- Presets ---
+    function applyPreset(name) {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Reset
+      selectedCellIdx = null;
+      document.getElementById('cellControls').style.display = 'none';
+      document.getElementById('rowGap').value = '10px';
+      document.getElementById('colGap').value = '10px';
+      document.getElementById('justifyItems').value = 'stretch';
+      document.getElementById('alignItems').value = 'stretch';
+
+      switch (name) {
+        case 'holygrail':
+          columns = ['200px', '1fr', '200px'];
+          rows = ['auto', '1fr', 'auto'];
+          useTemplateAreas = true;
+          document.getElementById('useAreas').checked = true;
+          document.getElementById('areasEditor').style.display = '';
+          areaNames = [
+            ['header', 'header', 'header'],
+            ['sidebar', 'main', 'aside'],
+            ['footer', 'footer', 'footer']
+          ];
+          rebuildCellsForPreset();
+          // Assign cells to areas
+          cells = [
+            { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 3, color: CELL_COLORS[0], label: '1' },
+            { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 1, color: CELL_COLORS[1], label: '2' },
+            { rowStart: 2, colStart: 2, rowSpan: 1, colSpan: 1, color: CELL_COLORS[2], label: '3' },
+            { rowStart: 2, colStart: 3, rowSpan: 1, colSpan: 1, color: CELL_COLORS[3], label: '4' },
+            { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 3, color: CELL_COLORS[4], label: '5' }
+          ];
+          break;
+
+        case 'cards':
+          columns = ['repeat(auto-fill, minmax(200px, 1fr))'];
+          rows = ['auto'];
+          useTemplateAreas = false;
+          document.getElementById('useAreas').checked = false;
+          document.getElementById('areasEditor').style.display = 'none';
+          document.getElementById('colGap').value = '16px';
+          document.getElementById('rowGap').value = '16px';
+          rebuildAreaNames();
+          cells = [];
+          for (let i = 0; i < 6; i++) {
+            cells.push({
+              rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 1,
+              color: CELL_COLORS[i % CELL_COLORS.length], label: '' + (i + 1)
+            });
+          }
+          break;
+
+        case 'dashboard':
+          columns = ['1fr', '1fr', '1fr', '1fr'];
+          rows = ['auto', '1fr', '1fr'];
+          useTemplateAreas = true;
+          document.getElementById('useAreas').checked = true;
+          document.getElementById('areasEditor').style.display = '';
+          areaNames = [
+            ['header', 'header', 'header', 'header'],
+            ['nav', 'main', 'main', 'aside'],
+            ['nav', 'main', 'main', 'aside']
+          ];
+          document.getElementById('colGap').value = '12px';
+          document.getElementById('rowGap').value = '12px';
+          rebuildCellsForPreset();
+          cells = [
+            { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 4, color: CELL_COLORS[0], label: '1' },
+            { rowStart: 2, colStart: 1, rowSpan: 2, colSpan: 1, color: CELL_COLORS[1], label: '2' },
+            { rowStart: 2, colStart: 2, rowSpan: 2, colSpan: 2, color: CELL_COLORS[2], label: '3' },
+            { rowStart: 2, colStart: 4, rowSpan: 2, colSpan: 1, color: CELL_COLORS[3], label: '4' }
+          ];
+          break;
+
+        case '12col':
+          columns = ['1fr', '1fr', '1fr', '1fr', '1fr', '1fr', '1fr', '1fr', '1fr', '1fr', '1fr', '1fr'];
+          rows = ['auto', 'auto', 'auto'];
+          useTemplateAreas = false;
+          document.getElementById('useAreas').checked = false;
+          document.getElementById('areasEditor').style.display = 'none';
+          document.getElementById('colGap').value = '8px';
+          document.getElementById('rowGap').value = '8px';
+          rebuildAreaNames();
+          cells = [
+            { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 12, color: CELL_COLORS[0], label: '1' },
+            { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 3, color: CELL_COLORS[1], label: '2' },
+            { rowStart: 2, colStart: 4, rowSpan: 1, colSpan: 6, color: CELL_COLORS[2], label: '3' },
+            { rowStart: 2, colStart: 10, rowSpan: 1, colSpan: 3, color: CELL_COLORS[3], label: '4' },
+            { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 4, color: CELL_COLORS[4], label: '5' },
+            { rowStart: 3, colStart: 5, rowSpan: 1, colSpan: 4, color: CELL_COLORS[5], label: '6' },
+            { rowStart: 3, colStart: 9, rowSpan: 1, colSpan: 4, color: CELL_COLORS[6], label: '7' }
+          ];
+          break;
+      }
+
+      renderColumnList();
+      renderRowList();
+      updatePreview();
+    }
+
+    function rebuildCellsForPreset() {
+      // Used by presets that set cells manually after this call
+      rebuildAreaNames();
+      // areaNames is set before this in presets that use areas
+    }
+
+    // --- Init ---
+    init();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

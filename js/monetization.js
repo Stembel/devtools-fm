@@ -149,6 +149,20 @@
       { id: 'dns-lookup', name: 'DNS Lookup', icon: 'DNS' },
       { id: 'ssl-checker', name: 'SSL Checker', icon: 'SSL' },
       { id: 'http-headers', name: 'HTTP Headers', icon: 'HDR' },
+      { id: 'whois', name: 'WHOIS Lookup', icon: 'WH' },
+      { id: 'redirect-checker', name: 'Redirect Checker', icon: '3xx' },
+      { id: 'subnet', name: 'Subnet Calculator', icon: 'IP4' },
+      { id: 'apitester', name: 'API Tester', icon: 'API' },
+      { id: 'status-checker', name: 'Status Checker', icon: 'UP?' },
+      { id: 'email-validate', name: 'Email Validator', icon: '@' },
+      { id: 'tech-detect', name: 'Tech Detector', icon: 'TEC' },
+      { id: 'jsonschema', name: 'JSON Schema', icon: 'JS' },
+      { id: 'robots', name: 'Robots.txt Generator', icon: 'BOT' },
+      { id: 'jsonpath', name: 'JSONPath Evaluator', icon: '$.' },
+      { id: 'mdtable', name: 'MD Table Generator', icon: 'MD' },
+      { id: 'cssgrid', name: 'CSS Grid Generator', icon: 'GR' },
+      { id: 'favicon', name: 'Favicon Generator', icon: 'FV' },
+      { id: 'htaccess', name: '.htaccess Generator', icon: '.ht' },
     ];
 
     const others = allTools.filter(t => t.id !== currentTool);
@@ -360,7 +374,7 @@
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         'name': 'Developer Tools',
-        'numberOfItems': 47,
+        'numberOfItems': 53,
         'itemListElement': Array.from(document.querySelectorAll('.tool-card')).slice(0, 10).map(function(card, i) {
           const link = card.querySelector('a') || card;
           const name = card.querySelector('h3, .tool-name');

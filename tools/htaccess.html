@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>.htaccess Generator - Apache Config Builder Online | ZeroKit.dev</title>
+  <meta name="description" content="Generate .htaccess rules visually: HTTPS redirects, gzip compression, caching, security headers, URL rewrites, and more. Free Apache config builder, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/htaccess.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .config-form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .form-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .section-header:hover { background: var(--surface-2); }
+    .section-header .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .section-header.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+
+    .section-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      overflow: hidden;
+    }
+    .section-body.collapsed {
+      max-height: 0;
+      padding: 0 16px;
+    }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .toggle-row .toggle-label {
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .toggle-row .toggle-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      transition: 0.2s;
+    }
+    .toggle-slider:before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+      background: white;
+    }
+
+    /* Form inputs inside sections */
+    .ht-input, .ht-select {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .ht-input:focus, .ht-select:focus { border-color: var(--accent); }
+    .ht-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .field-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 600px) {
+      .field-row { grid-template-columns: 1fr; }
+    }
+
+    /* Dynamic list rows */
+    .list-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .list-row .ht-input { flex: 1; }
+    .list-row .ht-select { width: auto; min-width: 80px; flex-shrink: 0; }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+      flex-shrink: 0;
+    }
+    .btn-sm:hover { border-color: var(--error); color: var(--error); }
+
+    .btn-add {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Error page inputs */
+    .error-page-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .error-page-row .error-code {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      min-width: 36px;
+      font-weight: 600;
+    }
+    .error-page-row .ht-input { flex: 1; }
+
+    /* Output panel (sticky) */
+    .output-col {
+      position: sticky;
+      top: 24px;
+    }
+    .output-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .output-header span {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Preset bar */
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    /* Copy toast */
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Sub-option that shows when a toggle is on */
+    .sub-options {
+      padding: 10px 0 0 0;
+      display: grid;
+      gap: 10px;
+    }
+    .sub-options.hidden { display: none; }
+
+    /* Radio group for www */
+    .radio-group {
+      display: flex;
+      gap: 16px;
+    }
+    .radio-group label {
+      font-size: 0.85rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 400;
+    }
+    .radio-group input[type="radio"] {
+      accent-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>.htaccess Generator</h1>
+    <p class="description">Visually build Apache .htaccess rules for redirects, caching, security, and more. Everything runs locally in your browser.</p>
+
+    <h3 class="section-label">Presets</h3>
+    <div class="preset-bar">
+      <button class="btn" onclick="applyPreset('wordpress')">WordPress Security</button>
+      <button class="btn" onclick="applyPreset('performance')">Basic Performance</button>
+      <button class="btn" onclick="applyPreset('security')">Full Security</button>
+      <button class="btn" onclick="resetAll()">Reset All</button>
+    </div>
+
+    <div class="two-col">
+      <!-- Left: Config form -->
+      <div class="config-form">
+
+        <!-- Redirects & Rewrites -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Redirects &amp; Rewrites</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <!-- Force HTTPS -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Force HTTPS</div>
+                <div class="toggle-desc">Redirect all HTTP requests to HTTPS</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="force-https" onchange="generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- WWW -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">WWW Redirect</div>
+                <div class="toggle-desc">Force or remove www prefix</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="www-toggle" onchange="toggleWww(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="www-options">
+              <div class="field-group">
+                <div class="radio-group">
+                  <label><input type="radio" name="www-mode" value="force" checked onchange="generate()"> Force www</label>
+                  <label><input type="radio" name="www-mode" value="remove" onchange="generate()"> Remove www</label>
+                </div>
+                <div class="field-group" style="margin-top:6px">
+                  <label>Domain</label>
+                  <input type="text" class="ht-input" id="www-domain" placeholder="example.com" oninput="generate()">
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Error Pages -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Custom Error Pages</div>
+                <div class="toggle-desc">Set custom pages for HTTP error codes</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="error-pages-toggle" onchange="toggleErrorPages(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="error-pages-options">
+              <div class="error-page-row">
+                <span class="error-code">400</span>
+                <input type="text" class="ht-input" id="error-400" placeholder="/errors/400.html" oninput="generate()">
+              </div>
+              <div class="error-page-row">
+                <span class="error-code">401</span>
+                <input type="text" class="ht-input" id="error-401" placeholder="/errors/401.html" oninput="generate()">
+              </div>
+              <div class="error-page-row">
+                <span class="error-code">403</span>
+                <input type="text" class="ht-input" id="error-403" placeholder="/errors/403.html" oninput="generate()">
+              </div>
+              <div class="error-page-row">
+                <span class="error-code">404</span>
+                <input type="text" class="ht-input" id="error-404" placeholder="/errors/404.html" oninput="generate()">
+              </div>
+              <div class="error-page-row">
+                <span class="error-code">500</span>
+                <input type="text" class="ht-input" id="error-500" placeholder="/errors/500.html" oninput="generate()">
+              </div>
+            </div>
+
+            <!-- URL Redirects -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">URL Redirects</div>
+                <div class="toggle-desc">Add 301/302 redirect rules</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="redirects-toggle" onchange="toggleRedirects(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="redirects-options">
+              <div id="redirects-list"></div>
+              <button class="btn-add" onclick="addRedirect()">+ Add Redirect</button>
+            </div>
+
+            <!-- Rewrite Rules -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Rewrite Rules</div>
+                <div class="toggle-desc">Custom mod_rewrite rules</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="rewrites-toggle" onchange="toggleRewrites(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="rewrites-options">
+              <div id="rewrites-list"></div>
+              <button class="btn-add" onclick="addRewrite()">+ Add Rewrite Rule</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Performance</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <!-- Gzip -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Enable Gzip Compression</div>
+                <div class="toggle-desc">Compress HTML, CSS, JS, XML, and fonts</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="gzip-toggle" onchange="generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Browser Caching -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Browser Caching</div>
+                <div class="toggle-desc">Set Cache-Control headers for static assets</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="caching-toggle" onchange="toggleCaching(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="caching-options">
+              <div class="field-group">
+                <label>Cache Duration (seconds)</label>
+                <div class="field-row">
+                  <div class="field-group">
+                    <label style="font-size:0.7rem">Images</label>
+                    <input type="number" class="ht-input" id="cache-images" value="2592000" min="0" oninput="generate()">
+                  </div>
+                  <div class="field-group">
+                    <label style="font-size:0.7rem">CSS / JS</label>
+                    <input type="number" class="ht-input" id="cache-cssjs" value="604800" min="0" oninput="generate()">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Security</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <!-- Security Headers -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Security Headers</div>
+                <div class="toggle-desc">X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="security-headers-toggle" onchange="generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- CORS -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">CORS Headers</div>
+                <div class="toggle-desc">Access-Control-Allow-Origin header</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="cors-toggle" onchange="toggleCors(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="cors-options">
+              <div class="field-group">
+                <label>Allowed Origin</label>
+                <input type="text" class="ht-input" id="cors-origin" placeholder="* or https://example.com" value="*" oninput="generate()">
+              </div>
+            </div>
+
+            <!-- Hotlink Protection -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Block Hotlinking</div>
+                <div class="toggle-desc">Prevent other sites from embedding your images</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="hotlink-toggle" onchange="toggleHotlink(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="hotlink-options">
+              <div class="field-group">
+                <label>Your Domain</label>
+                <input type="text" class="ht-input" id="hotlink-domain" placeholder="example.com" oninput="generate()">
+              </div>
+            </div>
+
+            <!-- Block Bad Bots -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Block Bad Bots</div>
+                <div class="toggle-desc">Block known malicious user agents</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="badbots-toggle" onchange="generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Directory Listing -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Disable Directory Listing</div>
+                <div class="toggle-desc">Prevent browsing of directory contents</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="dirlist-toggle" onchange="generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Password Protection -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Password Protection</div>
+                <div class="toggle-desc">Require htpasswd authentication</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="htpasswd-toggle" onchange="toggleHtpasswd(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="htpasswd-options">
+              <div class="field-group">
+                <label>AuthName (Prompt Text)</label>
+                <input type="text" class="ht-input" id="htpasswd-name" placeholder="Restricted Area" value="Restricted Area" oninput="generate()">
+              </div>
+              <div class="field-group">
+                <label>.htpasswd File Path</label>
+                <input type="text" class="ht-input" id="htpasswd-path" placeholder="/home/user/.htpasswd" oninput="generate()">
+              </div>
+            </div>
+
+            <!-- IP Blocking -->
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">IP Blocking</div>
+                <div class="toggle-desc">Deny access from specific IP addresses</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="ipblock-toggle" onchange="toggleIpBlock(); generate()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="sub-options hidden" id="ipblock-options">
+              <div class="field-group">
+                <label>IP Addresses (one per line)</label>
+                <textarea class="ht-input" id="ipblock-ips" rows="4" placeholder="192.168.1.1&#10;10.0.0.0/24" oninput="generate()" style="resize:vertical;min-height:60px;font-family:var(--mono)"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Output -->
+      <div class="output-col">
+        <div class="output-panel">
+          <div class="output-header">
+            <span>Generated .htaccess</span>
+            <button class="btn btn-primary" onclick="copyOutput()">Copy to Clipboard</button>
+          </div>
+          <textarea class="tool-textarea" id="output" readonly placeholder="Enable options on the left to generate .htaccess rules..." style="min-height:500px"></textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <div class="copy-toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    // --- State ---
+    let redirects = [];
+    let rewrites = [];
+    let redirectIdCounter = 0;
+    let rewriteIdCounter = 0;
+
+    // --- Helpers ---
+    function $(id) { return document.getElementById(id); }
+    function isOn(id) { return $(id).checked; }
+    function val(id) { return $(id).value.trim(); }
+
+    function toggleSection(header) {
+      const body = header.nextElementSibling;
+      const isCollapsed = body.classList.toggle('collapsed');
+      header.classList.toggle('collapsed', isCollapsed);
+    }
+
+    function showSub(id, show) {
+      $(id).classList.toggle('hidden', !show);
+    }
+
+    function toggleWww() { showSub('www-options', isOn('www-toggle')); }
+    function toggleErrorPages() { showSub('error-pages-options', isOn('error-pages-toggle')); }
+    function toggleRedirects() {
+      const on = isOn('redirects-toggle');
+      showSub('redirects-options', on);
+      if (on && redirects.length === 0) addRedirect();
+    }
+    function toggleRewrites() {
+      const on = isOn('rewrites-toggle');
+      showSub('rewrites-options', on);
+      if (on && rewrites.length === 0) addRewrite();
+    }
+    function toggleCaching() { showSub('caching-options', isOn('caching-toggle')); }
+    function toggleCors() { showSub('cors-options', isOn('cors-toggle')); }
+    function toggleHotlink() { showSub('hotlink-options', isOn('hotlink-toggle')); }
+    function toggleHtpasswd() { showSub('htpasswd-options', isOn('htpasswd-toggle')); }
+    function toggleIpBlock() { showSub('ipblock-options', isOn('ipblock-toggle')); }
+
+    // --- Redirects ---
+    function addRedirect() {
+      redirects.push({ id: redirectIdCounter++, type: '301', from: '', to: '' });
+      renderRedirects();
+      generate();
+    }
+    function removeRedirect(id) {
+      redirects = redirects.filter(r => r.id !== id);
+      renderRedirects();
+      generate();
+    }
+    function syncRedirects() {
+      redirects.forEach(r => {
+        const t = $('redir-' + r.id + '-type');
+        const f = $('redir-' + r.id + '-from');
+        const to = $('redir-' + r.id + '-to');
+        if (t) r.type = t.value;
+        if (f) r.from = f.value;
+        if (to) r.to = to.value;
+      });
+    }
+    function renderRedirects() {
+      syncRedirects();
+      let html = '';
+      redirects.forEach(r => {
+        html += '<div class="list-row">';
+        html += '<select class="ht-select" id="redir-' + r.id + '-type" onchange="generate()" style="width:70px">';
+        html += '<option value="301"' + (r.type === '301' ? ' selected' : '') + '>301</option>';
+        html += '<option value="302"' + (r.type === '302' ? ' selected' : '') + '>302</option>';
+        html += '</select>';
+        html += '<input type="text" class="ht-input" id="redir-' + r.id + '-from" value="' + esc(r.from) + '" placeholder="/old-path" oninput="generate()">';
+        html += '<input type="text" class="ht-input" id="redir-' + r.id + '-to" value="' + esc(r.to) + '" placeholder="/new-path" oninput="generate()">';
+        html += '<button class="btn-sm" onclick="removeRedirect(' + r.id + ')" title="Remove">&times;</button>';
+        html += '</div>';
+      });
+      $('redirects-list').innerHTML = html;
+    }
+
+    // --- Rewrites ---
+    function addRewrite() {
+      rewrites.push({ id: rewriteIdCounter++, pattern: '', substitution: '', flags: '[L,R=301]' });
+      renderRewrites();
+      generate();
+    }
+    function removeRewrite(id) {
+      rewrites = rewrites.filter(r => r.id !== id);
+      renderRewrites();
+      generate();
+    }
+    function syncRewrites() {
+      rewrites.forEach(r => {
+        const p = $('rewrite-' + r.id + '-pattern');
+        const s = $('rewrite-' + r.id + '-sub');
+        const f = $('rewrite-' + r.id + '-flags');
+        if (p) r.pattern = p.value;
+        if (s) r.substitution = s.value;
+        if (f) r.flags = f.value;
+      });
+    }
+    function renderRewrites() {
+      syncRewrites();
+      let html = '';
+      rewrites.forEach(r => {
+        html += '<div class="list-row">';
+        html += '<input type="text" class="ht-input" id="rewrite-' + r.id + '-pattern" value="' + esc(r.pattern) + '" placeholder="^old-page$" oninput="generate()">';
+        html += '<input type="text" class="ht-input" id="rewrite-' + r.id + '-sub" value="' + esc(r.substitution) + '" placeholder="/new-page" oninput="generate()">';
+        html += '<input type="text" class="ht-input" id="rewrite-' + r.id + '-flags" value="' + esc(r.flags) + '" placeholder="[L,R=301]" oninput="generate()" style="width:100px;flex:none">';
+        html += '<button class="btn-sm" onclick="removeRewrite(' + r.id + ')" title="Remove">&times;</button>';
+        html += '</div>';
+      });
+      $('rewrites-list').innerHTML = html;
+    }
+
+    function esc(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // --- Generate ---
+    function generate() {
+      syncRedirects();
+      syncRewrites();
+
+      const blocks = [];
+
+      // Force HTTPS
+      if (isOn('force-https')) {
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Force HTTPS\n' +
+          '# ----------------------------------------------------------------------\n' +
+          'RewriteEngine On\n' +
+          'RewriteCond %{HTTPS} !=on\n' +
+          'RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]'
+        );
+      }
+
+      // WWW redirect
+      if (isOn('www-toggle')) {
+        const mode = document.querySelector('input[name="www-mode"]:checked').value;
+        const domain = val('www-domain') || 'example.com';
+        if (mode === 'force') {
+          blocks.push(
+            '# ----------------------------------------------------------------------\n' +
+            '# Force www prefix\n' +
+            '# ----------------------------------------------------------------------\n' +
+            'RewriteEngine On\n' +
+            'RewriteCond %{HTTP_HOST} !^www\\. [NC]\n' +
+            'RewriteRule ^(.*)$ https://www.' + domain + '/$1 [R=301,L]'
+          );
+        } else {
+          blocks.push(
+            '# ----------------------------------------------------------------------\n' +
+            '# Remove www prefix\n' +
+            '# ----------------------------------------------------------------------\n' +
+            'RewriteEngine On\n' +
+            'RewriteCond %{HTTP_HOST} ^www\\.' + domain.replace(/\./g, '\\.') + ' [NC]\n' +
+            'RewriteRule ^(.*)$ https://' + domain + '/$1 [R=301,L]'
+          );
+        }
+      }
+
+      // Custom Error Pages
+      if (isOn('error-pages-toggle')) {
+        const codes = ['400', '401', '403', '404', '500'];
+        const lines = [];
+        codes.forEach(code => {
+          const page = val('error-' + code);
+          if (page) lines.push('ErrorDocument ' + code + ' ' + page);
+        });
+        if (lines.length > 0) {
+          blocks.push(
+            '# ----------------------------------------------------------------------\n' +
+            '# Custom Error Pages\n' +
+            '# ----------------------------------------------------------------------\n' +
+            lines.join('\n')
+          );
+        }
+      }
+
+      // URL Redirects
+      if (isOn('redirects-toggle')) {
+        const lines = [];
+        redirects.forEach(r => {
+          if (r.from && r.to) {
+            lines.push('Redirect ' + r.type + ' ' + r.from + ' ' + r.to);
+          }
+        });
+        if (lines.length > 0) {
+          blocks.push(
+            '# ----------------------------------------------------------------------\n' +
+            '# URL Redirects\n' +
+            '# ----------------------------------------------------------------------\n' +
+            lines.join('\n')
+          );
+        }
+      }
+
+      // Rewrite Rules
+      if (isOn('rewrites-toggle')) {
+        const lines = [];
+        rewrites.forEach(r => {
+          if (r.pattern && r.substitution) {
+            lines.push('RewriteRule ' + r.pattern + ' ' + r.substitution + ' ' + r.flags);
+          }
+        });
+        if (lines.length > 0) {
+          blocks.push(
+            '# ----------------------------------------------------------------------\n' +
+            '# Custom Rewrite Rules\n' +
+            '# ----------------------------------------------------------------------\n' +
+            'RewriteEngine On\n' +
+            lines.join('\n')
+          );
+        }
+      }
+
+      // Gzip Compression
+      if (isOn('gzip-toggle')) {
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Gzip Compression\n' +
+          '# ----------------------------------------------------------------------\n' +
+          '<IfModule mod_deflate.c>\n' +
+          '  AddOutputFilterByType DEFLATE text/html\n' +
+          '  AddOutputFilterByType DEFLATE text/css\n' +
+          '  AddOutputFilterByType DEFLATE text/javascript\n' +
+          '  AddOutputFilterByType DEFLATE application/javascript\n' +
+          '  AddOutputFilterByType DEFLATE application/json\n' +
+          '  AddOutputFilterByType DEFLATE application/xml\n' +
+          '  AddOutputFilterByType DEFLATE text/xml\n' +
+          '  AddOutputFilterByType DEFLATE text/plain\n' +
+          '  AddOutputFilterByType DEFLATE image/svg+xml\n' +
+          '  AddOutputFilterByType DEFLATE application/xhtml+xml\n' +
+          '  AddOutputFilterByType DEFLATE font/opentype\n' +
+          '  AddOutputFilterByType DEFLATE font/ttf\n' +
+          '  AddOutputFilterByType DEFLATE font/woff\n' +
+          '  AddOutputFilterByType DEFLATE font/woff2\n' +
+          '</IfModule>'
+        );
+      }
+
+      // Browser Caching
+      if (isOn('caching-toggle')) {
+        const imgSec = val('cache-images') || '2592000';
+        const cssjsSec = val('cache-cssjs') || '604800';
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Browser Caching (Cache-Control Headers)\n' +
+          '# ----------------------------------------------------------------------\n' +
+          '<IfModule mod_headers.c>\n' +
+          '  # Images: ' + imgSec + ' seconds (' + Math.round(imgSec / 86400) + ' days)\n' +
+          '  <FilesMatch "\\.(jpg|jpeg|png|gif|webp|svg|ico)$">\n' +
+          '    Header set Cache-Control "max-age=' + imgSec + ', public"\n' +
+          '  </FilesMatch>\n' +
+          '\n' +
+          '  # CSS and JavaScript: ' + cssjsSec + ' seconds (' + Math.round(cssjsSec / 86400) + ' days)\n' +
+          '  <FilesMatch "\\.(css|js)$">\n' +
+          '    Header set Cache-Control "max-age=' + cssjsSec + ', public"\n' +
+          '  </FilesMatch>\n' +
+          '\n' +
+          '  # Fonts: ' + imgSec + ' seconds\n' +
+          '  <FilesMatch "\\.(woff|woff2|ttf|otf|eot)$">\n' +
+          '    Header set Cache-Control "max-age=' + imgSec + ', public"\n' +
+          '  </FilesMatch>\n' +
+          '</IfModule>'
+        );
+      }
+
+      // Security Headers
+      if (isOn('security-headers-toggle')) {
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Security Headers\n' +
+          '# ----------------------------------------------------------------------\n' +
+          '<IfModule mod_headers.c>\n' +
+          '  # Prevent clickjacking by disallowing iframe embedding\n' +
+          '  Header always set X-Frame-Options "SAMEORIGIN"\n' +
+          '\n' +
+          '  # Prevent MIME-type sniffing\n' +
+          '  Header always set X-Content-Type-Options "nosniff"\n' +
+          '\n' +
+          '  # Enable XSS filtering in older browsers\n' +
+          '  Header always set X-XSS-Protection "1; mode=block"\n' +
+          '\n' +
+          '  # Control referrer information sent with requests\n' +
+          '  Header always set Referrer-Policy "strict-origin-when-cross-origin"\n' +
+          '\n' +
+          '  # Restrict browser features and APIs\n' +
+          '  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"\n' +
+          '\n' +
+          '  # Enforce HTTPS for 1 year including subdomains\n' +
+          '  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"\n' +
+          '</IfModule>'
+        );
+      }
+
+      // CORS
+      if (isOn('cors-toggle')) {
+        const origin = val('cors-origin') || '*';
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# CORS Headers\n' +
+          '# ----------------------------------------------------------------------\n' +
+          '<IfModule mod_headers.c>\n' +
+          '  Header set Access-Control-Allow-Origin "' + origin + '"\n' +
+          '  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"\n' +
+          '  Header set Access-Control-Allow-Headers "Content-Type, Authorization"\n' +
+          '</IfModule>'
+        );
+      }
+
+      // Hotlink Protection
+      if (isOn('hotlink-toggle')) {
+        const domain = val('hotlink-domain') || 'example.com';
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Hotlink Protection\n' +
+          '# ----------------------------------------------------------------------\n' +
+          'RewriteEngine On\n' +
+          'RewriteCond %{HTTP_REFERER} !^$\n' +
+          'RewriteCond %{HTTP_REFERER} !^https?://(www\\.)?' + domain.replace(/\./g, '\\.') + ' [NC]\n' +
+          'RewriteRule \\.(jpg|jpeg|png|gif|webp|svg|bmp)$ - [F,NC,L]'
+        );
+      }
+
+      // Block Bad Bots
+      if (isOn('badbots-toggle')) {
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Block Bad Bots\n' +
+          '# ----------------------------------------------------------------------\n' +
+          'RewriteEngine On\n' +
+          'RewriteCond %{HTTP_USER_AGENT} (SemrushBot|AhrefsBot|MJ12bot|DotBot|BLEXBot|SearchmetricsBot) [NC,OR]\n' +
+          'RewriteCond %{HTTP_USER_AGENT} (SeznamBot|Sogou|YandexBot|MegaIndex|ltx71|Riddler) [NC,OR]\n' +
+          'RewriteCond %{HTTP_USER_AGENT} (ZmEu|sqlmap|nikto|nmap|masscan|Nessus) [NC,OR]\n' +
+          'RewriteCond %{HTTP_USER_AGENT} (HTTrack|WebCopier|WebZIP|Teleport|wget) [NC]\n' +
+          'RewriteRule ^(.*)$ - [F,L]'
+        );
+      }
+
+      // Disable Directory Listing
+      if (isOn('dirlist-toggle')) {
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Disable Directory Listing\n' +
+          '# ----------------------------------------------------------------------\n' +
+          'Options -Indexes'
+        );
+      }
+
+      // Password Protection
+      if (isOn('htpasswd-toggle')) {
+        const authName = val('htpasswd-name') || 'Restricted Area';
+        const htpasswdPath = val('htpasswd-path') || '/path/to/.htpasswd';
+        blocks.push(
+          '# ----------------------------------------------------------------------\n' +
+          '# Password Protection (htpasswd)\n' +
+          '# ----------------------------------------------------------------------\n' +
+          'AuthType Basic\n' +
+          'AuthName "' + authName + '"\n' +
+          'AuthUserFile ' + htpasswdPath + '\n' +
+          'Require valid-user'
+        );
+      }
+
+      // IP Blocking
+      if (isOn('ipblock-toggle')) {
+        const ipsRaw = val('ipblock-ips');
+        if (ipsRaw) {
+          const ips = ipsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+          if (ips.length > 0) {
+            const lines = ips.map(ip => '  Require not ip ' + ip);
+            blocks.push(
+              '# ----------------------------------------------------------------------\n' +
+              '# IP Blocking\n' +
+              '# ----------------------------------------------------------------------\n' +
+              '<RequireAll>\n' +
+              '  Require all granted\n' +
+              lines.join('\n') + '\n' +
+              '</RequireAll>'
+            );
+          }
+        }
+      }
+
+      $('output').value = blocks.join('\n\n');
+    }
+
+    // --- Copy ---
+    function copyOutput() {
+      const text = $('output').value;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch {
+        showToast('Copy failed. Please select and copy manually.');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      const toast = $('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // --- Presets ---
+    function resetAll() {
+      // Uncheck all toggles
+      const toggles = document.querySelectorAll('.toggle-switch input[type="checkbox"]');
+      toggles.forEach(t => { t.checked = false; });
+
+      // Hide all sub-options
+      document.querySelectorAll('.sub-options').forEach(el => el.classList.add('hidden'));
+
+      // Reset fields
+      $('www-domain').value = '';
+      document.querySelector('input[name="www-mode"][value="force"]').checked = true;
+      ['400','401','403','404','500'].forEach(c => { $('error-' + c).value = ''; });
+      $('cache-images').value = '2592000';
+      $('cache-cssjs').value = '604800';
+      $('cors-origin').value = '*';
+      $('hotlink-domain').value = '';
+      $('htpasswd-name').value = 'Restricted Area';
+      $('htpasswd-path').value = '';
+      $('ipblock-ips').value = '';
+
+      redirects = [];
+      rewrites = [];
+      redirectIdCounter = 0;
+      rewriteIdCounter = 0;
+      $('redirects-list').innerHTML = '';
+      $('rewrites-list').innerHTML = '';
+
+      generate();
+    }
+
+    function applyPreset(preset) {
+      resetAll();
+
+      switch (preset) {
+        case 'wordpress':
+          // Force HTTPS
+          $('force-https').checked = true;
+          // Security headers
+          $('security-headers-toggle').checked = true;
+          // Disable directory listing
+          $('dirlist-toggle').checked = true;
+          // Block bad bots
+          $('badbots-toggle').checked = true;
+          // Custom error pages
+          $('error-pages-toggle').checked = true;
+          showSub('error-pages-options', true);
+          $('error-404').value = '/404.html';
+          $('error-403').value = '/403.html';
+          break;
+
+        case 'performance':
+          // Gzip
+          $('gzip-toggle').checked = true;
+          // Browser caching
+          $('caching-toggle').checked = true;
+          showSub('caching-options', true);
+          $('cache-images').value = '2592000';
+          $('cache-cssjs').value = '604800';
+          // Force HTTPS
+          $('force-https').checked = true;
+          break;
+
+        case 'security':
+          // Force HTTPS
+          $('force-https').checked = true;
+          // Security headers
+          $('security-headers-toggle').checked = true;
+          // Block bad bots
+          $('badbots-toggle').checked = true;
+          // Disable directory listing
+          $('dirlist-toggle').checked = true;
+          // Hotlink protection
+          $('hotlink-toggle').checked = true;
+          showSub('hotlink-options', true);
+          $('hotlink-domain').value = 'example.com';
+          // CORS
+          $('cors-toggle').checked = true;
+          showSub('cors-options', true);
+          // Gzip
+          $('gzip-toggle').checked = true;
+          // Caching
+          $('caching-toggle').checked = true;
+          showSub('caching-options', true);
+          break;
+      }
+
+      generate();
+    }
+
+    // --- Init ---
+    generate();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Generator - Create Favicons from Text & Emoji | ZeroKit.dev</title>
+  <meta name="description" content="Generate favicons from text, letters, or emoji. Preview at all sizes, download as ICO, PNG, SVG. Get HTML link tags. Free online tool, runs in your browser.">
+  <link rel="canonical" href="https://zerokit.dev/tools/favicon.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .favicon-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .favicon-controls { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .control-group { display: flex; flex-direction: column; gap: 6px; }
+    .control-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .control-group select,
+    .control-group input[type="text"],
+    .control-group input[type="color"] { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 4px; font-family: var(--font); font-size: 0.85rem; outline: none; }
+    .control-group select:focus,
+    .control-group input:focus { border-color: var(--accent); }
+    .control-group input[type="color"] { width: 48px; height: 36px; padding: 2px; cursor: pointer; }
+
+    .mode-tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .mode-tab { flex: 1; padding: 10px 16px; text-align: center; background: var(--surface-2); border: none; color: var(--text-muted); font-family: var(--font); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .mode-tab:not(:last-child) { border-right: 1px solid var(--border); }
+    .mode-tab.active { background: var(--accent); color: white; }
+    .mode-tab:hover:not(.active) { color: var(--text); }
+
+    .mode-content { display: none; }
+    .mode-content.active { display: flex; flex-direction: column; gap: 12px; }
+
+    .color-row { display: flex; gap: 12px; align-items: flex-end; }
+    .color-row .control-group { flex: 1; }
+
+    .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; max-height: 200px; overflow-y: auto; padding: 4px; }
+    .emoji-btn { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; background: var(--surface-2); border: 2px solid transparent; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+    .emoji-btn:hover { border-color: var(--accent); background: var(--border); }
+    .emoji-btn.selected { border-color: var(--accent); background: rgba(99, 102, 241, 0.15); }
+
+    .emoji-search { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 4px; font-family: var(--font); font-size: 0.85rem; outline: none; margin-bottom: 8px; }
+    .emoji-search:focus { border-color: var(--accent); }
+
+    .shape-options { display: flex; gap: 8px; }
+    .shape-btn { padding: 8px 16px; background: var(--surface-2); border: 2px solid var(--border); border-radius: 4px; color: var(--text-muted); font-family: var(--font); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .shape-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+    .shape-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+
+    .preview-area { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .main-preview { display: flex; align-items: center; justify-content: center; }
+    .main-preview canvas { border: 1px solid var(--border); border-radius: 4px; image-rendering: pixelated; }
+
+    .size-previews { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; justify-content: center; }
+    .size-preview { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .size-preview canvas { border: 1px solid var(--border); border-radius: 2px; image-rendering: pixelated; }
+    .size-preview span { font-size: 0.7rem; color: var(--text-muted); font-family: var(--mono); }
+
+    .download-section { width: 100%; display: flex; flex-direction: column; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .download-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+    .code-output { width: 100%; }
+    .code-output pre { background: var(--surface-2); padding: 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.75rem; color: var(--text); overflow-x: auto; white-space: pre-wrap; word-break: break-all; cursor: pointer; transition: background 0.15s; line-height: 1.8; }
+    .code-output pre:hover { background: var(--border); }
+    .code-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+
+    @media (max-width: 768px) {
+      .favicon-layout { grid-template-columns: 1fr; }
+      .emoji-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Favicon Generator</h1>
+    <p class="description">Create favicons from text or emoji. Preview at all sizes, download as ICO, PNG, or SVG. Everything runs locally in your browser.</p>
+
+    <div class="favicon-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Settings</div>
+        <div class="favicon-controls">
+
+          <div class="mode-tabs">
+            <button class="mode-tab active" onclick="setMode('text')">Text</button>
+            <button class="mode-tab" onclick="setMode('emoji')">Emoji</button>
+          </div>
+
+          <div id="textMode" class="mode-content active">
+            <div class="control-group">
+              <label>Characters (1-2)</label>
+              <input type="text" id="textInput" value="Zk" maxlength="2" oninput="render()">
+            </div>
+            <div class="color-row">
+              <div class="control-group">
+                <label>Background</label>
+                <input type="color" id="bgColor" value="#6366f1" oninput="render()">
+              </div>
+              <div class="control-group">
+                <label>Text Color</label>
+                <input type="color" id="textColor" value="#ffffff" oninput="render()">
+              </div>
+            </div>
+            <div class="control-group">
+              <label>Font</label>
+              <select id="fontSelect" onchange="render()">
+                <option value="Inter" selected>Inter</option>
+                <option value="Arial">Arial</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Trebuchet MS">Trebuchet MS</option>
+                <option value="Impact">Impact</option>
+                <option value="Comic Sans MS">Comic Sans MS</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="emojiMode" class="mode-content">
+            <div class="control-group">
+              <label>Search or pick an emoji</label>
+              <input type="text" class="emoji-search" id="emojiSearch" placeholder="Search emoji or type one directly..." oninput="filterEmoji()">
+            </div>
+            <div class="emoji-grid" id="emojiGrid"></div>
+          </div>
+
+          <div class="control-group">
+            <label>Shape</label>
+            <div class="shape-options">
+              <button class="shape-btn active" onclick="setShape('square')" data-shape="square">Square</button>
+              <button class="shape-btn" onclick="setShape('rounded')" data-shape="rounded">Rounded</button>
+              <button class="shape-btn" onclick="setShape('circle')" data-shape="circle">Circle</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tool-panel">
+        <div class="panel-header">Preview</div>
+        <div class="preview-area">
+          <div class="main-preview">
+            <canvas id="mainCanvas" width="256" height="256"></canvas>
+          </div>
+
+          <div class="size-previews">
+            <div class="size-preview">
+              <canvas id="preview16" width="16" height="16"></canvas>
+              <span>16x16</span>
+            </div>
+            <div class="size-preview">
+              <canvas id="preview32" width="32" height="32"></canvas>
+              <span>32x32</span>
+            </div>
+            <div class="size-preview">
+              <canvas id="preview48" width="48" height="48"></canvas>
+              <span>48x48</span>
+            </div>
+            <div class="size-preview">
+              <canvas id="preview180" width="180" height="180"></canvas>
+              <span>180x180</span>
+            </div>
+          </div>
+
+          <div class="download-section">
+            <div class="download-btns">
+              <button class="btn btn-primary" onclick="downloadICO()">Download .ico</button>
+              <button class="btn" onclick="downloadPNG(16)">PNG 16</button>
+              <button class="btn" onclick="downloadPNG(32)">PNG 32</button>
+              <button class="btn" onclick="downloadPNG(48)">PNG 48</button>
+              <button class="btn" onclick="downloadPNG(180)">PNG 180</button>
+              <button class="btn" onclick="downloadSVG()">SVG</button>
+            </div>
+          </div>
+
+          <div class="code-output">
+            <div class="code-label">HTML Link Tags (click to copy)</div>
+            <pre id="linkTags" onclick="copyLinkTags()"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // State
+    let mode = 'text';
+    let shape = 'square';
+    let selectedEmoji = '🚀';
+
+    const emojis = [
+      '🚀','⚡','🔥','💎','🎯','🛡️','⚙️','🔧',
+      '💻','🌐','📦','🎨','📱','🔒','✅','❤️',
+      '⭐','🌟','💡','🏠','📊','🔍','📝','🎮',
+      '🤖','👾','🎵','📸','🧩','🔮','🍀','🌈',
+      '☕','🍕','🎲','🏆','💰','📌','🔑','💬',
+      '🦊','🐱','🐶','🦄','🐝','🦋','🐙','🐳',
+      '🍎','🍊','🍋','🍇','🍓','🥑','🌸','🌻'
+    ];
+
+    const emojiNames = {
+      '🚀':'rocket','⚡':'lightning bolt','🔥':'fire','💎':'gem diamond','🎯':'target bullseye',
+      '🛡️':'shield','⚙️':'gear settings','🔧':'wrench tool','💻':'laptop computer','🌐':'globe web',
+      '📦':'package box','🎨':'art palette','📱':'phone mobile','🔒':'lock security','✅':'check mark',
+      '❤️':'heart love','⭐':'star','🌟':'glowing star','💡':'lightbulb idea','🏠':'house home',
+      '📊':'chart graph','🔍':'search magnifying','📝':'memo note','🎮':'game controller','🤖':'robot',
+      '👾':'alien space invader','🎵':'music note','📸':'camera photo','🧩':'puzzle piece','🔮':'crystal ball',
+      '🍀':'clover luck','🌈':'rainbow','☕':'coffee','🍕':'pizza','🎲':'dice game',
+      '🏆':'trophy winner','💰':'money bag','📌':'pin','🔑':'key','💬':'speech bubble chat',
+      '🦊':'fox','🐱':'cat','🐶':'dog','🦄':'unicorn','🐝':'bee',
+      '🦋':'butterfly','🐙':'octopus','🐳':'whale','🍎':'apple','🍊':'orange',
+      '🍋':'lemon','🍇':'grape','🍓':'strawberry','🥑':'avocado','🌸':'cherry blossom','🌻':'sunflower'
+    };
+
+    // DOM refs
+    const mainCanvas = document.getElementById('mainCanvas');
+    const mainCtx = mainCanvas.getContext('2d');
+
+    // Init emoji grid
+    function initEmojiGrid() {
+      const grid = document.getElementById('emojiGrid');
+      grid.innerHTML = '';
+      emojis.forEach(e => {
+        const btn = document.createElement('button');
+        btn.className = 'emoji-btn' + (e === selectedEmoji ? ' selected' : '');
+        btn.textContent = e;
+        btn.onclick = () => { selectedEmoji = e; highlightEmoji(); render(); };
+        grid.appendChild(btn);
+      });
+    }
+
+    function highlightEmoji() {
+      document.querySelectorAll('.emoji-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.textContent === selectedEmoji);
+      });
+    }
+
+    function filterEmoji() {
+      const q = document.getElementById('emojiSearch').value.toLowerCase().trim();
+      const grid = document.getElementById('emojiGrid');
+
+      // If the input itself is an emoji (or starts with one), use it directly
+      const emojiRegex = /\p{Emoji_Presentation}|\p{Emoji}\uFE0F/u;
+      if (emojiRegex.test(q)) {
+        const match = q.match(/(\p{Emoji_Presentation}|\p{Emoji}\uFE0F[\u200D\p{Emoji_Presentation}\p{Emoji}\uFE0F]*)/u);
+        if (match) {
+          selectedEmoji = match[0];
+          render();
+        }
+      }
+
+      if (!q) { initEmojiGrid(); return; }
+
+      grid.innerHTML = '';
+      emojis.filter(e => {
+        const name = emojiNames[e] || '';
+        return name.includes(q) || e === q;
+      }).forEach(e => {
+        const btn = document.createElement('button');
+        btn.className = 'emoji-btn' + (e === selectedEmoji ? ' selected' : '');
+        btn.textContent = e;
+        btn.onclick = () => { selectedEmoji = e; highlightEmoji(); render(); };
+        grid.appendChild(btn);
+      });
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase() === m));
+      document.getElementById('textMode').classList.toggle('active', m === 'text');
+      document.getElementById('emojiMode').classList.toggle('active', m === 'emoji');
+      render();
+    }
+
+    function setShape(s) {
+      shape = s;
+      document.querySelectorAll('.shape-btn').forEach(b => b.classList.toggle('active', b.dataset.shape === s));
+      render();
+    }
+
+    // Core rendering
+    function renderToCanvas(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = size;
+      canvas.height = size;
+      ctx.clearRect(0, 0, size, size);
+
+      // Draw background shape
+      if (mode === 'text') {
+        const bgColor = document.getElementById('bgColor').value;
+        ctx.fillStyle = bgColor;
+        drawShape(ctx, size);
+        ctx.fill();
+
+        // Draw text
+        const text = document.getElementById('textInput').value || 'A';
+        const textColor = document.getElementById('textColor').value;
+        const font = document.getElementById('fontSelect').value;
+
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Scale font size based on character count and canvas size
+        const charCount = text.length;
+        const fontSize = charCount === 1 ? size * 0.65 : size * 0.45;
+        ctx.font = `bold ${fontSize}px "${font}", sans-serif`;
+
+        ctx.fillText(text, size / 2, size / 2 + size * 0.03);
+      } else {
+        // Emoji mode - transparent or optionally shaped background
+        const fontSize = size * 0.7;
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(selectedEmoji, size / 2, size / 2 + size * 0.03);
+      }
+    }
+
+    function drawShape(ctx, size) {
+      const padding = size * 0.02;
+      const s = size - padding * 2;
+
+      if (shape === 'square') {
+        ctx.beginPath();
+        ctx.rect(padding, padding, s, s);
+      } else if (shape === 'rounded') {
+        const r = s * 0.18;
+        roundRect(ctx, padding, padding, s, s, r);
+      } else if (shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, s / 2, 0, Math.PI * 2);
+      }
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function render() {
+      // Main preview (256px rendered, displayed at 128px via CSS max)
+      renderToCanvas(mainCanvas, 256);
+      mainCanvas.style.width = '128px';
+      mainCanvas.style.height = '128px';
+
+      // Size previews
+      [16, 32, 48, 180].forEach(size => {
+        const c = document.getElementById('preview' + size);
+        renderToCanvas(c, size);
+      });
+
+      updateLinkTags();
+    }
+
+    function updateLinkTags() {
+      const tags = [
+        '<link rel="icon" type="image/x-icon" href="/favicon.ico">',
+        '<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">',
+        '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">',
+        '<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">',
+        '<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">',
+        '<link rel="icon" type="image/svg+xml" href="/favicon.svg">'
+      ];
+      document.getElementById('linkTags').textContent = tags.join('\n');
+    }
+
+    function copyLinkTags() {
+      const text = document.getElementById('linkTags').textContent;
+      navigator.clipboard.writeText(text);
+      showCopyFeedback(document.getElementById('linkTags'));
+    }
+
+    function showCopyFeedback(el) {
+      const orig = el.style.outline;
+      el.style.outline = '2px solid var(--success)';
+      el.style.outlineOffset = '2px';
+      setTimeout(() => { el.style.outline = orig; el.style.outlineOffset = ''; }, 800);
+    }
+
+    // Downloads
+    function downloadPNG(size) {
+      const c = document.createElement('canvas');
+      renderToCanvas(c, size);
+      const link = document.createElement('a');
+      link.download = size === 180 ? 'apple-touch-icon.png' : `favicon-${size}x${size}.png`;
+      link.href = c.toDataURL('image/png');
+      link.click();
+    }
+
+    function downloadSVG() {
+      const size = 256;
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">`;
+
+      if (mode === 'text') {
+        const bgColor = document.getElementById('bgColor').value;
+        const textColor = document.getElementById('textColor').value;
+        const font = document.getElementById('fontSelect').value;
+        const text = document.getElementById('textInput').value || 'A';
+        const fontSize = text.length === 1 ? size * 0.65 : size * 0.45;
+
+        if (shape === 'square') {
+          svg += `<rect width="${size}" height="${size}" fill="${bgColor}"/>`;
+        } else if (shape === 'rounded') {
+          const r = size * 0.18;
+          svg += `<rect width="${size}" height="${size}" rx="${r}" fill="${bgColor}"/>`;
+        } else if (shape === 'circle') {
+          svg += `<circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${bgColor}"/>`;
+        }
+
+        svg += `<text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" fill="${textColor}" font-family="${font}, sans-serif" font-weight="bold" font-size="${fontSize}">${escapeXml(text)}</text>`;
+      } else {
+        svg += `<text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="${size * 0.7}">${selectedEmoji}</text>`;
+      }
+
+      svg += '</svg>';
+
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const link = document.createElement('a');
+      link.download = 'favicon.svg';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function escapeXml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function downloadICO() {
+      // ICO format: header + directory entries + image data (using PNG encoding)
+      const sizes = [16, 32, 48];
+      const pngDataArrays = [];
+
+      // Render each size and get PNG data
+      const promises = sizes.map(size => {
+        const c = document.createElement('canvas');
+        renderToCanvas(c, size);
+        return new Promise(resolve => {
+          c.toBlob(blob => {
+            blob.arrayBuffer().then(buf => {
+              resolve({ size, data: new Uint8Array(buf) });
+            });
+          }, 'image/png');
+        });
+      });
+
+      Promise.all(promises).then(results => {
+        // ICO file structure
+        // Header: 6 bytes
+        const numImages = results.length;
+        const headerSize = 6;
+        const dirEntrySize = 16;
+        const dirSize = dirEntrySize * numImages;
+        let dataOffset = headerSize + dirSize;
+
+        // Calculate total size
+        let totalSize = dataOffset;
+        results.forEach(r => totalSize += r.data.length);
+
+        const buffer = new ArrayBuffer(totalSize);
+        const view = new DataView(buffer);
+
+        // ICO Header
+        view.setUint16(0, 0, true);       // Reserved
+        view.setUint16(2, 1, true);        // Type: 1 = ICO
+        view.setUint16(4, numImages, true); // Number of images
+
+        // Directory entries + image data
+        let offset = dataOffset;
+        results.forEach((r, i) => {
+          const dirOffset = headerSize + i * dirEntrySize;
+          const s = r.size;
+
+          view.setUint8(dirOffset, s < 256 ? s : 0);       // Width
+          view.setUint8(dirOffset + 1, s < 256 ? s : 0);   // Height
+          view.setUint8(dirOffset + 2, 0);                   // Color palette
+          view.setUint8(dirOffset + 3, 0);                   // Reserved
+          view.setUint16(dirOffset + 4, 1, true);            // Color planes
+          view.setUint16(dirOffset + 6, 32, true);           // Bits per pixel
+          view.setUint32(dirOffset + 8, r.data.length, true); // Image size
+          view.setUint32(dirOffset + 12, offset, true);       // Image offset
+
+          // Copy PNG data
+          const arr = new Uint8Array(buffer);
+          arr.set(r.data, offset);
+          offset += r.data.length;
+        });
+
+        const blob = new Blob([buffer], { type: 'image/x-icon' });
+        const link = document.createElement('a');
+        link.download = 'favicon.ico';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      });
+    }
+
+    // Init
+    initEmojiGrid();
+    render();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
