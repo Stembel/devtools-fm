@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Carbon Footprint Estimator | DevTools.fm</title>
+  <meta name="description" content="Estimate the carbon footprint of any website. See CO2 emissions per page view, get a green score rating from A+ to F, and learn how to reduce your site's environmental impact.">
+  <meta name="keywords" content="website carbon footprint, website co2 emissions, green website checker, sustainable web design, website environmental impact, page weight checker, eco-friendly website, carbon calculator">
+  <link rel="canonical" href="https://zerokit.dev/tools/carbon.html">
+  <meta property="og:title" content="Website Carbon Footprint Estimator | DevTools.fm">
+  <meta property="og:description" content="How green is your website? Estimate CO2 emissions per page view, get a sustainability score, and learn how to reduce your site's carbon footprint.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .carbon-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .carbon-input-group input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .carbon-input-group input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .carbon-input-group input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Results area */
+    .carbon-results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 32px;
+      min-height: 200px;
+    }
+
+    .carbon-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .carbon-results-header .query-time {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .carbon-results-body {
+      padding: 16px;
+    }
+
+    /* Loading spinner */
+    .carbon-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      gap: 16px;
+    }
+
+    .carbon-loading .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: #22c55e;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .carbon-loading .spinner-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Placeholder state */
+    .carbon-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .carbon-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* Error state */
+    .carbon-error {
+      padding: 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .carbon-error strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .carbon-error .fallback-hint {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Score badge */
+    .carbon-score-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 32px 16px;
+      margin-bottom: 24px;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .carbon-score-badge .score-url {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      margin-bottom: 20px;
+    }
+
+    /* Gauge container */
+    .gauge-container {
+      position: relative;
+      width: 220px;
+      height: 130px;
+      margin: 0 auto 16px;
+    }
+
+    .gauge-svg {
+      width: 220px;
+      height: 130px;
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 18;
+      stroke-linecap: round;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke-width: 18;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease-out, stroke 0.5s ease;
+    }
+
+    .gauge-label {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .gauge-grade {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .gauge-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Score summary text */
+    .carbon-summary {
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .carbon-summary-detail {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    /* Grade colors */
+    .grade-aplus { color: #059669; }
+    .grade-a { color: #10b981; }
+    .grade-b { color: #22c55e; }
+    .grade-c { color: #84cc16; }
+    .grade-d { color: #f59e0b; }
+    .grade-e { color: #f97316; }
+    .grade-f { color: #ef4444; }
+
+    /* Breakdown cards */
+    .carbon-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .breakdown-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .breakdown-card .breakdown-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .breakdown-card .breakdown-value {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .breakdown-card .breakdown-value.green {
+      color: #22c55e;
+    }
+
+    .breakdown-card .breakdown-value.yellow {
+      color: #f59e0b;
+    }
+
+    .breakdown-card .breakdown-value.red {
+      color: #ef4444;
+    }
+
+    /* Comparison bar */
+    .carbon-comparison {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .comparison-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .comparison-bar-wrapper {
+      position: relative;
+      height: 32px;
+      background: var(--surface);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .comparison-bar-fill {
+      height: 100%;
+      border-radius: 6px 0 0 6px;
+      transition: width 1s ease-out;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      min-width: 60px;
+    }
+
+    .comparison-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .comparison-label-row .site-label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Avg marker */
+    .comparison-avg-marker {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 2px;
+      background: var(--text-muted);
+      z-index: 2;
+    }
+
+    .comparison-avg-marker::after {
+      content: 'Avg';
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Tips section */
+    .carbon-tips {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .carbon-tips h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .carbon-tips ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .carbon-tips ul li {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      padding: 4px 0 4px 20px;
+      position: relative;
+    }
+
+    .carbon-tips ul li::before {
+      content: '\2714';
+      position: absolute;
+      left: 0;
+      color: #22c55e;
+      font-size: 0.75rem;
+    }
+
+    /* Share button */
+    .share-section {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .share-section .btn-share {
+      background: #22c55e;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .share-section .btn-share:hover {
+      background: #16a34a;
+    }
+
+    .share-section .btn-share:active {
+      transform: scale(0.97);
+    }
+
+    /* Educational content */
+    .carbon-education {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+
+    .carbon-education h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .carbon-education-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .carbon-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .carbon-info-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .carbon-info-card h3 .badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: #22c55e;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .carbon-info-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .carbon-info-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .carbon-input-group {
+        flex-direction: column;
+      }
+
+      .carbon-breakdown {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .carbon-education-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .gauge-container {
+        width: 180px;
+        height: 110px;
+      }
+
+      .gauge-svg {
+        width: 180px;
+        height: 110px;
+      }
+
+      .gauge-grade {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .carbon-breakdown {
+        grid-template-columns: 1fr;
+      }
+
+      .share-section {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Website Carbon Footprint Estimator</h1>
+    <p class="description">Estimate the CO2 emissions of any website. Get a green score from A+ to F, see detailed breakdowns, and learn how to make your site more sustainable.</p>
+
+    <div class="carbon-input-group">
+      <input type="text" id="url-input" placeholder="example.com" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" id="check-btn" onclick="performCheck()">Analyze</button>
+    </div>
+
+    <div class="carbon-results" id="results-container">
+      <div class="carbon-results-header">
+        <span>Carbon Report</span>
+        <span class="query-time" id="query-time"></span>
+      </div>
+      <div class="carbon-results-body" id="results-body">
+        <div class="carbon-placeholder">
+          <div class="placeholder-icon">&#x1F331;</div>
+          Enter a URL above to estimate the carbon footprint of any website.
+        </div>
+      </div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="carbon-education">
+      <h2>Understanding Website Carbon Emissions</h2>
+      <div class="carbon-education-grid">
+        <div class="carbon-info-card">
+          <h3>Why Does the Web Have a Carbon Footprint? <span class="badge">CO2</span></h3>
+          <p>
+            Every website visit requires energy: data centers serve content, networks transmit data,
+            and user devices render pages. The internet accounts for roughly <code>3.7%</code> of global
+            carbon emissions, comparable to the airline industry. Larger pages transfer more data,
+            requiring more energy at every step of the chain. By optimizing page weight, developers
+            can meaningfully reduce the environmental impact of their websites.
+          </p>
+        </div>
+        <div class="carbon-info-card">
+          <h3>How We Calculate Emissions <span class="badge">METHOD</span></h3>
+          <p>
+            Our estimate is based on data transfer size, using the Sustainable Web Design model.
+            We assume <code>0.5g CO2</code> per average page view (<code>~2MB</code>), factoring
+            in data center energy, network transmission, and end-user device consumption.
+            The formula scales linearly with page weight: a <code>4MB</code> page produces roughly
+            twice the emissions of a <code>2MB</code> page. Green hosting can reduce this by up to 90%.
+          </p>
+        </div>
+        <div class="carbon-info-card">
+          <h3>The Rating Scale <span class="badge">A+ to F</span></h3>
+          <p>
+            Websites are graded from <strong>A+</strong> (under <code>0.1g CO2</code>, exceptionally
+            clean) to <strong>F</strong> (over <code>1.5g CO2</code>, very heavy). The average website
+            scores around a <strong>C</strong> or <strong>D</strong>. Getting to an A or better typically
+            means keeping total page weight under <code>500KB</code>, using efficient images, minimizing
+            JavaScript, and choosing green hosting providers.
+          </p>
+        </div>
+        <div class="carbon-info-card">
+          <h3>How to Reduce Your Website's Carbon Footprint</h3>
+          <p>
+            Key strategies include: <strong>compress and optimize images</strong> using WebP or AVIF
+            format, <strong>minimize JavaScript</strong> bundles and remove unused code,
+            <strong>enable caching</strong> so repeat visitors transfer less data,
+            <strong>use a CDN</strong> to reduce network distance, <strong>choose green hosting</strong>
+            powered by renewable energy, and <strong>implement lazy loading</strong> so resources
+            are only fetched when needed. Every kilobyte saved reduces emissions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      var urlInput = document.getElementById('url-input');
+      var resultsBody = document.getElementById('results-body');
+      var queryTimeEl = document.getElementById('query-time');
+      var checkBtn = document.getElementById('check-btn');
+
+      // API configuration
+      var API_DOMAIN = '65-109-129-230.sslip.io';
+      var HETZNER_IP = '65.109.129.230';
+      var apiBase;
+      if (window.location.hostname === HETZNER_IP || window.location.hostname === API_DOMAIN || window.location.hostname === 'localhost') {
+        apiBase = '/api/headers';
+      } else {
+        apiBase = 'https://' + API_DOMAIN + '/api/headers';
+      }
+
+      // Constants for carbon calculation (Sustainable Web Design Model)
+      var AVG_PAGE_SIZE_BYTES = 2000000; // 2MB average page
+      var CO2_PER_GB = 0.25; // grams CO2 per GB (combined data center + network + device)
+      var ENERGY_PER_GB = 0.81; // kWh per GB transferred
+      var RETURNING_VISITOR_FACTOR = 0.02; // 2% data for cached return visits
+      var FIRST_VISIT_FACTOR = 1.0;
+      var AVG_MONTHLY_VIEWS = 10000; // assumed monthly page views for projections
+
+      // Enter key triggers check
+      urlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          performCheck();
+        }
+      });
+
+      // Focus input on load
+      urlInput.focus();
+
+      function performCheck() {
+        var url = urlInput.value.trim();
+
+        if (!url) {
+          showError('Please enter a URL or domain name.', '');
+          return;
+        }
+
+        var cleanUrl = url.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+        urlInput.value = cleanUrl;
+
+        if (!/^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}(\/.*)?$/.test(cleanUrl) && !/^\d{1,3}(\.\d{1,3}){3}(\/.*)?$/.test(cleanUrl)) {
+          showError('Invalid URL format.', 'Enter a valid domain like example.com');
+          return;
+        }
+
+        showLoading(cleanUrl);
+        checkBtn.disabled = true;
+        checkBtn.textContent = 'Analyzing...';
+
+        var startTime = performance.now();
+
+        // Fetch headers from the API to get content-length
+        var fetchUrl = apiBase + '?url=' + encodeURIComponent('https://' + cleanUrl);
+
+        fetch(fetchUrl, { mode: 'cors' })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Analyzed in ' + elapsed + 's';
+            processResults(data, cleanUrl);
+          })
+          .catch(function(err) {
+            var elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            queryTimeEl.textContent = 'Failed after ' + elapsed + 's';
+            showError(
+              'Could not reach the analysis API.',
+              'Error: ' + err.message + '. The API server may be unreachable. Try again later.'
+            );
+          })
+          .finally(function() {
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Analyze';
+          });
+      }
+      window.performCheck = performCheck;
+
+      function processResults(data, url) {
+        if (data.error) {
+          showError('API Error: ' + data.error, data.detail || '');
+          return;
+        }
+
+        // Extract page size from headers
+        var headers = data.headers || data;
+        var contentLength = 0;
+        var server = '';
+        var contentType = '';
+        var contentEncoding = '';
+
+        // Headers may come as object or array
+        if (headers) {
+          for (var key in headers) {
+            if (headers.hasOwnProperty(key)) {
+              var lk = key.toLowerCase();
+              if (lk === 'content-length') {
+                contentLength = parseInt(headers[key], 10) || 0;
+              } else if (lk === 'server') {
+                server = headers[key];
+              } else if (lk === 'content-type') {
+                contentType = headers[key];
+              } else if (lk === 'content-encoding') {
+                contentEncoding = headers[key];
+              }
+            }
+          }
+        }
+
+        // If no content-length, estimate based on average
+        if (!contentLength || contentLength < 100) {
+          // HTML pages often don't send content-length; estimate ~1.5MB for a typical page
+          contentLength = 1500000;
+        }
+
+        // If content is compressed, estimate the actual transfer is ~3x compressed
+        if (contentEncoding && (contentEncoding.indexOf('gzip') !== -1 || contentEncoding.indexOf('br') !== -1)) {
+          // content-length shows compressed size, but actual transfer cost is the compressed size
+          // (good! compression helps)
+        }
+
+        // Calculate carbon metrics
+        var sizeGB = contentLength / (1024 * 1024 * 1024);
+        var co2PerView = sizeGB * CO2_PER_GB * 1000; // convert to mg then... actually let's use grams directly
+
+        // Sustainable Web Design formula:
+        // CO2 per view = transfer size (GB) * energy intensity (kWh/GB) * carbon intensity (g CO2/kWh)
+        var GLOBAL_GRID_INTENSITY = 442; // g CO2 per kWh (global average)
+        co2PerView = sizeGB * ENERGY_PER_GB * GLOBAL_GRID_INTENSITY;
+
+        // Weighted average considering returning visitors (75% return, 25% new)
+        var adjustedCo2 = (co2PerView * FIRST_VISIT_FACTOR * 0.25) + (co2PerView * RETURNING_VISITOR_FACTOR * 0.75);
+        // For display, show first-visit CO2 (worst case, most meaningful to users)
+        var displayCo2 = co2PerView;
+
+        var monthlyCo2 = displayCo2 * AVG_MONTHLY_VIEWS; // grams
+        var annualCo2 = monthlyCo2 * 12;
+
+        // Determine grade
+        var grade = getGrade(displayCo2);
+        var gradeInfo = getGradeInfo(grade);
+
+        // Compare to average
+        var avgCo2PerView = (AVG_PAGE_SIZE_BYTES / (1024 * 1024 * 1024)) * ENERGY_PER_GB * GLOBAL_GRID_INTENSITY;
+        var percentOfAvg = (displayCo2 / avgCo2PerView) * 100;
+        var cleanerThanPercent = Math.max(0, Math.min(99, Math.round(100 - percentOfAvg)));
+        if (displayCo2 < avgCo2PerView) {
+          cleanerThanPercent = Math.round((1 - displayCo2 / avgCo2PerView) * 100);
+        } else {
+          cleanerThanPercent = -Math.round((displayCo2 / avgCo2PerView - 1) * 100);
+        }
+
+        renderResults({
+          url: url,
+          pageSize: contentLength,
+          co2PerView: displayCo2,
+          monthlyCo2: monthlyCo2,
+          annualCo2: annualCo2,
+          grade: grade,
+          gradeInfo: gradeInfo,
+          percentOfAvg: percentOfAvg,
+          cleanerThanPercent: cleanerThanPercent,
+          server: server,
+          contentType: contentType,
+          contentEncoding: contentEncoding,
+          avgCo2: avgCo2PerView
+        });
+      }
+
+      function getGrade(co2g) {
+        if (co2g <= 0.05) return 'A+';
+        if (co2g <= 0.1) return 'A';
+        if (co2g <= 0.2) return 'B';
+        if (co2g <= 0.35) return 'C';
+        if (co2g <= 0.55) return 'D';
+        if (co2g <= 0.85) return 'E';
+        return 'F';
+      }
+
+      function getGradeInfo(grade) {
+        var info = {
+          'A+': { label: 'Exceptionally Clean', color: '#059669', class: 'grade-aplus', score: 98 },
+          'A':  { label: 'Very Clean', color: '#10b981', class: 'grade-a', score: 85 },
+          'B':  { label: 'Cleaner Than Average', color: '#22c55e', class: 'grade-b', score: 72 },
+          'C':  { label: 'About Average', color: '#84cc16', class: 'grade-c', score: 55 },
+          'D':  { label: 'Dirtier Than Average', color: '#f59e0b', class: 'grade-d', score: 38 },
+          'E':  { label: 'Very Dirty', color: '#f97316', class: 'grade-e', score: 22 },
+          'F':  { label: 'Extremely Dirty', color: '#ef4444', class: 'grade-f', score: 8 }
+        };
+        return info[grade] || info['F'];
+      }
+
+      function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        var k = 1024;
+        var sizes = ['B', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
+      function formatCO2(grams) {
+        if (grams < 1) {
+          return (grams * 1000).toFixed(1) + ' mg';
+        } else if (grams < 1000) {
+          return grams.toFixed(2) + ' g';
+        } else {
+          return (grams / 1000).toFixed(2) + ' kg';
+        }
+      }
+
+      function renderResults(data) {
+        var html = '';
+
+        // Score badge with gauge
+        html += '<div class="carbon-score-badge">';
+        html += '<div class="score-url">' + escapeHtml(data.url) + '</div>';
+
+        // SVG Gauge
+        var gaugeScore = data.gradeInfo.score;
+        var gaugeColor = data.gradeInfo.color;
+        // Arc: from 180deg to 0deg (left to right semicircle)
+        var radius = 85;
+        var circumference = Math.PI * radius; // semicircle
+        var dashOffset = circumference - (gaugeScore / 100) * circumference;
+
+        html += '<div class="gauge-container">';
+        html += '<svg class="gauge-svg" viewBox="0 0 220 130">';
+        // Background arc
+        html += '<path class="gauge-bg" d="M 20 120 A 85 85 0 0 1 200 120" />';
+        // Filled arc
+        html += '<path class="gauge-fill" d="M 20 120 A 85 85 0 0 1 200 120" ';
+        html += 'stroke="' + gaugeColor + '" ';
+        html += 'stroke-dasharray="' + circumference.toFixed(1) + '" ';
+        html += 'stroke-dashoffset="' + dashOffset.toFixed(1) + '" />';
+        html += '</svg>';
+        html += '<div class="gauge-label">';
+        html += '<div class="gauge-grade ' + data.gradeInfo.class + '">' + escapeHtml(data.grade) + '</div>';
+        html += '<div class="gauge-subtitle">' + escapeHtml(data.gradeInfo.label) + '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Summary text
+        var co2Text = formatCO2(data.co2PerView);
+        html += '<div class="carbon-summary">This page produces approximately ' + co2Text + ' of CO2 per visit</div>';
+
+        if (data.cleanerThanPercent > 0) {
+          html += '<p class="carbon-summary-detail">This is cleaner than approximately ' + data.cleanerThanPercent + '% of web pages tested.</p>';
+        } else if (data.cleanerThanPercent < 0) {
+          html += '<p class="carbon-summary-detail">This page produces ' + Math.abs(data.cleanerThanPercent) + '% more CO2 than the average website.</p>';
+        } else {
+          html += '<p class="carbon-summary-detail">This is about average for the web.</p>';
+        }
+
+        html += '</div>';
+
+        // Breakdown cards
+        html += '<div class="carbon-breakdown">';
+
+        // Page Size
+        var sizeClass = data.pageSize < 500000 ? 'green' : (data.pageSize < 2000000 ? 'yellow' : 'red');
+        html += '<div class="breakdown-card">';
+        html += '<div class="breakdown-label">Page Size</div>';
+        html += '<div class="breakdown-value ' + sizeClass + '">' + formatBytes(data.pageSize) + '</div>';
+        html += '</div>';
+
+        // CO2 per view
+        var co2Class = data.co2PerView < 0.2 ? 'green' : (data.co2PerView < 0.5 ? 'yellow' : 'red');
+        html += '<div class="breakdown-card">';
+        html += '<div class="breakdown-label">CO2 per Visit</div>';
+        html += '<div class="breakdown-value ' + co2Class + '">' + formatCO2(data.co2PerView) + '</div>';
+        html += '</div>';
+
+        // Monthly CO2
+        html += '<div class="breakdown-card">';
+        html += '<div class="breakdown-label">Monthly CO2 (10k views)</div>';
+        html += '<div class="breakdown-value">' + formatCO2(data.monthlyCo2) + '</div>';
+        html += '</div>';
+
+        // Annual CO2
+        html += '<div class="breakdown-card">';
+        html += '<div class="breakdown-label">Annual CO2 (10k views/mo)</div>';
+        html += '<div class="breakdown-value">' + formatCO2(data.annualCo2) + '</div>';
+        html += '</div>';
+
+        // Energy per visit
+        var energyPerVisit = (data.pageSize / (1024 * 1024 * 1024)) * ENERGY_PER_GB * 1000; // Wh
+        html += '<div class="breakdown-card">';
+        html += '<div class="breakdown-label">Energy per Visit</div>';
+        html += '<div class="breakdown-value">' + energyPerVisit.toFixed(4) + ' Wh</div>';
+        html += '</div>';
+
+        // Trees needed to offset (1 tree absorbs ~21kg CO2/year)
+        var treesNeeded = data.annualCo2 / 21000;
+        html += '<div class="breakdown-card">';
+        html += '<div class="breakdown-label">Trees to Offset (annual)</div>';
+        html += '<div class="breakdown-value">' + (treesNeeded < 0.01 ? '< 0.01' : treesNeeded.toFixed(2)) + ' trees</div>';
+        html += '</div>';
+
+        html += '</div>';
+
+        // Comparison bar
+        html += '<div class="carbon-comparison">';
+        html += '<div class="comparison-title">Compared to the Average Website</div>';
+        var barPercent = Math.min(200, data.percentOfAvg);
+        var barWidth = Math.min(100, barPercent / 2);
+        var barColor = data.co2PerView < data.avgCo2 * 0.5 ? '#22c55e' :
+                       (data.co2PerView < data.avgCo2 ? '#84cc16' :
+                       (data.co2PerView < data.avgCo2 * 1.5 ? '#f59e0b' : '#ef4444'));
+
+        html += '<div class="comparison-bar-wrapper">';
+        // Average marker at 50%
+        html += '<div class="comparison-avg-marker" style="left: 50%"></div>';
+        html += '<div class="comparison-bar-fill" style="width: ' + barWidth + '%; background: ' + barColor + ';">';
+        html += escapeHtml(data.url);
+        html += '</div>';
+        html += '</div>';
+
+        html += '<div class="comparison-label-row">';
+        html += '<span class="site-label">' + formatCO2(data.co2PerView) + ' per view</span>';
+        html += '<span>Average: ' + formatCO2(data.avgCo2) + ' per view</span>';
+        html += '</div>';
+        html += '</div>';
+
+        // Tips
+        html += '<div class="carbon-tips">';
+        html += '<h3>Tips to Reduce Your Carbon Footprint</h3>';
+        html += '<ul>';
+
+        var tips = getTips(data);
+        for (var i = 0; i < tips.length; i++) {
+          html += '<li>' + escapeHtml(tips[i]) + '</li>';
+        }
+
+        html += '</ul>';
+        html += '</div>';
+
+        // Share button
+        html += '<div class="share-section">';
+        html += '<button class="btn-share" onclick="shareScore()">Share Your Score</button>';
+        html += '</div>';
+
+        resultsBody.innerHTML = html;
+
+        // Store data for sharing
+        window._carbonData = data;
+      }
+
+      function getTips(data) {
+        var tips = [];
+
+        if (data.pageSize > 2000000) {
+          tips.push('Your page is over 2MB. Aim for under 1MB by compressing images and removing unused resources.');
+        }
+        if (data.pageSize > 500000) {
+          tips.push('Use modern image formats like WebP or AVIF to reduce image sizes by 30-50%.');
+          tips.push('Implement lazy loading for images and videos below the fold.');
+        }
+        if (!data.contentEncoding || data.contentEncoding.indexOf('br') === -1) {
+          tips.push('Enable Brotli compression on your server for 15-20% smaller transfers than Gzip.');
+        }
+        tips.push('Minimize and tree-shake JavaScript bundles. Remove unused CSS.');
+        tips.push('Use a CDN to serve content from edge locations closer to your users.');
+        tips.push('Consider switching to a green hosting provider powered by renewable energy.');
+        tips.push('Set long cache headers so returning visitors download fewer resources.');
+        if (data.pageSize > 1000000) {
+          tips.push('Audit your page with Lighthouse and aim for a total page weight under 500KB.');
+        }
+        tips.push('Use system fonts or limit web font weights to reduce font file downloads.');
+
+        return tips.slice(0, 7);
+      }
+
+      function showLoading(url) {
+        resultsBody.innerHTML =
+          '<div class="carbon-loading">' +
+            '<div class="spinner"></div>' +
+            '<div class="spinner-text">Analyzing carbon footprint of <strong>' + escapeHtml(url) + '</strong>...</div>' +
+          '</div>';
+      }
+
+      function showError(title, detail) {
+        resultsBody.innerHTML =
+          '<div class="carbon-error">' +
+            '<strong>' + escapeHtml(title) + '</strong>' +
+            (detail ? '<div class="fallback-hint">' + escapeHtml(detail) + '</div>' : '') +
+          '</div>';
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+      window.shareScore = function() {
+        var data = window._carbonData;
+        if (!data) return;
+
+        var text = 'My website ' + data.url + ' scored ' + data.grade + ' on the carbon footprint test!\n';
+        text += formatCO2(data.co2PerView) + ' CO2 per visit — ';
+
+        if (data.cleanerThanPercent > 0) {
+          text += 'cleaner than ' + data.cleanerThanPercent + '% of the web.';
+        } else {
+          text += data.gradeInfo.label.toLowerCase() + '.';
+        }
+
+        text += '\n\nTest your site: https://zerokit.dev/tools/carbon.html';
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            showToast('Score copied to clipboard!');
+          }).catch(function() {
+            fallbackCopy(text);
+          });
+        } else {
+          fallbackCopy(text);
+        }
+      };
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('Score copied to clipboard!');
+        } catch (e) {
+          showToast('Could not copy. Please copy manually.');
+        }
+        document.body.removeChild(ta);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
