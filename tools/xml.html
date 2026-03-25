@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XML Formatter & Validator - DevTools.fm</title>
+  <meta name="description" content="Format, validate, and minify XML online. Free, fast, no signup. Syntax highlighting and error detection with line numbers.">
+  <link rel="canonical" href="https://zerokit.dev/tools/xml.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .output-container {
+      position: relative;
+      flex: 1;
+      overflow: auto;
+    }
+    .output-container pre {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 400px;
+    }
+    .xml-tag { color: #ef4444; }
+    .xml-attr { color: #f59e0b; }
+    .xml-value { color: #22c55e; }
+    .xml-text { color: var(--text); }
+    .xml-comment { color: var(--text-muted); font-style: italic; }
+    .xml-cdata { color: #06b6d4; }
+    .xml-prolog { color: #a78bfa; }
+    .xml-entity { color: #f472b6; }
+    .error-line {
+      display: block;
+      padding: 2px 0;
+    }
+    .error-line-number {
+      color: var(--error);
+      font-weight: 600;
+      user-select: none;
+      margin-right: 8px;
+    }
+    .error-pointer {
+      color: var(--error);
+      font-weight: 700;
+    }
+    .error-msg {
+      color: var(--error);
+      font-weight: 600;
+    }
+    .view-toggle {
+      display: flex;
+      gap: 0;
+      margin-left: auto;
+    }
+    .view-toggle button {
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-family: var(--font);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .view-toggle button:first-child { border-radius: 4px 0 0 4px; }
+    .view-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+    .view-toggle button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>XML Formatter & Validator</h1>
+    <p class="description">Paste your XML to format, validate, or minify. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="formatXML()">Format</button>
+        <button class="btn" onclick="minifyXML()">Minify</button>
+        <button class="btn" onclick="validateXML()">Validate</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="options-row">
+        <label>Indent:
+          <select id="indent">
+            <option value="2" selected>2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="tab">Tab</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste XML here...
+
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <item id="1">Hello</item>
+</root>'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+          <div class="view-toggle">
+            <button class="active" onclick="setView('highlighted')" id="btn-highlighted">Highlighted</button>
+            <button onclick="setView('plain')" id="btn-plain">Plain</button>
+          </div>
+        </div>
+        <textarea class="tool-textarea" id="output-plain" placeholder="Formatted output will appear here..." style="display:none;" readonly></textarea>
+        <div class="output-container" id="output-highlighted">
+          <pre id="output-pre"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $outputPlain = document.getElementById('output-plain');
+    const $outputPre = document.getElementById('output-pre');
+    const $outputHighlighted = document.getElementById('output-highlighted');
+    const $status = document.getElementById('status');
+    const $indent = document.getElementById('indent');
+    let currentView = 'highlighted';
+    let lastPlainOutput = '';
+
+    function getIndentStr() {
+      const v = $indent.value;
+      return v === 'tab' ? '\t' : ' '.repeat(Number(v));
+    }
+
+    // ---- XML Parser & Formatter (pure JS, no DOMParser for formatting) ----
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function parseAndFormatXML(raw, indentStr) {
+      // Use DOMParser to validate, then format manually for control
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(raw, 'application/xml');
+      const errorNode = doc.querySelector('parsererror');
+      if (errorNode) {
+        const errText = errorNode.textContent;
+        throw new XMLParseError(errText, raw);
+      }
+
+      // Manual formatting for precise output
+      return formatXMLString(raw, indentStr);
+    }
+
+    class XMLParseError extends Error {
+      constructor(message, source) {
+        super(message);
+        this.name = 'XMLParseError';
+        this.source = source;
+        this.extractLineInfo();
+      }
+      extractLineInfo() {
+        // Try to extract line number from parser error message
+        const lineMatch = this.message.match(/line\s+(\d+)/i);
+        const colMatch = this.message.match(/column\s+(\d+)/i);
+        this.line = lineMatch ? parseInt(lineMatch[1]) : null;
+        this.column = colMatch ? parseInt(colMatch[1]) : null;
+      }
+    }
+
+    function formatXMLString(xml, indentStr) {
+      // Normalize line endings
+      xml = xml.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+      // Tokenize the XML into meaningful pieces
+      const tokens = tokenizeXML(xml);
+      let output = '';
+      let depth = 0;
+      let lastType = '';
+
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        if (token.type === 'prolog' || token.type === 'processing') {
+          output += indentStr.repeat(depth) + token.value.trim() + '\n';
+        } else if (token.type === 'comment') {
+          const comment = token.value.trim();
+          if (comment.includes('\n')) {
+            const lines = comment.split('\n');
+            output += indentStr.repeat(depth) + lines[0].trim() + '\n';
+            for (let l = 1; l < lines.length; l++) {
+              output += indentStr.repeat(depth) + '   ' + lines[l].trim() + '\n';
+            }
+          } else {
+            output += indentStr.repeat(depth) + comment + '\n';
+          }
+        } else if (token.type === 'cdata') {
+          output += indentStr.repeat(depth) + token.value.trim() + '\n';
+        } else if (token.type === 'open') {
+          output += indentStr.repeat(depth) + token.value.trim() + '\n';
+          depth++;
+        } else if (token.type === 'close') {
+          depth = Math.max(0, depth - 1);
+          output += indentStr.repeat(depth) + token.value.trim() + '\n';
+        } else if (token.type === 'selfclose') {
+          output += indentStr.repeat(depth) + token.value.trim() + '\n';
+        } else if (token.type === 'text') {
+          const text = token.value.trim();
+          if (text) {
+            // Check if this text is between an open and close tag (inline content)
+            const prev = tokens[i - 1];
+            const next = tokens[i + 1];
+            if (prev && next && prev.type === 'open' && next.type === 'close') {
+              // Inline: remove last newline, append text + close tag
+              output = output.replace(/\n$/, '');
+              output = output.substring(0, output.lastIndexOf(prev.value.trim()));
+              depth = Math.max(0, depth - 1);
+              output += indentStr.repeat(depth) + prev.value.trim() + text + next.value.trim() + '\n';
+              i++; // skip close tag
+            } else {
+              output += indentStr.repeat(depth) + text + '\n';
+            }
+          }
+        } else if (token.type === 'doctype') {
+          output += indentStr.repeat(depth) + token.value.trim() + '\n';
+        }
+        lastType = token.type;
+      }
+
+      return output.replace(/\n+$/, '\n').trimEnd();
+    }
+
+    function tokenizeXML(xml) {
+      const tokens = [];
+      let i = 0;
+      const len = xml.length;
+
+      while (i < len) {
+        if (xml[i] === '<') {
+          if (xml.substring(i, i + 4) === '<!--') {
+            // Comment
+            const end = xml.indexOf('-->', i);
+            if (end === -1) {
+              tokens.push({ type: 'comment', value: xml.substring(i) });
+              break;
+            }
+            tokens.push({ type: 'comment', value: xml.substring(i, end + 3) });
+            i = end + 3;
+          } else if (xml.substring(i, i + 9) === '<![CDATA[') {
+            // CDATA
+            const end = xml.indexOf(']]>', i);
+            if (end === -1) {
+              tokens.push({ type: 'cdata', value: xml.substring(i) });
+              break;
+            }
+            tokens.push({ type: 'cdata', value: xml.substring(i, end + 3) });
+            i = end + 3;
+          } else if (xml.substring(i, i + 2) === '<?') {
+            // Processing instruction or XML declaration
+            const end = xml.indexOf('?>', i);
+            if (end === -1) {
+              tokens.push({ type: 'prolog', value: xml.substring(i) });
+              break;
+            }
+            const tag = xml.substring(i, end + 2);
+            tokens.push({ type: tag.startsWith('<?xml') ? 'prolog' : 'processing', value: tag });
+            i = end + 2;
+          } else if (xml.substring(i, i + 9).toUpperCase() === '<!DOCTYPE') {
+            // DOCTYPE
+            let depth = 0;
+            let j = i;
+            while (j < len) {
+              if (xml[j] === '<' || xml[j] === '[') depth++;
+              if (xml[j] === '>' || xml[j] === ']') depth--;
+              if (xml[j] === '>' && depth <= 0) break;
+              j++;
+            }
+            tokens.push({ type: 'doctype', value: xml.substring(i, j + 1) });
+            i = j + 1;
+          } else if (xml[i + 1] === '/') {
+            // Closing tag
+            const end = xml.indexOf('>', i);
+            if (end === -1) {
+              tokens.push({ type: 'close', value: xml.substring(i) });
+              break;
+            }
+            tokens.push({ type: 'close', value: xml.substring(i, end + 1) });
+            i = end + 1;
+          } else {
+            // Opening or self-closing tag
+            const end = findTagEnd(xml, i);
+            if (end === -1) {
+              tokens.push({ type: 'open', value: xml.substring(i) });
+              break;
+            }
+            const tag = xml.substring(i, end + 1);
+            if (tag.endsWith('/>')) {
+              tokens.push({ type: 'selfclose', value: tag });
+            } else {
+              tokens.push({ type: 'open', value: tag });
+            }
+            i = end + 1;
+          }
+        } else {
+          // Text content
+          const end = xml.indexOf('<', i);
+          if (end === -1) {
+            const text = xml.substring(i);
+            if (text.trim()) tokens.push({ type: 'text', value: text });
+            break;
+          }
+          const text = xml.substring(i, end);
+          if (text.trim()) tokens.push({ type: 'text', value: text });
+          i = end;
+        }
+      }
+      return tokens;
+    }
+
+    function findTagEnd(xml, start) {
+      let inQuote = false;
+      let quoteChar = '';
+      for (let i = start + 1; i < xml.length; i++) {
+        if (inQuote) {
+          if (xml[i] === quoteChar) inQuote = false;
+        } else {
+          if (xml[i] === '"' || xml[i] === "'") {
+            inQuote = true;
+            quoteChar = xml[i];
+          } else if (xml[i] === '>') {
+            return i;
+          }
+        }
+      }
+      return -1;
+    }
+
+    // ---- Syntax Highlighting ----
+
+    function highlightXML(xml) {
+      // Escape HTML first, then apply highlighting via regex on the escaped text
+      // We process the raw XML and build highlighted HTML directly
+      const result = [];
+      let i = 0;
+      const len = xml.length;
+
+      while (i < len) {
+        if (xml[i] === '<') {
+          if (xml.substring(i, i + 4) === '<!--') {
+            const end = xml.indexOf('-->', i);
+            if (end === -1) {
+              result.push('<span class="xml-comment">' + escapeHtml(xml.substring(i)) + '</span>');
+              break;
+            }
+            result.push('<span class="xml-comment">' + escapeHtml(xml.substring(i, end + 3)) + '</span>');
+            i = end + 3;
+          } else if (xml.substring(i, i + 9) === '<![CDATA[') {
+            const end = xml.indexOf(']]>', i);
+            if (end === -1) {
+              result.push('<span class="xml-cdata">' + escapeHtml(xml.substring(i)) + '</span>');
+              break;
+            }
+            result.push('<span class="xml-cdata">' + escapeHtml(xml.substring(i, end + 3)) + '</span>');
+            i = end + 3;
+          } else if (xml.substring(i, i + 2) === '<?') {
+            const end = xml.indexOf('?>', i);
+            if (end === -1) {
+              result.push('<span class="xml-prolog">' + escapeHtml(xml.substring(i)) + '</span>');
+              break;
+            }
+            result.push(highlightTag(xml.substring(i, end + 2), 'xml-prolog'));
+            i = end + 2;
+          } else if (xml.substring(i, i + 9).toUpperCase() === '<!DOCTYPE') {
+            let depth = 0;
+            let j = i;
+            while (j < len) {
+              if (xml[j] === '<' || xml[j] === '[') depth++;
+              if (xml[j] === '>' || xml[j] === ']') depth--;
+              if (xml[j] === '>' && depth <= 0) break;
+              j++;
+            }
+            result.push('<span class="xml-prolog">' + escapeHtml(xml.substring(i, j + 1)) + '</span>');
+            i = j + 1;
+          } else {
+            // Regular tag (open, close, self-closing)
+            const end = findTagEnd(xml, i);
+            if (end === -1) {
+              result.push(highlightTag(xml.substring(i), 'xml-tag'));
+              break;
+            }
+            result.push(highlightTag(xml.substring(i, end + 1), 'xml-tag'));
+            i = end + 1;
+          }
+        } else {
+          // Text content
+          const end = xml.indexOf('<', i);
+          if (end === -1) {
+            const text = xml.substring(i);
+            result.push(highlightTextContent(text));
+            break;
+          }
+          const text = xml.substring(i, end);
+          result.push(highlightTextContent(text));
+          i = end;
+        }
+      }
+
+      return result.join('');
+    }
+
+    function highlightTextContent(text) {
+      if (!text.trim()) return escapeHtml(text);
+      // Highlight entities within text
+      return '<span class="xml-text">' + escapeHtml(text).replace(/(&amp;(?:#\d+|#x[\da-fA-F]+|\w+);)/g, '<span class="xml-entity">$1</span>') + '</span>';
+    }
+
+    function highlightTag(tag, baseClass) {
+      // For processing instructions and prolog
+      if (baseClass === 'xml-prolog') {
+        return '<span class="xml-prolog">' + highlightAttributes(tag) + '</span>';
+      }
+
+      // Parse the tag to highlight parts
+      return highlightAttributes(tag);
+    }
+
+    function highlightAttributes(tag) {
+      // Match: tag name, attributes, and structure
+      let result = '';
+      let i = 0;
+      const len = tag.length;
+
+      // Opening bracket and possible /
+      if (tag.startsWith('</')) {
+        result += '<span class="xml-tag">' + escapeHtml('</') + '</span>';
+        i = 2;
+      } else if (tag.startsWith('<?')) {
+        result += '<span class="xml-prolog">' + escapeHtml('<?') + '</span>';
+        i = 2;
+      } else {
+        result += '<span class="xml-tag">' + escapeHtml('<') + '</span>';
+        i = 1;
+      }
+
+      // Tag name
+      let nameEnd = i;
+      while (nameEnd < len && !/[\s/>?]/.test(tag[nameEnd])) nameEnd++;
+      result += '<span class="xml-tag">' + escapeHtml(tag.substring(i, nameEnd)) + '</span>';
+      i = nameEnd;
+
+      // Attributes and rest
+      while (i < len) {
+        // Whitespace
+        if (/\s/.test(tag[i])) {
+          result += tag[i];
+          i++;
+          continue;
+        }
+
+        // End of tag
+        if (tag[i] === '>' || tag.substring(i) === '/>' || tag.substring(i) === '?>') {
+          const ending = tag.substring(i);
+          if (ending.startsWith('?>')) {
+            result += '<span class="xml-prolog">' + escapeHtml('?>') + '</span>';
+          } else {
+            result += '<span class="xml-tag">' + escapeHtml(ending) + '</span>';
+          }
+          break;
+        }
+
+        // Attribute name
+        let attrEnd = i;
+        while (attrEnd < len && !/[\s=/>?]/.test(tag[attrEnd])) attrEnd++;
+        if (attrEnd > i) {
+          result += '<span class="xml-attr">' + escapeHtml(tag.substring(i, attrEnd)) + '</span>';
+          i = attrEnd;
+        }
+
+        // Skip whitespace
+        while (i < len && /\s/.test(tag[i])) { result += tag[i]; i++; }
+
+        // =
+        if (i < len && tag[i] === '=') {
+          result += '<span class="xml-tag">=</span>';
+          i++;
+        }
+
+        // Skip whitespace
+        while (i < len && /\s/.test(tag[i])) { result += tag[i]; i++; }
+
+        // Attribute value
+        if (i < len && (tag[i] === '"' || tag[i] === "'")) {
+          const quote = tag[i];
+          const valEnd = tag.indexOf(quote, i + 1);
+          if (valEnd !== -1) {
+            result += '<span class="xml-value">' + escapeHtml(tag.substring(i, valEnd + 1)) + '</span>';
+            i = valEnd + 1;
+          } else {
+            result += '<span class="xml-value">' + escapeHtml(tag.substring(i)) + '</span>';
+            break;
+          }
+        }
+      }
+
+      return result;
+    }
+
+    // ---- Minify ----
+
+    function minifyXMLString(xml) {
+      // Validate first
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xml, 'application/xml');
+      const errorNode = doc.querySelector('parsererror');
+      if (errorNode) {
+        throw new XMLParseError(errorNode.textContent, xml);
+      }
+
+      // Remove whitespace between tags, preserve whitespace in text content
+      // Tokenize and rebuild without unnecessary whitespace
+      const tokens = tokenizeXML(xml);
+      let output = '';
+
+      for (const token of tokens) {
+        if (token.type === 'text') {
+          // Keep text content but trim leading/trailing whitespace
+          const text = token.value.trim();
+          if (text) output += text;
+        } else {
+          output += token.value.trim();
+        }
+      }
+
+      return output;
+    }
+
+    // ---- Validation ----
+
+    function validateXMLDetailed(raw) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(raw, 'application/xml');
+      const errorNode = doc.querySelector('parsererror');
+
+      if (!errorNode) {
+        return { valid: true, message: 'Valid XML' };
+      }
+
+      const errText = errorNode.textContent;
+      return {
+        valid: false,
+        message: errText,
+        source: raw
+      };
+    }
+
+    function formatValidationError(result) {
+      if (result.valid) return null;
+
+      const lines = result.source.split('\n');
+      const lineMatch = result.message.match(/line\s+(\d+)/i);
+      const colMatch = result.message.match(/column\s+(\d+)/i);
+      const errorLine = lineMatch ? parseInt(lineMatch[1]) : null;
+      const errorCol = colMatch ? parseInt(colMatch[1]) : null;
+
+      // Clean up error message
+      let cleanMsg = result.message
+        .replace(/This page contains the following errors:/, '')
+        .replace(/Below is a rendering of the page up to the first error\./, '')
+        .trim();
+
+      let html = '<span class="error-msg">Error: ' + escapeHtml(cleanMsg) + '</span>\n\n';
+
+      if (errorLine && lines.length > 0) {
+        const start = Math.max(0, errorLine - 4);
+        const end = Math.min(lines.length, errorLine + 3);
+
+        for (let i = start; i < end; i++) {
+          const lineNum = (i + 1).toString().padStart(4, ' ');
+          const isError = (i + 1) === errorLine;
+          const prefix = isError ? '>>> ' : '    ';
+
+          if (isError) {
+            html += '<span class="error-line"><span class="error-line-number">' + prefix + lineNum + ' |</span> ' + escapeHtml(lines[i]) + '</span>\n';
+            if (errorCol) {
+              const pointer = ' '.repeat(prefix.length + lineNum.length + 3 + errorCol - 1) + '^';
+              html += '<span class="error-pointer">' + pointer + '</span>\n';
+            }
+          } else {
+            html += '<span class="error-line"><span style="color:var(--text-muted)">' + prefix + lineNum + ' |</span> ' + escapeHtml(lines[i]) + '</span>\n';
+          }
+        }
+      }
+
+      return html;
+    }
+
+    // ---- View Toggle ----
+
+    function setView(view) {
+      currentView = view;
+      document.getElementById('btn-highlighted').classList.toggle('active', view === 'highlighted');
+      document.getElementById('btn-plain').classList.toggle('active', view === 'plain');
+
+      if (view === 'plain') {
+        $outputPlain.style.display = '';
+        $outputHighlighted.style.display = 'none';
+        $outputPlain.value = lastPlainOutput;
+      } else {
+        $outputPlain.style.display = 'none';
+        $outputHighlighted.style.display = '';
+      }
+    }
+
+    // ---- Main Actions ----
+
+    function formatXML() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+      try {
+        const formatted = parseAndFormatXML(raw, getIndentStr());
+        lastPlainOutput = formatted;
+        $outputPlain.value = formatted;
+        $outputPre.innerHTML = highlightXML(formatted);
+        showStatus('Valid XML', true);
+      } catch (e) {
+        if (e instanceof XMLParseError) {
+          lastPlainOutput = '';
+          $outputPlain.value = '';
+          const errorHtml = formatValidationError({ valid: false, message: e.message, source: raw });
+          $outputPre.innerHTML = errorHtml || '<span class="error-msg">' + escapeHtml(e.message) + '</span>';
+          showStatus('Invalid XML', false);
+        } else {
+          showStatus('Error: ' + e.message, false);
+        }
+      }
+    }
+
+    function minifyXML() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+      try {
+        const minified = minifyXMLString(raw);
+        lastPlainOutput = minified;
+        $outputPlain.value = minified;
+        $outputPre.innerHTML = highlightXML(minified);
+        const originalSize = new Blob([raw]).size;
+        const minifiedSize = new Blob([minified]).size;
+        const savings = ((1 - minifiedSize / originalSize) * 100).toFixed(1);
+        showStatus('Minified (' + savings + '% smaller)', true);
+      } catch (e) {
+        if (e instanceof XMLParseError) {
+          lastPlainOutput = '';
+          $outputPlain.value = '';
+          const errorHtml = formatValidationError({ valid: false, message: e.message, source: raw });
+          $outputPre.innerHTML = errorHtml || '<span class="error-msg">' + escapeHtml(e.message) + '</span>';
+          showStatus('Invalid XML - cannot minify', false);
+        } else {
+          showStatus('Error: ' + e.message, false);
+        }
+      }
+    }
+
+    function validateXML() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+
+      const result = validateXMLDetailed(raw);
+
+      if (result.valid) {
+        // Count some stats
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(raw, 'application/xml');
+        const allElements = doc.querySelectorAll('*');
+        let attrCount = 0;
+        allElements.forEach(el => { attrCount += el.attributes.length; });
+
+        lastPlainOutput = 'Valid XML\n\nElements: ' + allElements.length + '\nAttributes: ' + attrCount;
+        $outputPlain.value = lastPlainOutput;
+
+        let html = '<span style="color:var(--success); font-weight:600; font-size:1rem;">Valid XML</span>\n\n';
+        html += '<span style="color:var(--text-muted)">Elements:   </span><span class="xml-text">' + allElements.length + '</span>\n';
+        html += '<span style="color:var(--text-muted)">Attributes: </span><span class="xml-text">' + attrCount + '</span>\n';
+        $outputPre.innerHTML = html;
+        showStatus('Valid XML', true);
+      } else {
+        const errorHtml = formatValidationError(result);
+        lastPlainOutput = result.message;
+        $outputPlain.value = lastPlainOutput;
+        $outputPre.innerHTML = errorHtml || '<span class="error-msg">' + escapeHtml(result.message) + '</span>';
+        showStatus('Invalid XML', false);
+      }
+    }
+
+    function copyOutput() {
+      const text = lastPlainOutput || $outputPlain.value;
+      if (text) {
+        navigator.clipboard.writeText(text).then(() => {
+          showStatus('Copied!', true);
+        }).catch(() => {
+          // Fallback for older browsers
+          $outputPlain.style.display = '';
+          $outputPlain.select();
+          document.execCommand('copy');
+          if (currentView === 'highlighted') $outputPlain.style.display = 'none';
+          showStatus('Copied!', true);
+        });
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $outputPlain.value = '';
+      $outputPre.innerHTML = '';
+      lastPlainOutput = '';
+      $status.textContent = '';
+      $status.className = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    // Auto-format on paste
+    $input.addEventListener('paste', () => setTimeout(formatXML, 50));
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

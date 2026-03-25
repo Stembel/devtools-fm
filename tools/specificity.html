@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Specificity Calculator - Analyze & Compare Selectors | ZeroKit.dev</title>
+  <meta name="description" content="Calculate CSS specificity for any selector. Visual breakdown of IDs, classes, and elements. Compare multiple selectors, sort by weight. Free, fast, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/specificity.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    :root {
+      --spec-id: #ef4444;
+      --spec-id-bg: rgba(239, 68, 68, 0.12);
+      --spec-class: #f59e0b;
+      --spec-class-bg: rgba(245, 158, 11, 0.12);
+      --spec-element: #3b82f6;
+      --spec-element-bg: rgba(59, 130, 246, 0.12);
+      --spec-inline: #a855f7;
+      --spec-inline-bg: rgba(168, 85, 247, 0.12);
+    }
+
+    .spec-input-section {
+      margin-bottom: 28px;
+    }
+    .spec-input-section label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .spec-textarea {
+      width: 100%;
+      min-height: 120px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      outline: none;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .spec-textarea:focus {
+      border-color: var(--accent);
+    }
+    .spec-textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+    .input-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+      color: #fff;
+    }
+
+    /* Results */
+    .results-section {
+      margin-top: 32px;
+    }
+    .results-section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .selector-result {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      transition: border-color 0.15s;
+    }
+    .selector-result:hover {
+      border-color: var(--accent);
+    }
+    .selector-result.winner {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .selector-result .winner-badge {
+      display: none;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-left: 10px;
+    }
+    .selector-result.winner .winner-badge {
+      display: inline-block;
+    }
+
+    .selector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .selector-text {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .specificity-score {
+      font-family: var(--mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .score-part {
+      padding: 3px 8px;
+      border-radius: 4px;
+      min-width: 28px;
+      text-align: center;
+    }
+    .score-inline { background: var(--spec-inline-bg); color: var(--spec-inline); }
+    .score-id { background: var(--spec-id-bg); color: var(--spec-id); }
+    .score-class { background: var(--spec-class-bg); color: var(--spec-class); }
+    .score-element { background: var(--spec-element-bg); color: var(--spec-element); }
+    .score-comma {
+      color: var(--text-muted);
+      padding: 3px 1px;
+    }
+
+    /* Specificity bar */
+    .spec-bar-container {
+      margin-bottom: 14px;
+    }
+    .spec-bar {
+      display: flex;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      background: var(--border);
+      gap: 1px;
+    }
+    .spec-bar-segment {
+      height: 100%;
+      transition: width 0.3s ease;
+      min-width: 0;
+    }
+    .spec-bar-segment.seg-id { background: var(--spec-id); }
+    .spec-bar-segment.seg-class { background: var(--spec-class); }
+    .spec-bar-segment.seg-element { background: var(--spec-element); }
+
+    .spec-bar-labels {
+      display: flex;
+      gap: 16px;
+      margin-top: 6px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+    .spec-bar-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .spec-bar-label .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-id { background: var(--spec-id); }
+    .dot-class { background: var(--spec-class); }
+    .dot-element { background: var(--spec-element); }
+
+    /* Breakdown */
+    .breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .breakdown-tag {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+    .tag-id {
+      background: var(--spec-id-bg);
+      border-color: rgba(239, 68, 68, 0.25);
+      color: var(--spec-id);
+    }
+    .tag-class {
+      background: var(--spec-class-bg);
+      border-color: rgba(245, 158, 11, 0.25);
+      color: var(--spec-class);
+    }
+    .tag-element {
+      background: var(--spec-element-bg);
+      border-color: rgba(59, 130, 246, 0.25);
+      color: var(--spec-element);
+    }
+    .tag-ignored {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text-muted);
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    .breakdown-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .error-msg {
+      color: var(--spec-id);
+      font-size: 0.8rem;
+      font-family: var(--mono);
+      margin-top: 4px;
+    }
+
+    /* Examples */
+    .examples-section {
+      margin-top: 40px;
+    }
+    .examples-section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .examples-section .section-note {
+      margin-bottom: 16px;
+    }
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .example-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .example-card:hover {
+      border-color: var(--accent);
+    }
+    .example-selector {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .example-score {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Education section */
+    .education-section {
+      margin-top: 40px;
+    }
+    .education-section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .edu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .edu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .edu-card h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .edu-card h3 .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .edu-card p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+    .edu-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2, rgba(0,0,0,0.15));
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .edu-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+    }
+    .edu-card ul li {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 2px 0;
+    }
+    .edu-card ul li::before {
+      content: "- ";
+      color: var(--border);
+    }
+
+    /* Comparison table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 20px;
+    }
+    .comparison-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--surface-2, rgba(0,0,0,0.08));
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    .comparison-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .comparison-table tr:hover td {
+      background: var(--surface);
+    }
+
+    .sort-info {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .selector-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .examples-grid {
+        grid-template-columns: 1fr;
+      }
+      .edu-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Specificity Calculator</h1>
+    <p class="description">Calculate and compare CSS specificity for any selector. See a visual breakdown of how IDs, classes, and elements contribute to selector weight. Paste multiple selectors to rank them.</p>
+
+    <div class="spec-input-section">
+      <label for="selectorInput">CSS Selectors</label>
+      <textarea id="selectorInput" class="spec-textarea" placeholder="Enter one or more CSS selectors, one per line&#10;&#10;Examples:&#10;#nav .item a&#10;div > ul > li.active&#10;.sidebar:hover .link::before"
+      spellcheck="false"></textarea>
+      <p class="input-hint">One selector per line. Results update as you type.</p>
+      <div class="actions-row">
+        <button class="btn btn-primary" id="btnCalculate">Calculate</button>
+        <button class="btn" id="btnClear">Clear</button>
+        <button class="btn" id="btnSort">Sort by Specificity</button>
+        <button class="btn" id="btnLoadExamples">Load Examples</button>
+      </div>
+    </div>
+
+    <div class="results-section" id="resultsSection" style="display:none;">
+      <h2>Results <span class="sort-info" id="sortInfo"></span></h2>
+      <div id="resultsContainer"></div>
+    </div>
+
+    <!-- Common Examples -->
+    <div class="examples-section">
+      <h2>Common Examples</h2>
+      <p class="section-note">Click any example to load it into the calculator.</p>
+      <div class="examples-grid" id="examplesGrid"></div>
+    </div>
+
+    <!-- Education Section -->
+    <div class="education-section">
+      <h2>How CSS Specificity Works</h2>
+      <div class="edu-grid">
+        <div class="edu-card">
+          <h3><span class="dot" style="background:var(--spec-inline)"></span> Inline Styles (1,0,0,0)</h3>
+          <p>Styles applied directly on an element via the <code>style</code> attribute. They override almost everything except <code>!important</code>.</p>
+          <ul>
+            <li>style="color: red"</li>
+          </ul>
+        </div>
+        <div class="edu-card">
+          <h3><span class="dot dot-id"></span> IDs (0,X,0,0)</h3>
+          <p>Each <code>#id</code> selector adds 1 to the ID column. IDs are the most powerful selector type in stylesheets.</p>
+          <ul>
+            <li>#header</li>
+            <li>#nav #logo</li>
+          </ul>
+        </div>
+        <div class="edu-card">
+          <h3><span class="dot dot-class"></span> Classes, Attributes &amp; Pseudo-classes (0,0,X,0)</h3>
+          <p>Includes <code>.class</code>, <code>[attr]</code>, <code>:hover</code>, <code>:focus</code>, <code>:nth-child()</code>, and similar pseudo-classes.</p>
+          <ul>
+            <li>.active</li>
+            <li>[type="text"]</li>
+            <li>:hover, :focus, :nth-child(2)</li>
+          </ul>
+        </div>
+        <div class="edu-card">
+          <h3><span class="dot dot-element"></span> Elements &amp; Pseudo-elements (0,0,0,X)</h3>
+          <p>Type selectors (<code>div</code>, <code>p</code>, <code>a</code>) and pseudo-elements (<code>::before</code>, <code>::after</code>, <code>::placeholder</code>).</p>
+          <ul>
+            <li>div, p, h1, a</li>
+            <li>::before, ::after</li>
+            <li>::placeholder, ::selection</li>
+          </ul>
+        </div>
+        <div class="edu-card">
+          <h3>Special Pseudo-classes</h3>
+          <p><code>:where()</code> always has zero specificity. <code>:is()</code> and <code>:not()</code> take the specificity of their most specific argument. <code>:has()</code> also takes its argument's specificity.</p>
+        </div>
+        <div class="edu-card">
+          <h3>Combinators &amp; Universal</h3>
+          <p>Combinators (<code>&gt;</code>, <code>+</code>, <code>~</code>, space) and the universal selector (<code>*</code>) add zero specificity. They select elements but do not increase weight.</p>
+        </div>
+      </div>
+
+      <div class="tool-panel" style="margin-top:16px;">
+        <div class="panel-header">Specificity Hierarchy</div>
+        <div style="overflow-x:auto;">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Selector</th>
+                <th>Specificity</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>*</td><td>0,0,0,0</td><td>Universal</td></tr>
+              <tr><td>li</td><td>0,0,0,1</td><td>Element</td></tr>
+              <tr><td>ul li</td><td>0,0,0,2</td><td>Elements</td></tr>
+              <tr><td>ul ol+li</td><td>0,0,0,3</td><td>Elements + combinator</td></tr>
+              <tr><td>.class</td><td>0,0,1,0</td><td>Class</td></tr>
+              <tr><td>li.class</td><td>0,0,1,1</td><td>Element + class</td></tr>
+              <tr><td>ul li.active</td><td>0,0,1,2</td><td>Elements + class</td></tr>
+              <tr><td>#id</td><td>0,1,0,0</td><td>ID</td></tr>
+              <tr><td>#id .class</td><td>0,1,1,0</td><td>ID + class</td></tr>
+              <tr><td>#id .class li</td><td>0,1,1,1</td><td>ID + class + element</td></tr>
+              <tr><td>style=""</td><td>1,0,0,0</td><td>Inline</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // ========================================
+    // CSS Specificity Calculator Engine
+    // ========================================
+
+    const PSEUDO_ELEMENTS = [
+      'after', 'before', 'first-line', 'first-letter', 'selection',
+      'placeholder', 'marker', 'backdrop', 'spelling-error',
+      'grammar-error', 'cue', 'cue-region', 'file-selector-button',
+      'target-text', 'highlight', 'view-transition',
+      'view-transition-group', 'view-transition-image-pair',
+      'view-transition-new', 'view-transition-old'
+    ];
+
+    const PSEUDO_CLASSES_ZERO_SPECIFICITY = ['where'];
+    const PSEUDO_CLASSES_ARGUMENT_SPECIFICITY = ['is', 'not', 'has', 'matches', '-webkit-any', '-moz-any'];
+    const PSEUDO_CLASSES_ELEMENT = ['host', 'host-context', 'slotted'];
+
+    // Pseudo-classes that count as class-level
+    const PSEUDO_CLASSES = [
+      'hover', 'active', 'focus', 'focus-within', 'focus-visible',
+      'visited', 'link', 'any-link', 'local-link', 'target',
+      'target-within', 'scope', 'root', 'empty', 'blank',
+      'first-child', 'last-child', 'only-child',
+      'first-of-type', 'last-of-type', 'only-of-type',
+      'nth-child', 'nth-last-child', 'nth-of-type', 'nth-last-of-type',
+      'nth-col', 'nth-last-col',
+      'enabled', 'disabled', 'read-only', 'read-write',
+      'placeholder-shown', 'autofill', 'default',
+      'checked', 'indeterminate', 'valid', 'invalid',
+      'in-range', 'out-of-range', 'required', 'optional',
+      'user-valid', 'user-invalid',
+      'dir', 'lang', 'defined', 'fullscreen', 'modal',
+      'picture-in-picture', 'paused', 'playing',
+      'current', 'past', 'future', 'popover-open',
+      'state'
+    ];
+
+    function calculateSpecificity(selector) {
+      selector = selector.trim();
+      if (!selector) return null;
+
+      const result = {
+        selector: selector,
+        inline: 0,
+        ids: 0,
+        classes: 0,
+        elements: 0,
+        parts: [],
+        error: null
+      };
+
+      try {
+        parseSelector(selector, result);
+      } catch (e) {
+        result.error = e.message;
+      }
+
+      return result;
+    }
+
+    function parseSelector(selector, result) {
+      let s = selector.trim();
+
+      // Remove leading/trailing combinators for robustness
+      s = s.replace(/^\s*[>+~]\s*/, '').replace(/\s*[>+~]\s*$/, '');
+
+      let i = 0;
+      const len = s.length;
+
+      while (i < len) {
+        // Skip whitespace and combinators
+        while (i < len && /[\s>+~,\/]/.test(s[i])) {
+          i++;
+        }
+        if (i >= len) break;
+
+        if (s[i] === '#') {
+          // ID selector
+          i++;
+          let name = '';
+          while (i < len && /[\w-]/.test(s[i])) {
+            name += s[i];
+            i++;
+          }
+          if (name) {
+            result.ids++;
+            result.parts.push({ type: 'id', value: '#' + name });
+          }
+        } else if (s[i] === '.') {
+          // Class selector
+          i++;
+          let name = '';
+          while (i < len && /[\w-]/.test(s[i])) {
+            name += s[i];
+            i++;
+          }
+          if (name) {
+            result.classes++;
+            result.parts.push({ type: 'class', value: '.' + name });
+          }
+        } else if (s[i] === '[') {
+          // Attribute selector
+          let depth = 1;
+          let attr = '[';
+          i++;
+          while (i < len && depth > 0) {
+            if (s[i] === '[') depth++;
+            if (s[i] === ']') depth--;
+            attr += s[i];
+            i++;
+          }
+          result.classes++;
+          result.parts.push({ type: 'class', value: attr });
+        } else if (s[i] === ':') {
+          i++;
+          let isDouble = false;
+          if (i < len && s[i] === ':') {
+            isDouble = true;
+            i++;
+          }
+
+          let name = '';
+          while (i < len && /[\w-]/.test(s[i])) {
+            name += s[i];
+            i++;
+          }
+          const nameLower = name.toLowerCase();
+
+          if (isDouble || PSEUDO_ELEMENTS.includes(nameLower)) {
+            // Pseudo-element
+            result.elements++;
+            result.parts.push({ type: 'element', value: (isDouble ? '::' : ':') + name });
+            // Some pseudo-elements have arguments like ::highlight(name)
+            if (i < len && s[i] === '(') {
+              i = skipParens(s, i);
+            }
+          } else if (PSEUDO_CLASSES_ZERO_SPECIFICITY.includes(nameLower)) {
+            // :where() has zero specificity
+            let args = '';
+            if (i < len && s[i] === '(') {
+              const start = i;
+              i = skipParens(s, i);
+              args = s.substring(start, i);
+            }
+            result.parts.push({ type: 'ignored', value: ':' + name + args });
+          } else if (PSEUDO_CLASSES_ARGUMENT_SPECIFICITY.includes(nameLower)) {
+            // :is(), :not(), :has() - take the specificity of the most specific argument
+            if (i < len && s[i] === '(') {
+              const start = i + 1;
+              const endPos = findMatchingParen(s, i);
+              const inner = s.substring(start, endPos);
+              i = endPos + 1;
+
+              // Split by commas at the top level
+              const args = splitTopLevel(inner);
+              let maxIds = 0, maxClasses = 0, maxElements = 0;
+
+              for (const arg of args) {
+                const sub = calculateSpecificity(arg.trim());
+                if (sub && !sub.error) {
+                  const subTotal = sub.ids * 10000 + sub.classes * 100 + sub.elements;
+                  const maxTotal = maxIds * 10000 + maxClasses * 100 + maxElements;
+                  if (subTotal > maxTotal) {
+                    maxIds = sub.ids;
+                    maxClasses = sub.classes;
+                    maxElements = sub.elements;
+                  }
+                }
+              }
+
+              result.ids += maxIds;
+              result.classes += maxClasses;
+              result.elements += maxElements;
+              result.parts.push({ type: maxIds > 0 ? 'id' : maxClasses > 0 ? 'class' : 'element', value: ':' + name + '(' + inner + ')' });
+            } else {
+              result.classes++;
+              result.parts.push({ type: 'class', value: ':' + name });
+            }
+          } else {
+            // Regular pseudo-class
+            result.classes++;
+            let fullValue = ':' + name;
+            if (i < len && s[i] === '(') {
+              const start = i;
+              i = skipParens(s, i);
+              fullValue += s.substring(start, i);
+            }
+            result.parts.push({ type: 'class', value: fullValue });
+          }
+        } else if (s[i] === '*') {
+          // Universal selector - zero specificity
+          i++;
+          result.parts.push({ type: 'ignored', value: '*' });
+        } else if (/[\w]/.test(s[i]) || s[i] === '-') {
+          // Element/type selector
+          let name = '';
+          while (i < len && /[\w-]/.test(s[i])) {
+            name += s[i];
+            i++;
+          }
+          // Check for namespace (e.g., svg|a)
+          if (i < len && s[i] === '|') {
+            i++;
+            let localName = '';
+            while (i < len && /[\w-]/.test(s[i])) {
+              localName += s[i];
+              i++;
+            }
+            if (localName === '*') {
+              // namespace|* - only namespace part contributes, but actually neither does
+              result.parts.push({ type: 'ignored', value: name + '|*' });
+            } else if (localName) {
+              result.elements++;
+              result.parts.push({ type: 'element', value: name + '|' + localName });
+            }
+          } else {
+            result.elements++;
+            result.parts.push({ type: 'element', value: name });
+          }
+        } else {
+          // Skip unrecognized characters
+          i++;
+        }
+      }
+    }
+
+    function skipParens(s, i) {
+      if (s[i] !== '(') return i;
+      let depth = 1;
+      i++;
+      while (i < s.length && depth > 0) {
+        if (s[i] === '(') depth++;
+        if (s[i] === ')') depth--;
+        i++;
+      }
+      return i;
+    }
+
+    function findMatchingParen(s, i) {
+      if (s[i] !== '(') return i;
+      let depth = 1;
+      i++;
+      while (i < s.length && depth > 0) {
+        if (s[i] === '(') depth++;
+        if (s[i] === ')') depth--;
+        if (depth === 0) return i;
+        i++;
+      }
+      return i;
+    }
+
+    function splitTopLevel(s) {
+      const parts = [];
+      let depth = 0;
+      let current = '';
+      for (let i = 0; i < s.length; i++) {
+        if (s[i] === '(') depth++;
+        if (s[i] === ')') depth--;
+        if (s[i] === ',' && depth === 0) {
+          parts.push(current);
+          current = '';
+        } else {
+          current += s[i];
+        }
+      }
+      if (current.trim()) parts.push(current);
+      return parts;
+    }
+
+    function specificityToString(r) {
+      return r.inline + ',' + r.ids + ',' + r.classes + ',' + r.elements;
+    }
+
+    function specificityToNumber(r) {
+      return r.inline * 1000000 + r.ids * 10000 + r.classes * 100 + r.elements;
+    }
+
+    // ========================================
+    // Rendering
+    // ========================================
+
+    const $input = document.getElementById('selectorInput');
+    const $resultsSection = document.getElementById('resultsSection');
+    const $resultsContainer = document.getElementById('resultsContainer');
+    const $sortInfo = document.getElementById('sortInfo');
+
+    function renderResults(sorted) {
+      const text = $input.value.trim();
+      if (!text) {
+        $resultsSection.style.display = 'none';
+        return;
+      }
+
+      const lines = text.split('\n').filter(function(l) { return l.trim().length > 0; });
+      if (lines.length === 0) {
+        $resultsSection.style.display = 'none';
+        return;
+      }
+
+      let results = lines.map(function(line) {
+        return calculateSpecificity(line.trim());
+      }).filter(function(r) { return r !== null; });
+
+      if (results.length === 0) {
+        $resultsSection.style.display = 'none';
+        return;
+      }
+
+      if (sorted) {
+        results.sort(function(a, b) {
+          return specificityToNumber(b) - specificityToNumber(a);
+        });
+        $sortInfo.textContent = '(sorted highest to lowest)';
+      } else {
+        $sortInfo.textContent = '';
+      }
+
+      // Find the winner (highest specificity)
+      let maxSpec = -1;
+      let winnerCount = 0;
+      results.forEach(function(r) {
+        if (!r.error) {
+          const spec = specificityToNumber(r);
+          if (spec > maxSpec) {
+            maxSpec = spec;
+            winnerCount = 1;
+          } else if (spec === maxSpec) {
+            winnerCount++;
+          }
+        }
+      });
+
+      // For the bar chart, find max total for scaling
+      let maxTotal = 0;
+      results.forEach(function(r) {
+        if (!r.error) {
+          const total = r.ids * 100 + r.classes * 10 + r.elements;
+          if (total > maxTotal) maxTotal = total;
+        }
+      });
+      if (maxTotal === 0) maxTotal = 1;
+
+      $resultsContainer.innerHTML = '';
+
+      results.forEach(function(r) {
+        const card = document.createElement('div');
+        card.className = 'selector-result';
+
+        if (r.error) {
+          card.innerHTML =
+            '<div class="selector-header">' +
+              '<span class="selector-text">' + escapeHTML(r.selector) + '</span>' +
+            '</div>' +
+            '<div class="error-msg">Parse error: ' + escapeHTML(r.error) + '</div>';
+          $resultsContainer.appendChild(card);
+          return;
+        }
+
+        const spec = specificityToNumber(r);
+        const isWinner = results.length > 1 && spec === maxSpec && winnerCount <= results.length;
+
+        if (isWinner && results.length > 1) {
+          card.classList.add('winner');
+        }
+
+        // Bar widths
+        const idWeight = r.ids * 100;
+        const classWeight = r.classes * 10;
+        const elemWeight = r.elements;
+        const totalWeight = idWeight + classWeight + elemWeight;
+
+        let idPct = 0, classPct = 0, elemPct = 0;
+        if (totalWeight > 0) {
+          idPct = (idWeight / totalWeight) * 100;
+          classPct = (classWeight / totalWeight) * 100;
+          elemPct = (elemWeight / totalWeight) * 100;
+        }
+
+        // Build breakdown tags
+        let breakdownHTML = '';
+        if (r.parts.length > 0) {
+          breakdownHTML = '<div style="margin-top:12px;"><span class="breakdown-label">Breakdown</span><div class="breakdown">';
+          r.parts.forEach(function(p) {
+            const tagClass = p.type === 'id' ? 'tag-id' : p.type === 'class' ? 'tag-class' : p.type === 'element' ? 'tag-element' : 'tag-ignored';
+            breakdownHTML += '<span class="breakdown-tag ' + tagClass + '">' + escapeHTML(p.value) + '</span>';
+          });
+          breakdownHTML += '</div></div>';
+        }
+
+        card.innerHTML =
+          '<div class="selector-header">' +
+            '<span class="selector-text">' + escapeHTML(r.selector) + '<span class="winner-badge">Highest</span></span>' +
+            '<div class="specificity-score">' +
+              '<span class="score-part score-inline">' + r.inline + '</span>' +
+              '<span class="score-comma">,</span>' +
+              '<span class="score-part score-id">' + r.ids + '</span>' +
+              '<span class="score-comma">,</span>' +
+              '<span class="score-part score-class">' + r.classes + '</span>' +
+              '<span class="score-comma">,</span>' +
+              '<span class="score-part score-element">' + r.elements + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="spec-bar-container">' +
+            '<div class="spec-bar">' +
+              (idPct > 0 ? '<div class="spec-bar-segment seg-id" style="width:' + idPct + '%"></div>' : '') +
+              (classPct > 0 ? '<div class="spec-bar-segment seg-class" style="width:' + classPct + '%"></div>' : '') +
+              (elemPct > 0 ? '<div class="spec-bar-segment seg-element" style="width:' + elemPct + '%"></div>' : '') +
+            '</div>' +
+            '<div class="spec-bar-labels">' +
+              '<span class="spec-bar-label"><span class="dot dot-id"></span> IDs: ' + r.ids + '</span>' +
+              '<span class="spec-bar-label"><span class="dot dot-class"></span> Classes/Attrs: ' + r.classes + '</span>' +
+              '<span class="spec-bar-label"><span class="dot dot-element"></span> Elements: ' + r.elements + '</span>' +
+            '</div>' +
+          '</div>' +
+          breakdownHTML;
+
+        $resultsContainer.appendChild(card);
+      });
+
+      $resultsSection.style.display = '';
+    }
+
+    function escapeHTML(s) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(s));
+      return div.innerHTML;
+    }
+
+    // ========================================
+    // Examples
+    // ========================================
+
+    var EXAMPLES = [
+      { selector: '*', desc: 'Universal' },
+      { selector: 'div', desc: 'Element' },
+      { selector: 'ul li', desc: 'Descendant' },
+      { selector: 'ul > li', desc: 'Child combinator' },
+      { selector: '.active', desc: 'Class' },
+      { selector: 'div.container', desc: 'Element + class' },
+      { selector: '#header', desc: 'ID' },
+      { selector: '#nav .item a', desc: 'ID + class + element' },
+      { selector: '#sidebar #nav .item', desc: 'Two IDs + class' },
+      { selector: 'a:hover', desc: 'Pseudo-class' },
+      { selector: 'li:first-child', desc: 'Structural pseudo' },
+      { selector: 'p::first-line', desc: 'Pseudo-element' },
+      { selector: 'a::before', desc: 'Pseudo-element' },
+      { selector: 'input[type="text"]', desc: 'Attribute selector' },
+      { selector: '.btn.btn-primary.lg', desc: 'Multiple classes' },
+      { selector: '#form input[required]:valid', desc: 'Mixed' },
+      { selector: ':is(.header, #nav) a', desc: ':is() pseudo' },
+      { selector: ':not(#main)', desc: ':not() pseudo' },
+      { selector: ':where(.a, .b, .c)', desc: ':where() zero spec' },
+      { selector: ':has(> img)', desc: ':has() pseudo' },
+      { selector: 'div > p + span ~ a', desc: 'All combinators' },
+      { selector: '.a .b .c .d .e .f .g .h .i .j .k', desc: '11 classes' },
+      { selector: 'body #content .article p.intro::first-letter', desc: 'Complex' },
+      { selector: '#a #b #c #d', desc: 'Four IDs' },
+    ];
+
+    function buildExamples() {
+      var grid = document.getElementById('examplesGrid');
+      grid.innerHTML = '';
+      EXAMPLES.forEach(function(ex) {
+        var card = document.createElement('div');
+        card.className = 'example-card';
+        var spec = calculateSpecificity(ex.selector);
+        var scoreStr = spec && !spec.error ? specificityToString(spec) : '?';
+        card.innerHTML =
+          '<span class="example-selector">' + escapeHTML(ex.selector) + '</span>' +
+          '<span class="example-score">' + scoreStr + '</span>';
+        card.addEventListener('click', function() {
+          $input.value = ex.selector;
+          renderResults(false);
+          $input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    // ========================================
+    // Event Listeners
+    // ========================================
+
+    var debounceTimer;
+    $input.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() { renderResults(false); }, 200);
+    });
+
+    document.getElementById('btnCalculate').addEventListener('click', function() {
+      renderResults(false);
+    });
+
+    document.getElementById('btnClear').addEventListener('click', function() {
+      $input.value = '';
+      $resultsSection.style.display = 'none';
+      $resultsContainer.innerHTML = '';
+    });
+
+    document.getElementById('btnSort').addEventListener('click', function() {
+      renderResults(true);
+    });
+
+    document.getElementById('btnLoadExamples').addEventListener('click', function() {
+      var exampleSelectors = [
+        '*',
+        'div',
+        '.active',
+        '#header',
+        'ul > li.active',
+        '#nav .item a:hover',
+        '#form input[type="text"]:valid',
+        ':where(.a, .b) p',
+        ':is(.header, #nav) a',
+        'body #content .article p.intro::first-letter'
+      ];
+      $input.value = exampleSelectors.join('\n');
+      renderResults(false);
+    });
+
+    // ========================================
+    // Initialize
+    // ========================================
+
+    buildExamples();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

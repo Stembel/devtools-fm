@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown to HTML Converter - DevTools.fm</title>
+  <meta name="description" content="Convert Markdown to HTML with live preview. Supports GFM tables, task lists, strikethrough, code blocks with syntax highlighting, and more. Pure client-side, no data leaves your browser.">
+  <meta name="keywords" content="markdown to html, markdown converter, md2html, markdown preview, github flavored markdown, gfm converter">
+  <link rel="canonical" href="https://zerokit.dev/tools/md2html.html">
+  <meta property="og:title" content="Markdown to HTML Converter - DevTools.fm">
+  <meta property="og:description" content="Convert Markdown to HTML with live rendered preview and raw HTML output. Free online tool.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .output-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 0;
+    }
+    .output-tab {
+      padding: 8px 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .output-tab:hover {
+      color: var(--text);
+    }
+    .output-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .output-content {
+      display: none;
+      height: 100%;
+    }
+    .output-content.active {
+      display: block;
+    }
+    .preview-frame {
+      padding: 16px 20px;
+      overflow-y: auto;
+      height: calc(100% - 42px);
+      line-height: 1.7;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .preview-frame h1, .preview-frame h2, .preview-frame h3,
+    .preview-frame h4, .preview-frame h5, .preview-frame h6 {
+      margin: 1.2em 0 0.5em;
+      line-height: 1.3;
+      color: var(--text);
+    }
+    .preview-frame h1 { font-size: 1.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+    .preview-frame h2 { font-size: 1.4em; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+    .preview-frame h3 { font-size: 1.2em; }
+    .preview-frame h4 { font-size: 1.05em; }
+    .preview-frame h5 { font-size: 0.95em; }
+    .preview-frame h6 { font-size: 0.85em; color: var(--text-muted); }
+    .preview-frame p { margin: 0.8em 0; }
+    .preview-frame a { color: var(--accent); text-decoration: underline; }
+    .preview-frame code {
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88em;
+    }
+    .preview-frame pre {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      overflow-x: auto;
+      margin: 1em 0;
+    }
+    .preview-frame pre code {
+      background: none;
+      padding: 0;
+      font-size: 0.88em;
+      line-height: 1.5;
+    }
+    .preview-frame blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 1em 0;
+      padding: 4px 16px;
+      color: var(--text-muted);
+    }
+    .preview-frame blockquote p { margin: 0.4em 0; }
+    .preview-frame ul, .preview-frame ol { padding-left: 1.8em; margin: 0.6em 0; }
+    .preview-frame li { margin: 0.25em 0; }
+    .preview-frame li.task-item { list-style: none; margin-left: -1.4em; }
+    .preview-frame li.task-item input[type="checkbox"] {
+      margin-right: 6px;
+      vertical-align: middle;
+      pointer-events: none;
+    }
+    .preview-frame hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5em 0;
+    }
+    .preview-frame table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+      font-size: 0.9em;
+    }
+    .preview-frame th, .preview-frame td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .preview-frame th {
+      background: var(--surface-2);
+      font-weight: 600;
+    }
+    .preview-frame img { max-width: 100%; height: auto; border-radius: 6px; }
+    .preview-frame del { text-decoration: line-through; color: var(--text-muted); }
+    .raw-html {
+      height: calc(100% - 42px);
+    }
+    .raw-html .tool-textarea {
+      height: 100%;
+      border: none;
+      border-radius: 0;
+    }
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .status-bar .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .tool-layout .tool-panel:last-child {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Markdown to HTML Converter</h1>
+    <p class="description">Convert Markdown to clean HTML with live rendered preview. Supports GitHub Flavored Markdown: tables, task lists, strikethrough, fenced code blocks, and more. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="copyHTML()">Copy HTML</button>
+        <button class="btn" onclick="pasteInput()">Paste</button>
+        <button class="btn" onclick="loadSample()">Sample</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="status-bar">
+        <span class="dot"></span>
+        <span id="status">Live conversion active</span>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">
+          <span>Markdown Input</span>
+        </div>
+        <textarea class="tool-textarea" id="input" placeholder="Type or paste Markdown here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header" style="padding:0;">
+          <div class="output-tabs">
+            <button class="output-tab active" onclick="switchTab('preview')">Preview</button>
+            <button class="output-tab" onclick="switchTab('html')">HTML Source</button>
+          </div>
+          <span id="charCount" style="font-size:0.75rem;font-weight:400;padding-right:12px;"></span>
+        </div>
+        <div class="output-content active" id="tabPreview">
+          <div class="preview-frame" id="preview"></div>
+        </div>
+        <div class="output-content" id="tabHtml">
+          <div class="raw-html">
+            <textarea class="tool-textarea" id="htmlOutput" readonly placeholder="HTML output will appear here..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="text-align:center;padding:32px 24px;color:var(--text-muted);font-size:0.8rem;"><a href="../" style="color:var(--accent);text-decoration:none;">&larr; Back to all tools</a> &middot; DevTools.fm</footer>
+
+  <script>
+    // ─── DOM refs ────────────────────────────────────────────
+    const $input = document.getElementById('input');
+    const $preview = document.getElementById('preview');
+    const $htmlOutput = document.getElementById('htmlOutput');
+    const $status = document.getElementById('status');
+    const $charCount = document.getElementById('charCount');
+
+    // ─── Tab switching ──────────────────────────────────────
+    function switchTab(tab) {
+      document.querySelectorAll('.output-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.output-content').forEach(function(c) { c.classList.remove('active'); });
+      if (tab === 'preview') {
+        document.querySelector('.output-tab:first-child').classList.add('active');
+        document.getElementById('tabPreview').classList.add('active');
+      } else {
+        document.querySelector('.output-tab:last-child').classList.add('active');
+        document.getElementById('tabHtml').classList.add('active');
+      }
+    }
+
+    // ─── Markdown Parser ────────────────────────────────────
+    // A self-contained GFM-compatible Markdown-to-HTML parser.
+    // Handles block and inline elements in two passes.
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Inline parsing: processes text for inline Markdown syntax.
+    // Uses a character-scanning approach to handle nesting correctly.
+    function parseInline(text) {
+      // Protect code spans first by extracting them
+      var codeSpans = [];
+      text = text.replace(/`([^`]+)`/g, function(_, code) {
+        var idx = codeSpans.length;
+        codeSpans.push('<code>' + escapeHtml(code) + '</code>');
+        return '\x00CODE' + idx + '\x00';
+      });
+
+      // Images (before links so ![...](...) isn't caught as a link)
+      text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+
+      // Links
+      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+      // Bold + italic combined
+      text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      text = text.replace(/___(.+?)___/g, '<strong><em>$1</em></strong>');
+
+      // Bold
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+      // Italic
+      text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      text = text.replace(/_(.+?)_/g, '<em>$1</em>');
+
+      // Strikethrough (GFM)
+      text = text.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+      // Restore code spans
+      text = text.replace(/\x00CODE(\d+)\x00/g, function(_, idx) {
+        return codeSpans[parseInt(idx)];
+      });
+
+      return text;
+    }
+
+    function markdownToHtml(md) {
+      var lines = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+      var html = [];
+      var i = 0;
+      var len = lines.length;
+
+      while (i < len) {
+        var line = lines[i];
+
+        // ── Fenced code blocks ──────────────────────────
+        var fenceMatch = line.match(/^(`{3,}|~{3,})(\w*)\s*$/);
+        if (fenceMatch) {
+          var fence = fenceMatch[1].charAt(0);
+          var fenceLen = fenceMatch[1].length;
+          var lang = fenceMatch[2];
+          var codeLines = [];
+          i++;
+          while (i < len) {
+            var closingMatch = lines[i].match(new RegExp('^' + (fence === '`' ? '`' : '~') + '{' + fenceLen + ',}\\s*$'));
+            if (closingMatch) { i++; break; }
+            codeLines.push(lines[i]);
+            i++;
+          }
+          var cls = lang ? ' class="language-' + escapeHtml(lang) + '"' : '';
+          html.push('<pre><code' + cls + '>' + escapeHtml(codeLines.join('\n')) + '</code></pre>');
+          continue;
+        }
+
+        // ── Headings (ATX) ──────────────────────────────
+        var headingMatch = line.match(/^(#{1,6})\s+(.+?)(?:\s+#*)?$/);
+        if (headingMatch) {
+          var level = headingMatch[1].length;
+          html.push('<h' + level + '>' + parseInline(headingMatch[2]) + '</h' + level + '>');
+          i++;
+          continue;
+        }
+
+        // ── Horizontal rules ────────────────────────────
+        if (/^(\*\s*\*\s*\*[\s*]*|---[\s-]*|___[\s_]*)$/.test(line.trim()) && line.trim().length >= 3) {
+          // Make sure it's truly an HR: at least 3 of the same char (-, *, _)
+          var trimmed = line.trim();
+          if (/^[-]{3,}$/.test(trimmed) || /^[*]{3,}$/.test(trimmed) || /^[_]{3,}$/.test(trimmed) ||
+              /^[-\s]{3,}$/.test(trimmed) && (trimmed.match(/-/g) || []).length >= 3 ||
+              /^[*\s]{3,}$/.test(trimmed) && (trimmed.match(/\*/g) || []).length >= 3 ||
+              /^[_\s]{3,}$/.test(trimmed) && (trimmed.match(/_/g) || []).length >= 3) {
+            html.push('<hr>');
+            i++;
+            continue;
+          }
+        }
+
+        // ── Tables (GFM) ────────────────────────────────
+        if (line.indexOf('|') !== -1 && i + 1 < len && /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(lines[i + 1])) {
+          var headerLine = line;
+          var sepLine = lines[i + 1];
+          var tableRows = [];
+
+          // Parse alignment from separator
+          var aligns = parsePipeCells(sepLine).map(function(cell) {
+            cell = cell.trim();
+            if (cell.charAt(0) === ':' && cell.charAt(cell.length - 1) === ':') return 'center';
+            if (cell.charAt(cell.length - 1) === ':') return 'right';
+            return 'left';
+          });
+
+          // Header cells
+          var headerCells = parsePipeCells(headerLine);
+          var thead = '<thead><tr>' + headerCells.map(function(cell, ci) {
+            var align = aligns[ci] || 'left';
+            return '<th' + (align !== 'left' ? ' style="text-align:' + align + '"' : '') + '>' + parseInline(cell.trim()) + '</th>';
+          }).join('') + '</tr></thead>';
+
+          // Body rows
+          i += 2;
+          var tbodyRows = [];
+          while (i < len && lines[i].indexOf('|') !== -1 && lines[i].trim() !== '') {
+            var rowCells = parsePipeCells(lines[i]);
+            tbodyRows.push('<tr>' + rowCells.map(function(cell, ci) {
+              var align = aligns[ci] || 'left';
+              return '<td' + (align !== 'left' ? ' style="text-align:' + align + '"' : '') + '>' + parseInline(cell.trim()) + '</td>';
+            }).join('') + '</tr>');
+            i++;
+          }
+
+          html.push('<table>' + thead + (tbodyRows.length ? '<tbody>' + tbodyRows.join('') + '</tbody>' : '') + '</table>');
+          continue;
+        }
+
+        // ── Blockquotes ─────────────────────────────────
+        if (/^>\s?/.test(line)) {
+          var bqLines = [];
+          while (i < len && /^>\s?/.test(lines[i])) {
+            bqLines.push(lines[i].replace(/^>\s?/, ''));
+            i++;
+          }
+          // Recursively parse blockquote content
+          html.push('<blockquote>' + markdownToHtml(bqLines.join('\n')) + '</blockquote>');
+          continue;
+        }
+
+        // ── Unordered lists ─────────────────────────────
+        if (/^(\s*)([-*+])\s/.test(line)) {
+          html.push(parseList(lines, i, 'ul'));
+          // Advance past the list
+          while (i < len && (/^(\s*)([-*+])\s/.test(lines[i]) || /^\s+\S/.test(lines[i]) && !/^\s*([-*+])\s/.test(lines[i]) && !/^\s*\d+\.\s/.test(lines[i]))) {
+            // Also skip continuation lines (indented non-list text)
+            if (/^\s+/.test(lines[i]) && !/^\s*([-*+])\s/.test(lines[i]) && !/^\s*\d+\.\s/.test(lines[i])) {
+              i++; continue;
+            }
+            i++;
+          }
+          continue;
+        }
+
+        // ── Ordered lists ───────────────────────────────
+        if (/^(\s*)\d+\.\s/.test(line)) {
+          html.push(parseList(lines, i, 'ol'));
+          while (i < len && (/^(\s*)\d+\.\s/.test(lines[i]) || /^\s+\S/.test(lines[i]) && !/^\s*([-*+])\s/.test(lines[i]) && !/^\s*\d+\.\s/.test(lines[i]))) {
+            if (/^\s+/.test(lines[i]) && !/^\s*([-*+])\s/.test(lines[i]) && !/^\s*\d+\.\s/.test(lines[i])) {
+              i++; continue;
+            }
+            i++;
+          }
+          continue;
+        }
+
+        // ── Setext headings (= and -) ──────────────────
+        if (i + 1 < len && /^=+\s*$/.test(lines[i + 1]) && line.trim() !== '') {
+          html.push('<h1>' + parseInline(line.trim()) + '</h1>');
+          i += 2;
+          continue;
+        }
+        if (i + 1 < len && /^-+\s*$/.test(lines[i + 1]) && line.trim() !== '' && !(/^(\s*)([-*+])\s/.test(line))) {
+          html.push('<h2>' + parseInline(line.trim()) + '</h2>');
+          i += 2;
+          continue;
+        }
+
+        // ── Blank line ──────────────────────────────────
+        if (line.trim() === '') {
+          i++;
+          continue;
+        }
+
+        // ── Paragraph (default) ─────────────────────────
+        var paraLines = [line];
+        i++;
+        while (i < len && lines[i].trim() !== '' &&
+               !lines[i].match(/^(#{1,6})\s/) &&
+               !lines[i].match(/^(`{3,}|~{3,})/) &&
+               !lines[i].match(/^>\s?/) &&
+               !lines[i].match(/^(\s*)([-*+])\s/) &&
+               !lines[i].match(/^(\s*)\d+\.\s/) &&
+               !lines[i].match(/^(\*\s*\*\s*\*|---|___)/) &&
+               !(lines[i].indexOf('|') !== -1 && i + 1 < len && /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(lines[i + 1])) &&
+               !/^=+\s*$/.test(lines[i]) &&
+               !/^-+\s*$/.test(lines[i])) {
+          paraLines.push(lines[i]);
+          i++;
+        }
+        html.push('<p>' + parseInline(paraLines.join('\n').replace(/  \n/g, '<br>\n').replace(/\n/g, '\n')) + '</p>');
+      }
+
+      return html.join('\n');
+    }
+
+    // Parse cells from a pipe-delimited table row
+    function parsePipeCells(line) {
+      line = line.trim();
+      if (line.charAt(0) === '|') line = line.substring(1);
+      if (line.charAt(line.length - 1) === '|') line = line.substring(0, line.length - 1);
+      return line.split('|');
+    }
+
+    // ── List Parser ─────────────────────────────────────────
+    // Handles nested lists, task lists, mixed ul/ol
+    function parseList(lines, startIdx, type) {
+      var items = [];
+      var i = startIdx;
+      var len = lines.length;
+      var baseIndent = lines[i].match(/^(\s*)/)[1].length;
+      var listPattern = type === 'ul' ? /^(\s*)([-*+])\s(.*)$/ : /^(\s*)(\d+)\.\s(.*)$/;
+
+      while (i < len) {
+        var line = lines[i];
+
+        // Check if this line is a list item at our indent level
+        var match = line.match(type === 'ul' ? /^(\s*)([-*+])\s(.*)$/ : /^(\s*)(\d+)\.\s(.*)$/);
+
+        if (match && match[1].length === baseIndent) {
+          var content = match[3];
+
+          // Check for task list items (GFM)
+          var taskMatch = content.match(/^\[([ xX])\]\s(.*)$/);
+          var isTask = false;
+          var isChecked = false;
+          if (taskMatch && type === 'ul') {
+            isTask = true;
+            isChecked = taskMatch[1].toLowerCase() === 'x';
+            content = taskMatch[2];
+          }
+
+          // Collect continuation lines and sublists
+          i++;
+          var subContent = [];
+          while (i < len) {
+            var nextLine = lines[i];
+            // Blank line might be part of a loose list
+            if (nextLine.trim() === '') {
+              // Check if next non-blank line continues the list
+              if (i + 1 < len) {
+                var afterBlank = lines[i + 1];
+                var nextMatch = afterBlank.match(/^(\s*)([-*+])\s/) || afterBlank.match(/^(\s*)(\d+)\.\s/);
+                if (nextMatch && nextMatch[1].length >= baseIndent) {
+                  i++;
+                  continue;
+                }
+                if (/^\s+/.test(afterBlank) && afterBlank.match(/^(\s*)/)[1].length > baseIndent) {
+                  i++;
+                  continue;
+                }
+              }
+              break;
+            }
+            // Check if this is a new item at the same level
+            var sameLevel = nextLine.match(type === 'ul' ? /^(\s*)([-*+])\s/ : /^(\s*)(\d+)\.\s/);
+            if (sameLevel && sameLevel[1].length === baseIndent) break;
+            // Check if this is a nested list item
+            var nestedUl = nextLine.match(/^(\s*)([-*+])\s/);
+            var nestedOl = nextLine.match(/^(\s*)(\d+)\.\s/);
+            if ((nestedUl && nestedUl[1].length > baseIndent) || (nestedOl && nestedOl[1].length > baseIndent)) {
+              subContent.push(nextLine);
+              i++;
+              continue;
+            }
+            // Continuation line (indented)
+            if (/^\s+/.test(nextLine) && nextLine.match(/^(\s*)/)[1].length > baseIndent) {
+              content += ' ' + nextLine.trim();
+              i++;
+              continue;
+            }
+            break;
+          }
+
+          // Parse nested lists from subContent
+          var subHtml = '';
+          if (subContent.length > 0) {
+            var subLine = subContent[0];
+            var subUl = subLine.match(/^(\s*)([-*+])\s/);
+            var subOl = subLine.match(/^(\s*)(\d+)\.\s/);
+            if (subUl) {
+              subHtml = parseList(subContent, 0, 'ul');
+            } else if (subOl) {
+              subHtml = parseList(subContent, 0, 'ol');
+            }
+          }
+
+          if (isTask) {
+            var checkbox = '<input type="checkbox"' + (isChecked ? ' checked' : '') + ' disabled> ';
+            items.push('<li class="task-item">' + checkbox + parseInline(content) + subHtml + '</li>');
+          } else {
+            items.push('<li>' + parseInline(content) + subHtml + '</li>');
+          }
+        } else if (match && match[1].length > baseIndent) {
+          // This shouldn't happen since we handle nested lists above, but just in case
+          i++;
+        } else {
+          break;
+        }
+      }
+
+      var tag = type === 'ul' ? 'ul' : 'ol';
+      return '<' + tag + '>\n' + items.join('\n') + '\n</' + tag + '>';
+    }
+
+    // ── Pretty-print HTML ───────────────────────────────────
+    function prettyHtml(html) {
+      // Simple formatter: add newlines and indentation
+      var result = '';
+      var indent = 0;
+      var tokens = html.split(/(<\/?[^>]+>)/g);
+
+      for (var t = 0; t < tokens.length; t++) {
+        var token = tokens[t];
+        if (!token) continue;
+
+        if (/^<\/(h[1-6]|p|div|ul|ol|li|table|thead|tbody|tr|blockquote|pre|hr)>/i.test(token)) {
+          indent = Math.max(0, indent - 1);
+          result += repeat('  ', indent) + token + '\n';
+        } else if (/^<(h[1-6]|p|div|ul|ol|li|table|thead|tbody|tr|blockquote|pre|hr)[\s>]/i.test(token) || token === '<hr>') {
+          result += repeat('  ', indent) + token;
+          if (/^<(ul|ol|table|thead|tbody|tr|blockquote)[\s>]/i.test(token)) {
+            result += '\n';
+            indent++;
+          }
+        } else {
+          result += token;
+          if (/^<\/(ul|ol|table|thead|tbody|tr|blockquote)>/i.test(token)) {
+            // Already handled above
+          }
+        }
+      }
+
+      // Clean up: remove excessive blank lines, trim
+      return result.replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function repeat(str, n) {
+      var result = '';
+      for (var i = 0; i < n; i++) result += str;
+      return result;
+    }
+
+    // ─── Conversion ─────────────────────────────────────────
+    function convert() {
+      var input = $input.value;
+      if (!input.trim()) {
+        $preview.innerHTML = '';
+        $htmlOutput.value = '';
+        $charCount.textContent = '';
+        return;
+      }
+
+      try {
+        var result = markdownToHtml(input);
+        $preview.innerHTML = result;
+        $htmlOutput.value = result;
+        $charCount.textContent = result.length + ' chars';
+        $status.textContent = 'Live conversion active';
+      } catch (e) {
+        $preview.innerHTML = '<p style="color:red;">Error: ' + escapeHtml(e.message) + '</p>';
+        $htmlOutput.value = 'Error: ' + e.message;
+        $status.textContent = 'Conversion error';
+      }
+    }
+
+    // ─── Action Buttons ─────────────────────────────────────
+    function copyHTML() {
+      if (!$htmlOutput.value) return;
+      navigator.clipboard.writeText($htmlOutput.value).then(function() {
+        showToast('HTML copied to clipboard!');
+      });
+    }
+
+    function pasteInput() {
+      navigator.clipboard.readText().then(function(text) {
+        $input.value = text;
+        convert();
+        showToast('Pasted from clipboard');
+      }).catch(function() {
+        showToast('Could not access clipboard');
+      });
+    }
+
+    function loadSample() {
+      $input.value = '# Markdown to HTML Demo\n\nThis converter supports **bold**, *italic*, ***bold italic***, ~~strikethrough~~, and `inline code`.\n\n## Links & Images\n\nVisit [DevTools.fm](https://zerokit.dev) for more tools.\n\n![Placeholder image](https://via.placeholder.com/400x120)\n\n## Lists\n\nUnordered list:\n\n- First item\n- Second item with **bold**\n- Third item\n  - Nested item\n  - Another nested item\n\nOrdered list:\n\n1. Step one\n2. Step two\n3. Step three\n\n## Task Lists (GFM)\n\n- [x] Write the parser\n- [x] Support GFM extensions\n- [ ] Handle every edge case\n- [ ] Take over the world\n\n## Code Block\n\n```javascript\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet("World"));\n```\n\n## Blockquote\n\n> The best way to predict the future is to invent it.\n>\n> -- Alan Kay\n\n## Table\n\n| Feature | Status | Notes |\n|---------|:------:|------:|\n| Headings | Done | ATX + Setext |\n| Lists | Done | Nested + task lists |\n| Tables | Done | With alignment |\n| Code | Done | Fenced + inline |\n\n---\n\n*Built with zero dependencies. Everything runs in your browser.*';
+      convert();
+      showToast('Sample loaded');
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $preview.innerHTML = '';
+      $htmlOutput.value = '';
+      $charCount.textContent = '';
+      $status.textContent = 'Live conversion active';
+    }
+
+    function showToast(msg) {
+      $status.textContent = msg;
+      setTimeout(function() {
+        $status.textContent = 'Live conversion active';
+      }, 2000);
+    }
+
+    // ─── Live Conversion ────────────────────────────────────
+    $input.addEventListener('input', convert);
+    $input.addEventListener('paste', function() { setTimeout(convert, 50); });
+
+    // Initial render
+    convert();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
