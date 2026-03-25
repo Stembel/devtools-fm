@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emoji Picker & Search - Find Emojis by Name | ZeroKit.dev</title>
+  <meta name="description" content="Search and copy emojis by name or keyword. Browse by category, copy as character, HTML entity, CSS code, or JS escape. Skin tone support. Free, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/emoji.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .emoji-search-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .emoji-search-wrap input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .emoji-search-wrap input:focus { border-color: var(--accent); }
+    .emoji-search-wrap input::placeholder { color: var(--text-muted); opacity: 0.5; }
+    .emoji-search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+    .emoji-search-count {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .emoji-categories {
+      display: flex;
+      gap: 4px;
+      padding: 8px 0 16px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .emoji-categories::-webkit-scrollbar { height: 4px; }
+    .emoji-categories::-webkit-scrollbar-track { background: transparent; }
+    .emoji-categories::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .cat-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .cat-btn:hover { border-color: var(--accent); color: var(--text); }
+    .cat-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .cat-btn .cat-icon { font-size: 1rem; }
+
+    .emoji-section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 0 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+      gap: 4px;
+      padding: 8px 0;
+    }
+    .emoji-cell {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s;
+      background: transparent;
+      border: 1px solid transparent;
+      position: relative;
+    }
+    .emoji-cell:hover {
+      background: var(--surface-2);
+      border-color: var(--border);
+      transform: scale(1.15);
+      z-index: 2;
+    }
+    .emoji-cell.copied {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: var(--success);
+    }
+
+    .emoji-detail-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .emoji-detail-panel.visible { display: block; }
+
+    .detail-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+    .detail-emoji {
+      font-size: 3.5rem;
+      line-height: 1;
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-width: 80px;
+      text-align: center;
+    }
+    .detail-info { flex: 1; min-width: 0; }
+    .detail-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .detail-codepoint {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .skin-tones {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .skin-tone-btn {
+      width: 36px;
+      height: 36px;
+      font-size: 1.3rem;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      background: var(--surface-2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .skin-tone-btn:hover { border-color: var(--accent); }
+    .skin-tone-btn.active { border-color: var(--accent); background: rgba(99,102,241,0.15); }
+
+    .copy-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .copy-opt {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .copy-opt-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .copy-opt-value {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      cursor: pointer;
+      word-break: break-all;
+      transition: background 0.15s;
+      color: var(--text);
+    }
+    .copy-opt-value:hover { background: var(--border); }
+    .copy-opt-value.copied { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+
+    .recent-section {
+      margin-bottom: 16px;
+    }
+    .recent-section .emoji-grid {
+      grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    }
+
+    .emoji-container {
+      max-height: 65vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      padding-right: 4px;
+    }
+    .emoji-container::-webkit-scrollbar { width: 6px; }
+    .emoji-container::-webkit-scrollbar-track { background: transparent; }
+    .emoji-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+    }
+    .no-results .big-emoji { font-size: 3rem; margin-bottom: 12px; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--success);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .emoji-grid {
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      }
+      .copy-options {
+        grid-template-columns: 1fr;
+      }
+      .detail-top {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .skin-tones { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Emoji Picker & Search</h1>
+    <p class="description">Search emojis by name or keyword, browse by category, and copy in multiple formats. Everything runs locally in your browser.</p>
+
+    <div class="emoji-search-wrap">
+      <span class="emoji-search-icon">&#x1F50D;</span>
+      <input type="text" id="searchInput" placeholder="Search emojis by name or keyword..." autocomplete="off" autofocus>
+      <span class="emoji-search-count" id="searchCount"></span>
+    </div>
+
+    <div class="emoji-categories" id="categoryBar"></div>
+
+    <div class="emoji-detail-panel" id="detailPanel">
+      <div class="detail-top">
+        <div class="detail-emoji" id="detailEmoji"></div>
+        <div class="detail-info">
+          <div class="detail-name" id="detailName"></div>
+          <div class="detail-codepoint" id="detailCodepoint"></div>
+          <div class="skin-tones" id="skinTones" style="display:none"></div>
+        </div>
+      </div>
+      <div class="copy-options" id="copyOptions"></div>
+    </div>
+
+    <div class="recent-section" id="recentSection" style="display:none">
+      <div class="emoji-section-title">Recently Used</div>
+      <div class="emoji-grid" id="recentGrid"></div>
+    </div>
+
+    <div class="emoji-container" id="emojiContainer"></div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // ===== EMOJI DATABASE =====
+  const SKIN_TONES = [
+    { mod: '', label: 'Default' },
+    { mod: '\u{1F3FB}', label: 'Light' },
+    { mod: '\u{1F3FC}', label: 'Medium-Light' },
+    { mod: '\u{1F3FD}', label: 'Medium' },
+    { mod: '\u{1F3FE}', label: 'Medium-Dark' },
+    { mod: '\u{1F3FF}', label: 'Dark' }
+  ];
+
+  const CATEGORIES = [
+    { id: 'all', icon: '\u{2B50}', label: 'All' },
+    { id: 'smileys', icon: '\u{1F600}', label: 'Smileys' },
+    { id: 'people', icon: '\u{1F464}', label: 'People' },
+    { id: 'animals', icon: '\u{1F43E}', label: 'Animals' },
+    { id: 'food', icon: '\u{1F354}', label: 'Food' },
+    { id: 'travel', icon: '\u{2708}\uFE0F', label: 'Travel' },
+    { id: 'activities', icon: '\u{26BD}', label: 'Activities' },
+    { id: 'objects', icon: '\u{1F4A1}', label: 'Objects' },
+    { id: 'symbols', icon: '\u{2764}\uFE0F', label: 'Symbols' },
+    { id: 'flags', icon: '\u{1F3C1}', label: 'Flags' }
+  ];
+
+  // Comprehensive emoji database with 500+ entries
+  const EMOJIS = [
+    // === SMILEYS ===
+    { e: '\u{1F600}', n: 'grinning face', k: 'happy smile grin', c: 'smileys' },
+    { e: '\u{1F603}', n: 'grinning face with big eyes', k: 'happy smile', c: 'smileys' },
+    { e: '\u{1F604}', n: 'grinning face with smiling eyes', k: 'happy smile', c: 'smileys' },
+    { e: '\u{1F601}', n: 'beaming face with smiling eyes', k: 'happy grin', c: 'smileys' },
+    { e: '\u{1F606}', n: 'grinning squinting face', k: 'laugh happy', c: 'smileys' },
+    { e: '\u{1F605}', n: 'grinning face with sweat', k: 'nervous laugh', c: 'smileys' },
+    { e: '\u{1F923}', n: 'rolling on the floor laughing', k: 'rofl lol', c: 'smileys' },
+    { e: '\u{1F602}', n: 'face with tears of joy', k: 'laugh cry lol', c: 'smileys' },
+    { e: '\u{1F642}', n: 'slightly smiling face', k: 'smile', c: 'smileys' },
+    { e: '\u{1F643}', n: 'upside-down face', k: 'silly sarcasm', c: 'smileys' },
+    { e: '\u{1FAE0}', n: 'melting face', k: 'melt hot embarrassed', c: 'smileys' },
+    { e: '\u{1F609}', n: 'winking face', k: 'wink', c: 'smileys' },
+    { e: '\u{1F60A}', n: 'smiling face with smiling eyes', k: 'blush happy', c: 'smileys' },
+    { e: '\u{1F607}', n: 'smiling face with halo', k: 'angel innocent', c: 'smileys' },
+    { e: '\u{1F970}', n: 'smiling face with hearts', k: 'love adore', c: 'smileys' },
+    { e: '\u{1F60D}', n: 'smiling face with heart-eyes', k: 'love heart eyes', c: 'smileys' },
+    { e: '\u{1F929}', n: 'star-struck', k: 'excited star eyes', c: 'smileys' },
+    { e: '\u{1F618}', n: 'face blowing a kiss', k: 'kiss love', c: 'smileys' },
+    { e: '\u{1F617}', n: 'kissing face', k: 'kiss', c: 'smileys' },
+    { e: '\u{263A}\uFE0F', n: 'smiling face', k: 'warm smile', c: 'smileys' },
+    { e: '\u{1F61A}', n: 'kissing face with closed eyes', k: 'kiss', c: 'smileys' },
+    { e: '\u{1F619}', n: 'kissing face with smiling eyes', k: 'kiss', c: 'smileys' },
+    { e: '\u{1F972}', n: 'smiling face with tear', k: 'grateful relieved', c: 'smileys' },
+    { e: '\u{1F60B}', n: 'face savoring food', k: 'yummy delicious', c: 'smileys' },
+    { e: '\u{1F61B}', n: 'face with tongue', k: 'playful tongue', c: 'smileys' },
+    { e: '\u{1F61C}', n: 'winking face with tongue', k: 'playful wink tongue', c: 'smileys' },
+    { e: '\u{1F92A}', n: 'zany face', k: 'crazy wild', c: 'smileys' },
+    { e: '\u{1F61D}', n: 'squinting face with tongue', k: 'tongue playful', c: 'smileys' },
+    { e: '\u{1F911}', n: 'money-mouth face', k: 'money rich', c: 'smileys' },
+    { e: '\u{1F917}', n: 'smiling face with open hands', k: 'hug', c: 'smileys' },
+    { e: '\u{1F92D}', n: 'face with hand over mouth', k: 'oops giggle', c: 'smileys' },
+    { e: '\u{1FAE2}', n: 'face with open eyes and hand over mouth', k: 'shock surprise', c: 'smileys' },
+    { e: '\u{1FAE3}', n: 'face with peeking eye', k: 'peek shy', c: 'smileys' },
+    { e: '\u{1F910}', n: 'zipper-mouth face', k: 'secret quiet zip', c: 'smileys' },
+    { e: '\u{1F914}', n: 'thinking face', k: 'think hmm', c: 'smileys' },
+    { e: '\u{1F92B}', n: 'shushing face', k: 'quiet shh secret', c: 'smileys' },
+    { e: '\u{1F925}', n: 'lying face', k: 'pinocchio lie', c: 'smileys' },
+    { e: '\u{1F636}', n: 'face without mouth', k: 'silent speechless', c: 'smileys' },
+    { e: '\u{1F610}', n: 'neutral face', k: 'meh neutral', c: 'smileys' },
+    { e: '\u{1F611}', n: 'expressionless face', k: 'blank deadpan', c: 'smileys' },
+    { e: '\u{1F636}\u200D\u{1F32B}\uFE0F', n: 'face in clouds', k: 'foggy dreamy', c: 'smileys' },
+    { e: '\u{1F60F}', n: 'smirking face', k: 'smirk', c: 'smileys' },
+    { e: '\u{1F612}', n: 'unamused face', k: 'annoyed', c: 'smileys' },
+    { e: '\u{1F644}', n: 'face with rolling eyes', k: 'eyeroll whatever', c: 'smileys' },
+    { e: '\u{1F62C}', n: 'grimacing face', k: 'yikes awkward', c: 'smileys' },
+    { e: '\u{1F62E}\u200D\u{1F4A8}', n: 'face exhaling', k: 'sigh relief exhale', c: 'smileys' },
+    { e: '\u{1F60C}', n: 'relieved face', k: 'relief calm', c: 'smileys' },
+    { e: '\u{1F614}', n: 'pensive face', k: 'sad thoughtful', c: 'smileys' },
+    { e: '\u{1F62A}', n: 'sleepy face', k: 'tired sleep', c: 'smileys' },
+    { e: '\u{1F924}', n: 'drooling face', k: 'drool hungry', c: 'smileys' },
+    { e: '\u{1F634}', n: 'sleeping face', k: 'sleep zzz', c: 'smileys' },
+    { e: '\u{1F637}', n: 'face with medical mask', k: 'sick mask covid', c: 'smileys' },
+    { e: '\u{1F912}', n: 'face with thermometer', k: 'sick fever', c: 'smileys' },
+    { e: '\u{1F915}', n: 'face with head-bandage', k: 'hurt injured', c: 'smileys' },
+    { e: '\u{1F922}', n: 'nauseated face', k: 'sick gross nausea', c: 'smileys' },
+    { e: '\u{1F92E}', n: 'face vomiting', k: 'puke sick', c: 'smileys' },
+    { e: '\u{1F927}', n: 'sneezing face', k: 'sneeze cold', c: 'smileys' },
+    { e: '\u{1F975}', n: 'hot face', k: 'hot warm sweating', c: 'smileys' },
+    { e: '\u{1F976}', n: 'cold face', k: 'cold freezing', c: 'smileys' },
+    { e: '\u{1F974}', n: 'woozy face', k: 'drunk dizzy', c: 'smileys' },
+    { e: '\u{1F635}', n: 'face with crossed-out eyes', k: 'dizzy dead', c: 'smileys' },
+    { e: '\u{1F92F}', n: 'exploding head', k: 'mind blown shocked', c: 'smileys' },
+    { e: '\u{1F920}', n: 'cowboy hat face', k: 'cowboy western', c: 'smileys' },
+    { e: '\u{1F973}', n: 'partying face', k: 'party celebration', c: 'smileys' },
+    { e: '\u{1F978}', n: 'disguised face', k: 'disguise spy', c: 'smileys' },
+    { e: '\u{1F60E}', n: 'smiling face with sunglasses', k: 'cool sunglasses', c: 'smileys' },
+    { e: '\u{1F913}', n: 'nerd face', k: 'nerd geek glasses', c: 'smileys' },
+    { e: '\u{1F9D0}', n: 'face with monocle', k: 'monocle fancy', c: 'smileys' },
+    { e: '\u{1F615}', n: 'confused face', k: 'confused', c: 'smileys' },
+    { e: '\u{1FAE4}', n: 'face with diagonal mouth', k: 'unsure skeptical', c: 'smileys' },
+    { e: '\u{1F61F}', n: 'worried face', k: 'worried nervous', c: 'smileys' },
+    { e: '\u{1F641}', n: 'slightly frowning face', k: 'sad frown', c: 'smileys' },
+    { e: '\u{2639}\uFE0F', n: 'frowning face', k: 'sad frown', c: 'smileys' },
+    { e: '\u{1F62E}', n: 'face with open mouth', k: 'surprised wow', c: 'smileys' },
+    { e: '\u{1F62F}', n: 'hushed face', k: 'surprised hushed', c: 'smileys' },
+    { e: '\u{1F632}', n: 'astonished face', k: 'surprised shocked', c: 'smileys' },
+    { e: '\u{1F633}', n: 'flushed face', k: 'embarrassed blush', c: 'smileys' },
+    { e: '\u{1F97A}', n: 'pleading face', k: 'puppy eyes please', c: 'smileys' },
+    { e: '\u{1F979}', n: 'face holding back tears', k: 'sad watery eyes', c: 'smileys' },
+    { e: '\u{1F626}', n: 'frowning face with open mouth', k: 'anguish shocked', c: 'smileys' },
+    { e: '\u{1F627}', n: 'anguished face', k: 'pain anguish', c: 'smileys' },
+    { e: '\u{1F628}', n: 'fearful face', k: 'scared fear', c: 'smileys' },
+    { e: '\u{1F630}', n: 'anxious face with sweat', k: 'nervous anxious', c: 'smileys' },
+    { e: '\u{1F625}', n: 'sad but relieved face', k: 'disappointed relieved', c: 'smileys' },
+    { e: '\u{1F622}', n: 'crying face', k: 'sad cry tear', c: 'smileys' },
+    { e: '\u{1F62D}', n: 'loudly crying face', k: 'sobbing wailing', c: 'smileys' },
+    { e: '\u{1F631}', n: 'face screaming in fear', k: 'scream horror', c: 'smileys' },
+    { e: '\u{1F616}', n: 'confounded face', k: 'confused quizzical', c: 'smileys' },
+    { e: '\u{1F623}', n: 'persevering face', k: 'endure struggle', c: 'smileys' },
+    { e: '\u{1F61E}', n: 'disappointed face', k: 'sad disappointed', c: 'smileys' },
+    { e: '\u{1F613}', n: 'downcast face with sweat', k: 'disappointed sweat', c: 'smileys' },
+    { e: '\u{1F629}', n: 'weary face', k: 'tired weary', c: 'smileys' },
+    { e: '\u{1F62B}', n: 'tired face', k: 'exhausted tired', c: 'smileys' },
+    { e: '\u{1F971}', n: 'yawning face', k: 'yawn bored tired', c: 'smileys' },
+    { e: '\u{1F624}', n: 'face with steam from nose', k: 'angry triumph', c: 'smileys' },
+    { e: '\u{1F621}', n: 'pouting face', k: 'angry rage red', c: 'smileys' },
+    { e: '\u{1F620}', n: 'angry face', k: 'angry mad', c: 'smileys' },
+    { e: '\u{1F92C}', n: 'face with symbols on mouth', k: 'swearing cursing', c: 'smileys' },
+    { e: '\u{1F608}', n: 'smiling face with horns', k: 'devil evil', c: 'smileys' },
+    { e: '\u{1F47F}', n: 'angry face with horns', k: 'devil angry', c: 'smileys' },
+    { e: '\u{1F480}', n: 'skull', k: 'death dead skeleton', c: 'smileys' },
+    { e: '\u{2620}\uFE0F', n: 'skull and crossbones', k: 'death danger poison', c: 'smileys' },
+    { e: '\u{1F4A9}', n: 'pile of poo', k: 'poop poo shit', c: 'smileys' },
+    { e: '\u{1F921}', n: 'clown face', k: 'clown silly', c: 'smileys' },
+    { e: '\u{1F47B}', n: 'ghost', k: 'ghost halloween', c: 'smileys' },
+    { e: '\u{1F47D}', n: 'alien', k: 'alien ufo space', c: 'smileys' },
+    { e: '\u{1F47E}', n: 'alien monster', k: 'game monster', c: 'smileys' },
+    { e: '\u{1F916}', n: 'robot', k: 'robot bot', c: 'smileys' },
+    { e: '\u{1F63A}', n: 'grinning cat', k: 'cat happy', c: 'smileys' },
+    { e: '\u{1F638}', n: 'grinning cat with smiling eyes', k: 'cat happy', c: 'smileys' },
+    { e: '\u{1F639}', n: 'cat with tears of joy', k: 'cat laugh', c: 'smileys' },
+    { e: '\u{1F63B}', n: 'smiling cat with heart-eyes', k: 'cat love', c: 'smileys' },
+    { e: '\u{1F63C}', n: 'cat with wry smile', k: 'cat smirk', c: 'smileys' },
+    { e: '\u{1F63D}', n: 'kissing cat', k: 'cat kiss', c: 'smileys' },
+    { e: '\u{1F640}', n: 'weary cat', k: 'cat scared', c: 'smileys' },
+    { e: '\u{1F63F}', n: 'crying cat', k: 'cat sad cry', c: 'smileys' },
+    { e: '\u{1F63E}', n: 'pouting cat', k: 'cat angry', c: 'smileys' },
+
+    // === PEOPLE ===
+    { e: '\u{1F44B}', n: 'waving hand', k: 'wave hello bye', c: 'people', s: true },
+    { e: '\u{1F91A}', n: 'raised back of hand', k: 'hand back', c: 'people', s: true },
+    { e: '\u{1F590}\uFE0F', n: 'hand with fingers splayed', k: 'hand spread', c: 'people', s: true },
+    { e: '\u{270B}', n: 'raised hand', k: 'hand stop high five', c: 'people', s: true },
+    { e: '\u{1F596}', n: 'vulcan salute', k: 'spock star trek', c: 'people', s: true },
+    { e: '\u{1FAF1}', n: 'rightwards hand', k: 'hand right', c: 'people', s: true },
+    { e: '\u{1FAF2}', n: 'leftwards hand', k: 'hand left', c: 'people', s: true },
+    { e: '\u{1FAF3}', n: 'palm down hand', k: 'hand down', c: 'people', s: true },
+    { e: '\u{1FAF4}', n: 'palm up hand', k: 'hand up', c: 'people', s: true },
+    { e: '\u{1F44C}', n: 'OK hand', k: 'ok okay perfect', c: 'people', s: true },
+    { e: '\u{1F90C}', n: 'pinched fingers', k: 'italian chef kiss', c: 'people', s: true },
+    { e: '\u{1F90F}', n: 'pinching hand', k: 'small tiny little', c: 'people', s: true },
+    { e: '\u{270C}\uFE0F', n: 'victory hand', k: 'peace victory v', c: 'people', s: true },
+    { e: '\u{1F91E}', n: 'crossed fingers', k: 'luck hope fingers crossed', c: 'people', s: true },
+    { e: '\u{1FAF0}', n: 'hand with index finger and thumb crossed', k: 'love snap money', c: 'people', s: true },
+    { e: '\u{1F91F}', n: 'love-you gesture', k: 'love rock on ily', c: 'people', s: true },
+    { e: '\u{1F918}', n: 'sign of the horns', k: 'rock metal', c: 'people', s: true },
+    { e: '\u{1F919}', n: 'call me hand', k: 'call phone shaka', c: 'people', s: true },
+    { e: '\u{1F448}', n: 'backhand index pointing left', k: 'point left', c: 'people', s: true },
+    { e: '\u{1F449}', n: 'backhand index pointing right', k: 'point right', c: 'people', s: true },
+    { e: '\u{1F446}', n: 'backhand index pointing up', k: 'point up', c: 'people', s: true },
+    { e: '\u{1F595}', n: 'middle finger', k: 'middle finger flip off', c: 'people', s: true },
+    { e: '\u{1F447}', n: 'backhand index pointing down', k: 'point down', c: 'people', s: true },
+    { e: '\u{261D}\uFE0F', n: 'index pointing up', k: 'point up one', c: 'people', s: true },
+    { e: '\u{1FAF5}', n: 'index pointing at the viewer', k: 'point you', c: 'people', s: true },
+    { e: '\u{1F44D}', n: 'thumbs up', k: 'thumbsup like approve yes', c: 'people', s: true },
+    { e: '\u{1F44E}', n: 'thumbs down', k: 'thumbsdown dislike no', c: 'people', s: true },
+    { e: '\u{270A}', n: 'raised fist', k: 'fist power', c: 'people', s: true },
+    { e: '\u{1F44A}', n: 'oncoming fist', k: 'punch fistbump', c: 'people', s: true },
+    { e: '\u{1F91B}', n: 'left-facing fist', k: 'fist bump left', c: 'people', s: true },
+    { e: '\u{1F91C}', n: 'right-facing fist', k: 'fist bump right', c: 'people', s: true },
+    { e: '\u{1F44F}', n: 'clapping hands', k: 'clap applause', c: 'people', s: true },
+    { e: '\u{1F64C}', n: 'raising hands', k: 'celebrate hooray praise', c: 'people', s: true },
+    { e: '\u{1FAF6}', n: 'heart hands', k: 'love heart gesture', c: 'people', s: true },
+    { e: '\u{1F450}', n: 'open hands', k: 'hands open', c: 'people', s: true },
+    { e: '\u{1F932}', n: 'palms up together', k: 'prayer open palms', c: 'people', s: true },
+    { e: '\u{1F91D}', n: 'handshake', k: 'shake hands deal agree', c: 'people' },
+    { e: '\u{1F64F}', n: 'folded hands', k: 'pray please thank you namaste', c: 'people', s: true },
+    { e: '\u{270D}\uFE0F', n: 'writing hand', k: 'write pen', c: 'people', s: true },
+    { e: '\u{1F485}', n: 'nail polish', k: 'nails beauty sassy', c: 'people', s: true },
+    { e: '\u{1F933}', n: 'selfie', k: 'selfie phone camera', c: 'people', s: true },
+    { e: '\u{1F4AA}', n: 'flexed biceps', k: 'strong muscle flex', c: 'people', s: true },
+    { e: '\u{1F9BE}', n: 'mechanical arm', k: 'prosthetic robot arm', c: 'people' },
+    { e: '\u{1F9BF}', n: 'mechanical leg', k: 'prosthetic robot leg', c: 'people' },
+    { e: '\u{1F9B5}', n: 'leg', k: 'leg kick', c: 'people', s: true },
+    { e: '\u{1F9B6}', n: 'foot', k: 'foot kick stomp', c: 'people', s: true },
+    { e: '\u{1F442}', n: 'ear', k: 'ear listen hear', c: 'people', s: true },
+    { e: '\u{1F443}', n: 'nose', k: 'nose smell', c: 'people', s: true },
+    { e: '\u{1F9E0}', n: 'brain', k: 'brain smart think', c: 'people' },
+    { e: '\u{1F441}\uFE0F', n: 'eye', k: 'eye see look', c: 'people' },
+    { e: '\u{1F440}', n: 'eyes', k: 'eyes look see stare', c: 'people' },
+    { e: '\u{1F445}', n: 'tongue', k: 'tongue taste lick', c: 'people' },
+    { e: '\u{1F444}', n: 'mouth', k: 'mouth lips kiss', c: 'people' },
+    { e: '\u{1F476}', n: 'baby', k: 'baby infant child', c: 'people', s: true },
+    { e: '\u{1F9D2}', n: 'child', k: 'child kid', c: 'people', s: true },
+    { e: '\u{1F466}', n: 'boy', k: 'boy male child', c: 'people', s: true },
+    { e: '\u{1F467}', n: 'girl', k: 'girl female child', c: 'people', s: true },
+    { e: '\u{1F9D1}', n: 'person', k: 'person adult', c: 'people', s: true },
+    { e: '\u{1F468}', n: 'man', k: 'man male adult', c: 'people', s: true },
+    { e: '\u{1F469}', n: 'woman', k: 'woman female adult', c: 'people', s: true },
+    { e: '\u{1F9D3}', n: 'older person', k: 'elder old senior', c: 'people', s: true },
+    { e: '\u{1F474}', n: 'old man', k: 'grandpa elderly', c: 'people', s: true },
+    { e: '\u{1F475}', n: 'old woman', k: 'grandma elderly', c: 'people', s: true },
+
+    // === ANIMALS ===
+    { e: '\u{1F435}', n: 'monkey face', k: 'monkey ape', c: 'animals' },
+    { e: '\u{1F412}', n: 'monkey', k: 'monkey ape', c: 'animals' },
+    { e: '\u{1F98D}', n: 'gorilla', k: 'gorilla ape', c: 'animals' },
+    { e: '\u{1F9A7}', n: 'orangutan', k: 'orangutan ape', c: 'animals' },
+    { e: '\u{1F436}', n: 'dog face', k: 'dog puppy pet', c: 'animals' },
+    { e: '\u{1F415}', n: 'dog', k: 'dog pet', c: 'animals' },
+    { e: '\u{1F9AE}', n: 'guide dog', k: 'guide service dog', c: 'animals' },
+    { e: '\u{1F429}', n: 'poodle', k: 'poodle dog', c: 'animals' },
+    { e: '\u{1F43A}', n: 'wolf', k: 'wolf howl', c: 'animals' },
+    { e: '\u{1F98A}', n: 'fox', k: 'fox clever', c: 'animals' },
+    { e: '\u{1F99D}', n: 'raccoon', k: 'raccoon trash panda', c: 'animals' },
+    { e: '\u{1F431}', n: 'cat face', k: 'cat kitten pet', c: 'animals' },
+    { e: '\u{1F408}', n: 'cat', k: 'cat pet', c: 'animals' },
+    { e: '\u{1F981}', n: 'lion', k: 'lion king jungle', c: 'animals' },
+    { e: '\u{1F42F}', n: 'tiger face', k: 'tiger', c: 'animals' },
+    { e: '\u{1F405}', n: 'tiger', k: 'tiger', c: 'animals' },
+    { e: '\u{1F406}', n: 'leopard', k: 'leopard cheetah', c: 'animals' },
+    { e: '\u{1F434}', n: 'horse face', k: 'horse pony', c: 'animals' },
+    { e: '\u{1F40E}', n: 'horse', k: 'horse racing', c: 'animals' },
+    { e: '\u{1F984}', n: 'unicorn', k: 'unicorn magic fantasy', c: 'animals' },
+    { e: '\u{1F993}', n: 'zebra', k: 'zebra stripes', c: 'animals' },
+    { e: '\u{1F98C}', n: 'deer', k: 'deer bambi', c: 'animals' },
+    { e: '\u{1F9AC}', n: 'bison', k: 'bison buffalo', c: 'animals' },
+    { e: '\u{1F42E}', n: 'cow face', k: 'cow moo', c: 'animals' },
+    { e: '\u{1F402}', n: 'ox', k: 'ox bull', c: 'animals' },
+    { e: '\u{1F403}', n: 'water buffalo', k: 'buffalo water', c: 'animals' },
+    { e: '\u{1F404}', n: 'cow', k: 'cow dairy', c: 'animals' },
+    { e: '\u{1F437}', n: 'pig face', k: 'pig oink', c: 'animals' },
+    { e: '\u{1F416}', n: 'pig', k: 'pig pork', c: 'animals' },
+    { e: '\u{1F417}', n: 'boar', k: 'boar wild pig', c: 'animals' },
+    { e: '\u{1F43D}', n: 'pig nose', k: 'pig nose snout', c: 'animals' },
+    { e: '\u{1F40F}', n: 'ram', k: 'ram sheep horn', c: 'animals' },
+    { e: '\u{1F411}', n: 'ewe', k: 'sheep lamb wool', c: 'animals' },
+    { e: '\u{1F410}', n: 'goat', k: 'goat', c: 'animals' },
+    { e: '\u{1F42A}', n: 'camel', k: 'camel desert hump', c: 'animals' },
+    { e: '\u{1F42B}', n: 'two-hump camel', k: 'camel desert', c: 'animals' },
+    { e: '\u{1F999}', n: 'llama', k: 'llama alpaca', c: 'animals' },
+    { e: '\u{1F992}', n: 'giraffe', k: 'giraffe tall', c: 'animals' },
+    { e: '\u{1F418}', n: 'elephant', k: 'elephant trunk', c: 'animals' },
+    { e: '\u{1F9A3}', n: 'mammoth', k: 'mammoth extinct woolly', c: 'animals' },
+    { e: '\u{1F98F}', n: 'rhinoceros', k: 'rhino horn', c: 'animals' },
+    { e: '\u{1F99B}', n: 'hippopotamus', k: 'hippo', c: 'animals' },
+    { e: '\u{1F42D}', n: 'mouse face', k: 'mouse rat', c: 'animals' },
+    { e: '\u{1F401}', n: 'mouse', k: 'mouse rat', c: 'animals' },
+    { e: '\u{1F400}', n: 'rat', k: 'rat mouse', c: 'animals' },
+    { e: '\u{1F439}', n: 'hamster', k: 'hamster pet', c: 'animals' },
+    { e: '\u{1F430}', n: 'rabbit face', k: 'rabbit bunny', c: 'animals' },
+    { e: '\u{1F407}', n: 'rabbit', k: 'rabbit bunny', c: 'animals' },
+    { e: '\u{1F43F}\uFE0F', n: 'chipmunk', k: 'chipmunk squirrel', c: 'animals' },
+    { e: '\u{1F9AB}', n: 'beaver', k: 'beaver dam', c: 'animals' },
+    { e: '\u{1F994}', n: 'hedgehog', k: 'hedgehog spiny', c: 'animals' },
+    { e: '\u{1F987}', n: 'bat', k: 'bat vampire', c: 'animals' },
+    { e: '\u{1F43B}', n: 'bear', k: 'bear teddy', c: 'animals' },
+    { e: '\u{1F428}', n: 'koala', k: 'koala australia', c: 'animals' },
+    { e: '\u{1F43C}', n: 'panda', k: 'panda bear', c: 'animals' },
+    { e: '\u{1F9A5}', n: 'sloth', k: 'sloth lazy slow', c: 'animals' },
+    { e: '\u{1F9A6}', n: 'otter', k: 'otter cute', c: 'animals' },
+    { e: '\u{1F9A8}', n: 'skunk', k: 'skunk stink', c: 'animals' },
+    { e: '\u{1F998}', n: 'kangaroo', k: 'kangaroo joey australia', c: 'animals' },
+    { e: '\u{1F9A1}', n: 'badger', k: 'badger', c: 'animals' },
+    { e: '\u{1F43E}', n: 'paw prints', k: 'paw pet footprints', c: 'animals' },
+    { e: '\u{1F983}', n: 'turkey', k: 'turkey thanksgiving', c: 'animals' },
+    { e: '\u{1F414}', n: 'chicken', k: 'chicken hen poultry', c: 'animals' },
+    { e: '\u{1F413}', n: 'rooster', k: 'rooster cock', c: 'animals' },
+    { e: '\u{1F423}', n: 'hatching chick', k: 'chick baby bird', c: 'animals' },
+    { e: '\u{1F424}', n: 'baby chick', k: 'chick baby bird', c: 'animals' },
+    { e: '\u{1F425}', n: 'front-facing baby chick', k: 'chick baby bird', c: 'animals' },
+    { e: '\u{1F426}', n: 'bird', k: 'bird tweet', c: 'animals' },
+    { e: '\u{1F427}', n: 'penguin', k: 'penguin cold', c: 'animals' },
+    { e: '\u{1F54A}\uFE0F', n: 'dove', k: 'dove peace bird', c: 'animals' },
+    { e: '\u{1F985}', n: 'eagle', k: 'eagle bird america', c: 'animals' },
+    { e: '\u{1F986}', n: 'duck', k: 'duck quack', c: 'animals' },
+    { e: '\u{1F9A2}', n: 'swan', k: 'swan grace elegant', c: 'animals' },
+    { e: '\u{1F989}', n: 'owl', k: 'owl wise night', c: 'animals' },
+    { e: '\u{1F9A4}', n: 'dodo', k: 'dodo extinct bird', c: 'animals' },
+    { e: '\u{1FAB6}', n: 'feather', k: 'feather bird light', c: 'animals' },
+    { e: '\u{1F9A9}', n: 'flamingo', k: 'flamingo pink', c: 'animals' },
+    { e: '\u{1F438}', n: 'frog', k: 'frog toad', c: 'animals' },
+    { e: '\u{1F40A}', n: 'crocodile', k: 'crocodile alligator', c: 'animals' },
+    { e: '\u{1F422}', n: 'turtle', k: 'turtle slow shell', c: 'animals' },
+    { e: '\u{1F98E}', n: 'lizard', k: 'lizard reptile', c: 'animals' },
+    { e: '\u{1F40D}', n: 'snake', k: 'snake serpent', c: 'animals' },
+    { e: '\u{1F432}', n: 'dragon face', k: 'dragon fantasy', c: 'animals' },
+    { e: '\u{1F409}', n: 'dragon', k: 'dragon fantasy fire', c: 'animals' },
+    { e: '\u{1F995}', n: 'sauropod', k: 'dinosaur brontosaurus', c: 'animals' },
+    { e: '\u{1F996}', n: 't-rex', k: 'dinosaur trex', c: 'animals' },
+    { e: '\u{1F433}', n: 'spouting whale', k: 'whale ocean', c: 'animals' },
+    { e: '\u{1F40B}', n: 'whale', k: 'whale ocean', c: 'animals' },
+    { e: '\u{1F42C}', n: 'dolphin', k: 'dolphin ocean', c: 'animals' },
+    { e: '\u{1F9AD}', n: 'seal', k: 'seal ocean', c: 'animals' },
+    { e: '\u{1F41F}', n: 'fish', k: 'fish ocean', c: 'animals' },
+    { e: '\u{1F420}', n: 'tropical fish', k: 'fish tropical nemo', c: 'animals' },
+    { e: '\u{1F421}', n: 'blowfish', k: 'fish blowfish puffer', c: 'animals' },
+    { e: '\u{1F988}', n: 'shark', k: 'shark ocean jaws', c: 'animals' },
+    { e: '\u{1F419}', n: 'octopus', k: 'octopus tentacles', c: 'animals' },
+    { e: '\u{1F41A}', n: 'spiral shell', k: 'shell ocean beach', c: 'animals' },
+    { e: '\u{1FAB8}', n: 'coral', k: 'coral reef ocean', c: 'animals' },
+    { e: '\u{1F40C}', n: 'snail', k: 'snail slow', c: 'animals' },
+    { e: '\u{1F98B}', n: 'butterfly', k: 'butterfly insect', c: 'animals' },
+    { e: '\u{1F41B}', n: 'bug', k: 'bug insect caterpillar', c: 'animals' },
+    { e: '\u{1F41C}', n: 'ant', k: 'ant insect', c: 'animals' },
+    { e: '\u{1F41D}', n: 'honeybee', k: 'bee honey insect', c: 'animals' },
+    { e: '\u{1FAB2}', n: 'beetle', k: 'beetle bug insect', c: 'animals' },
+    { e: '\u{1F41E}', n: 'lady beetle', k: 'ladybug insect', c: 'animals' },
+    { e: '\u{1F997}', n: 'cricket', k: 'cricket insect', c: 'animals' },
+    { e: '\u{1FAB3}', n: 'cockroach', k: 'cockroach bug gross', c: 'animals' },
+    { e: '\u{1F577}\uFE0F', n: 'spider', k: 'spider web insect', c: 'animals' },
+    { e: '\u{1F578}\uFE0F', n: 'spider web', k: 'web spider', c: 'animals' },
+    { e: '\u{1F982}', n: 'scorpion', k: 'scorpion sting', c: 'animals' },
+
+    // === FOOD ===
+    { e: '\u{1F347}', n: 'grapes', k: 'grapes fruit wine', c: 'food' },
+    { e: '\u{1F348}', n: 'melon', k: 'melon fruit', c: 'food' },
+    { e: '\u{1F349}', n: 'watermelon', k: 'watermelon fruit summer', c: 'food' },
+    { e: '\u{1F34A}', n: 'tangerine', k: 'tangerine orange mandarin', c: 'food' },
+    { e: '\u{1F34B}', n: 'lemon', k: 'lemon citrus sour', c: 'food' },
+    { e: '\u{1F34C}', n: 'banana', k: 'banana fruit', c: 'food' },
+    { e: '\u{1F34D}', n: 'pineapple', k: 'pineapple tropical fruit', c: 'food' },
+    { e: '\u{1F96D}', n: 'mango', k: 'mango tropical fruit', c: 'food' },
+    { e: '\u{1F34E}', n: 'red apple', k: 'apple fruit red', c: 'food' },
+    { e: '\u{1F34F}', n: 'green apple', k: 'apple fruit green', c: 'food' },
+    { e: '\u{1F350}', n: 'pear', k: 'pear fruit', c: 'food' },
+    { e: '\u{1F351}', n: 'peach', k: 'peach fruit butt', c: 'food' },
+    { e: '\u{1F352}', n: 'cherries', k: 'cherries fruit', c: 'food' },
+    { e: '\u{1F353}', n: 'strawberry', k: 'strawberry fruit berry', c: 'food' },
+    { e: '\u{1FAD0}', n: 'blueberries', k: 'blueberries fruit berry', c: 'food' },
+    { e: '\u{1F95D}', n: 'kiwi fruit', k: 'kiwi fruit', c: 'food' },
+    { e: '\u{1F345}', n: 'tomato', k: 'tomato vegetable', c: 'food' },
+    { e: '\u{1FAD2}', n: 'olive', k: 'olive oil', c: 'food' },
+    { e: '\u{1F965}', n: 'coconut', k: 'coconut tropical', c: 'food' },
+    { e: '\u{1F951}', n: 'avocado', k: 'avocado guacamole', c: 'food' },
+    { e: '\u{1F346}', n: 'eggplant', k: 'eggplant aubergine', c: 'food' },
+    { e: '\u{1F954}', n: 'potato', k: 'potato spud', c: 'food' },
+    { e: '\u{1F955}', n: 'carrot', k: 'carrot vegetable', c: 'food' },
+    { e: '\u{1F33D}', n: 'ear of corn', k: 'corn maize', c: 'food' },
+    { e: '\u{1F336}\uFE0F', n: 'hot pepper', k: 'pepper chili spicy', c: 'food' },
+    { e: '\u{1FAD1}', n: 'bell pepper', k: 'pepper capsicum', c: 'food' },
+    { e: '\u{1F952}', n: 'cucumber', k: 'cucumber pickle', c: 'food' },
+    { e: '\u{1F96C}', n: 'leafy green', k: 'lettuce salad kale', c: 'food' },
+    { e: '\u{1F966}', n: 'broccoli', k: 'broccoli vegetable', c: 'food' },
+    { e: '\u{1F9C5}', n: 'onion', k: 'onion cry', c: 'food' },
+    { e: '\u{1F344}', n: 'mushroom', k: 'mushroom fungus', c: 'food' },
+    { e: '\u{1F95C}', n: 'peanuts', k: 'peanuts nuts', c: 'food' },
+    { e: '\u{1FAD8}', n: 'beans', k: 'beans legume', c: 'food' },
+    { e: '\u{1F35E}', n: 'bread', k: 'bread loaf toast', c: 'food' },
+    { e: '\u{1F950}', n: 'croissant', k: 'croissant french pastry', c: 'food' },
+    { e: '\u{1F956}', n: 'baguette bread', k: 'baguette french bread', c: 'food' },
+    { e: '\u{1FAD3}', n: 'flatbread', k: 'flatbread naan pita', c: 'food' },
+    { e: '\u{1F968}', n: 'pretzel', k: 'pretzel snack', c: 'food' },
+    { e: '\u{1F96F}', n: 'bagel', k: 'bagel bread breakfast', c: 'food' },
+    { e: '\u{1F95E}', n: 'pancakes', k: 'pancakes breakfast', c: 'food' },
+    { e: '\u{1F9C7}', n: 'waffle', k: 'waffle breakfast', c: 'food' },
+    { e: '\u{1F9C0}', n: 'cheese wedge', k: 'cheese', c: 'food' },
+    { e: '\u{1F356}', n: 'meat on bone', k: 'meat bone', c: 'food' },
+    { e: '\u{1F357}', n: 'poultry leg', k: 'chicken leg drumstick', c: 'food' },
+    { e: '\u{1F969}', n: 'cut of meat', k: 'steak meat', c: 'food' },
+    { e: '\u{1F953}', n: 'bacon', k: 'bacon pork breakfast', c: 'food' },
+    { e: '\u{1F354}', n: 'hamburger', k: 'burger hamburger cheeseburger', c: 'food' },
+    { e: '\u{1F35F}', n: 'french fries', k: 'fries chips fast food', c: 'food' },
+    { e: '\u{1F355}', n: 'pizza', k: 'pizza slice', c: 'food' },
+    { e: '\u{1F32D}', n: 'hot dog', k: 'hotdog sausage', c: 'food' },
+    { e: '\u{1F96A}', n: 'sandwich', k: 'sandwich sub', c: 'food' },
+    { e: '\u{1F32E}', n: 'taco', k: 'taco mexican', c: 'food' },
+    { e: '\u{1F32F}', n: 'burrito', k: 'burrito wrap mexican', c: 'food' },
+    { e: '\u{1FAD4}', n: 'tamale', k: 'tamale mexican', c: 'food' },
+    { e: '\u{1F959}', n: 'stuffed flatbread', k: 'falafel pita', c: 'food' },
+    { e: '\u{1F9C6}', n: 'falafel', k: 'falafel middle eastern', c: 'food' },
+    { e: '\u{1F95A}', n: 'egg', k: 'egg breakfast', c: 'food' },
+    { e: '\u{1F373}', n: 'cooking', k: 'egg frying pan cook', c: 'food' },
+    { e: '\u{1F958}', n: 'shallow pan of food', k: 'paella cooking', c: 'food' },
+    { e: '\u{1F372}', n: 'pot of food', k: 'stew soup pot', c: 'food' },
+    { e: '\u{1FAD5}', n: 'fondue', k: 'fondue cheese', c: 'food' },
+    { e: '\u{1F963}', n: 'bowl with spoon', k: 'cereal soup bowl', c: 'food' },
+    { e: '\u{1F957}', n: 'green salad', k: 'salad healthy', c: 'food' },
+    { e: '\u{1F37F}', n: 'popcorn', k: 'popcorn movie snack', c: 'food' },
+    { e: '\u{1F9C8}', n: 'butter', k: 'butter dairy', c: 'food' },
+    { e: '\u{1F9C2}', n: 'salt', k: 'salt seasoning', c: 'food' },
+    { e: '\u{1F35D}', n: 'spaghetti', k: 'pasta spaghetti noodle', c: 'food' },
+    { e: '\u{1F35C}', n: 'steaming bowl', k: 'ramen noodles soup', c: 'food' },
+    { e: '\u{1F363}', n: 'sushi', k: 'sushi japanese fish', c: 'food' },
+    { e: '\u{1F371}', n: 'bento box', k: 'bento japanese lunch', c: 'food' },
+    { e: '\u{1F364}', n: 'fried shrimp', k: 'shrimp tempura', c: 'food' },
+    { e: '\u{1F35B}', n: 'curry rice', k: 'curry rice indian', c: 'food' },
+    { e: '\u{1F35A}', n: 'cooked rice', k: 'rice bowl', c: 'food' },
+    { e: '\u{1F370}', n: 'shortcake', k: 'cake dessert strawberry', c: 'food' },
+    { e: '\u{1F382}', n: 'birthday cake', k: 'cake birthday party', c: 'food' },
+    { e: '\u{1F967}', n: 'pie', k: 'pie dessert', c: 'food' },
+    { e: '\u{1F9C1}', n: 'cupcake', k: 'cupcake muffin dessert', c: 'food' },
+    { e: '\u{1F36B}', n: 'chocolate bar', k: 'chocolate candy', c: 'food' },
+    { e: '\u{1F36C}', n: 'candy', k: 'candy sweet', c: 'food' },
+    { e: '\u{1F36D}', n: 'lollipop', k: 'lollipop candy sweet', c: 'food' },
+    { e: '\u{1F36E}', n: 'custard', k: 'custard pudding dessert', c: 'food' },
+    { e: '\u{1F36F}', n: 'honey pot', k: 'honey sweet bee', c: 'food' },
+    { e: '\u{1F37C}', n: 'baby bottle', k: 'bottle milk baby', c: 'food' },
+    { e: '\u{1F95B}', n: 'glass of milk', k: 'milk dairy', c: 'food' },
+    { e: '\u{2615}', n: 'hot beverage', k: 'coffee tea hot', c: 'food' },
+    { e: '\u{1FAD6}', n: 'teapot', k: 'tea pot teapot', c: 'food' },
+    { e: '\u{1F375}', n: 'teacup without handle', k: 'tea green', c: 'food' },
+    { e: '\u{1F376}', n: 'sake', k: 'sake japanese alcohol', c: 'food' },
+    { e: '\u{1F37E}', n: 'bottle with popping cork', k: 'champagne celebrate', c: 'food' },
+    { e: '\u{1F377}', n: 'wine glass', k: 'wine red glass', c: 'food' },
+    { e: '\u{1F378}', n: 'cocktail glass', k: 'cocktail martini drink', c: 'food' },
+    { e: '\u{1F379}', n: 'tropical drink', k: 'cocktail tropical drink', c: 'food' },
+    { e: '\u{1F37A}', n: 'beer mug', k: 'beer mug drink alcohol', c: 'food' },
+    { e: '\u{1F37B}', n: 'clinking beer mugs', k: 'beer cheers drink', c: 'food' },
+    { e: '\u{1F942}', n: 'clinking glasses', k: 'cheers toast champagne', c: 'food' },
+    { e: '\u{1F943}', n: 'tumbler glass', k: 'whisky bourbon', c: 'food' },
+    { e: '\u{1FAD7}', n: 'pouring liquid', k: 'pour drink water', c: 'food' },
+    { e: '\u{1F964}', n: 'cup with straw', k: 'juice soda boba', c: 'food' },
+    { e: '\u{1F9CB}', n: 'bubble tea', k: 'boba bubble tea', c: 'food' },
+    { e: '\u{1F9C3}', n: 'beverage box', k: 'juice box drink', c: 'food' },
+    { e: '\u{1F9C9}', n: 'mate', k: 'mate tea drink', c: 'food' },
+    { e: '\u{1F9CA}', n: 'ice', k: 'ice cube cold', c: 'food' },
+    { e: '\u{1F366}', n: 'soft ice cream', k: 'ice cream cone soft', c: 'food' },
+    { e: '\u{1F367}', n: 'shaved ice', k: 'shaved ice snow cone', c: 'food' },
+    { e: '\u{1F368}', n: 'ice cream', k: 'ice cream sundae', c: 'food' },
+    { e: '\u{1F369}', n: 'doughnut', k: 'donut doughnut dessert', c: 'food' },
+    { e: '\u{1F36A}', n: 'cookie', k: 'cookie biscuit', c: 'food' },
+
+    // === TRAVEL ===
+    { e: '\u{1F30D}', n: 'globe showing Europe-Africa', k: 'world earth globe', c: 'travel' },
+    { e: '\u{1F30E}', n: 'globe showing Americas', k: 'world earth globe', c: 'travel' },
+    { e: '\u{1F30F}', n: 'globe showing Asia-Australia', k: 'world earth globe', c: 'travel' },
+    { e: '\u{1F310}', n: 'globe with meridians', k: 'world globe internet', c: 'travel' },
+    { e: '\u{1F5FA}\uFE0F', n: 'world map', k: 'map world travel', c: 'travel' },
+    { e: '\u{1F3D4}\uFE0F', n: 'snow-capped mountain', k: 'mountain snow', c: 'travel' },
+    { e: '\u{26F0}\uFE0F', n: 'mountain', k: 'mountain', c: 'travel' },
+    { e: '\u{1F30B}', n: 'volcano', k: 'volcano eruption', c: 'travel' },
+    { e: '\u{1F3D5}\uFE0F', n: 'camping', k: 'camping tent outdoor', c: 'travel' },
+    { e: '\u{1F3D6}\uFE0F', n: 'beach with umbrella', k: 'beach vacation', c: 'travel' },
+    { e: '\u{1F3DC}\uFE0F', n: 'desert', k: 'desert cactus', c: 'travel' },
+    { e: '\u{1F3DD}\uFE0F', n: 'desert island', k: 'island tropical', c: 'travel' },
+    { e: '\u{1F3DE}\uFE0F', n: 'national park', k: 'park nature', c: 'travel' },
+    { e: '\u{1F3DF}\uFE0F', n: 'stadium', k: 'stadium arena sports', c: 'travel' },
+    { e: '\u{1F3DB}\uFE0F', n: 'classical building', k: 'bank museum building', c: 'travel' },
+    { e: '\u{1F3D7}\uFE0F', n: 'building construction', k: 'construction crane', c: 'travel' },
+    { e: '\u{1F3E0}', n: 'house', k: 'home house building', c: 'travel' },
+    { e: '\u{1F3E2}', n: 'office building', k: 'office building work', c: 'travel' },
+    { e: '\u{1F3E5}', n: 'hospital', k: 'hospital medical doctor', c: 'travel' },
+    { e: '\u{1F3E8}', n: 'hotel', k: 'hotel accommodation', c: 'travel' },
+    { e: '\u{1F3EA}', n: 'convenience store', k: 'store shop', c: 'travel' },
+    { e: '\u{1F3EB}', n: 'school', k: 'school education', c: 'travel' },
+    { e: '\u{1F3EC}', n: 'department store', k: 'store shopping mall', c: 'travel' },
+    { e: '\u{1F3ED}', n: 'factory', k: 'factory industrial', c: 'travel' },
+    { e: '\u{1F3EF}', n: 'Japanese castle', k: 'castle japan', c: 'travel' },
+    { e: '\u{1F3F0}', n: 'castle', k: 'castle medieval', c: 'travel' },
+    { e: '\u{1F5FC}', n: 'Tokyo tower', k: 'tokyo tower japan', c: 'travel' },
+    { e: '\u{1F5FD}', n: 'Statue of Liberty', k: 'liberty statue new york', c: 'travel' },
+    { e: '\u{26EA}', n: 'church', k: 'church religion', c: 'travel' },
+    { e: '\u{1F54C}', n: 'mosque', k: 'mosque islam religion', c: 'travel' },
+    { e: '\u{1F54D}', n: 'synagogue', k: 'synagogue jewish religion', c: 'travel' },
+    { e: '\u{26E9}\uFE0F', n: 'shinto shrine', k: 'shrine shinto japan', c: 'travel' },
+    { e: '\u{1F54B}', n: 'kaaba', k: 'kaaba mecca islam', c: 'travel' },
+    { e: '\u{26F2}', n: 'fountain', k: 'fountain water', c: 'travel' },
+    { e: '\u{26FA}', n: 'tent', k: 'tent camping', c: 'travel' },
+    { e: '\u{1F301}', n: 'foggy', k: 'fog bridge san francisco', c: 'travel' },
+    { e: '\u{1F303}', n: 'night with stars', k: 'night stars city', c: 'travel' },
+    { e: '\u{1F304}', n: 'sunrise over mountains', k: 'sunrise mountain', c: 'travel' },
+    { e: '\u{1F305}', n: 'sunrise', k: 'sunrise morning', c: 'travel' },
+    { e: '\u{1F306}', n: 'cityscape at dusk', k: 'city dusk sunset', c: 'travel' },
+    { e: '\u{1F307}', n: 'sunset', k: 'sunset city evening', c: 'travel' },
+    { e: '\u{1F309}', n: 'bridge at night', k: 'bridge night', c: 'travel' },
+    { e: '\u{1F697}', n: 'automobile', k: 'car automobile vehicle', c: 'travel' },
+    { e: '\u{1F695}', n: 'taxi', k: 'taxi cab', c: 'travel' },
+    { e: '\u{1F68C}', n: 'bus', k: 'bus public transport', c: 'travel' },
+    { e: '\u{1F693}', n: 'police car', k: 'police car cop', c: 'travel' },
+    { e: '\u{1F691}', n: 'ambulance', k: 'ambulance emergency', c: 'travel' },
+    { e: '\u{1F692}', n: 'fire engine', k: 'fire truck engine', c: 'travel' },
+    { e: '\u{1F3CE}\uFE0F', n: 'racing car', k: 'race car formula', c: 'travel' },
+    { e: '\u{1F6B2}', n: 'bicycle', k: 'bike bicycle cycling', c: 'travel' },
+    { e: '\u{1F6F5}', n: 'motor scooter', k: 'scooter vespa', c: 'travel' },
+    { e: '\u{1F3CD}\uFE0F', n: 'motorcycle', k: 'motorcycle motorbike', c: 'travel' },
+    { e: '\u{1F6F4}', n: 'kick scooter', k: 'scooter kick', c: 'travel' },
+    { e: '\u{1F6F9}', n: 'skateboard', k: 'skateboard skate', c: 'travel' },
+    { e: '\u{1F6FA}', n: 'auto rickshaw', k: 'rickshaw tuk tuk', c: 'travel' },
+    { e: '\u{2708}\uFE0F', n: 'airplane', k: 'airplane plane fly travel', c: 'travel' },
+    { e: '\u{1F6EB}', n: 'airplane departure', k: 'departure takeoff fly', c: 'travel' },
+    { e: '\u{1F6EC}', n: 'airplane arrival', k: 'arrival landing fly', c: 'travel' },
+    { e: '\u{1F680}', n: 'rocket', k: 'rocket space launch', c: 'travel' },
+    { e: '\u{1F6F8}', n: 'flying saucer', k: 'ufo alien spaceship', c: 'travel' },
+    { e: '\u{1F681}', n: 'helicopter', k: 'helicopter chopper', c: 'travel' },
+    { e: '\u{1F6A2}', n: 'ship', k: 'ship boat cruise', c: 'travel' },
+    { e: '\u{26F5}', n: 'sailboat', k: 'sailboat yacht', c: 'travel' },
+    { e: '\u{1F6A4}', n: 'speedboat', k: 'speedboat motorboat', c: 'travel' },
+    { e: '\u{1F6A3}', n: 'person rowing boat', k: 'rowing boat canoe', c: 'travel' },
+    { e: '\u{1F6F6}', n: 'canoe', k: 'canoe kayak', c: 'travel' },
+    { e: '\u{1F682}', n: 'locomotive', k: 'train locomotive', c: 'travel' },
+    { e: '\u{1F685}', n: 'bullet train', k: 'train shinkansen high speed', c: 'travel' },
+    { e: '\u{1F686}', n: 'train', k: 'train railway', c: 'travel' },
+    { e: '\u{1F687}', n: 'metro', k: 'metro subway underground', c: 'travel' },
+    { e: '\u{1F68E}', n: 'trolleybus', k: 'trolleybus bus', c: 'travel' },
+
+    // === ACTIVITIES ===
+    { e: '\u{26BD}', n: 'soccer ball', k: 'soccer football ball', c: 'activities' },
+    { e: '\u{1F3C0}', n: 'basketball', k: 'basketball ball', c: 'activities' },
+    { e: '\u{1F3C8}', n: 'american football', k: 'football american nfl', c: 'activities' },
+    { e: '\u{26BE}', n: 'baseball', k: 'baseball ball', c: 'activities' },
+    { e: '\u{1F94E}', n: 'softball', k: 'softball ball', c: 'activities' },
+    { e: '\u{1F3BE}', n: 'tennis', k: 'tennis ball racket', c: 'activities' },
+    { e: '\u{1F3D0}', n: 'volleyball', k: 'volleyball ball', c: 'activities' },
+    { e: '\u{1F3C9}', n: 'rugby football', k: 'rugby ball', c: 'activities' },
+    { e: '\u{1F94F}', n: 'flying disc', k: 'frisbee disc ultimate', c: 'activities' },
+    { e: '\u{1F3B1}', n: 'pool 8 ball', k: 'billiards pool 8 ball', c: 'activities' },
+    { e: '\u{1F3D3}', n: 'ping pong', k: 'ping pong table tennis', c: 'activities' },
+    { e: '\u{1F3F8}', n: 'badminton', k: 'badminton shuttlecock', c: 'activities' },
+    { e: '\u{1F3D2}', n: 'ice hockey', k: 'hockey ice puck', c: 'activities' },
+    { e: '\u{1F3D1}', n: 'field hockey', k: 'hockey field', c: 'activities' },
+    { e: '\u{1F94D}', n: 'lacrosse', k: 'lacrosse stick ball', c: 'activities' },
+    { e: '\u{1F3CF}', n: 'cricket game', k: 'cricket bat ball', c: 'activities' },
+    { e: '\u{1F945}', n: 'goal net', k: 'goal net soccer', c: 'activities' },
+    { e: '\u{26F3}', n: 'flag in hole', k: 'golf flag', c: 'activities' },
+    { e: '\u{1F3F9}', n: 'bow and arrow', k: 'archery bow arrow', c: 'activities' },
+    { e: '\u{1F3A3}', n: 'fishing pole', k: 'fishing rod pole', c: 'activities' },
+    { e: '\u{1F93F}', n: 'diving mask', k: 'diving snorkel scuba', c: 'activities' },
+    { e: '\u{1F3BD}', n: 'running shirt', k: 'running shirt sport', c: 'activities' },
+    { e: '\u{1F3BF}', n: 'skis', k: 'ski snow winter sport', c: 'activities' },
+    { e: '\u{1F6F7}', n: 'sled', k: 'sled sledge toboggan', c: 'activities' },
+    { e: '\u{1F94C}', n: 'curling stone', k: 'curling stone', c: 'activities' },
+    { e: '\u{1F3AF}', n: 'bullseye', k: 'target dart bullseye', c: 'activities' },
+    { e: '\u{1F3B3}', n: 'bowling', k: 'bowling pin ball', c: 'activities' },
+    { e: '\u{1F3AE}', n: 'video game', k: 'game controller joystick', c: 'activities' },
+    { e: '\u{1F3B2}', n: 'game die', k: 'dice die game', c: 'activities' },
+    { e: '\u{1F9E9}', n: 'puzzle piece', k: 'puzzle jigsaw', c: 'activities' },
+    { e: '\u{265F}\uFE0F', n: 'chess pawn', k: 'chess pawn strategy', c: 'activities' },
+    { e: '\u{1F3AD}', n: 'performing arts', k: 'theater drama masks', c: 'activities' },
+    { e: '\u{1F3A8}', n: 'artist palette', k: 'art paint palette', c: 'activities' },
+    { e: '\u{1F3BC}', n: 'musical score', k: 'music score notes', c: 'activities' },
+    { e: '\u{1F3B5}', n: 'musical note', k: 'music note', c: 'activities' },
+    { e: '\u{1F3B6}', n: 'musical notes', k: 'music notes sing', c: 'activities' },
+    { e: '\u{1F3A4}', n: 'microphone', k: 'microphone sing karaoke', c: 'activities' },
+    { e: '\u{1F3A7}', n: 'headphone', k: 'headphones music listen', c: 'activities' },
+    { e: '\u{1F3B7}', n: 'saxophone', k: 'saxophone jazz music', c: 'activities' },
+    { e: '\u{1FA97}', n: 'accordion', k: 'accordion music', c: 'activities' },
+    { e: '\u{1F3B8}', n: 'guitar', k: 'guitar music rock', c: 'activities' },
+    { e: '\u{1F3B9}', n: 'musical keyboard', k: 'piano keyboard music', c: 'activities' },
+    { e: '\u{1F3BA}', n: 'trumpet', k: 'trumpet brass music', c: 'activities' },
+    { e: '\u{1F3BB}', n: 'violin', k: 'violin fiddle music', c: 'activities' },
+    { e: '\u{1FA95}', n: 'banjo', k: 'banjo music country', c: 'activities' },
+    { e: '\u{1F941}', n: 'drum', k: 'drum percussion music', c: 'activities' },
+    { e: '\u{1FA98}', n: 'long drum', k: 'drum bongo', c: 'activities' },
+    { e: '\u{1F3AC}', n: 'clapper board', k: 'movie film action', c: 'activities' },
+    { e: '\u{1F3A0}', n: 'carousel horse', k: 'merry go round horse', c: 'activities' },
+    { e: '\u{1F3A1}', n: 'ferris wheel', k: 'ferris wheel fair', c: 'activities' },
+    { e: '\u{1F3A2}', n: 'roller coaster', k: 'roller coaster theme park', c: 'activities' },
+    { e: '\u{1F9F8}', n: 'teddy bear', k: 'teddy bear stuffed toy', c: 'activities' },
+    { e: '\u{1FA80}', n: 'yo-yo', k: 'yoyo toy', c: 'activities' },
+    { e: '\u{1FA81}', n: 'kite', k: 'kite fly wind', c: 'activities' },
+    { e: '\u{1F3AA}', n: 'circus tent', k: 'circus tent big top', c: 'activities' },
+    { e: '\u{1F3C6}', n: 'trophy', k: 'trophy winner award cup', c: 'activities' },
+    { e: '\u{1F3C5}', n: 'sports medal', k: 'medal sports gold', c: 'activities' },
+    { e: '\u{1F947}', n: 'first place medal', k: 'gold medal first', c: 'activities' },
+    { e: '\u{1F948}', n: 'second place medal', k: 'silver medal second', c: 'activities' },
+    { e: '\u{1F949}', n: 'third place medal', k: 'bronze medal third', c: 'activities' },
+
+    // === OBJECTS ===
+    { e: '\u{231A}', n: 'watch', k: 'watch time clock', c: 'objects' },
+    { e: '\u{1F4F1}', n: 'mobile phone', k: 'phone mobile smartphone', c: 'objects' },
+    { e: '\u{1F4F2}', n: 'mobile phone with arrow', k: 'phone call incoming', c: 'objects' },
+    { e: '\u{1F4BB}', n: 'laptop', k: 'laptop computer pc', c: 'objects' },
+    { e: '\u{2328}\uFE0F', n: 'keyboard', k: 'keyboard type', c: 'objects' },
+    { e: '\u{1F5A5}\uFE0F', n: 'desktop computer', k: 'computer desktop pc monitor', c: 'objects' },
+    { e: '\u{1F5A8}\uFE0F', n: 'printer', k: 'printer print', c: 'objects' },
+    { e: '\u{1F5B1}\uFE0F', n: 'computer mouse', k: 'mouse computer click', c: 'objects' },
+    { e: '\u{1F4BD}', n: 'computer disk', k: 'disk minidisc', c: 'objects' },
+    { e: '\u{1F4BE}', n: 'floppy disk', k: 'floppy disk save', c: 'objects' },
+    { e: '\u{1F4BF}', n: 'optical disk', k: 'cd dvd disc', c: 'objects' },
+    { e: '\u{1F4C0}', n: 'dvd', k: 'dvd disc', c: 'objects' },
+    { e: '\u{1F4F7}', n: 'camera', k: 'camera photo picture', c: 'objects' },
+    { e: '\u{1F4F8}', n: 'camera with flash', k: 'camera flash photo', c: 'objects' },
+    { e: '\u{1F4F9}', n: 'video camera', k: 'video camera film', c: 'objects' },
+    { e: '\u{1F3A5}', n: 'movie camera', k: 'movie film camera cinema', c: 'objects' },
+    { e: '\u{1F4FD}\uFE0F', n: 'film projector', k: 'projector film movie', c: 'objects' },
+    { e: '\u{1F4FA}', n: 'television', k: 'tv television screen', c: 'objects' },
+    { e: '\u{1F4FB}', n: 'radio', k: 'radio broadcast', c: 'objects' },
+    { e: '\u{1F4E0}', n: 'fax machine', k: 'fax machine', c: 'objects' },
+    { e: '\u{1F50B}', n: 'battery', k: 'battery power energy', c: 'objects' },
+    { e: '\u{1FAAB}', n: 'low battery', k: 'battery low power', c: 'objects' },
+    { e: '\u{1F50C}', n: 'electric plug', k: 'plug electric power', c: 'objects' },
+    { e: '\u{1F4A1}', n: 'light bulb', k: 'idea light bulb', c: 'objects' },
+    { e: '\u{1F526}', n: 'flashlight', k: 'flashlight torch', c: 'objects' },
+    { e: '\u{1F56F}\uFE0F', n: 'candle', k: 'candle light', c: 'objects' },
+    { e: '\u{1F4D5}', n: 'closed book', k: 'book red', c: 'objects' },
+    { e: '\u{1F4D6}', n: 'open book', k: 'book open read', c: 'objects' },
+    { e: '\u{1F4D7}', n: 'green book', k: 'book green', c: 'objects' },
+    { e: '\u{1F4D8}', n: 'blue book', k: 'book blue', c: 'objects' },
+    { e: '\u{1F4D9}', n: 'orange book', k: 'book orange', c: 'objects' },
+    { e: '\u{1F4DA}', n: 'books', k: 'books library read', c: 'objects' },
+    { e: '\u{1F4D3}', n: 'notebook', k: 'notebook journal', c: 'objects' },
+    { e: '\u{1F4D2}', n: 'ledger', k: 'ledger notebook', c: 'objects' },
+    { e: '\u{1F4C3}', n: 'page with curl', k: 'page document', c: 'objects' },
+    { e: '\u{1F4DC}', n: 'scroll', k: 'scroll paper ancient', c: 'objects' },
+    { e: '\u{1F4C4}', n: 'page facing up', k: 'page document file', c: 'objects' },
+    { e: '\u{1F4F0}', n: 'newspaper', k: 'newspaper news press', c: 'objects' },
+    { e: '\u{1F4E7}', n: 'e-mail', k: 'email mail message', c: 'objects' },
+    { e: '\u{2709}\uFE0F', n: 'envelope', k: 'envelope mail letter', c: 'objects' },
+    { e: '\u{1F4E8}', n: 'incoming envelope', k: 'email incoming mail', c: 'objects' },
+    { e: '\u{1F4E9}', n: 'envelope with arrow', k: 'email outgoing mail send', c: 'objects' },
+    { e: '\u{1F4E6}', n: 'package', k: 'package box delivery', c: 'objects' },
+    { e: '\u{1F4EE}', n: 'postbox', k: 'mailbox postbox', c: 'objects' },
+    { e: '\u{270F}\uFE0F', n: 'pencil', k: 'pencil write edit', c: 'objects' },
+    { e: '\u{1F58A}\uFE0F', n: 'pen', k: 'pen write ballpoint', c: 'objects' },
+    { e: '\u{1F58B}\uFE0F', n: 'fountain pen', k: 'pen fountain write', c: 'objects' },
+    { e: '\u{1F58C}\uFE0F', n: 'paintbrush', k: 'brush paint art', c: 'objects' },
+    { e: '\u{1F58D}\uFE0F', n: 'crayon', k: 'crayon draw color', c: 'objects' },
+    { e: '\u{1F4DD}', n: 'memo', k: 'memo note write', c: 'objects' },
+    { e: '\u{1F4BC}', n: 'briefcase', k: 'briefcase business work', c: 'objects' },
+    { e: '\u{1F4C1}', n: 'file folder', k: 'folder file directory', c: 'objects' },
+    { e: '\u{1F4C2}', n: 'open file folder', k: 'folder open directory', c: 'objects' },
+    { e: '\u{1F4CB}', n: 'clipboard', k: 'clipboard paste', c: 'objects' },
+    { e: '\u{1F4CC}', n: 'pushpin', k: 'pin push tack', c: 'objects' },
+    { e: '\u{1F4CE}', n: 'paperclip', k: 'paperclip clip attach', c: 'objects' },
+    { e: '\u{1F4CF}', n: 'straight ruler', k: 'ruler measure', c: 'objects' },
+    { e: '\u{1F4D0}', n: 'triangular ruler', k: 'ruler triangle measure', c: 'objects' },
+    { e: '\u{2702}\uFE0F', n: 'scissors', k: 'scissors cut', c: 'objects' },
+    { e: '\u{1F5C3}\uFE0F', n: 'card file box', k: 'file box card', c: 'objects' },
+    { e: '\u{1F5D1}\uFE0F', n: 'wastebasket', k: 'trash bin delete', c: 'objects' },
+    { e: '\u{1F512}', n: 'locked', k: 'lock secure padlock', c: 'objects' },
+    { e: '\u{1F513}', n: 'unlocked', k: 'unlock open padlock', c: 'objects' },
+    { e: '\u{1F511}', n: 'key', k: 'key lock password', c: 'objects' },
+    { e: '\u{1F528}', n: 'hammer', k: 'hammer tool build', c: 'objects' },
+    { e: '\u{1FA93}', n: 'axe', k: 'axe chop tool', c: 'objects' },
+    { e: '\u{1F527}', n: 'wrench', k: 'wrench tool settings', c: 'objects' },
+    { e: '\u{1FA9B}', n: 'screwdriver', k: 'screwdriver tool fix', c: 'objects' },
+    { e: '\u{1F529}', n: 'nut and bolt', k: 'nut bolt hardware', c: 'objects' },
+    { e: '\u{2699}\uFE0F', n: 'gear', k: 'gear settings cog', c: 'objects' },
+    { e: '\u{1F50D}', n: 'magnifying glass tilted left', k: 'search magnifying glass find', c: 'objects' },
+    { e: '\u{1F50E}', n: 'magnifying glass tilted right', k: 'search magnifying glass find', c: 'objects' },
+    { e: '\u{1F4B0}', n: 'money bag', k: 'money bag dollar rich', c: 'objects' },
+    { e: '\u{1F4B5}', n: 'dollar banknote', k: 'money dollar bill', c: 'objects' },
+    { e: '\u{1F4B3}', n: 'credit card', k: 'credit card payment', c: 'objects' },
+    { e: '\u{1F4B8}', n: 'money with wings', k: 'money fly spending', c: 'objects' },
+    { e: '\u{1FA99}', n: 'coin', k: 'coin money', c: 'objects' },
+    { e: '\u{1F48E}', n: 'gem stone', k: 'gem diamond jewel', c: 'objects' },
+
+    // === SYMBOLS ===
+    { e: '\u{2764}\uFE0F', n: 'red heart', k: 'heart love red', c: 'symbols' },
+    { e: '\u{1F9E1}', n: 'orange heart', k: 'heart love orange', c: 'symbols' },
+    { e: '\u{1F49B}', n: 'yellow heart', k: 'heart love yellow', c: 'symbols' },
+    { e: '\u{1F49A}', n: 'green heart', k: 'heart love green', c: 'symbols' },
+    { e: '\u{1F499}', n: 'blue heart', k: 'heart love blue', c: 'symbols' },
+    { e: '\u{1F49C}', n: 'purple heart', k: 'heart love purple', c: 'symbols' },
+    { e: '\u{1F90E}', n: 'brown heart', k: 'heart love brown', c: 'symbols' },
+    { e: '\u{1F5A4}', n: 'black heart', k: 'heart love black', c: 'symbols' },
+    { e: '\u{1FA76}', n: 'light blue heart', k: 'heart love light blue', c: 'symbols' },
+    { e: '\u{1FA77}', n: 'pink heart', k: 'heart love pink', c: 'symbols' },
+    { e: '\u{1F90D}', n: 'white heart', k: 'heart love white', c: 'symbols' },
+    { e: '\u{1F498}', n: 'heart with arrow', k: 'heart cupid love', c: 'symbols' },
+    { e: '\u{1F49D}', n: 'heart with ribbon', k: 'heart valentine gift', c: 'symbols' },
+    { e: '\u{1F496}', n: 'sparkling heart', k: 'heart sparkle love', c: 'symbols' },
+    { e: '\u{1F497}', n: 'growing heart', k: 'heart growing love', c: 'symbols' },
+    { e: '\u{1F493}', n: 'beating heart', k: 'heart beating love', c: 'symbols' },
+    { e: '\u{1F49E}', n: 'revolving hearts', k: 'hearts love revolving', c: 'symbols' },
+    { e: '\u{1F495}', n: 'two hearts', k: 'hearts love two', c: 'symbols' },
+    { e: '\u{1F48C}', n: 'love letter', k: 'letter love envelope', c: 'symbols' },
+    { e: '\u{1F49F}', n: 'heart decoration', k: 'heart decoration', c: 'symbols' },
+    { e: '\u{2763}\uFE0F', n: 'heart exclamation', k: 'heart exclamation', c: 'symbols' },
+    { e: '\u{1F494}', n: 'broken heart', k: 'heart broken sad', c: 'symbols' },
+    { e: '\u{2764}\uFE0F\u200D\u{1F525}', n: 'heart on fire', k: 'heart fire passion', c: 'symbols' },
+    { e: '\u{2764}\uFE0F\u200D\u{1FA79}', n: 'mending heart', k: 'heart mending heal', c: 'symbols' },
+    { e: '\u{1F4AF}', n: 'hundred points', k: 'hundred 100 perfect score', c: 'symbols' },
+    { e: '\u{1F4A2}', n: 'anger symbol', k: 'angry anger', c: 'symbols' },
+    { e: '\u{1F4A5}', n: 'collision', k: 'boom explosion bang', c: 'symbols' },
+    { e: '\u{1F4AB}', n: 'dizzy', k: 'dizzy star', c: 'symbols' },
+    { e: '\u{1F4A6}', n: 'sweat droplets', k: 'sweat water splash', c: 'symbols' },
+    { e: '\u{1F4A8}', n: 'dashing away', k: 'wind dash fast', c: 'symbols' },
+    { e: '\u{1F4AC}', n: 'speech balloon', k: 'speech bubble talk chat', c: 'symbols' },
+    { e: '\u{1F4AD}', n: 'thought balloon', k: 'thought bubble think', c: 'symbols' },
+    { e: '\u{1F4A4}', n: 'zzz', k: 'sleep zzz snore', c: 'symbols' },
+    { e: '\u{2728}', n: 'sparkles', k: 'sparkle stars shine clean', c: 'symbols' },
+    { e: '\u{1F31F}', n: 'glowing star', k: 'star glow bright', c: 'symbols' },
+    { e: '\u{2B50}', n: 'star', k: 'star gold yellow', c: 'symbols' },
+    { e: '\u{1F320}', n: 'shooting star', k: 'star shooting wish', c: 'symbols' },
+    { e: '\u{1F525}', n: 'fire', k: 'fire flame hot lit', c: 'symbols' },
+    { e: '\u{1F4A3}', n: 'bomb', k: 'bomb explosive', c: 'symbols' },
+    { e: '\u{1F386}', n: 'fireworks', k: 'fireworks celebration', c: 'symbols' },
+    { e: '\u{1F387}', n: 'sparkler', k: 'sparkler firework', c: 'symbols' },
+    { e: '\u{2705}', n: 'check mark button', k: 'check yes ok done', c: 'symbols' },
+    { e: '\u{2714}\uFE0F', n: 'check mark', k: 'check yes done', c: 'symbols' },
+    { e: '\u{274C}', n: 'cross mark', k: 'x cross no wrong delete', c: 'symbols' },
+    { e: '\u{274E}', n: 'cross mark button', k: 'x cross no', c: 'symbols' },
+    { e: '\u{2795}', n: 'plus', k: 'plus add', c: 'symbols' },
+    { e: '\u{2796}', n: 'minus', k: 'minus subtract', c: 'symbols' },
+    { e: '\u{2797}', n: 'divide', k: 'divide division', c: 'symbols' },
+    { e: '\u{267E}\uFE0F', n: 'infinity', k: 'infinity forever loop', c: 'symbols' },
+    { e: '\u{203C}\uFE0F', n: 'double exclamation mark', k: 'exclamation double bang', c: 'symbols' },
+    { e: '\u{2049}\uFE0F', n: 'exclamation question mark', k: 'exclamation question', c: 'symbols' },
+    { e: '\u{2753}', n: 'red question mark', k: 'question red', c: 'symbols' },
+    { e: '\u{2754}', n: 'white question mark', k: 'question white', c: 'symbols' },
+    { e: '\u{2755}', n: 'white exclamation mark', k: 'exclamation white', c: 'symbols' },
+    { e: '\u{2757}', n: 'red exclamation mark', k: 'exclamation red important', c: 'symbols' },
+    { e: '\u{27B0}', n: 'curly loop', k: 'loop curl', c: 'symbols' },
+    { e: '\u{27BF}', n: 'double curly loop', k: 'loop double', c: 'symbols' },
+    { e: '\u{1F534}', n: 'red circle', k: 'red circle dot', c: 'symbols' },
+    { e: '\u{1F7E0}', n: 'orange circle', k: 'orange circle dot', c: 'symbols' },
+    { e: '\u{1F7E1}', n: 'yellow circle', k: 'yellow circle dot', c: 'symbols' },
+    { e: '\u{1F7E2}', n: 'green circle', k: 'green circle dot', c: 'symbols' },
+    { e: '\u{1F535}', n: 'blue circle', k: 'blue circle dot', c: 'symbols' },
+    { e: '\u{1F7E3}', n: 'purple circle', k: 'purple circle dot', c: 'symbols' },
+    { e: '\u{26AB}', n: 'black circle', k: 'black circle dot', c: 'symbols' },
+    { e: '\u{26AA}', n: 'white circle', k: 'white circle dot', c: 'symbols' },
+    { e: '\u{1F7E5}', n: 'red square', k: 'red square', c: 'symbols' },
+    { e: '\u{1F7E7}', n: 'orange square', k: 'orange square', c: 'symbols' },
+    { e: '\u{1F7E8}', n: 'yellow square', k: 'yellow square', c: 'symbols' },
+    { e: '\u{1F7E9}', n: 'green square', k: 'green square', c: 'symbols' },
+    { e: '\u{1F7E6}', n: 'blue square', k: 'blue square', c: 'symbols' },
+    { e: '\u{1F7EA}', n: 'purple square', k: 'purple square', c: 'symbols' },
+    { e: '\u{2B1B}', n: 'black large square', k: 'black square large', c: 'symbols' },
+    { e: '\u{2B1C}', n: 'white large square', k: 'white square large', c: 'symbols' },
+    { e: '\u{25FC}\uFE0F', n: 'black medium square', k: 'black square medium', c: 'symbols' },
+    { e: '\u{25FB}\uFE0F', n: 'white medium square', k: 'white square medium', c: 'symbols' },
+    { e: '\u{25AA}\uFE0F', n: 'black small square', k: 'black square small', c: 'symbols' },
+    { e: '\u{25AB}\uFE0F', n: 'white small square', k: 'white square small', c: 'symbols' },
+    { e: '\u{1F536}', n: 'large orange diamond', k: 'diamond orange large', c: 'symbols' },
+    { e: '\u{1F537}', n: 'large blue diamond', k: 'diamond blue large', c: 'symbols' },
+    { e: '\u{1F538}', n: 'small orange diamond', k: 'diamond orange small', c: 'symbols' },
+    { e: '\u{1F539}', n: 'small blue diamond', k: 'diamond blue small', c: 'symbols' },
+    { e: '\u{1F53A}', n: 'red triangle pointed up', k: 'triangle up red', c: 'symbols' },
+    { e: '\u{1F53B}', n: 'red triangle pointed down', k: 'triangle down red', c: 'symbols' },
+    { e: '\u{26A0}\uFE0F', n: 'warning', k: 'warning caution alert', c: 'symbols' },
+    { e: '\u{1F6AB}', n: 'prohibited', k: 'prohibited banned no', c: 'symbols' },
+    { e: '\u{267B}\uFE0F', n: 'recycling symbol', k: 'recycle green environment', c: 'symbols' },
+    { e: '\u{1F4F4}', n: 'mobile phone off', k: 'phone off silent', c: 'symbols' },
+    { e: '\u{1F4B2}', n: 'heavy dollar sign', k: 'dollar money usd', c: 'symbols' },
+    { e: '\u{1F4B1}', n: 'currency exchange', k: 'currency exchange money', c: 'symbols' },
+    { e: '\u{2122}\uFE0F', n: 'trade mark', k: 'trademark tm', c: 'symbols' },
+    { e: '\u{00A9}\uFE0F', n: 'copyright', k: 'copyright c', c: 'symbols' },
+    { e: '\u{00AE}\uFE0F', n: 'registered', k: 'registered r', c: 'symbols' },
+
+    // === FLAGS ===
+    { e: '\u{1F3F3}\uFE0F', n: 'white flag', k: 'flag white surrender', c: 'flags' },
+    { e: '\u{1F3F4}', n: 'black flag', k: 'flag black', c: 'flags' },
+    { e: '\u{1F3C1}', n: 'chequered flag', k: 'flag checkered finish race', c: 'flags' },
+    { e: '\u{1F6A9}', n: 'triangular flag', k: 'flag triangle', c: 'flags' },
+    { e: '\u{1F3F3}\uFE0F\u200D\u{1F308}', n: 'rainbow flag', k: 'flag rainbow pride lgbtq', c: 'flags' },
+    { e: '\u{1F3F3}\uFE0F\u200D\u26A7\uFE0F', n: 'transgender flag', k: 'flag transgender trans', c: 'flags' },
+    { e: '\u{1F1FA}\u{1F1F8}', n: 'flag: United States', k: 'flag us usa america', c: 'flags' },
+    { e: '\u{1F1EC}\u{1F1E7}', n: 'flag: United Kingdom', k: 'flag uk britain england', c: 'flags' },
+    { e: '\u{1F1E9}\u{1F1EA}', n: 'flag: Germany', k: 'flag germany deutsch', c: 'flags' },
+    { e: '\u{1F1EB}\u{1F1F7}', n: 'flag: France', k: 'flag france french', c: 'flags' },
+    { e: '\u{1F1EA}\u{1F1F8}', n: 'flag: Spain', k: 'flag spain spanish', c: 'flags' },
+    { e: '\u{1F1EE}\u{1F1F9}', n: 'flag: Italy', k: 'flag italy italian', c: 'flags' },
+    { e: '\u{1F1EF}\u{1F1F5}', n: 'flag: Japan', k: 'flag japan japanese', c: 'flags' },
+    { e: '\u{1F1E8}\u{1F1F3}', n: 'flag: China', k: 'flag china chinese', c: 'flags' },
+    { e: '\u{1F1F0}\u{1F1F7}', n: 'flag: South Korea', k: 'flag korea korean south', c: 'flags' },
+    { e: '\u{1F1F7}\u{1F1FA}', n: 'flag: Russia', k: 'flag russia russian', c: 'flags' },
+    { e: '\u{1F1E7}\u{1F1F7}', n: 'flag: Brazil', k: 'flag brazil brazilian', c: 'flags' },
+    { e: '\u{1F1EE}\u{1F1F3}', n: 'flag: India', k: 'flag india indian', c: 'flags' },
+    { e: '\u{1F1E6}\u{1F1FA}', n: 'flag: Australia', k: 'flag australia australian', c: 'flags' },
+    { e: '\u{1F1E8}\u{1F1E6}', n: 'flag: Canada', k: 'flag canada canadian', c: 'flags' },
+    { e: '\u{1F1F2}\u{1F1FD}', n: 'flag: Mexico', k: 'flag mexico mexican', c: 'flags' },
+    { e: '\u{1F1F5}\u{1F1F9}', n: 'flag: Portugal', k: 'flag portugal portuguese', c: 'flags' },
+    { e: '\u{1F1F3}\u{1F1F1}', n: 'flag: Netherlands', k: 'flag netherlands dutch', c: 'flags' },
+    { e: '\u{1F1E7}\u{1F1EA}', n: 'flag: Belgium', k: 'flag belgium belgian', c: 'flags' },
+    { e: '\u{1F1E8}\u{1F1ED}', n: 'flag: Switzerland', k: 'flag switzerland swiss', c: 'flags' },
+    { e: '\u{1F1E6}\u{1F1F9}', n: 'flag: Austria', k: 'flag austria austrian', c: 'flags' },
+    { e: '\u{1F1F8}\u{1F1EA}', n: 'flag: Sweden', k: 'flag sweden swedish', c: 'flags' },
+    { e: '\u{1F1F3}\u{1F1F4}', n: 'flag: Norway', k: 'flag norway norwegian', c: 'flags' },
+    { e: '\u{1F1E9}\u{1F1F0}', n: 'flag: Denmark', k: 'flag denmark danish', c: 'flags' },
+    { e: '\u{1F1EB}\u{1F1EE}', n: 'flag: Finland', k: 'flag finland finnish', c: 'flags' },
+    { e: '\u{1F1F5}\u{1F1F1}', n: 'flag: Poland', k: 'flag poland polish', c: 'flags' },
+    { e: '\u{1F1FA}\u{1F1E6}', n: 'flag: Ukraine', k: 'flag ukraine ukrainian', c: 'flags' },
+    { e: '\u{1F1EC}\u{1F1F7}', n: 'flag: Greece', k: 'flag greece greek', c: 'flags' },
+    { e: '\u{1F1F9}\u{1F1F7}', n: 'flag: Turkey', k: 'flag turkey turkish', c: 'flags' },
+    { e: '\u{1F1EE}\u{1F1F1}', n: 'flag: Israel', k: 'flag israel israeli', c: 'flags' },
+    { e: '\u{1F1F8}\u{1F1E6}', n: 'flag: Saudi Arabia', k: 'flag saudi arabia', c: 'flags' },
+    { e: '\u{1F1E6}\u{1F1EA}', n: 'flag: United Arab Emirates', k: 'flag uae emirates dubai', c: 'flags' },
+    { e: '\u{1F1F9}\u{1F1ED}', n: 'flag: Thailand', k: 'flag thailand thai', c: 'flags' },
+    { e: '\u{1F1FB}\u{1F1F3}', n: 'flag: Vietnam', k: 'flag vietnam vietnamese', c: 'flags' },
+    { e: '\u{1F1EE}\u{1F1E9}', n: 'flag: Indonesia', k: 'flag indonesia indonesian', c: 'flags' },
+    { e: '\u{1F1F5}\u{1F1ED}', n: 'flag: Philippines', k: 'flag philippines filipino', c: 'flags' },
+    { e: '\u{1F1F2}\u{1F1FE}', n: 'flag: Malaysia', k: 'flag malaysia malay', c: 'flags' },
+    { e: '\u{1F1F8}\u{1F1EC}', n: 'flag: Singapore', k: 'flag singapore', c: 'flags' },
+    { e: '\u{1F1F3}\u{1F1FF}', n: 'flag: New Zealand', k: 'flag new zealand kiwi', c: 'flags' },
+    { e: '\u{1F1E6}\u{1F1F7}', n: 'flag: Argentina', k: 'flag argentina argentinian', c: 'flags' },
+    { e: '\u{1F1E8}\u{1F1F4}', n: 'flag: Colombia', k: 'flag colombia colombian', c: 'flags' },
+    { e: '\u{1F1E8}\u{1F1F1}', n: 'flag: Chile', k: 'flag chile chilean', c: 'flags' },
+    { e: '\u{1F1F5}\u{1F1EA}', n: 'flag: Peru', k: 'flag peru peruvian', c: 'flags' },
+    { e: '\u{1F1EA}\u{1F1EC}', n: 'flag: Egypt', k: 'flag egypt egyptian', c: 'flags' },
+    { e: '\u{1F1F3}\u{1F1EC}', n: 'flag: Nigeria', k: 'flag nigeria nigerian', c: 'flags' },
+    { e: '\u{1F1FF}\u{1F1E6}', n: 'flag: South Africa', k: 'flag south africa', c: 'flags' },
+    { e: '\u{1F1F0}\u{1F1EA}', n: 'flag: Kenya', k: 'flag kenya kenyan', c: 'flags' },
+    { e: '\u{1F1EE}\u{1F1EA}', n: 'flag: Ireland', k: 'flag ireland irish', c: 'flags' },
+    { e: '\u{1F1EE}\u{1F1F8}', n: 'flag: Iceland', k: 'flag iceland icelandic', c: 'flags' },
+    { e: '\u{1F1F7}\u{1F1F4}', n: 'flag: Romania', k: 'flag romania romanian', c: 'flags' },
+    { e: '\u{1F1ED}\u{1F1FA}', n: 'flag: Hungary', k: 'flag hungary hungarian', c: 'flags' },
+    { e: '\u{1F1E8}\u{1F1FF}', n: 'flag: Czechia', k: 'flag czech republic czechia', c: 'flags' },
+    { e: '\u{1F1ED}\u{1F1F7}', n: 'flag: Croatia', k: 'flag croatia croatian', c: 'flags' }
+  ];
+
+  // ===== STATE =====
+  let currentCategory = 'all';
+  let selectedEmoji = null;
+  let selectedSkinTone = '';
+  let recentEmojis = JSON.parse(localStorage.getItem('emoji-recent') || '[]');
+
+  // ===== HELPERS =====
+  function getCodePoints(str) {
+    const cps = [];
+    for (const ch of str) {
+      const cp = ch.codePointAt(0);
+      if (cp !== 0xFE0F && cp !== 0x200D) {
+        cps.push('U+' + cp.toString(16).toUpperCase().padStart(4, '0'));
+      }
+    }
+    return cps.join(' ');
+  }
+
+  function getHtmlEntity(str) {
+    const ents = [];
+    for (const ch of str) {
+      const cp = ch.codePointAt(0);
+      ents.push('&#x' + cp.toString(16).toUpperCase() + ';');
+    }
+    return ents.join('');
+  }
+
+  function getCssCode(str) {
+    const codes = [];
+    for (const ch of str) {
+      const cp = ch.codePointAt(0);
+      codes.push('\\' + cp.toString(16).toUpperCase());
+    }
+    return codes.join('');
+  }
+
+  function getJsEscape(str) {
+    const codes = [];
+    for (const ch of str) {
+      const cp = ch.codePointAt(0);
+      if (cp > 0xFFFF) {
+        codes.push('\\u{' + cp.toString(16).toUpperCase() + '}');
+      } else {
+        codes.push('\\u' + cp.toString(16).toUpperCase().padStart(4, '0'));
+      }
+    }
+    return codes.join('');
+  }
+
+  function applySkintone(emoji, tone) {
+    if (!tone) return emoji;
+    // Insert skin tone modifier after the first codepoint
+    const chars = [...emoji];
+    return chars[0] + tone + chars.slice(1).join('');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 1600);
+  }
+
+  function copyText(text, label) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Copied ' + (label || text) + '!');
+    });
+  }
+
+  function addRecent(emoji) {
+    recentEmojis = recentEmojis.filter(e => e !== emoji);
+    recentEmojis.unshift(emoji);
+    if (recentEmojis.length > 30) recentEmojis = recentEmojis.slice(0, 30);
+    localStorage.setItem('emoji-recent', JSON.stringify(recentEmojis));
+    renderRecent();
+  }
+
+  // ===== RENDERING =====
+  function renderCategories() {
+    const bar = document.getElementById('categoryBar');
+    bar.innerHTML = CATEGORIES.map(c =>
+      `<button class="cat-btn${c.id === currentCategory ? ' active' : ''}" data-cat="${c.id}">
+        <span class="cat-icon">${c.icon}</span> ${c.label}
+      </button>`
+    ).join('');
+    bar.addEventListener('click', e => {
+      const btn = e.target.closest('.cat-btn');
+      if (!btn) return;
+      currentCategory = btn.dataset.cat;
+      document.getElementById('searchInput').value = '';
+      renderCategories();
+      renderEmojis();
+    });
+  }
+
+  function renderRecent() {
+    const sec = document.getElementById('recentSection');
+    const grid = document.getElementById('recentGrid');
+    if (recentEmojis.length === 0) {
+      sec.style.display = 'none';
+      return;
+    }
+    sec.style.display = 'block';
+    grid.innerHTML = recentEmojis.map(e =>
+      `<div class="emoji-cell" data-emoji="${encodeURIComponent(e)}" title="Click to copy">${e}</div>`
+    ).join('');
+  }
+
+  function renderEmojis(query) {
+    const container = document.getElementById('emojiContainer');
+    let filtered = EMOJIS;
+
+    if (query && query.trim()) {
+      const q = query.toLowerCase().trim();
+      filtered = EMOJIS.filter(em =>
+        em.n.toLowerCase().includes(q) || em.k.toLowerCase().includes(q)
+      );
+    } else if (currentCategory !== 'all') {
+      filtered = EMOJIS.filter(em => em.c === currentCategory);
+    }
+
+    document.getElementById('searchCount').textContent = filtered.length + ' emojis';
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="no-results">
+        <div class="big-emoji">\u{1F50D}</div>
+        <p>No emojis found for "${query}"</p>
+        <p style="font-size:0.8rem;margin-top:4px">Try a different keyword</p>
+      </div>`;
+      return;
+    }
+
+    if (query && query.trim()) {
+      // Flat grid for search results
+      container.innerHTML = `<div class="emoji-grid">${filtered.map(em =>
+        `<div class="emoji-cell" data-idx="${EMOJIS.indexOf(em)}" title="${em.n}">${em.e}</div>`
+      ).join('')}</div>`;
+    } else if (currentCategory === 'all') {
+      // Group by category
+      const groups = {};
+      for (const cat of CATEGORIES) {
+        if (cat.id === 'all') continue;
+        groups[cat.id] = filtered.filter(em => em.c === cat.id);
+      }
+      let html = '';
+      for (const cat of CATEGORIES) {
+        if (cat.id === 'all') continue;
+        const items = groups[cat.id];
+        if (!items || items.length === 0) continue;
+        html += `<div class="emoji-section-title">${cat.icon} ${cat.label}</div>`;
+        html += `<div class="emoji-grid">${items.map(em =>
+          `<div class="emoji-cell" data-idx="${EMOJIS.indexOf(em)}" title="${em.n}">${em.e}</div>`
+        ).join('')}</div>`;
+      }
+      container.innerHTML = html;
+    } else {
+      container.innerHTML = `<div class="emoji-grid">${filtered.map(em =>
+        `<div class="emoji-cell" data-idx="${EMOJIS.indexOf(em)}" title="${em.n}">${em.e}</div>`
+      ).join('')}</div>`;
+    }
+  }
+
+  function showDetail(emojiObj) {
+    selectedEmoji = emojiObj;
+    selectedSkinTone = '';
+    const panel = document.getElementById('detailPanel');
+    panel.classList.add('visible');
+    updateDetail();
+  }
+
+  function updateDetail() {
+    if (!selectedEmoji) return;
+    const em = selectedEmoji;
+    const display = em.s ? applySkintone(em.e, selectedSkinTone) : em.e;
+
+    document.getElementById('detailEmoji').textContent = display;
+    document.getElementById('detailName').textContent = em.n;
+    document.getElementById('detailCodepoint').textContent = getCodePoints(display);
+
+    // Skin tones
+    const st = document.getElementById('skinTones');
+    if (em.s) {
+      st.style.display = 'flex';
+      st.innerHTML = SKIN_TONES.map(t =>
+        `<button class="skin-tone-btn${t.mod === selectedSkinTone ? ' active' : ''}" data-tone="${t.mod}" title="${t.label}">
+          ${applySkintone(em.e, t.mod)}
+        </button>`
+      ).join('');
+    } else {
+      st.style.display = 'none';
+    }
+
+    // Copy options
+    const opts = document.getElementById('copyOptions');
+    const formats = [
+      { label: 'Emoji Character', value: display },
+      { label: 'HTML Entity', value: getHtmlEntity(display) },
+      { label: 'CSS Content', value: getCssCode(display) },
+      { label: 'JavaScript Escape', value: getJsEscape(display) }
+    ];
+    opts.innerHTML = formats.map(f =>
+      `<div class="copy-opt">
+        <div class="copy-opt-label">${f.label}</div>
+        <div class="copy-opt-value" data-copy="${encodeURIComponent(f.value)}" title="Click to copy">${f.value}</div>
+      </div>`
+    ).join('');
+  }
+
+  // ===== EVENT HANDLERS =====
+  document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value;
+    if (q.trim()) {
+      // Deselect category when searching
+      currentCategory = 'all';
+      renderCategories();
+    }
+    renderEmojis(q);
+  });
+
+  document.getElementById('emojiContainer').addEventListener('click', function(e) {
+    const cell = e.target.closest('.emoji-cell');
+    if (!cell) return;
+    const idx = cell.dataset.idx;
+    if (idx !== undefined) {
+      const emojiObj = EMOJIS[parseInt(idx)];
+      // Single click: copy and show detail
+      const display = emojiObj.s ? applySkintone(emojiObj.e, selectedSkinTone) : emojiObj.e;
+      copyText(display, emojiObj.n);
+      addRecent(display);
+      showDetail(emojiObj);
+      // Flash effect
+      cell.classList.add('copied');
+      setTimeout(() => cell.classList.remove('copied'), 600);
+    }
+  });
+
+  document.getElementById('recentGrid').addEventListener('click', function(e) {
+    const cell = e.target.closest('.emoji-cell');
+    if (!cell) return;
+    const emoji = decodeURIComponent(cell.dataset.emoji);
+    copyText(emoji);
+    addRecent(emoji);
+    cell.classList.add('copied');
+    setTimeout(() => cell.classList.remove('copied'), 600);
+  });
+
+  document.getElementById('skinTones').addEventListener('click', function(e) {
+    const btn = e.target.closest('.skin-tone-btn');
+    if (!btn) return;
+    selectedSkinTone = btn.dataset.tone;
+    updateDetail();
+  });
+
+  document.getElementById('copyOptions').addEventListener('click', function(e) {
+    const val = e.target.closest('.copy-opt-value');
+    if (!val) return;
+    const text = decodeURIComponent(val.dataset.copy);
+    copyText(text);
+    val.classList.add('copied');
+    setTimeout(() => val.classList.remove('copied'), 600);
+  });
+
+  // ===== INIT =====
+  renderCategories();
+  renderRecent();
+  renderEmojis();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
