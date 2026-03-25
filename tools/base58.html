@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base58 &amp; Base62 Encoder/Decoder - Encode Text Online | ZeroKit.dev</title>
+  <meta name="description" content="Encode and decode text using Base58 (Bitcoin alphabet) or Base62. Real-time encoding, character stats, copy output. Free, runs in your browser.">
+  <link rel="canonical" href="https://zerokit.dev/tools/base58.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .encoding-toggle {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .encoding-toggle button {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .encoding-toggle button.active {
+      background: var(--accent);
+      color: white;
+    }
+    .encoding-toggle button:hover:not(.active) {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+    .stats-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 16px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 16px;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .char-distribution {
+      padding: 0 16px 16px;
+    }
+    .char-distribution h4 {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .char-bars {
+      display: flex;
+      gap: 1px;
+      align-items: flex-end;
+      height: 60px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      padding: 4px;
+      overflow: hidden;
+    }
+    .char-bar {
+      flex: 1;
+      min-width: 2px;
+      background: var(--accent);
+      border-radius: 1px 1px 0 0;
+      transition: height 0.2s;
+      position: relative;
+    }
+    .char-bar:hover {
+      background: var(--accent-hover);
+    }
+    .char-bar-tooltip {
+      display: none;
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: var(--mono);
+      white-space: nowrap;
+      z-index: 10;
+      color: var(--text);
+    }
+    .char-bar:hover .char-bar-tooltip {
+      display: block;
+    }
+    .info-section {
+      margin-top: 32px;
+    }
+    .info-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 768px) {
+      .info-cards { grid-template-columns: 1fr; }
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .info-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .info-card p, .info-card li {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .info-card ul {
+      list-style: none;
+      padding: 0;
+    }
+    .info-card ul li::before {
+      content: "\2022 ";
+      color: var(--accent);
+      font-weight: 700;
+      margin-right: 6px;
+    }
+    .info-card code {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--accent);
+    }
+    .alphabet-display {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      background: var(--surface-2);
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin-top: 8px;
+      word-break: break-all;
+      line-height: 1.8;
+      color: var(--text);
+    }
+    .mode-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .direction-toggle {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .direction-toggle button {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .direction-toggle button.active {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .direction-toggle button:hover:not(.active) {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Base58 &amp; Base62 Encoder / Decoder</h1>
+    <p class="description">Encode and decode text using Base58 (Bitcoin alphabet) or Base62. Real-time conversion, character statistics, runs entirely in your browser.</p>
+
+    <div class="action-bar" style="flex-wrap: wrap;">
+      <div class="encoding-toggle">
+        <button id="btnBase58" class="active" onclick="setEncoding('base58')">Base58</button>
+        <button id="btnBase62" onclick="setEncoding('base62')">Base62</button>
+      </div>
+      <div class="direction-toggle">
+        <button id="btnEncode" class="active" onclick="setDirection('encode')">Encode</button>
+        <button id="btnDecode" onclick="setDirection('decode')">Decode</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="copyOutput()">Copy Output</button>
+        <button class="btn" onclick="swap()">Swap</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">
+          <span id="inputLabel">Input (Text)</span>
+          <span class="mode-label" id="encodingLabel">Base58</span>
+        </div>
+        <textarea class="tool-textarea" id="input" placeholder="Type or paste text here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          <span id="outputLabel">Output (Encoded)</span>
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Result will appear here in real-time..."></textarea>
+      </div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="stats-panel">
+      <div class="panel-header">Character Statistics</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statInputLen">0</div>
+          <div class="stat-label">Input Length</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statOutputLen">0</div>
+          <div class="stat-label">Output Length</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statRatio">-</div>
+          <div class="stat-label">Size Ratio</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statUnique">0</div>
+          <div class="stat-label">Unique Chars</div>
+        </div>
+      </div>
+      <div class="char-distribution" id="charDistSection" style="display:none;">
+        <h4>Character Distribution (Output)</h4>
+        <div class="char-bars" id="charBars"></div>
+      </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+      <h2 style="font-size: 1.25rem; margin-bottom: 4px;">Understanding Base58 &amp; Base62</h2>
+      <p class="description">What they are, how they differ, and when to use each.</p>
+
+      <div class="info-cards">
+        <div class="info-card">
+          <h3>Base58 (Bitcoin Alphabet)</h3>
+          <p>Base58 encodes binary data using 58 characters. It deliberately <strong>removes ambiguous characters</strong> to prevent human reading errors:</p>
+          <ul style="margin-top:8px;">
+            <li><code>0</code> (zero) and <code>O</code> (uppercase O) look similar</li>
+            <li><code>I</code> (uppercase I) and <code>l</code> (lowercase L) look similar</li>
+            <li><code>+</code> and <code>/</code> are removed (not URL-safe)</li>
+          </ul>
+          <div class="alphabet-display" style="margin-top:12px;">123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz</div>
+        </div>
+        <div class="info-card">
+          <h3>Base62</h3>
+          <p>Base62 uses the full alphanumeric set: all digits, uppercase, and lowercase letters. No special characters, making it <strong>URL-safe without encoding</strong>.</p>
+          <ul style="margin-top:8px;">
+            <li>62 characters: <code>0-9</code>, <code>A-Z</code>, <code>a-z</code></li>
+            <li>More compact than Base58 (larger alphabet)</li>
+            <li>Ideal for short URLs, unique IDs, tokens</li>
+          </ul>
+          <div class="alphabet-display" style="margin-top:12px;">0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</div>
+        </div>
+        <div class="info-card">
+          <h3>Common Use Cases</h3>
+          <ul>
+            <li><strong>Base58:</strong> Bitcoin/crypto addresses, IPFS hashes, Solana keys</li>
+            <li><strong>Base58:</strong> Any context where humans read/copy encoded data</li>
+            <li><strong>Base62:</strong> URL shorteners (bit.ly, TinyURL)</li>
+            <li><strong>Base62:</strong> Database-friendly unique IDs, session tokens</li>
+            <li><strong>Both:</strong> Compact representation of binary/numeric data</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Key Differences</h3>
+          <ul>
+            <li><strong>Alphabet size:</strong> Base58 = 58 chars, Base62 = 62 chars</li>
+            <li><strong>Ambiguity:</strong> Base58 removes confusing chars, Base62 does not</li>
+            <li><strong>Compactness:</strong> Base62 is slightly more compact</li>
+            <li><strong>Human-friendly:</strong> Base58 wins for readability</li>
+            <li><strong>No padding:</strong> Neither uses <code>=</code> padding like Base64</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $i = document.getElementById('input');
+    const $o = document.getElementById('output');
+    const $s = document.getElementById('status');
+
+    const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    const BASE62_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+    let currentEncoding = 'base58';
+    let currentDirection = 'encode';
+
+    // --- Base58 encode/decode ---
+    function base58Encode(bytes) {
+      const alphabet = BASE58_ALPHABET;
+      // Count leading zeros
+      let leadingZeros = 0;
+      for (let i = 0; i < bytes.length; i++) {
+        if (bytes[i] === 0) leadingZeros++;
+        else break;
+      }
+      // Convert byte array to BigInt
+      let num = BigInt(0);
+      for (let i = 0; i < bytes.length; i++) {
+        num = num * 256n + BigInt(bytes[i]);
+      }
+      // Convert to base58
+      let result = '';
+      while (num > 0n) {
+        const remainder = Number(num % 58n);
+        num = num / 58n;
+        result = alphabet[remainder] + result;
+      }
+      // Add leading '1's for each leading zero byte
+      return alphabet[0].repeat(leadingZeros) + result;
+    }
+
+    function base58Decode(str) {
+      const alphabet = BASE58_ALPHABET;
+      // Validate
+      for (const ch of str) {
+        if (alphabet.indexOf(ch) === -1) {
+          throw new Error(`Invalid Base58 character: '${ch}'`);
+        }
+      }
+      // Count leading '1's
+      let leadingOnes = 0;
+      for (let i = 0; i < str.length; i++) {
+        if (str[i] === '1') leadingOnes++;
+        else break;
+      }
+      // Convert from base58 to BigInt
+      let num = BigInt(0);
+      for (let i = 0; i < str.length; i++) {
+        num = num * 58n + BigInt(alphabet.indexOf(str[i]));
+      }
+      // Convert BigInt to bytes
+      const bytes = [];
+      while (num > 0n) {
+        bytes.unshift(Number(num % 256n));
+        num = num / 256n;
+      }
+      // Add leading zero bytes
+      for (let i = 0; i < leadingOnes; i++) {
+        bytes.unshift(0);
+      }
+      return new Uint8Array(bytes);
+    }
+
+    // --- Base62 encode/decode ---
+    function base62Encode(bytes) {
+      const alphabet = BASE62_ALPHABET;
+      if (bytes.length === 0) return '';
+      // Count leading zeros
+      let leadingZeros = 0;
+      for (let i = 0; i < bytes.length; i++) {
+        if (bytes[i] === 0) leadingZeros++;
+        else break;
+      }
+      let num = BigInt(0);
+      for (let i = 0; i < bytes.length; i++) {
+        num = num * 256n + BigInt(bytes[i]);
+      }
+      let result = '';
+      while (num > 0n) {
+        const remainder = Number(num % 62n);
+        num = num / 62n;
+        result = alphabet[remainder] + result;
+      }
+      return alphabet[0].repeat(leadingZeros) + result;
+    }
+
+    function base62Decode(str) {
+      const alphabet = BASE62_ALPHABET;
+      for (const ch of str) {
+        if (alphabet.indexOf(ch) === -1) {
+          throw new Error(`Invalid Base62 character: '${ch}'`);
+        }
+      }
+      // Count leading '0's
+      let leadingZeros = 0;
+      for (let i = 0; i < str.length; i++) {
+        if (str[i] === '0') leadingZeros++;
+        else break;
+      }
+      let num = BigInt(0);
+      for (let i = 0; i < str.length; i++) {
+        num = num * 62n + BigInt(alphabet.indexOf(str[i]));
+      }
+      const bytes = [];
+      while (num > 0n) {
+        bytes.unshift(Number(num % 256n));
+        num = num / 256n;
+      }
+      for (let i = 0; i < leadingZeros; i++) {
+        bytes.unshift(0);
+      }
+      return new Uint8Array(bytes);
+    }
+
+    // --- Text <-> bytes helpers ---
+    function textToBytes(text) {
+      return new TextEncoder().encode(text);
+    }
+
+    function bytesToText(bytes) {
+      return new TextDecoder().decode(bytes);
+    }
+
+    // --- Encoding/Direction ---
+    function setEncoding(enc) {
+      currentEncoding = enc;
+      document.getElementById('btnBase58').classList.toggle('active', enc === 'base58');
+      document.getElementById('btnBase62').classList.toggle('active', enc === 'base62');
+      document.getElementById('encodingLabel').textContent = enc === 'base58' ? 'Base58' : 'Base62';
+      process();
+    }
+
+    function setDirection(dir) {
+      currentDirection = dir;
+      document.getElementById('btnEncode').classList.toggle('active', dir === 'encode');
+      document.getElementById('btnDecode').classList.toggle('active', dir === 'decode');
+      if (dir === 'encode') {
+        document.getElementById('inputLabel').textContent = 'Input (Text)';
+        document.getElementById('outputLabel').textContent = 'Output (Encoded)';
+        $i.placeholder = 'Type or paste text here...';
+        $o.placeholder = 'Encoded result will appear here in real-time...';
+      } else {
+        document.getElementById('inputLabel').textContent = 'Input (Encoded)';
+        document.getElementById('outputLabel').textContent = 'Output (Decoded Text)';
+        $i.placeholder = 'Paste encoded string here...';
+        $o.placeholder = 'Decoded text will appear here in real-time...';
+      }
+      process();
+    }
+
+    // --- Main processing ---
+    function process() {
+      const input = $i.value;
+      if (!input) {
+        $o.value = '';
+        $s.textContent = '';
+        $s.className = '';
+        updateStats('', '');
+        return;
+      }
+
+      try {
+        let output;
+        if (currentDirection === 'encode') {
+          const bytes = textToBytes(input);
+          output = currentEncoding === 'base58' ? base58Encode(bytes) : base62Encode(bytes);
+          $s.textContent = 'Encoded';
+          $s.className = 'status status-success';
+        } else {
+          const trimmed = input.trim();
+          const bytes = currentEncoding === 'base58' ? base58Decode(trimmed) : base62Decode(trimmed);
+          output = bytesToText(bytes);
+          $s.textContent = 'Decoded';
+          $s.className = 'status status-success';
+        }
+        $o.value = output;
+        updateStats(input, output);
+      } catch (e) {
+        $o.value = '';
+        $s.textContent = e.message;
+        $s.className = 'status status-error';
+        updateStats(input, '');
+      }
+    }
+
+    // --- Stats ---
+    function updateStats(input, output) {
+      document.getElementById('statInputLen').textContent = input.length;
+      document.getElementById('statOutputLen').textContent = output.length;
+
+      if (input.length > 0 && output.length > 0) {
+        const ratio = (output.length / input.length).toFixed(2);
+        document.getElementById('statRatio').textContent = ratio + 'x';
+      } else {
+        document.getElementById('statRatio').textContent = '-';
+      }
+
+      const unique = new Set(output).size;
+      document.getElementById('statUnique').textContent = output ? unique : 0;
+
+      // Character distribution
+      const distSection = document.getElementById('charDistSection');
+      const barsContainer = document.getElementById('charBars');
+      if (!output) {
+        distSection.style.display = 'none';
+        return;
+      }
+
+      distSection.style.display = 'block';
+      const alphabet = currentEncoding === 'base58' ? BASE58_ALPHABET : BASE62_ALPHABET;
+      const freq = {};
+      for (const ch of alphabet) freq[ch] = 0;
+      for (const ch of output) {
+        if (freq[ch] !== undefined) freq[ch]++;
+      }
+
+      const maxFreq = Math.max(...Object.values(freq), 1);
+      barsContainer.innerHTML = '';
+
+      for (const ch of alphabet) {
+        const count = freq[ch];
+        const heightPct = (count / maxFreq) * 100;
+        const bar = document.createElement('div');
+        bar.className = 'char-bar';
+        bar.style.height = count > 0 ? Math.max(heightPct, 3) + '%' : '0%';
+        bar.style.opacity = count > 0 ? '1' : '0.15';
+        bar.style.minHeight = count > 0 ? '2px' : '1px';
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'char-bar-tooltip';
+        tooltip.textContent = `'${ch}': ${count}`;
+        bar.appendChild(tooltip);
+
+        barsContainer.appendChild(bar);
+      }
+    }
+
+    // --- Actions ---
+    function copyOutput() {
+      if ($o.value) {
+        navigator.clipboard.writeText($o.value);
+        $s.textContent = 'Copied!';
+        $s.className = 'status status-success';
+      }
+    }
+
+    function swap() {
+      const t = $i.value;
+      $i.value = $o.value;
+      $o.value = t;
+      // Also swap direction
+      setDirection(currentDirection === 'encode' ? 'decode' : 'encode');
+    }
+
+    function clearAll() {
+      $i.value = '';
+      $o.value = '';
+      $s.textContent = '';
+      $s.className = '';
+      updateStats('', '');
+    }
+
+    // Real-time encoding
+    $i.addEventListener('input', process);
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
