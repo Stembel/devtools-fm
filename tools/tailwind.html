@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tailwind CSS Lookup - Class Reference &amp; Search | ZeroKit.dev</title>
+  <meta name="description" content="Searchable Tailwind CSS utility class reference. Look up any class instantly: spacing, sizing, flexbox, grid, typography, colors, borders, effects, transforms, transitions. Copy classes and see live CSS previews.">
+  <link rel="canonical" href="https://zerokit.dev/tools/tailwind.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .category-tab .tab-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .category-section {
+      margin-bottom: 32px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .cat-spacing .category-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .cat-sizing .category-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-flexbox .category-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .cat-grid .category-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .cat-typography .category-badge { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .cat-colors .category-badge { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .cat-borders .category-badge { background: rgba(20, 184, 166, 0.15); color: #2dd4bf; }
+    .cat-effects .category-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .cat-transforms .category-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+    .cat-transitions .category-badge { background: rgba(45, 212, 191, 0.15); color: #2dd4bf; }
+    .cat-combos .category-badge { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+
+    .cat-spacing .category-header { border-bottom-color: rgba(59, 130, 246, 0.2); }
+    .cat-sizing .category-header { border-bottom-color: rgba(34, 197, 94, 0.2); }
+    .cat-flexbox .category-header { border-bottom-color: rgba(168, 85, 247, 0.2); }
+    .cat-grid .category-header { border-bottom-color: rgba(234, 179, 8, 0.2); }
+    .cat-typography .category-header { border-bottom-color: rgba(249, 115, 22, 0.2); }
+    .cat-colors .category-header { border-bottom-color: rgba(236, 72, 153, 0.2); }
+    .cat-borders .category-header { border-bottom-color: rgba(20, 184, 166, 0.2); }
+    .cat-effects .category-header { border-bottom-color: rgba(239, 68, 68, 0.2); }
+    .cat-transforms .category-header { border-bottom-color: rgba(99, 102, 241, 0.2); }
+    .cat-transitions .category-header { border-bottom-color: rgba(45, 212, 191, 0.2); }
+    .cat-combos .category-header { border-bottom-color: rgba(251, 191, 36, 0.2); }
+
+    .tw-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.15s;
+    }
+    .tw-card:hover {
+      border-color: var(--text-muted);
+    }
+    .tw-class {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+    .tw-css {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tw-preview {
+      flex-shrink: 0;
+      width: 40px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tw-preview-box {
+      background: rgba(99, 102, 241, 0.3);
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+    }
+    .tw-copy-btn {
+      flex-shrink: 0;
+      padding: 4px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tw-copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .tw-copy-btn.copied {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* Combo cards */
+    .combo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      padding: 16px 20px;
+      transition: border-color 0.15s;
+    }
+    .combo-card:hover {
+      border-color: var(--text-muted);
+    }
+    .combo-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .combo-classes {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      background: var(--bg);
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      word-break: break-all;
+      line-height: 1.8;
+      user-select: all;
+    }
+    .combo-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .combo-copy-btn {
+      float: right;
+      padding: 4px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-left: 12px;
+    }
+    .combo-copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .combo-copy-btn.copied {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-code {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    .quick-jump {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .quick-jump:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+    .quick-jump.visible {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .tw-card {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 14px;
+      }
+      .tw-class {
+        min-width: unset;
+        flex-basis: auto;
+      }
+      .tw-css {
+        flex-basis: 100%;
+        order: 3;
+        white-space: normal;
+      }
+      .tw-preview {
+        display: none;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Tailwind CSS Lookup</h1>
+    <p class="description">Searchable reference for Tailwind CSS utility classes. Browse by category, search by class name or CSS property, copy with one click. Includes common pattern combos.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search classes... (e.g. flex, p-4, text-center)" autofocus spellcheck="false">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs">
+      <button class="category-tab active" data-cat="all">All <span class="tab-count" id="countAll"></span></button>
+      <button class="category-tab" data-cat="spacing">Spacing <span class="tab-count" id="countSpacing"></span></button>
+      <button class="category-tab" data-cat="sizing">Sizing <span class="tab-count" id="countSizing"></span></button>
+      <button class="category-tab" data-cat="flexbox">Flexbox <span class="tab-count" id="countFlexbox"></span></button>
+      <button class="category-tab" data-cat="grid">Grid <span class="tab-count" id="countGrid"></span></button>
+      <button class="category-tab" data-cat="typography">Typography <span class="tab-count" id="countTypography"></span></button>
+      <button class="category-tab" data-cat="colors">Colors <span class="tab-count" id="countColors"></span></button>
+      <button class="category-tab" data-cat="borders">Borders <span class="tab-count" id="countBorders"></span></button>
+      <button class="category-tab" data-cat="effects">Effects <span class="tab-count" id="countEffects"></span></button>
+      <button class="category-tab" data-cat="transforms">Transforms <span class="tab-count" id="countTransforms"></span></button>
+      <button class="category-tab" data-cat="transitions">Transitions <span class="tab-count" id="countTransitions"></span></button>
+      <button class="category-tab" data-cat="combos">Combos <span class="tab-count" id="countCombos"></span></button>
+    </div>
+
+    <div id="classList"></div>
+    <div id="noResults" class="no-results" style="display:none">
+      <div class="nr-code">?_?</div>
+      <p>No classes match your search.</p>
+    </div>
+
+    <button class="quick-jump" id="quickJump" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8679; Top</button>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    const TW_CLASSES = [
+      // === Spacing ===
+      { cls: "p-0", css: "padding: 0px;", cat: "spacing", preview: "box", pw: 4, ph: 4 },
+      { cls: "p-1", css: "padding: 0.25rem; /* 4px */", cat: "spacing", preview: "box", pw: 8, ph: 8 },
+      { cls: "p-2", css: "padding: 0.5rem; /* 8px */", cat: "spacing", preview: "box", pw: 12, ph: 12 },
+      { cls: "p-3", css: "padding: 0.75rem; /* 12px */", cat: "spacing", preview: "box", pw: 16, ph: 14 },
+      { cls: "p-4", css: "padding: 1rem; /* 16px */", cat: "spacing", preview: "box", pw: 20, ph: 16 },
+      { cls: "p-6", css: "padding: 1.5rem; /* 24px */", cat: "spacing", preview: "box", pw: 26, ph: 18 },
+      { cls: "p-8", css: "padding: 2rem; /* 32px */", cat: "spacing", preview: "box", pw: 32, ph: 20 },
+      { cls: "px-4", css: "padding-left: 1rem; padding-right: 1rem;", cat: "spacing" },
+      { cls: "py-2", css: "padding-top: 0.5rem; padding-bottom: 0.5rem;", cat: "spacing" },
+      { cls: "pt-4", css: "padding-top: 1rem;", cat: "spacing" },
+      { cls: "pb-4", css: "padding-bottom: 1rem;", cat: "spacing" },
+      { cls: "pl-4", css: "padding-left: 1rem;", cat: "spacing" },
+      { cls: "pr-4", css: "padding-right: 1rem;", cat: "spacing" },
+      { cls: "m-0", css: "margin: 0px;", cat: "spacing" },
+      { cls: "m-1", css: "margin: 0.25rem; /* 4px */", cat: "spacing" },
+      { cls: "m-2", css: "margin: 0.5rem; /* 8px */", cat: "spacing" },
+      { cls: "m-4", css: "margin: 1rem; /* 16px */", cat: "spacing" },
+      { cls: "m-auto", css: "margin: auto;", cat: "spacing" },
+      { cls: "mx-auto", css: "margin-left: auto; margin-right: auto;", cat: "spacing" },
+      { cls: "my-4", css: "margin-top: 1rem; margin-bottom: 1rem;", cat: "spacing" },
+      { cls: "mt-2", css: "margin-top: 0.5rem;", cat: "spacing" },
+      { cls: "mb-4", css: "margin-bottom: 1rem;", cat: "spacing" },
+      { cls: "ml-2", css: "margin-left: 0.5rem;", cat: "spacing" },
+      { cls: "mr-2", css: "margin-right: 0.5rem;", cat: "spacing" },
+      { cls: "-mt-1", css: "margin-top: -0.25rem;", cat: "spacing" },
+      { cls: "space-x-2", css: "& > * + * { margin-left: 0.5rem; }", cat: "spacing" },
+      { cls: "space-x-4", css: "& > * + * { margin-left: 1rem; }", cat: "spacing" },
+      { cls: "space-y-2", css: "& > * + * { margin-top: 0.5rem; }", cat: "spacing" },
+      { cls: "space-y-4", css: "& > * + * { margin-top: 1rem; }", cat: "spacing" },
+      { cls: "gap-1", css: "gap: 0.25rem; /* 4px */", cat: "spacing" },
+      { cls: "gap-2", css: "gap: 0.5rem; /* 8px */", cat: "spacing" },
+      { cls: "gap-4", css: "gap: 1rem; /* 16px */", cat: "spacing" },
+      { cls: "gap-6", css: "gap: 1.5rem; /* 24px */", cat: "spacing" },
+      { cls: "gap-8", css: "gap: 2rem; /* 32px */", cat: "spacing" },
+
+      // === Sizing ===
+      { cls: "w-0", css: "width: 0px;", cat: "sizing", preview: "box", pw: 2, ph: 14 },
+      { cls: "w-1", css: "width: 0.25rem; /* 4px */", cat: "sizing", preview: "box", pw: 4, ph: 14 },
+      { cls: "w-4", css: "width: 1rem; /* 16px */", cat: "sizing", preview: "box", pw: 12, ph: 14 },
+      { cls: "w-8", css: "width: 2rem; /* 32px */", cat: "sizing", preview: "box", pw: 20, ph: 14 },
+      { cls: "w-16", css: "width: 4rem; /* 64px */", cat: "sizing", preview: "box", pw: 32, ph: 14 },
+      { cls: "w-full", css: "width: 100%;", cat: "sizing", preview: "box", pw: 38, ph: 14 },
+      { cls: "w-screen", css: "width: 100vw;", cat: "sizing" },
+      { cls: "w-auto", css: "width: auto;", cat: "sizing" },
+      { cls: "w-1/2", css: "width: 50%;", cat: "sizing", preview: "box", pw: 20, ph: 14 },
+      { cls: "w-1/3", css: "width: 33.333333%;", cat: "sizing" },
+      { cls: "w-2/3", css: "width: 66.666667%;", cat: "sizing" },
+      { cls: "w-fit", css: "width: fit-content;", cat: "sizing" },
+      { cls: "min-w-0", css: "min-width: 0px;", cat: "sizing" },
+      { cls: "min-w-full", css: "min-width: 100%;", cat: "sizing" },
+      { cls: "max-w-sm", css: "max-width: 24rem; /* 384px */", cat: "sizing" },
+      { cls: "max-w-md", css: "max-width: 28rem; /* 448px */", cat: "sizing" },
+      { cls: "max-w-lg", css: "max-width: 32rem; /* 512px */", cat: "sizing" },
+      { cls: "max-w-xl", css: "max-width: 36rem; /* 576px */", cat: "sizing" },
+      { cls: "max-w-2xl", css: "max-width: 42rem; /* 672px */", cat: "sizing" },
+      { cls: "max-w-screen-xl", css: "max-width: 1280px;", cat: "sizing" },
+      { cls: "max-w-none", css: "max-width: none;", cat: "sizing" },
+      { cls: "h-0", css: "height: 0px;", cat: "sizing", preview: "box", pw: 14, ph: 2 },
+      { cls: "h-4", css: "height: 1rem; /* 16px */", cat: "sizing", preview: "box", pw: 14, ph: 10 },
+      { cls: "h-8", css: "height: 2rem; /* 32px */", cat: "sizing", preview: "box", pw: 14, ph: 16 },
+      { cls: "h-16", css: "height: 4rem; /* 64px */", cat: "sizing", preview: "box", pw: 14, ph: 22 },
+      { cls: "h-full", css: "height: 100%;", cat: "sizing" },
+      { cls: "h-screen", css: "height: 100vh;", cat: "sizing" },
+      { cls: "h-auto", css: "height: auto;", cat: "sizing" },
+      { cls: "min-h-0", css: "min-height: 0px;", cat: "sizing" },
+      { cls: "min-h-screen", css: "min-height: 100vh;", cat: "sizing" },
+      { cls: "size-4", css: "width: 1rem; height: 1rem; /* 16px */", cat: "sizing", preview: "box", pw: 10, ph: 10 },
+      { cls: "size-8", css: "width: 2rem; height: 2rem; /* 32px */", cat: "sizing", preview: "box", pw: 18, ph: 18 },
+
+      // === Flexbox ===
+      { cls: "flex", css: "display: flex;", cat: "flexbox" },
+      { cls: "inline-flex", css: "display: inline-flex;", cat: "flexbox" },
+      { cls: "flex-row", css: "flex-direction: row;", cat: "flexbox" },
+      { cls: "flex-col", css: "flex-direction: column;", cat: "flexbox" },
+      { cls: "flex-row-reverse", css: "flex-direction: row-reverse;", cat: "flexbox" },
+      { cls: "flex-col-reverse", css: "flex-direction: column-reverse;", cat: "flexbox" },
+      { cls: "flex-wrap", css: "flex-wrap: wrap;", cat: "flexbox" },
+      { cls: "flex-nowrap", css: "flex-wrap: nowrap;", cat: "flexbox" },
+      { cls: "flex-1", css: "flex: 1 1 0%;", cat: "flexbox" },
+      { cls: "flex-auto", css: "flex: 1 1 auto;", cat: "flexbox" },
+      { cls: "flex-none", css: "flex: none;", cat: "flexbox" },
+      { cls: "flex-shrink-0", css: "flex-shrink: 0;", cat: "flexbox" },
+      { cls: "flex-grow", css: "flex-grow: 1;", cat: "flexbox" },
+      { cls: "items-start", css: "align-items: flex-start;", cat: "flexbox" },
+      { cls: "items-center", css: "align-items: center;", cat: "flexbox" },
+      { cls: "items-end", css: "align-items: flex-end;", cat: "flexbox" },
+      { cls: "items-stretch", css: "align-items: stretch;", cat: "flexbox" },
+      { cls: "items-baseline", css: "align-items: baseline;", cat: "flexbox" },
+      { cls: "justify-start", css: "justify-content: flex-start;", cat: "flexbox" },
+      { cls: "justify-center", css: "justify-content: center;", cat: "flexbox" },
+      { cls: "justify-end", css: "justify-content: flex-end;", cat: "flexbox" },
+      { cls: "justify-between", css: "justify-content: space-between;", cat: "flexbox" },
+      { cls: "justify-around", css: "justify-content: space-around;", cat: "flexbox" },
+      { cls: "justify-evenly", css: "justify-content: space-evenly;", cat: "flexbox" },
+      { cls: "self-auto", css: "align-self: auto;", cat: "flexbox" },
+      { cls: "self-start", css: "align-self: flex-start;", cat: "flexbox" },
+      { cls: "self-center", css: "align-self: center;", cat: "flexbox" },
+      { cls: "self-end", css: "align-self: flex-end;", cat: "flexbox" },
+      { cls: "order-first", css: "order: -9999;", cat: "flexbox" },
+      { cls: "order-last", css: "order: 9999;", cat: "flexbox" },
+      { cls: "order-none", css: "order: 0;", cat: "flexbox" },
+
+      // === Grid ===
+      { cls: "grid", css: "display: grid;", cat: "grid" },
+      { cls: "inline-grid", css: "display: inline-grid;", cat: "grid" },
+      { cls: "grid-cols-1", css: "grid-template-columns: repeat(1, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-cols-2", css: "grid-template-columns: repeat(2, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-cols-3", css: "grid-template-columns: repeat(3, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-cols-4", css: "grid-template-columns: repeat(4, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-cols-6", css: "grid-template-columns: repeat(6, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-cols-12", css: "grid-template-columns: repeat(12, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-cols-none", css: "grid-template-columns: none;", cat: "grid" },
+      { cls: "grid-rows-1", css: "grid-template-rows: repeat(1, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-rows-2", css: "grid-template-rows: repeat(2, minmax(0, 1fr));", cat: "grid" },
+      { cls: "grid-rows-3", css: "grid-template-rows: repeat(3, minmax(0, 1fr));", cat: "grid" },
+      { cls: "col-span-1", css: "grid-column: span 1 / span 1;", cat: "grid" },
+      { cls: "col-span-2", css: "grid-column: span 2 / span 2;", cat: "grid" },
+      { cls: "col-span-3", css: "grid-column: span 3 / span 3;", cat: "grid" },
+      { cls: "col-span-full", css: "grid-column: 1 / -1;", cat: "grid" },
+      { cls: "col-start-1", css: "grid-column-start: 1;", cat: "grid" },
+      { cls: "row-span-2", css: "grid-row: span 2 / span 2;", cat: "grid" },
+      { cls: "auto-cols-auto", css: "grid-auto-columns: auto;", cat: "grid" },
+      { cls: "auto-cols-fr", css: "grid-auto-columns: minmax(0, 1fr);", cat: "grid" },
+      { cls: "place-items-center", css: "place-items: center;", cat: "grid" },
+      { cls: "place-content-center", css: "place-content: center;", cat: "grid" },
+
+      // === Typography ===
+      { cls: "text-xs", css: "font-size: 0.75rem; line-height: 1rem;", cat: "typography" },
+      { cls: "text-sm", css: "font-size: 0.875rem; line-height: 1.25rem;", cat: "typography" },
+      { cls: "text-base", css: "font-size: 1rem; line-height: 1.5rem;", cat: "typography" },
+      { cls: "text-lg", css: "font-size: 1.125rem; line-height: 1.75rem;", cat: "typography" },
+      { cls: "text-xl", css: "font-size: 1.25rem; line-height: 1.75rem;", cat: "typography" },
+      { cls: "text-2xl", css: "font-size: 1.5rem; line-height: 2rem;", cat: "typography" },
+      { cls: "text-3xl", css: "font-size: 1.875rem; line-height: 2.25rem;", cat: "typography" },
+      { cls: "text-4xl", css: "font-size: 2.25rem; line-height: 2.5rem;", cat: "typography" },
+      { cls: "text-5xl", css: "font-size: 3rem; line-height: 1;", cat: "typography" },
+      { cls: "font-thin", css: "font-weight: 100;", cat: "typography" },
+      { cls: "font-light", css: "font-weight: 300;", cat: "typography" },
+      { cls: "font-normal", css: "font-weight: 400;", cat: "typography" },
+      { cls: "font-medium", css: "font-weight: 500;", cat: "typography" },
+      { cls: "font-semibold", css: "font-weight: 600;", cat: "typography" },
+      { cls: "font-bold", css: "font-weight: 700;", cat: "typography" },
+      { cls: "font-extrabold", css: "font-weight: 800;", cat: "typography" },
+      { cls: "italic", css: "font-style: italic;", cat: "typography" },
+      { cls: "not-italic", css: "font-style: normal;", cat: "typography" },
+      { cls: "text-left", css: "text-align: left;", cat: "typography" },
+      { cls: "text-center", css: "text-align: center;", cat: "typography" },
+      { cls: "text-right", css: "text-align: right;", cat: "typography" },
+      { cls: "text-justify", css: "text-align: justify;", cat: "typography" },
+      { cls: "uppercase", css: "text-transform: uppercase;", cat: "typography" },
+      { cls: "lowercase", css: "text-transform: lowercase;", cat: "typography" },
+      { cls: "capitalize", css: "text-transform: capitalize;", cat: "typography" },
+      { cls: "normal-case", css: "text-transform: none;", cat: "typography" },
+      { cls: "underline", css: "text-decoration-line: underline;", cat: "typography" },
+      { cls: "line-through", css: "text-decoration-line: line-through;", cat: "typography" },
+      { cls: "no-underline", css: "text-decoration-line: none;", cat: "typography" },
+      { cls: "truncate", css: "overflow: hidden; text-overflow: ellipsis; white-space: nowrap;", cat: "typography" },
+      { cls: "leading-none", css: "line-height: 1;", cat: "typography" },
+      { cls: "leading-tight", css: "line-height: 1.25;", cat: "typography" },
+      { cls: "leading-normal", css: "line-height: 1.5;", cat: "typography" },
+      { cls: "leading-relaxed", css: "line-height: 1.625;", cat: "typography" },
+      { cls: "tracking-tight", css: "letter-spacing: -0.025em;", cat: "typography" },
+      { cls: "tracking-normal", css: "letter-spacing: 0em;", cat: "typography" },
+      { cls: "tracking-wide", css: "letter-spacing: 0.025em;", cat: "typography" },
+      { cls: "whitespace-nowrap", css: "white-space: nowrap;", cat: "typography" },
+      { cls: "whitespace-normal", css: "white-space: normal;", cat: "typography" },
+      { cls: "break-words", css: "overflow-wrap: break-word;", cat: "typography" },
+      { cls: "break-all", css: "word-break: break-all;", cat: "typography" },
+
+      // === Colors ===
+      { cls: "text-white", css: "color: rgb(255 255 255);", cat: "colors", preview: "color", color: "#ffffff" },
+      { cls: "text-black", css: "color: rgb(0 0 0);", cat: "colors", preview: "color", color: "#000000" },
+      { cls: "text-gray-500", css: "color: rgb(107 114 128);", cat: "colors", preview: "color", color: "#6b7280" },
+      { cls: "text-red-500", css: "color: rgb(239 68 68);", cat: "colors", preview: "color", color: "#ef4444" },
+      { cls: "text-blue-500", css: "color: rgb(59 130 246);", cat: "colors", preview: "color", color: "#3b82f6" },
+      { cls: "text-green-500", css: "color: rgb(34 197 94);", cat: "colors", preview: "color", color: "#22c55e" },
+      { cls: "text-yellow-500", css: "color: rgb(234 179 8);", cat: "colors", preview: "color", color: "#eab308" },
+      { cls: "text-purple-500", css: "color: rgb(168 85 247);", cat: "colors", preview: "color", color: "#a855f7" },
+      { cls: "text-indigo-500", css: "color: rgb(99 102 241);", cat: "colors", preview: "color", color: "#6366f1" },
+      { cls: "text-pink-500", css: "color: rgb(236 72 153);", cat: "colors", preview: "color", color: "#ec4899" },
+      { cls: "bg-white", css: "background-color: rgb(255 255 255);", cat: "colors", preview: "color", color: "#ffffff" },
+      { cls: "bg-black", css: "background-color: rgb(0 0 0);", cat: "colors", preview: "color", color: "#000000" },
+      { cls: "bg-gray-100", css: "background-color: rgb(243 244 246);", cat: "colors", preview: "color", color: "#f3f4f6" },
+      { cls: "bg-gray-200", css: "background-color: rgb(229 231 235);", cat: "colors", preview: "color", color: "#e5e7eb" },
+      { cls: "bg-gray-800", css: "background-color: rgb(31 41 55);", cat: "colors", preview: "color", color: "#1f2937" },
+      { cls: "bg-gray-900", css: "background-color: rgb(17 24 39);", cat: "colors", preview: "color", color: "#111827" },
+      { cls: "bg-red-500", css: "background-color: rgb(239 68 68);", cat: "colors", preview: "color", color: "#ef4444" },
+      { cls: "bg-blue-500", css: "background-color: rgb(59 130 246);", cat: "colors", preview: "color", color: "#3b82f6" },
+      { cls: "bg-green-500", css: "background-color: rgb(34 197 94);", cat: "colors", preview: "color", color: "#22c55e" },
+      { cls: "bg-yellow-500", css: "background-color: rgb(234 179 8);", cat: "colors", preview: "color", color: "#eab308" },
+      { cls: "bg-indigo-600", css: "background-color: rgb(79 70 229);", cat: "colors", preview: "color", color: "#4f46e5" },
+      { cls: "bg-transparent", css: "background-color: transparent;", cat: "colors" },
+      { cls: "opacity-0", css: "opacity: 0;", cat: "colors" },
+      { cls: "opacity-50", css: "opacity: 0.5;", cat: "colors" },
+      { cls: "opacity-100", css: "opacity: 1;", cat: "colors" },
+
+      // === Borders ===
+      { cls: "border", css: "border-width: 1px;", cat: "borders" },
+      { cls: "border-0", css: "border-width: 0px;", cat: "borders" },
+      { cls: "border-2", css: "border-width: 2px;", cat: "borders" },
+      { cls: "border-4", css: "border-width: 4px;", cat: "borders" },
+      { cls: "border-t", css: "border-top-width: 1px;", cat: "borders" },
+      { cls: "border-b", css: "border-bottom-width: 1px;", cat: "borders" },
+      { cls: "border-l", css: "border-left-width: 1px;", cat: "borders" },
+      { cls: "border-r", css: "border-right-width: 1px;", cat: "borders" },
+      { cls: "border-solid", css: "border-style: solid;", cat: "borders" },
+      { cls: "border-dashed", css: "border-style: dashed;", cat: "borders" },
+      { cls: "border-dotted", css: "border-style: dotted;", cat: "borders" },
+      { cls: "border-none", css: "border-style: none;", cat: "borders" },
+      { cls: "border-gray-300", css: "border-color: rgb(209 213 219);", cat: "borders", preview: "color", color: "#d1d5db" },
+      { cls: "border-gray-700", css: "border-color: rgb(55 65 81);", cat: "borders", preview: "color", color: "#374151" },
+      { cls: "border-red-500", css: "border-color: rgb(239 68 68);", cat: "borders", preview: "color", color: "#ef4444" },
+      { cls: "border-blue-500", css: "border-color: rgb(59 130 246);", cat: "borders", preview: "color", color: "#3b82f6" },
+      { cls: "border-transparent", css: "border-color: transparent;", cat: "borders" },
+      { cls: "rounded", css: "border-radius: 0.25rem; /* 4px */", cat: "borders", preview: "rounded", r: 4 },
+      { cls: "rounded-md", css: "border-radius: 0.375rem; /* 6px */", cat: "borders", preview: "rounded", r: 6 },
+      { cls: "rounded-lg", css: "border-radius: 0.5rem; /* 8px */", cat: "borders", preview: "rounded", r: 8 },
+      { cls: "rounded-xl", css: "border-radius: 0.75rem; /* 12px */", cat: "borders", preview: "rounded", r: 12 },
+      { cls: "rounded-2xl", css: "border-radius: 1rem; /* 16px */", cat: "borders", preview: "rounded", r: 16 },
+      { cls: "rounded-full", css: "border-radius: 9999px;", cat: "borders", preview: "rounded", r: 9999 },
+      { cls: "rounded-none", css: "border-radius: 0px;", cat: "borders", preview: "rounded", r: 0 },
+      { cls: "divide-y", css: "& > * + * { border-top-width: 1px; }", cat: "borders" },
+      { cls: "divide-x", css: "& > * + * { border-left-width: 1px; }", cat: "borders" },
+      { cls: "ring-1", css: "box-shadow: 0 0 0 1px var(--tw-ring-color);", cat: "borders" },
+      { cls: "ring-2", css: "box-shadow: 0 0 0 2px var(--tw-ring-color);", cat: "borders" },
+      { cls: "outline-none", css: "outline: 2px solid transparent; outline-offset: 2px;", cat: "borders" },
+
+      // === Effects ===
+      { cls: "shadow-sm", css: "box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);", cat: "effects" },
+      { cls: "shadow", css: "box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);", cat: "effects" },
+      { cls: "shadow-md", css: "box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);", cat: "effects" },
+      { cls: "shadow-lg", css: "box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);", cat: "effects" },
+      { cls: "shadow-xl", css: "box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);", cat: "effects" },
+      { cls: "shadow-2xl", css: "box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);", cat: "effects" },
+      { cls: "shadow-none", css: "box-shadow: 0 0 #0000;", cat: "effects" },
+      { cls: "overflow-hidden", css: "overflow: hidden;", cat: "effects" },
+      { cls: "overflow-auto", css: "overflow: auto;", cat: "effects" },
+      { cls: "overflow-scroll", css: "overflow: scroll;", cat: "effects" },
+      { cls: "overflow-visible", css: "overflow: visible;", cat: "effects" },
+      { cls: "overflow-x-auto", css: "overflow-x: auto;", cat: "effects" },
+      { cls: "overflow-y-auto", css: "overflow-y: auto;", cat: "effects" },
+      { cls: "z-0", css: "z-index: 0;", cat: "effects" },
+      { cls: "z-10", css: "z-index: 10;", cat: "effects" },
+      { cls: "z-20", css: "z-index: 20;", cat: "effects" },
+      { cls: "z-50", css: "z-index: 50;", cat: "effects" },
+      { cls: "z-auto", css: "z-index: auto;", cat: "effects" },
+      { cls: "hidden", css: "display: none;", cat: "effects" },
+      { cls: "block", css: "display: block;", cat: "effects" },
+      { cls: "inline-block", css: "display: inline-block;", cat: "effects" },
+      { cls: "inline", css: "display: inline;", cat: "effects" },
+      { cls: "relative", css: "position: relative;", cat: "effects" },
+      { cls: "absolute", css: "position: absolute;", cat: "effects" },
+      { cls: "fixed", css: "position: fixed;", cat: "effects" },
+      { cls: "sticky", css: "position: sticky;", cat: "effects" },
+      { cls: "static", css: "position: static;", cat: "effects" },
+      { cls: "inset-0", css: "inset: 0px;", cat: "effects" },
+      { cls: "top-0", css: "top: 0px;", cat: "effects" },
+      { cls: "right-0", css: "right: 0px;", cat: "effects" },
+      { cls: "bottom-0", css: "bottom: 0px;", cat: "effects" },
+      { cls: "left-0", css: "left: 0px;", cat: "effects" },
+      { cls: "cursor-pointer", css: "cursor: pointer;", cat: "effects" },
+      { cls: "cursor-not-allowed", css: "cursor: not-allowed;", cat: "effects" },
+      { cls: "pointer-events-none", css: "pointer-events: none;", cat: "effects" },
+      { cls: "select-none", css: "user-select: none;", cat: "effects" },
+      { cls: "select-all", css: "user-select: all;", cat: "effects" },
+
+      // === Transforms ===
+      { cls: "scale-0", css: "transform: scale(0);", cat: "transforms" },
+      { cls: "scale-50", css: "transform: scale(.5);", cat: "transforms" },
+      { cls: "scale-75", css: "transform: scale(.75);", cat: "transforms" },
+      { cls: "scale-100", css: "transform: scale(1);", cat: "transforms" },
+      { cls: "scale-110", css: "transform: scale(1.1);", cat: "transforms" },
+      { cls: "scale-125", css: "transform: scale(1.25);", cat: "transforms" },
+      { cls: "scale-150", css: "transform: scale(1.5);", cat: "transforms" },
+      { cls: "rotate-0", css: "transform: rotate(0deg);", cat: "transforms" },
+      { cls: "rotate-45", css: "transform: rotate(45deg);", cat: "transforms" },
+      { cls: "rotate-90", css: "transform: rotate(90deg);", cat: "transforms" },
+      { cls: "rotate-180", css: "transform: rotate(180deg);", cat: "transforms" },
+      { cls: "-rotate-45", css: "transform: rotate(-45deg);", cat: "transforms" },
+      { cls: "-rotate-90", css: "transform: rotate(-90deg);", cat: "transforms" },
+      { cls: "translate-x-0", css: "transform: translateX(0px);", cat: "transforms" },
+      { cls: "translate-x-1", css: "transform: translateX(0.25rem);", cat: "transforms" },
+      { cls: "translate-x-full", css: "transform: translateX(100%);", cat: "transforms" },
+      { cls: "-translate-x-1/2", css: "transform: translateX(-50%);", cat: "transforms" },
+      { cls: "translate-y-0", css: "transform: translateY(0px);", cat: "transforms" },
+      { cls: "-translate-y-1/2", css: "transform: translateY(-50%);", cat: "transforms" },
+      { cls: "origin-center", css: "transform-origin: center;", cat: "transforms" },
+      { cls: "origin-top", css: "transform-origin: top;", cat: "transforms" },
+
+      // === Transitions ===
+      { cls: "transition", css: "transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms;", cat: "transitions" },
+      { cls: "transition-all", css: "transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms;", cat: "transitions" },
+      { cls: "transition-colors", css: "transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms;", cat: "transitions" },
+      { cls: "transition-opacity", css: "transition-property: opacity; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms;", cat: "transitions" },
+      { cls: "transition-transform", css: "transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms;", cat: "transitions" },
+      { cls: "transition-none", css: "transition-property: none;", cat: "transitions" },
+      { cls: "duration-75", css: "transition-duration: 75ms;", cat: "transitions" },
+      { cls: "duration-100", css: "transition-duration: 100ms;", cat: "transitions" },
+      { cls: "duration-150", css: "transition-duration: 150ms;", cat: "transitions" },
+      { cls: "duration-200", css: "transition-duration: 200ms;", cat: "transitions" },
+      { cls: "duration-300", css: "transition-duration: 300ms;", cat: "transitions" },
+      { cls: "duration-500", css: "transition-duration: 500ms;", cat: "transitions" },
+      { cls: "ease-linear", css: "transition-timing-function: linear;", cat: "transitions" },
+      { cls: "ease-in", css: "transition-timing-function: cubic-bezier(0.4, 0, 1, 1);", cat: "transitions" },
+      { cls: "ease-out", css: "transition-timing-function: cubic-bezier(0, 0, 0.2, 1);", cat: "transitions" },
+      { cls: "ease-in-out", css: "transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);", cat: "transitions" },
+      { cls: "delay-100", css: "transition-delay: 100ms;", cat: "transitions" },
+      { cls: "delay-300", css: "transition-delay: 300ms;", cat: "transitions" },
+      { cls: "animate-spin", css: "animation: spin 1s linear infinite;", cat: "transitions" },
+      { cls: "animate-ping", css: "animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;", cat: "transitions" },
+      { cls: "animate-pulse", css: "animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;", cat: "transitions" },
+      { cls: "animate-bounce", css: "animation: bounce 1s infinite;", cat: "transitions" },
+      { cls: "animate-none", css: "animation: none;", cat: "transitions" },
+    ];
+
+    const COMBOS = [
+      {
+        name: "Centered Div",
+        classes: "flex items-center justify-center",
+        desc: "Centers child elements both horizontally and vertically using flexbox."
+      },
+      {
+        name: "Absolute Center",
+        classes: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
+        desc: "Centers an element absolutely within its positioned parent."
+      },
+      {
+        name: "Card",
+        classes: "bg-white rounded-lg shadow-md p-6 border border-gray-200",
+        desc: "A standard card component with rounded corners, shadow, and padding."
+      },
+      {
+        name: "Dark Card",
+        classes: "bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700",
+        desc: "A dark-themed card with larger radius and deeper shadow."
+      },
+      {
+        name: "Responsive Grid (3 cols)",
+        classes: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+        desc: "Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop."
+      },
+      {
+        name: "Sticky Header",
+        classes: "sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b",
+        desc: "A sticky header that stays at the top with a frosted glass effect."
+      },
+      {
+        name: "Truncated Text",
+        classes: "truncate overflow-hidden whitespace-nowrap text-ellipsis",
+        desc: "Prevents text from wrapping and adds an ellipsis for overflow."
+      },
+      {
+        name: "Screen Container",
+        classes: "min-h-screen flex flex-col",
+        desc: "Full viewport height container with vertical flex layout."
+      },
+      {
+        name: "Badge / Pill",
+        classes: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+        desc: "A small pill-shaped badge for labels or tags."
+      },
+      {
+        name: "Hover Button",
+        classes: "px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200",
+        desc: "A styled button with hover color change and smooth transition."
+      },
+      {
+        name: "Input Field",
+        classes: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500",
+        desc: "A standard form input with focus ring effect."
+      },
+      {
+        name: "Overlay / Backdrop",
+        classes: "fixed inset-0 bg-black/50 z-40 flex items-center justify-center",
+        desc: "A full-screen semi-transparent overlay for modals."
+      },
+      {
+        name: "Avatar Circle",
+        classes: "w-10 h-10 rounded-full object-cover",
+        desc: "A circular avatar image container."
+      },
+      {
+        name: "Sidebar Layout",
+        classes: "flex min-h-screen",
+        desc: "Parent container for a sidebar + main content layout. Sidebar child uses w-64 flex-shrink-0, main uses flex-1."
+      },
+      {
+        name: "Visually Hidden (SR only)",
+        classes: "sr-only absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0",
+        desc: "Hides content visually but keeps it accessible to screen readers."
+      },
+    ];
+
+    const CATEGORY_INFO = {
+      spacing:     { label: "Spacing", description: "Padding, Margin, Gap & Space" },
+      sizing:      { label: "Sizing", description: "Width, Height, Min/Max Sizing" },
+      flexbox:     { label: "Flexbox", description: "Flex Container & Item Utilities" },
+      grid:        { label: "Grid", description: "Grid Layout & Placement" },
+      typography:  { label: "Typography", description: "Font Size, Weight, Alignment & Text" },
+      colors:      { label: "Colors", description: "Text, Background & Opacity Colors" },
+      borders:     { label: "Borders", description: "Border Width, Radius, Ring & Divide" },
+      effects:     { label: "Effects", description: "Shadow, Overflow, Position, Display & Cursor" },
+      transforms:  { label: "Transforms", description: "Scale, Rotate, Translate & Origin" },
+      transitions: { label: "Transitions", description: "Transition, Duration, Easing & Animation" },
+      combos:      { label: "Combos", description: "Common Pattern Combinations" },
+    };
+
+    const CAT_ORDER = ['spacing', 'sizing', 'flexbox', 'grid', 'typography', 'colors', 'borders', 'effects', 'transforms', 'transitions', 'combos'];
+
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const classList = document.getElementById('classList');
+    const noResults = document.getElementById('noResults');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const quickJump = document.getElementById('quickJump');
+    let activeCat = 'all';
+
+    // Tab counts
+    function updateCounts() {
+      document.getElementById('countAll').textContent = TW_CLASSES.length;
+      const cats = {};
+      TW_CLASSES.forEach(c => {
+        cats[c.cat] = (cats[c.cat] || 0) + 1;
+      });
+      Object.keys(cats).forEach(cat => {
+        const el = document.getElementById('count' + cat.charAt(0).toUpperCase() + cat.slice(1));
+        if (el) el.textContent = cats[cat];
+      });
+      document.getElementById('countCombos').textContent = COMBOS.length;
+    }
+    updateCounts();
+
+    // Tab clicks
+    categoryTabs.addEventListener('click', e => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeCat = tab.dataset.cat;
+      render();
+    });
+
+    // Search
+    searchInput.addEventListener('input', () => render());
+
+    function getFiltered() {
+      const q = searchInput.value.toLowerCase().trim();
+      let items = TW_CLASSES;
+      if (activeCat !== 'all' && activeCat !== 'combos') {
+        items = items.filter(c => c.cat === activeCat);
+      }
+      if (q) {
+        items = items.filter(c =>
+          c.cls.toLowerCase().includes(q) ||
+          c.css.toLowerCase().includes(q) ||
+          c.cat.toLowerCase().includes(q)
+        );
+      }
+      return items;
+    }
+
+    function getFilteredCombos() {
+      const q = searchInput.value.toLowerCase().trim();
+      if (activeCat !== 'all' && activeCat !== 'combos') return [];
+      if (!q) return COMBOS;
+      return COMBOS.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.classes.toLowerCase().includes(q) ||
+        c.desc.toLowerCase().includes(q)
+      );
+    }
+
+    function copyToClipboard(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function renderPreview(item) {
+      if (!item.preview) return '';
+      if (item.preview === 'box') {
+        return `<div class="tw-preview"><div class="tw-preview-box" style="width:${item.pw}px;height:${item.ph}px;"></div></div>`;
+      }
+      if (item.preview === 'color') {
+        return `<div class="tw-preview"><div style="width:20px;height:20px;border-radius:4px;background:${item.color};border:1px solid rgba(255,255,255,0.15);"></div></div>`;
+      }
+      if (item.preview === 'rounded') {
+        const r = Math.min(item.r, 12);
+        return `<div class="tw-preview"><div class="tw-preview-box" style="width:24px;height:18px;border-radius:${r}px;"></div></div>`;
+      }
+      return '';
+    }
+
+    function render() {
+      const filtered = getFiltered();
+      const filteredCombos = getFilteredCombos();
+      const total = filtered.length + filteredCombos.length;
+      const totalAll = TW_CLASSES.length + COMBOS.length;
+      searchCount.textContent = total + ' of ' + totalAll + ' items';
+
+      if (total === 0) {
+        classList.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      // Group classes by category
+      const groups = {};
+      filtered.forEach(c => {
+        if (!groups[c.cat]) groups[c.cat] = [];
+        groups[c.cat].push(c);
+      });
+
+      let html = '';
+
+      CAT_ORDER.forEach(cat => {
+        if (cat === 'combos') {
+          if (filteredCombos.length === 0) return;
+          const info = CATEGORY_INFO[cat];
+          html += `<div class="category-section cat-${cat}">`;
+          html += `<div class="category-header">`;
+          html += `<span class="category-badge">${escHtml(info.label)}</span>`;
+          html += `<h2>${escHtml(info.description)}</h2>`;
+          html += `</div>`;
+
+          filteredCombos.forEach((combo, i) => {
+            html += `<div class="combo-card">`;
+            html += `<div class="combo-name">${escHtml(combo.name)} <button class="combo-copy-btn" onclick="copyToClipboard('${combo.classes.replace(/'/g, "\\'")}', this)">Copy</button></div>`;
+            html += `<div class="combo-classes">${escHtml(combo.classes)}</div>`;
+            html += `<div class="combo-desc">${escHtml(combo.desc)}</div>`;
+            html += `</div>`;
+          });
+
+          html += `</div>`;
+          return;
+        }
+
+        if (!groups[cat]) return;
+        const info = CATEGORY_INFO[cat];
+        html += `<div class="category-section cat-${cat}">`;
+        html += `<div class="category-header">`;
+        html += `<span class="category-badge">${escHtml(info.label)}</span>`;
+        html += `<h2>${escHtml(info.description)}</h2>`;
+        html += `</div>`;
+
+        groups[cat].forEach(item => {
+          html += `<div class="tw-card">`;
+          html += `<span class="tw-class">${escHtml(item.cls)}</span>`;
+          html += `<span class="tw-css">${escHtml(item.css)}</span>`;
+          html += renderPreview(item);
+          html += `<button class="tw-copy-btn" onclick="copyToClipboard('${item.cls.replace(/'/g, "\\'")}', this)">Copy</button>`;
+          html += `</div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      classList.innerHTML = html;
+    }
+
+    // Scroll to top button
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        quickJump.classList.add('visible');
+      } else {
+        quickJump.classList.remove('visible');
+      }
+    });
+
+    // Keyboard shortcut: focus search on any typing
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    // Initial render
+    render();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

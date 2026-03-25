@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL to MongoDB Converter - Convert SQL Queries Online | ZeroKit.dev</title>
+  <meta name="description" content="Convert SQL queries to MongoDB query syntax instantly. Supports SELECT, WHERE, AND/OR, ORDER BY, LIMIT, GROUP BY, COUNT, SUM, AVG. Free online tool.">
+  <link rel="canonical" href="https://zerokit.dev/tools/sql2mongo.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .examples-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px;
+    }
+    .example-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .example-item:hover { border-color: var(--accent); }
+    .example-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .example-sql, .example-mongo {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .example-sql { color: var(--text-muted); margin-bottom: 8px; }
+    .example-mongo { color: var(--text); }
+    .example-arrow {
+      color: var(--accent);
+      font-size: 0.7rem;
+      margin-bottom: 4px;
+    }
+    .cheatsheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .cheatsheet-table th {
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cheatsheet-table td {
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+    .cheatsheet-table tr:last-child td { border-bottom: none; }
+    .cheatsheet-table td:first-child { color: var(--text-muted); }
+    .cheatsheet-table td:last-child { color: var(--text); }
+    .section-gap { margin-top: 24px; }
+    @media (max-width: 768px) {
+      .examples-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>SQL to MongoDB Converter</h1>
+    <p class="description">Convert SQL queries to MongoDB query syntax. Supports SELECT, WHERE, ORDER BY, LIMIT, GROUP BY, and aggregation functions.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="convertSQL()">Convert</button>
+        <button class="btn" onclick="copyOutput()">Copy MongoDB</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">SQL Query</div>
+        <textarea class="tool-textarea" id="input" placeholder="Enter SQL query here...
+
+SELECT name, age FROM users WHERE age > 25 ORDER BY name LIMIT 10"></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          MongoDB Query
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="MongoDB query will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="tool-panel section-gap">
+      <div class="panel-header">Examples <span style="font-weight:400; font-size:0.75rem; color: var(--text-muted);">(click to load)</span></div>
+      <div class="examples-grid">
+        <div class="example-item" onclick="loadExample('SELECT * FROM users WHERE age > 25')">
+          <div class="example-label">Basic WHERE</div>
+          <div class="example-sql">SELECT * FROM users WHERE age > 25</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.users.find({ age: { $gt: 25 } })</div>
+        </div>
+        <div class="example-item" onclick="loadExample('SELECT name, email FROM users WHERE status = \'active\' AND age >= 18')">
+          <div class="example-label">SELECT + AND</div>
+          <div class="example-sql">SELECT name, email FROM users WHERE status = 'active' AND age >= 18</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.users.find({ status: "active", age: { $gte: 18 } }, { name: 1, email: 1 })</div>
+        </div>
+        <div class="example-item" onclick="loadExample('SELECT * FROM products WHERE price BETWEEN 10 AND 100 ORDER BY price LIMIT 5')">
+          <div class="example-label">BETWEEN + ORDER + LIMIT</div>
+          <div class="example-sql">SELECT * FROM products WHERE price BETWEEN 10 AND 100 ORDER BY price LIMIT 5</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.products.find({ price: { $gte: 10, $lte: 100 } }).sort({ price: 1 }).limit(5)</div>
+        </div>
+        <div class="example-item" onclick="loadExample('SELECT COUNT(*) FROM orders WHERE status = \'shipped\' GROUP BY customer_id')">
+          <div class="example-label">COUNT + GROUP BY</div>
+          <div class="example-sql">SELECT COUNT(*) FROM orders WHERE status = 'shipped' GROUP BY customer_id</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.orders.aggregate([{ $match: { status: "shipped" } }, { $group: { _id: "$customer_id", count: { $sum: 1 } } }])</div>
+        </div>
+        <div class="example-item" onclick="loadExample('SELECT * FROM users WHERE name LIKE \'%john%\'')">
+          <div class="example-label">LIKE (pattern match)</div>
+          <div class="example-sql">SELECT * FROM users WHERE name LIKE '%john%'</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.users.find({ name: { $regex: "john", $options: "i" } })</div>
+        </div>
+        <div class="example-item" onclick="loadExample('SELECT * FROM users WHERE role IN (\'admin\', \'editor\') AND email IS NULL')">
+          <div class="example-label">IN + IS NULL</div>
+          <div class="example-sql">SELECT * FROM users WHERE role IN ('admin', 'editor') AND email IS NULL</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.users.find({ role: { $in: ["admin", "editor"] }, email: null })</div>
+        </div>
+        <div class="example-item" onclick="loadExample('SELECT category, SUM(amount) FROM sales GROUP BY category')">
+          <div class="example-label">SUM + GROUP BY</div>
+          <div class="example-sql">SELECT category, SUM(amount) FROM sales GROUP BY category</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.sales.aggregate([{ $group: { _id: "$category", total_amount: { $sum: "$amount" } } }])</div>
+        </div>
+        <div class="example-item" onclick="loadExample('SELECT department, AVG(salary) FROM employees WHERE active = 1 GROUP BY department ORDER BY AVG(salary)')">
+          <div class="example-label">AVG + GROUP BY + ORDER</div>
+          <div class="example-sql">SELECT department, AVG(salary) FROM employees WHERE active = 1 GROUP BY department ORDER BY AVG(salary)</div>
+          <div class="example-arrow">---</div>
+          <div class="example-mongo">db.employees.aggregate([{ $match: { active: 1 } }, { $group: { _id: "$department", avg_salary: { $avg: "$salary" } } }, { $sort: { avg_salary: 1 } }])</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-panel section-gap">
+      <div class="panel-header">Operator Cheatsheet</div>
+      <table class="cheatsheet-table">
+        <thead>
+          <tr><th>SQL</th><th>MongoDB</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>= value</td><td>{ field: value }</td></tr>
+          <tr><td>!= value</td><td>{ field: { $ne: value } }</td></tr>
+          <tr><td>&gt; value</td><td>{ field: { $gt: value } }</td></tr>
+          <tr><td>&lt; value</td><td>{ field: { $lt: value } }</td></tr>
+          <tr><td>&gt;= value</td><td>{ field: { $gte: value } }</td></tr>
+          <tr><td>&lt;= value</td><td>{ field: { $lte: value } }</td></tr>
+          <tr><td>IN (a, b, c)</td><td>{ field: { $in: [a, b, c] } }</td></tr>
+          <tr><td>LIKE '%val%'</td><td>{ field: { $regex: "val", $options: "i" } }</td></tr>
+          <tr><td>BETWEEN a AND b</td><td>{ field: { $gte: a, $lte: b } }</td></tr>
+          <tr><td>IS NULL</td><td>{ field: null }</td></tr>
+          <tr><td>IS NOT NULL</td><td>{ field: { $ne: null } }</td></tr>
+          <tr><td>AND</td><td>implicit (comma-separated) or { $and: [...] }</td></tr>
+          <tr><td>OR</td><td>{ $or: [...] }</td></tr>
+          <tr><td>ORDER BY field ASC</td><td>.sort({ field: 1 })</td></tr>
+          <tr><td>ORDER BY field DESC</td><td>.sort({ field: -1 })</td></tr>
+          <tr><td>LIMIT n</td><td>.limit(n)</td></tr>
+          <tr><td>COUNT(*)</td><td>{ $sum: 1 } in $group</td></tr>
+          <tr><td>SUM(field)</td><td>{ $sum: "$field" } in $group</td></tr>
+          <tr><td>AVG(field)</td><td>{ $avg: "$field" } in $group</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+
+    function loadExample(sql) {
+      $input.value = sql;
+      convertSQL();
+    }
+
+    function copyOutput() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $status.textContent = '';
+      $status.className = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    // --- SQL Parser & Converter ---
+
+    function convertSQL() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+      try {
+        const result = sqlToMongo(raw);
+        $output.value = result;
+        showStatus('Converted', true);
+      } catch (e) {
+        $output.value = '';
+        showStatus(e.message, false);
+      }
+    }
+
+    function sqlToMongo(sql) {
+      // Normalize whitespace but preserve strings
+      sql = sql.replace(/\s+/g, ' ').trim().replace(/;$/, '');
+
+      const upperSql = sql.toUpperCase();
+      if (!upperSql.startsWith('SELECT')) {
+        throw new Error('Only SELECT queries are supported');
+      }
+
+      const parsed = parseSelect(sql);
+      const hasAgg = parsed.hasAggregate;
+
+      if (hasAgg) {
+        return buildAggregate(parsed);
+      } else {
+        return buildFind(parsed);
+      }
+    }
+
+    function parseSelect(sql) {
+      const result = {
+        fields: [],
+        collection: '',
+        where: null,
+        orderBy: [],
+        limit: null,
+        groupBy: [],
+        hasAggregate: false,
+        aggregates: []
+      };
+
+      // Tokenize respecting strings
+      let tokens = tokenize(sql);
+
+      let i = 0;
+
+      // Skip SELECT
+      if (tokens[i].toUpperCase() !== 'SELECT') throw new Error('Expected SELECT');
+      i++;
+
+      // Parse field list (until FROM)
+      const fieldTokens = [];
+      let parenDepth = 0;
+      while (i < tokens.length && !(tokens[i].toUpperCase() === 'FROM' && parenDepth === 0)) {
+        if (tokens[i] === '(') parenDepth++;
+        if (tokens[i] === ')') parenDepth--;
+        fieldTokens.push(tokens[i]);
+        i++;
+      }
+
+      // Parse fields
+      const fieldStr = fieldTokens.join(' ');
+      const fields = splitByComma(fieldStr);
+      for (const f of fields) {
+        const trimmed = f.trim();
+        const aggMatch = trimmed.match(/^(COUNT|SUM|AVG|MIN|MAX)\s*\(\s*(\*|\w+)\s*\)$/i);
+        if (aggMatch) {
+          result.hasAggregate = true;
+          result.aggregates.push({ fn: aggMatch[1].toUpperCase(), field: aggMatch[2] });
+        } else {
+          result.fields.push(trimmed);
+        }
+      }
+
+      // FROM
+      if (i >= tokens.length || tokens[i].toUpperCase() !== 'FROM') throw new Error('Expected FROM');
+      i++;
+      if (i >= tokens.length) throw new Error('Expected table name');
+      result.collection = tokens[i];
+      i++;
+
+      // Parse remaining clauses
+      while (i < tokens.length) {
+        const kw = tokens[i].toUpperCase();
+        if (kw === 'WHERE') {
+          i++;
+          const whereTokens = [];
+          while (i < tokens.length && !['ORDER', 'LIMIT', 'GROUP'].includes(tokens[i].toUpperCase())) {
+            whereTokens.push(tokens[i]);
+            i++;
+          }
+          result.where = parseWhere(whereTokens);
+        } else if (kw === 'ORDER') {
+          i++; // skip ORDER
+          if (i < tokens.length && tokens[i].toUpperCase() === 'BY') i++; // skip BY
+          while (i < tokens.length && !['LIMIT', 'GROUP'].includes(tokens[i].toUpperCase())) {
+            const field = tokens[i]; i++;
+            let dir = 1;
+            if (i < tokens.length && ['ASC', 'DESC'].includes(tokens[i].toUpperCase())) {
+              dir = tokens[i].toUpperCase() === 'DESC' ? -1 : 1;
+              i++;
+            }
+            result.orderBy.push({ field: field.replace(/,$/,''), dir });
+            if (i < tokens.length && tokens[i] === ',') i++;
+          }
+        } else if (kw === 'LIMIT') {
+          i++;
+          if (i < tokens.length) {
+            result.limit = parseInt(tokens[i], 10);
+            i++;
+          }
+        } else if (kw === 'GROUP') {
+          i++; // skip GROUP
+          if (i < tokens.length && tokens[i].toUpperCase() === 'BY') i++; // skip BY
+          while (i < tokens.length && !['ORDER', 'LIMIT', 'HAVING'].includes(tokens[i].toUpperCase())) {
+            result.groupBy.push(tokens[i].replace(/,$/,''));
+            i++;
+            if (i < tokens.length && tokens[i] === ',') i++;
+          }
+          result.hasAggregate = true;
+        } else {
+          i++;
+        }
+      }
+
+      return result;
+    }
+
+    function tokenize(sql) {
+      const tokens = [];
+      let i = 0;
+      while (i < sql.length) {
+        // Skip whitespace
+        if (/\s/.test(sql[i])) { i++; continue; }
+        // String literal
+        if (sql[i] === "'" || sql[i] === '"') {
+          const quote = sql[i];
+          let str = quote;
+          i++;
+          while (i < sql.length && sql[i] !== quote) {
+            if (sql[i] === '\\') { str += sql[i]; i++; }
+            if (i < sql.length) { str += sql[i]; i++; }
+          }
+          if (i < sql.length) { str += sql[i]; i++; }
+          tokens.push(str);
+          continue;
+        }
+        // Operators
+        if (sql[i] === '!' && sql[i+1] === '=') { tokens.push('!='); i += 2; continue; }
+        if (sql[i] === '<' && sql[i+1] === '>') { tokens.push('!='); i += 2; continue; }
+        if (sql[i] === '>' && sql[i+1] === '=') { tokens.push('>='); i += 2; continue; }
+        if (sql[i] === '<' && sql[i+1] === '=') { tokens.push('<='); i += 2; continue; }
+        if ('(),><=*'.includes(sql[i])) { tokens.push(sql[i]); i++; continue; }
+        // Word/number
+        let word = '';
+        while (i < sql.length && !/[\s(),><=!'"]/.test(sql[i])) {
+          word += sql[i]; i++;
+        }
+        if (word) tokens.push(word);
+      }
+      return tokens;
+    }
+
+    function splitByComma(str) {
+      const parts = [];
+      let depth = 0;
+      let current = '';
+      for (const ch of str) {
+        if (ch === '(') depth++;
+        if (ch === ')') depth--;
+        if (ch === ',' && depth === 0) {
+          parts.push(current);
+          current = '';
+        } else {
+          current += ch;
+        }
+      }
+      if (current.trim()) parts.push(current);
+      return parts;
+    }
+
+    function parseWhere(tokens) {
+      return parseOr(tokens, { pos: 0 });
+    }
+
+    function parseOr(tokens, ctx) {
+      const left = parseAnd(tokens, ctx);
+      const parts = [left];
+      while (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'OR') {
+        ctx.pos++; // skip OR
+        parts.push(parseAnd(tokens, ctx));
+      }
+      if (parts.length === 1) return parts[0];
+      return { $or: parts };
+    }
+
+    function parseAnd(tokens, ctx) {
+      const left = parseCondition(tokens, ctx);
+      const parts = [left];
+      while (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'AND') {
+        ctx.pos++; // skip AND
+        parts.push(parseCondition(tokens, ctx));
+      }
+      if (parts.length === 1) return parts[0];
+      // Merge if all are simple field conditions
+      const canMerge = parts.every(p => !p.$or && !p.$and);
+      if (canMerge) {
+        const merged = {};
+        let conflict = false;
+        for (const p of parts) {
+          for (const k in p) {
+            if (merged[k] !== undefined) { conflict = true; break; }
+            merged[k] = p[k];
+          }
+          if (conflict) break;
+        }
+        if (!conflict) return merged;
+      }
+      return { $and: parts };
+    }
+
+    function parseCondition(tokens, ctx) {
+      if (ctx.pos >= tokens.length) throw new Error('Unexpected end of WHERE clause');
+
+      // Handle parenthesized expressions
+      if (tokens[ctx.pos] === '(') {
+        ctx.pos++;
+        const inner = parseOr(tokens, ctx);
+        if (ctx.pos < tokens.length && tokens[ctx.pos] === ')') ctx.pos++;
+        return inner;
+      }
+
+      const field = tokens[ctx.pos]; ctx.pos++;
+
+      // IS NULL / IS NOT NULL
+      if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'IS') {
+        ctx.pos++;
+        if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'NOT') {
+          ctx.pos++;
+          if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'NULL') ctx.pos++;
+          return { [field]: { $ne: null } };
+        }
+        if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'NULL') ctx.pos++;
+        return { [field]: null };
+      }
+
+      // IN
+      if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'IN') {
+        ctx.pos++;
+        if (ctx.pos < tokens.length && tokens[ctx.pos] === '(') ctx.pos++;
+        const vals = [];
+        while (ctx.pos < tokens.length && tokens[ctx.pos] !== ')') {
+          if (tokens[ctx.pos] === ',') { ctx.pos++; continue; }
+          vals.push(parseValue(tokens[ctx.pos]));
+          ctx.pos++;
+        }
+        if (ctx.pos < tokens.length && tokens[ctx.pos] === ')') ctx.pos++;
+        return { [field]: { $in: vals } };
+      }
+
+      // NOT IN
+      if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'NOT' &&
+          ctx.pos + 1 < tokens.length && tokens[ctx.pos + 1].toUpperCase() === 'IN') {
+        ctx.pos += 2;
+        if (ctx.pos < tokens.length && tokens[ctx.pos] === '(') ctx.pos++;
+        const vals = [];
+        while (ctx.pos < tokens.length && tokens[ctx.pos] !== ')') {
+          if (tokens[ctx.pos] === ',') { ctx.pos++; continue; }
+          vals.push(parseValue(tokens[ctx.pos]));
+          ctx.pos++;
+        }
+        if (ctx.pos < tokens.length && tokens[ctx.pos] === ')') ctx.pos++;
+        return { [field]: { $nin: vals } };
+      }
+
+      // BETWEEN
+      if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'BETWEEN') {
+        ctx.pos++;
+        const low = parseValue(tokens[ctx.pos]); ctx.pos++;
+        if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'AND') ctx.pos++;
+        const high = parseValue(tokens[ctx.pos]); ctx.pos++;
+        return { [field]: { $gte: low, $lte: high } };
+      }
+
+      // LIKE
+      if (ctx.pos < tokens.length && tokens[ctx.pos].toUpperCase() === 'LIKE') {
+        ctx.pos++;
+        let pattern = tokens[ctx.pos]; ctx.pos++;
+        pattern = stripQuotes(pattern);
+        // Convert SQL LIKE to regex
+        let regex = pattern.replace(/%/g, '.*').replace(/_/g, '.');
+        // If pattern has leading/trailing wildcards, simplified regex
+        if (pattern.startsWith('%') && pattern.endsWith('%')) {
+          regex = pattern.slice(1, -1);
+          return { [field]: { $regex: regex, $options: 'i' } };
+        } else if (pattern.startsWith('%')) {
+          regex = pattern.slice(1) + '$';
+          return { [field]: { $regex: regex, $options: 'i' } };
+        } else if (pattern.endsWith('%')) {
+          regex = '^' + pattern.slice(0, -1);
+          return { [field]: { $regex: regex, $options: 'i' } };
+        }
+        return { [field]: { $regex: regex, $options: 'i' } };
+      }
+
+      // Comparison operators
+      if (ctx.pos >= tokens.length) throw new Error(`Expected operator after "${field}"`);
+      const op = tokens[ctx.pos]; ctx.pos++;
+      if (ctx.pos >= tokens.length) throw new Error(`Expected value after "${op}"`);
+      const val = parseValue(tokens[ctx.pos]); ctx.pos++;
+
+      const opMap = {
+        '=': null,
+        '!=': '$ne',
+        '<>': '$ne',
+        '>': '$gt',
+        '<': '$lt',
+        '>=': '$gte',
+        '<=': '$lte'
+      };
+
+      if (!(op in opMap)) throw new Error(`Unknown operator: ${op}`);
+      if (opMap[op] === null) return { [field]: val };
+      return { [field]: { [opMap[op]]: val } };
+    }
+
+    function parseValue(token) {
+      if (!token) return null;
+      // String literal
+      if ((token.startsWith("'") && token.endsWith("'")) ||
+          (token.startsWith('"') && token.endsWith('"'))) {
+        return stripQuotes(token);
+      }
+      // Number
+      if (/^-?\d+(\.\d+)?$/.test(token)) {
+        return Number(token);
+      }
+      // Boolean
+      if (token.toUpperCase() === 'TRUE') return true;
+      if (token.toUpperCase() === 'FALSE') return false;
+      if (token.toUpperCase() === 'NULL') return null;
+      return token;
+    }
+
+    function stripQuotes(s) {
+      if ((s.startsWith("'") && s.endsWith("'")) ||
+          (s.startsWith('"') && s.endsWith('"'))) {
+        return s.slice(1, -1);
+      }
+      return s;
+    }
+
+    // --- Build MongoDB output ---
+
+    function buildFind(parsed) {
+      const col = parsed.collection;
+      const filter = parsed.where ? formatObj(parsed.where) : '{}';
+
+      let projection = '';
+      if (parsed.fields.length > 0 && !(parsed.fields.length === 1 && parsed.fields[0] === '*')) {
+        const proj = {};
+        for (const f of parsed.fields) {
+          proj[f] = 1;
+        }
+        projection = ', ' + formatObj(proj);
+      }
+
+      let chain = `db.${col}.find(${filter}${projection})`;
+
+      if (parsed.orderBy.length > 0) {
+        const sort = {};
+        for (const o of parsed.orderBy) {
+          sort[o.field] = o.dir;
+        }
+        chain += `.sort(${formatObj(sort)})`;
+      }
+
+      if (parsed.limit !== null) {
+        chain += `.limit(${parsed.limit})`;
+      }
+
+      return chain;
+    }
+
+    function buildAggregate(parsed) {
+      const col = parsed.collection;
+      const pipeline = [];
+
+      // $match
+      if (parsed.where) {
+        pipeline.push({ $match: parsed.where });
+      }
+
+      // $group
+      if (parsed.groupBy.length > 0 || parsed.aggregates.length > 0) {
+        const group = {};
+        if (parsed.groupBy.length === 1) {
+          group._id = '$' + parsed.groupBy[0];
+        } else if (parsed.groupBy.length > 1) {
+          group._id = {};
+          for (const g of parsed.groupBy) {
+            group._id[g] = '$' + g;
+          }
+        } else {
+          group._id = null;
+        }
+
+        // Add non-aggregate, non-groupBy fields
+        for (const f of parsed.fields) {
+          if (f !== '*' && !parsed.groupBy.includes(f)) {
+            group[f] = { $first: '$' + f };
+          }
+        }
+
+        // Add aggregates
+        for (const agg of parsed.aggregates) {
+          if (agg.fn === 'COUNT') {
+            group.count = { $sum: 1 };
+          } else {
+            const alias = agg.fn.toLowerCase() + '_' + agg.field;
+            group[alias] = { ['$' + agg.fn.toLowerCase()]: '$' + agg.field };
+          }
+        }
+
+        pipeline.push({ $group: group });
+      }
+
+      // $sort
+      if (parsed.orderBy.length > 0) {
+        const sort = {};
+        for (const o of parsed.orderBy) {
+          // Check if the order field is an aggregate expression
+          const aggMatch = o.field.match(/^(COUNT|SUM|AVG|MIN|MAX)$/i);
+          if (aggMatch) {
+            // This is probably the start of an aggregate function in ORDER BY like: ORDER BY AVG(salary)
+            // We already handle this; skip for now
+          }
+          sort[o.field] = o.dir;
+        }
+        pipeline.push({ $sort: sort });
+      }
+
+      // $limit
+      if (parsed.limit !== null) {
+        pipeline.push({ $limit: parsed.limit });
+      }
+
+      return `db.${col}.aggregate(${formatArray(pipeline)})`;
+    }
+
+    function formatObj(obj, indent = 0) {
+      if (obj === null) return 'null';
+      if (typeof obj === 'string') return JSON.stringify(obj);
+      if (typeof obj === 'number' || typeof obj === 'boolean') return String(obj);
+      if (Array.isArray(obj)) return formatArray(obj, indent);
+
+      const pad = '  '.repeat(indent);
+      const padInner = '  '.repeat(indent + 1);
+      const entries = Object.entries(obj);
+
+      if (entries.length === 0) return '{}';
+
+      // Compact for simple objects
+      const simple = entries.every(([, v]) => typeof v !== 'object' || v === null);
+      if (simple && entries.length <= 3) {
+        const parts = entries.map(([k, v]) => {
+          const key = needsQuotes(k) ? JSON.stringify(k) : k;
+          return `${key}: ${formatValue(v)}`;
+        });
+        return '{ ' + parts.join(', ') + ' }';
+      }
+
+      const lines = entries.map(([k, v]) => {
+        const key = needsQuotes(k) ? JSON.stringify(k) : k;
+        return `${padInner}${key}: ${formatObj(v, indent + 1)}`;
+      });
+      return '{\n' + lines.join(',\n') + '\n' + pad + '}';
+    }
+
+    function formatArray(arr, indent = 0) {
+      if (arr.length === 0) return '[]';
+      const pad = '  '.repeat(indent);
+      const padInner = '  '.repeat(indent + 1);
+
+      // Compact for simple arrays
+      const simple = arr.every(v => typeof v !== 'object' || v === null);
+      if (simple) {
+        return '[' + arr.map(v => formatValue(v)).join(', ') + ']';
+      }
+
+      const lines = arr.map(v => padInner + formatObj(v, indent + 1));
+      return '[\n' + lines.join(',\n') + '\n' + pad + ']';
+    }
+
+    function formatValue(v) {
+      if (v === null) return 'null';
+      if (typeof v === 'string') return JSON.stringify(v);
+      if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+      if (Array.isArray(v)) return formatArray(v);
+      if (typeof v === 'object') return formatObj(v);
+      return String(v);
+    }
+
+    function needsQuotes(key) {
+      return key.startsWith('$') || key.includes('.') || key.includes(' ') || key.includes('-');
+    }
+
+    // Handle ORDER BY with aggregate functions
+    // We need special handling for "ORDER BY AVG(salary)" etc.
+    // Re-parse the ORDER BY from the original tokens for aggregates
+    const origParseSelect = parseSelect;
+
+    // Patch: handle aggregate functions in ORDER BY
+    (function() {
+      const origTokenize = tokenize;
+
+      // Override parseSelect to handle ORDER BY with agg functions
+      const origBuildAggregate = buildAggregate;
+      window._buildAggregate = function(parsed, sql) {
+        // Check if ORDER BY contains aggregate references and fix sort keys
+        if (parsed.orderBy.length > 0 && parsed.hasAggregate) {
+          const newOrder = [];
+          for (const o of parsed.orderBy) {
+            // Map aggregate field names to their aliases
+            for (const agg of parsed.aggregates) {
+              if (agg.fn === 'COUNT') {
+                newOrder.push({ field: 'count', dir: o.dir });
+              } else {
+                const alias = agg.fn.toLowerCase() + '_' + agg.field;
+                newOrder.push({ field: alias, dir: o.dir });
+              }
+            }
+            if (newOrder.length === 0) {
+              newOrder.push(o);
+            }
+          }
+          parsed.orderBy = newOrder;
+        }
+        return origBuildAggregate(parsed);
+      };
+    })();
+
+    // Auto-convert on paste
+    $input.addEventListener('paste', () => setTimeout(convertSQL, 50));
+
+    // Ctrl+Enter to convert
+    $input.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        convertSQL();
+      }
+    });
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

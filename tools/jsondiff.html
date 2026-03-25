@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Diff - Compare JSON Objects Online | ZeroKit.dev</title>
+  <meta name="description" content="Deep compare two JSON objects. See added, removed, and changed keys highlighted. Tree view, flat diff, JSON Patch (RFC 6902) export. Free online tool.">
+  <link rel="canonical" href="https://zerokit.dev/tools/jsondiff.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .diff-stats-bar {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 8px 0;
+      flex-wrap: wrap;
+    }
+    .diff-stats-bar .stat-added { color: var(--success); }
+    .diff-stats-bar .stat-removed { color: var(--error); }
+    .diff-stats-bar .stat-modified { color: #facc15; }
+
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface-2);
+    }
+    .view-tab {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .diff-tree {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      padding: 16px;
+      min-height: 200px;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    .diff-node { padding-left: 20px; }
+    .diff-key { color: var(--text-muted); }
+    .diff-val { color: var(--text); }
+
+    .diff-row {
+      padding: 3px 8px;
+      border-radius: 3px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .diff-row-added { background: rgba(34, 197, 94, 0.12); }
+    .diff-row-added .diff-key,
+    .diff-row-added .diff-val { color: #4ade80; }
+    .diff-row-added .diff-marker { color: #4ade80; }
+
+    .diff-row-removed { background: rgba(239, 68, 68, 0.12); }
+    .diff-row-removed .diff-key,
+    .diff-row-removed .diff-val { color: #f87171; text-decoration: line-through; }
+    .diff-row-removed .diff-marker { color: #f87171; }
+
+    .diff-row-modified { background: rgba(250, 204, 21, 0.1); }
+    .diff-row-modified .diff-key { color: #facc15; }
+    .diff-row-modified .diff-marker { color: #facc15; }
+    .diff-row-modified .diff-old { color: #f87171; text-decoration: line-through; }
+    .diff-row-modified .diff-new { color: #4ade80; }
+
+    .diff-row-unchanged .diff-key,
+    .diff-row-unchanged .diff-val { color: var(--text-muted); opacity: 0.5; }
+
+    .diff-marker {
+      font-weight: 600;
+      min-width: 14px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .flat-list {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      padding: 16px;
+      min-height: 200px;
+      line-height: 1.9;
+    }
+    .flat-item {
+      padding: 4px 10px;
+      border-radius: 3px;
+      margin-bottom: 2px;
+    }
+    .flat-path { color: var(--accent); font-weight: 500; }
+    .flat-arrow { color: var(--text-muted); margin: 0 6px; }
+    .flat-added { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+    .flat-removed { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+    .flat-modified { background: rgba(250, 204, 21, 0.08); }
+
+    .diff-view { display: none; }
+    .diff-view.active { display: block; }
+
+    .parse-error {
+      color: var(--error);
+      font-size: 0.8rem;
+      padding: 8px 0;
+    }
+
+    .options-row input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+
+    .toggle-unchanged {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      font-family: var(--font);
+    }
+    .toggle-unchanged:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>JSON Diff</h1>
+    <p class="description">Deep compare two JSON objects. See added, removed, and changed keys highlighted.</p>
+
+    <div class="options-row">
+      <label><input type="checkbox" id="optIgnoreOrder"> Ignore array ordering</label>
+      <label><input type="checkbox" id="optIgnoreWhitespace" checked> Ignore whitespace/formatting</label>
+    </div>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="compare()">Compare</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+        <button class="btn" onclick="swapPanels()">Swap</button>
+        <button class="btn" onclick="formatBoth()">Format Both</button>
+        <button class="btn" onclick="copyPatch()">Copy JSON Patch</button>
+      </div>
+      <div id="stats" class="diff-stats-bar"></div>
+    </div>
+
+    <div id="parseError" class="parse-error"></div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Original</div>
+        <textarea class="tool-textarea" id="jsonLeft" placeholder="Paste original JSON here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">Modified</div>
+        <textarea class="tool-textarea" id="jsonRight" placeholder="Paste modified JSON here..."></textarea>
+      </div>
+    </div>
+
+    <div class="tool-panel" style="margin-top: 16px;" id="resultPanel">
+      <div class="panel-header">
+        <div class="view-tabs">
+          <button class="view-tab active" onclick="switchView('tree', this)">Tree View</button>
+          <button class="view-tab" onclick="switchView('flat', this)">Flat List</button>
+        </div>
+        <button class="toggle-unchanged" onclick="toggleUnchanged()">Hide Unchanged</button>
+      </div>
+      <div id="treeView" class="diff-view active diff-tree"></div>
+      <div id="flatView" class="diff-view flat-list"></div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    let lastDiff = null;
+    let lastPatch = [];
+    let showUnchanged = true;
+
+    function escHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function jsonStr(v) {
+      if (v === undefined) return 'undefined';
+      return JSON.stringify(v);
+    }
+
+    function typeOf(v) {
+      if (v === null) return 'null';
+      if (Array.isArray(v)) return 'array';
+      return typeof v;
+    }
+
+    // Deep compare two JSON values; returns diff tree
+    function deepDiff(a, b, path, ignoreOrder) {
+      const tA = typeOf(a);
+      const tB = typeOf(b);
+
+      if (tA !== tB) {
+        return { type: 'modified', path, oldVal: a, newVal: b };
+      }
+
+      if (tA === 'object' && tA === tB) {
+        const allKeys = new Set([...Object.keys(a), ...Object.keys(b)]);
+        const children = [];
+        for (const key of [...allKeys].sort()) {
+          const subPath = path ? path + '.' + key : key;
+          if (!(key in a)) {
+            children.push({ type: 'added', path: subPath, newVal: b[key] });
+          } else if (!(key in b)) {
+            children.push({ type: 'removed', path: subPath, oldVal: a[key] });
+          } else {
+            children.push(deepDiff(a[key], b[key], subPath, ignoreOrder));
+          }
+        }
+        const hasChanges = children.some(c => c.type !== 'unchanged');
+        return { type: hasChanges ? 'object' : 'unchanged', path, children, isObject: true };
+      }
+
+      if (tA === 'array' && tA === tB) {
+        if (ignoreOrder) {
+          return diffArrayUnordered(a, b, path, ignoreOrder);
+        }
+        const len = Math.max(a.length, b.length);
+        const children = [];
+        for (let i = 0; i < len; i++) {
+          const subPath = path + '[' + i + ']';
+          if (i >= a.length) {
+            children.push({ type: 'added', path: subPath, newVal: b[i] });
+          } else if (i >= b.length) {
+            children.push({ type: 'removed', path: subPath, oldVal: a[i] });
+          } else {
+            children.push(deepDiff(a[i], b[i], subPath, ignoreOrder));
+          }
+        }
+        const hasChanges = children.some(c => c.type !== 'unchanged');
+        return { type: hasChanges ? 'array' : 'unchanged', path, children, isArray: true };
+      }
+
+      // Primitives
+      if (a === b) {
+        return { type: 'unchanged', path, value: a };
+      }
+      return { type: 'modified', path, oldVal: a, newVal: b };
+    }
+
+    function diffArrayUnordered(a, b, path, ignoreOrder) {
+      const aStrs = a.map((v, i) => ({ val: v, str: JSON.stringify(v), idx: i }));
+      const bStrs = b.map((v, i) => ({ val: v, str: JSON.stringify(v), idx: i }));
+      const matched = new Set();
+      const bMatched = new Set();
+      const children = [];
+
+      // Match identical items first
+      for (const ai of aStrs) {
+        for (const bi of bStrs) {
+          if (!bMatched.has(bi.idx) && ai.str === bi.str) {
+            matched.add(ai.idx);
+            bMatched.add(bi.idx);
+            children.push({ type: 'unchanged', path: path + '[' + ai.idx + ']', value: ai.val });
+            break;
+          }
+        }
+      }
+
+      // Remaining in a are removed
+      for (const ai of aStrs) {
+        if (!matched.has(ai.idx)) {
+          children.push({ type: 'removed', path: path + '[' + ai.idx + ']', oldVal: ai.val });
+        }
+      }
+
+      // Remaining in b are added
+      for (const bi of bStrs) {
+        if (!bMatched.has(bi.idx)) {
+          children.push({ type: 'added', path: path + '[' + bi.idx + ']', newVal: bi.val });
+        }
+      }
+
+      const hasChanges = children.some(c => c.type !== 'unchanged');
+      return { type: hasChanges ? 'array' : 'unchanged', path, children, isArray: true };
+    }
+
+    // Count stats
+    function countStats(diff) {
+      const stats = { added: 0, removed: 0, modified: 0, unchanged: 0 };
+      function walk(node) {
+        if (node.children) {
+          node.children.forEach(walk);
+        } else {
+          stats[node.type] = (stats[node.type] || 0) + 1;
+        }
+      }
+      walk(diff);
+      return stats;
+    }
+
+    // Generate JSON Patch (RFC 6902)
+    function generatePatch(diff) {
+      const ops = [];
+      function toPointer(dotPath) {
+        // Convert "a.b[0].c" to "/a/b/0/c"
+        return '/' + dotPath
+          .replace(/\[(\d+)\]/g, '.$1')
+          .split('.')
+          .map(s => s.replace(/~/g, '~0').replace(/\//g, '~1'))
+          .join('/');
+      }
+      function walk(node) {
+        if (node.children) {
+          node.children.forEach(walk);
+        } else if (node.type === 'added') {
+          ops.push({ op: 'add', path: toPointer(node.path), value: node.newVal });
+        } else if (node.type === 'removed') {
+          ops.push({ op: 'remove', path: toPointer(node.path) });
+        } else if (node.type === 'modified') {
+          ops.push({ op: 'replace', path: toPointer(node.path), value: node.newVal });
+        }
+      }
+      walk(diff);
+      return ops;
+    }
+
+    // Render tree view
+    function renderTree(diff, depth) {
+      depth = depth || 0;
+      let html = '';
+
+      if (diff.children) {
+        const bracket = diff.isArray ? ['[', ']'] : ['{', '}'];
+        if (depth > 0) {
+          html += '<div class="diff-row diff-row-unchanged"><span class="diff-marker"> </span><span class="diff-key">' +
+            escHtml(diff.path ? diff.path.split('.').pop().replace(/\[\d+\]$/, '') : '') + '</span>: ' + bracket[0] + '</div>';
+        }
+        html += '<div class="diff-node">';
+        for (const child of diff.children) {
+          html += renderTree(child, depth + 1);
+        }
+        html += '</div>';
+        if (depth > 0) {
+          html += '<div class="diff-row diff-row-unchanged"><span class="diff-marker"> </span>' + bracket[1] + '</div>';
+        }
+      } else {
+        const label = diff.path ? diff.path.split('.').pop().replace(/^.*\[/, '[') : '';
+        if (diff.type === 'added') {
+          html += '<div class="diff-row diff-row-added"><span class="diff-marker">+</span>' +
+            '<span class="diff-key">' + escHtml(label) + '</span>: ' +
+            '<span class="diff-val">' + escHtml(jsonStr(diff.newVal)) + '</span></div>';
+        } else if (diff.type === 'removed') {
+          html += '<div class="diff-row diff-row-removed"><span class="diff-marker">-</span>' +
+            '<span class="diff-key">' + escHtml(label) + '</span>: ' +
+            '<span class="diff-val">' + escHtml(jsonStr(diff.oldVal)) + '</span></div>';
+        } else if (diff.type === 'modified') {
+          html += '<div class="diff-row diff-row-modified"><span class="diff-marker">~</span>' +
+            '<span class="diff-key">' + escHtml(label) + '</span>: ' +
+            '<span class="diff-old">' + escHtml(jsonStr(diff.oldVal)) + '</span>' +
+            '<span class="flat-arrow">&rarr;</span>' +
+            '<span class="diff-new">' + escHtml(jsonStr(diff.newVal)) + '</span></div>';
+        } else if (diff.type === 'unchanged') {
+          html += '<div class="diff-row diff-row-unchanged" data-unchanged="1"><span class="diff-marker"> </span>' +
+            '<span class="diff-key">' + escHtml(label) + '</span>: ' +
+            '<span class="diff-val">' + escHtml(jsonStr(diff.value)) + '</span></div>';
+        }
+      }
+      return html;
+    }
+
+    // Render flat list
+    function renderFlat(diff) {
+      const items = [];
+      function walk(node) {
+        if (node.children) {
+          node.children.forEach(walk);
+        } else if (node.type === 'added') {
+          items.push('<div class="flat-item flat-added"><span class="flat-path">' + escHtml(node.path) + '</span>' +
+            '<span class="flat-arrow">&rarr;</span> ' + escHtml(jsonStr(node.newVal)) + ' <em>(added)</em></div>');
+        } else if (node.type === 'removed') {
+          items.push('<div class="flat-item flat-removed"><span class="flat-path">' + escHtml(node.path) + '</span>' +
+            '<span class="flat-arrow">&rarr;</span> ' + escHtml(jsonStr(node.oldVal)) + ' <em>(removed)</em></div>');
+        } else if (node.type === 'modified') {
+          items.push('<div class="flat-item flat-modified"><span class="flat-path">' + escHtml(node.path) + '</span>: ' +
+            '<span class="diff-old">' + escHtml(jsonStr(node.oldVal)) + '</span>' +
+            '<span class="flat-arrow">&rarr;</span>' +
+            '<span class="diff-new">' + escHtml(jsonStr(node.newVal)) + '</span></div>');
+        }
+      }
+      walk(diff);
+      return items.length ? items.join('') : '<span style="color: var(--text-muted);">No differences found.</span>';
+    }
+
+    function compare() {
+      const leftRaw = document.getElementById('jsonLeft').value.trim();
+      const rightRaw = document.getElementById('jsonRight').value.trim();
+      const errEl = document.getElementById('parseError');
+      errEl.textContent = '';
+
+      if (!leftRaw && !rightRaw) {
+        errEl.textContent = 'Both inputs are empty.';
+        return;
+      }
+
+      let leftJson, rightJson;
+      try {
+        leftJson = JSON.parse(leftRaw);
+      } catch (e) {
+        errEl.textContent = 'Original JSON parse error: ' + e.message;
+        return;
+      }
+      try {
+        rightJson = JSON.parse(rightRaw);
+      } catch (e) {
+        errEl.textContent = 'Modified JSON parse error: ' + e.message;
+        return;
+      }
+
+      const ignoreOrder = document.getElementById('optIgnoreOrder').checked;
+      lastDiff = deepDiff(leftJson, rightJson, '', ignoreOrder);
+      lastPatch = generatePatch(lastDiff);
+      const stats = countStats(lastDiff);
+
+      document.getElementById('stats').innerHTML =
+        '<span class="stat-added">+' + stats.added + ' added</span>' +
+        '<span class="stat-removed">-' + stats.removed + ' removed</span>' +
+        '<span class="stat-modified">~' + stats.modified + ' modified</span>' +
+        '<span>' + stats.unchanged + ' unchanged</span>';
+
+      const treeHtml = renderTree(lastDiff, 0);
+      document.getElementById('treeView').innerHTML = treeHtml || '<span style="color: var(--text-muted);">No differences found. The JSON objects are identical.</span>';
+      document.getElementById('flatView').innerHTML = renderFlat(lastDiff);
+
+      applyUnchangedVisibility();
+    }
+
+    function clearAll() {
+      document.getElementById('jsonLeft').value = '';
+      document.getElementById('jsonRight').value = '';
+      document.getElementById('treeView').innerHTML = '';
+      document.getElementById('flatView').innerHTML = '';
+      document.getElementById('stats').innerHTML = '';
+      document.getElementById('parseError').textContent = '';
+      lastDiff = null;
+      lastPatch = [];
+    }
+
+    function swapPanels() {
+      const l = document.getElementById('jsonLeft');
+      const r = document.getElementById('jsonRight');
+      const tmp = l.value;
+      l.value = r.value;
+      r.value = tmp;
+    }
+
+    function formatBoth() {
+      const errEl = document.getElementById('parseError');
+      errEl.textContent = '';
+      ['jsonLeft', 'jsonRight'].forEach(id => {
+        const el = document.getElementById(id);
+        const raw = el.value.trim();
+        if (!raw) return;
+        try {
+          el.value = JSON.stringify(JSON.parse(raw), null, 2);
+        } catch (e) {
+          errEl.textContent = (id === 'jsonLeft' ? 'Original' : 'Modified') + ' JSON parse error: ' + e.message;
+        }
+      });
+    }
+
+    function copyPatch() {
+      if (!lastPatch || lastPatch.length === 0) {
+        const errEl = document.getElementById('parseError');
+        errEl.textContent = 'No diff to export. Run Compare first.';
+        return;
+      }
+      const text = JSON.stringify(lastPatch, null, 2);
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target.closest('.btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = orig, 1500);
+      });
+    }
+
+    function switchView(view, tab) {
+      document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.diff-view').forEach(v => v.classList.remove('active'));
+      document.getElementById(view + 'View').classList.add('active');
+    }
+
+    function toggleUnchanged() {
+      showUnchanged = !showUnchanged;
+      const btn = document.querySelector('.toggle-unchanged');
+      btn.textContent = showUnchanged ? 'Hide Unchanged' : 'Show Unchanged';
+      applyUnchangedVisibility();
+    }
+
+    function applyUnchangedVisibility() {
+      document.querySelectorAll('[data-unchanged="1"]').forEach(el => {
+        el.style.display = showUnchanged ? '' : 'none';
+      });
+    }
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
