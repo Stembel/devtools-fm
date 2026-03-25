@@ -211,21 +211,25 @@ shasum -a 256 ubuntu-24.04-amd64.iso     # macOS</code></pre>
       <p>HMAC (Hash-based Message Authentication Code) combines a hash function with a secret key to authenticate messages. If you've integrated Stripe, GitHub, or Shopify webhooks, you've seen this: they sign payloads with HMAC-SHA256. Your server recomputes the HMAC using the shared secret and compares it to the signature in the request header. Match means the payload is legit and untampered. You can test these signatures with the <a href="../tools/hmac.html">HMAC generator</a>.</p>
 
       <div class="cta-box">
-        <p>Compute MD5, SHA-1, SHA-256, SHA-512, and other hashes instantly. Paste text or upload a file. Everything runs in your browser.</p>
-        <a href="../tools/hash.html">Try the Free Hash Generator</a>
+        <p>Compute MD5, SHA-1, SHA-256, SHA-512 and other hashes. Paste text or upload a file. Runs entirely in your browser.</p>
+        <a href="../tools/hash.html">Open Hash Generator</a>
       </div>
 
       <h2>Common Mistakes</h2>
 
-      <ul>
-        <li><strong>Using MD5 or SHA-1 for anything security-sensitive.</strong> Both have practical collision attacks. Use SHA-256 or stronger.</li>
-        <li><strong>Hashing passwords with SHA-256.</strong> It is too fast. Use Argon2id, bcrypt, or scrypt.</li>
-        <li><strong>Storing unsalted hashes.</strong> Without a unique random salt per entry, identical inputs produce identical hashes, enabling rainbow table attacks. Password hashing functions include salting automatically.</li>
-        <li><strong>Confusing hashing with encryption.</strong> Hashing is one-way; encryption is reversible with a key. Hashing is for verification, encryption is for confidentiality. They solve different problems.</li>
-        <li><strong>Using <code>==</code> to compare hashes.</strong> Use a constant-time comparison function to prevent timing attacks. Most languages provide one: <code>hmac.compare_digest()</code> in Python, <code>crypto.timingSafeEqual()</code> in Node.js.</li>
-      </ul>
+      <p>I've seen these repeatedly in code reviews and production incidents, so they're worth calling out explicitly.</p>
 
-      <p>Understanding the difference between hashing and encoding? <a href="what-is-base64-encoding.html">Base64 is encoding</a>, not hashing — it is fully reversible and provides zero security.</p>
+      <p>Using MD5 or SHA-1 for anything security-sensitive. Both have practical collision attacks. Reach for SHA-256 or stronger.</p>
+
+      <p>Hashing passwords with SHA-256. It's too fast. An attacker with commodity hardware will brute-force it. Use Argon2id, bcrypt, or scrypt.</p>
+
+      <p>Storing unsalted hashes. Without a unique random salt per entry, identical inputs produce identical hashes, and rainbow table attacks become trivial. Password hashing functions handle salting for you.</p>
+
+      <p>Confusing hashing with encryption. Hashing is one-way. Encryption is reversible with a key. One is for verification, the other for confidentiality. They solve different problems.</p>
+
+      <p>Using <code>==</code> to compare hashes. Use a constant-time comparison function to prevent timing attacks. Most languages have one: <code>hmac.compare_digest()</code> in Python, <code>crypto.timingSafeEqual()</code> in Node.js.</p>
+
+      <p>Worth noting: <a href="what-is-base64-encoding.html">Base64 is encoding</a>, not hashing. It's fully reversible and provides zero security. Don't mix the two up.</p>
 
       <h2>Quick Reference: Hashing in Code</h2>
 
