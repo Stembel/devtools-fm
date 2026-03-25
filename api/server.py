@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """DevTools.fm API - Server-side tools backend.
 Provides DNS lookup, SSL certificate check, HTTP header inspection,
-WHOIS lookup, and redirect chain tracing.
+WHOIS lookup, redirect chain tracing, and comprehensive website grading.
 Runs on port 8080, Caddy reverse-proxies /api/ to here.
 """
 
@@ -16,6 +16,8 @@ import urllib.request
 import urllib.error
 from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
+from html.parser import HTMLParser
+import threading
 
 
 def cors_headers():
@@ -436,6 +438,594 @@ def tech_detect(url):
         return {"url": url, "error": str(e)}
 
 
+# ---------------------------------------------------------------------------
+# Website Grader - comprehensive site analysis
+# ---------------------------------------------------------------------------
+
+class SEOHTMLParser(HTMLParser):
+    """Lightweight HTML parser to extract SEO-relevant tags."""
+
+    def __init__(self):
+        super().__init__()
+        self.title = None
+        self.meta_description = None
+        self.has_h1 = False
+        self.h1_count = 0
+        self.has_canonical = False
+        self.has_viewport = False
+        self.has_robots_meta = False
+        self.robots_content = None
+        self.has_og_title = False
+        self.has_og_description = False
+        self.has_lang = False
+        self.lang_value = None
+        self.img_count = 0
+        self.img_without_alt = 0
+        self._in_title = False
+        self._title_parts = []
+        self._in_h1 = False
+
+    def handle_starttag(self, tag, attrs):
+        attrs_dict = {k.lower(): v for k, v in attrs}
+
+        if tag == "html":
+            lang = attrs_dict.get("lang", "")
+            if lang:
+                self.has_lang = True
+                self.lang_value = lang
+
+        if tag == "title":
+            self._in_title = True
+            self._title_parts = []
+
+        if tag == "h1":
+            self.has_h1 = True
+            self.h1_count += 1
+            self._in_h1 = True
+
+        if tag == "meta":
+            name = attrs_dict.get("name", "").lower()
+            prop = attrs_dict.get("property", "").lower()
+            content = attrs_dict.get("content", "")
+
+            if name == "description":
+                self.meta_description = content
+            if name == "viewport":
+                self.has_viewport = True
+            if name == "robots":
+                self.has_robots_meta = True
+                self.robots_content = content
+            if prop == "og:title":
+                self.has_og_title = True
+            if prop == "og:description":
+                self.has_og_description = True
+
+        if tag == "link":
+            rel = attrs_dict.get("rel", "").lower()
+            if rel == "canonical":
+                self.has_canonical = True
+
+        if tag == "img":
+            self.img_count += 1
+            if not attrs_dict.get("alt"):
+                self.img_without_alt += 1
+
+    def handle_data(self, data):
+        if self._in_title:
+            self._title_parts.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "title" and self._in_title:
+            self._in_title = False
+            self.title = "".join(self._title_parts).strip()
+        if tag == "h1":
+            self._in_h1 = False
+
+
+def _score_to_grade(score):
+    """Convert a numeric score (0-100) to a letter grade."""
+    if score >= 97:
+        return "A+"
+    elif score >= 93:
+        return "A"
+    elif score >= 90:
+        return "A-"
+    elif score >= 87:
+        return "B+"
+    elif score >= 83:
+        return "B"
+    elif score >= 80:
+        return "B-"
+    elif score >= 77:
+        return "C+"
+    elif score >= 73:
+        return "C"
+    elif score >= 70:
+        return "C-"
+    elif score >= 67:
+        return "D+"
+    elif score >= 63:
+        return "D"
+    elif score >= 60:
+        return "D-"
+    else:
+        return "F"
+
+
+def _fetch_page(url, timeout=15):
+    """Fetch a page and return (response_time_ms, status_code, headers_dict, body_text, final_url).
+    Returns None tuple values on failure."""
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
+    start = time.time()
+    try:
+        req = urllib.request.Request(url)
+        req.add_header("User-Agent",
+                        "Mozilla/5.0 (compatible; ZeroKit.dev WebsiteGrader/1.0; +https://zerokit.dev)")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            elapsed_ms = round((time.time() - start) * 1000)
+            headers = {k: v for k, v in resp.headers.items()}
+            body = resp.read(120000).decode("utf-8", errors="ignore")
+            return elapsed_ms, resp.status, headers, body, resp.url
+    except urllib.error.HTTPError as e:
+        elapsed_ms = round((time.time() - start) * 1000)
+        headers = {k: v for k, v in e.headers.items()} if e.headers else {}
+        body = ""
+        try:
+            body = e.read(120000).decode("utf-8", errors="ignore")
+        except Exception:
+            pass
+        return elapsed_ms, e.code, headers, body, url
+    except Exception as e:
+        elapsed_ms = round((time.time() - start) * 1000)
+        return elapsed_ms, None, {}, "", url
+
+
+def _check_https_redirect(url):
+    """Check if HTTP version redirects to HTTPS."""
+    parsed = urlparse(url if "://" in url else "https://" + url)
+    hostname = parsed.hostname
+    http_url = f"http://{hostname}/"
+
+    class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
+    opener = urllib.request.build_opener(NoRedirectHandler)
+    try:
+        req = urllib.request.Request(http_url, method="HEAD")
+        req.add_header("User-Agent", "ZeroKit.dev WebsiteGrader/1.0")
+        resp = opener.open(req, timeout=8)
+        return {"redirects_to_https": False, "status": resp.status}
+    except urllib.error.HTTPError as e:
+        location = e.headers.get("Location", "") if e.headers else ""
+        redirects = location.startswith("https://")
+        return {"redirects_to_https": redirects, "status": e.code, "location": location}
+    except Exception as e:
+        return {"redirects_to_https": False, "error": str(e)}
+
+
+def website_grade(url):
+    """Run comprehensive website grading across multiple categories."""
+    if not url:
+        return {"error": "Missing URL"}
+
+    # Normalise
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname
+    if not hostname:
+        return {"error": "Invalid URL"}
+
+    # ------------------------------------------------------------------
+    # 1. Fetch page (gives us response time, headers, body)
+    # ------------------------------------------------------------------
+    response_time_ms, status_code, headers, body, final_url = _fetch_page(url)
+
+    site_down = status_code is None or status_code >= 500
+
+    # ------------------------------------------------------------------
+    # 2. SSL check (threaded for speed)
+    # ------------------------------------------------------------------
+    ssl_result = {}
+    ssl_thread_result = [None]
+
+    def _ssl_worker():
+        ssl_thread_result[0] = ssl_check(hostname)
+
+    ssl_thread = threading.Thread(target=_ssl_worker)
+    ssl_thread.start()
+
+    # ------------------------------------------------------------------
+    # 3. HTTPS redirect check (threaded)
+    # ------------------------------------------------------------------
+    https_redirect_result = [None]
+
+    def _https_worker():
+        https_redirect_result[0] = _check_https_redirect(url)
+
+    https_thread = threading.Thread(target=_https_worker)
+    https_thread.start()
+
+    # ------------------------------------------------------------------
+    # 4. Parse HTML for SEO
+    # ------------------------------------------------------------------
+    seo_parser = SEOHTMLParser()
+    try:
+        seo_parser.feed(body)
+    except Exception:
+        pass
+
+    # ------------------------------------------------------------------
+    # Wait for threaded checks
+    # ------------------------------------------------------------------
+    ssl_thread.join(timeout=12)
+    https_thread.join(timeout=12)
+    ssl_result = ssl_thread_result[0] or {"valid": False, "error": "SSL check timed out"}
+    https_redirect = https_redirect_result[0] or {"redirects_to_https": False, "error": "Check timed out"}
+
+    # ------------------------------------------------------------------
+    # CATEGORY 1: Performance (20%)
+    # ------------------------------------------------------------------
+    if response_time_ms is not None and not site_down:
+        if response_time_ms < 200:
+            perf_score = 100
+        elif response_time_ms < 500:
+            perf_score = 90
+        elif response_time_ms < 1000:
+            perf_score = 75
+        elif response_time_ms < 2000:
+            perf_score = 60
+        elif response_time_ms < 3000:
+            perf_score = 40
+        else:
+            perf_score = 20
+    else:
+        perf_score = 0
+
+    perf_details = {
+        "response_time_ms": response_time_ms,
+        "status_code": status_code,
+    }
+
+    # ------------------------------------------------------------------
+    # CATEGORY 2: Security Headers (25%)
+    # ------------------------------------------------------------------
+    SECURITY_HEADERS = [
+        "Strict-Transport-Security",
+        "Content-Security-Policy",
+        "X-Frame-Options",
+        "X-Content-Type-Options",
+        "Referrer-Policy",
+        "Permissions-Policy",
+        "X-XSS-Protection",
+    ]
+
+    # Normalise header lookup (case-insensitive)
+    headers_lower = {k.lower(): v for k, v in headers.items()}
+
+    sec_present = {}
+    sec_missing = []
+    for h in SECURITY_HEADERS:
+        val = headers_lower.get(h.lower())
+        if val:
+            sec_present[h] = val
+        else:
+            sec_missing.append(h)
+
+    total_sec_headers = len(SECURITY_HEADERS)
+    found_sec = len(sec_present)
+    sec_score = round((found_sec / total_sec_headers) * 100) if total_sec_headers else 0
+
+    sec_details = {
+        "headers_present": sec_present,
+        "headers_missing": sec_missing,
+        "found": found_sec,
+        "total": total_sec_headers,
+    }
+
+    # ------------------------------------------------------------------
+    # CATEGORY 3: SSL / HTTPS (20%)
+    # ------------------------------------------------------------------
+    ssl_score = 0
+    ssl_details = {}
+
+    ssl_valid = ssl_result.get("valid", False)
+    if ssl_valid:
+        ssl_score += 50  # Valid cert = 50 points
+
+        # Check expiry - bonus points for long validity
+        not_after = ssl_result.get("not_after", "")
+        days_remaining = None
+        if not_after:
+            try:
+                expiry = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
+                now = datetime.utcnow()
+                days_remaining = (expiry - now).days
+                if days_remaining > 30:
+                    ssl_score += 20
+                elif days_remaining > 7:
+                    ssl_score += 10
+                # else near-expiry, no bonus
+            except Exception:
+                ssl_score += 10  # Can't parse but cert is valid
+
+        # Check cipher strength
+        cipher_info = ssl_result.get("cipher", {})
+        bits = cipher_info.get("bits")
+        if bits and bits >= 256:
+            ssl_score += 10
+        elif bits and bits >= 128:
+            ssl_score += 5
+
+        ssl_details["valid"] = True
+        ssl_details["days_remaining"] = days_remaining
+        ssl_details["cipher"] = cipher_info
+        ssl_details["issuer"] = ssl_result.get("issuer", {})
+    else:
+        ssl_details["valid"] = False
+        ssl_details["error"] = ssl_result.get("error", "Unknown SSL error")
+
+    # HTTPS redirect bonus
+    if https_redirect.get("redirects_to_https"):
+        ssl_score += 20
+        ssl_details["https_redirect"] = True
+    else:
+        ssl_details["https_redirect"] = False
+
+    ssl_score = min(100, ssl_score)
+
+    # ------------------------------------------------------------------
+    # CATEGORY 4: SEO Basics (20%)
+    # ------------------------------------------------------------------
+    seo_checks = {}
+    seo_score = 0
+    seo_max = 0
+
+    # Title tag (15 pts)
+    seo_max += 15
+    if seo_parser.title:
+        title_len = len(seo_parser.title)
+        if 10 <= title_len <= 70:
+            seo_score += 15
+            seo_checks["title"] = {"present": True, "value": seo_parser.title[:100], "length": title_len, "optimal": True}
+        else:
+            seo_score += 8
+            seo_checks["title"] = {"present": True, "value": seo_parser.title[:100], "length": title_len, "optimal": False,
+                                    "note": "Title should be 10-70 characters"}
+    else:
+        seo_checks["title"] = {"present": False}
+
+    # Meta description (15 pts)
+    seo_max += 15
+    if seo_parser.meta_description:
+        desc_len = len(seo_parser.meta_description)
+        if 50 <= desc_len <= 160:
+            seo_score += 15
+            seo_checks["meta_description"] = {"present": True, "length": desc_len, "optimal": True}
+        else:
+            seo_score += 8
+            seo_checks["meta_description"] = {"present": True, "length": desc_len, "optimal": False,
+                                                "note": "Description should be 50-160 characters"}
+    else:
+        seo_checks["meta_description"] = {"present": False}
+
+    # H1 tag (15 pts)
+    seo_max += 15
+    if seo_parser.has_h1:
+        if seo_parser.h1_count == 1:
+            seo_score += 15
+            seo_checks["h1"] = {"present": True, "count": 1, "optimal": True}
+        else:
+            seo_score += 8
+            seo_checks["h1"] = {"present": True, "count": seo_parser.h1_count, "optimal": False,
+                                 "note": f"Found {seo_parser.h1_count} H1 tags, should have exactly 1"}
+    else:
+        seo_checks["h1"] = {"present": False}
+
+    # Canonical URL (10 pts)
+    seo_max += 10
+    if seo_parser.has_canonical:
+        seo_score += 10
+        seo_checks["canonical"] = {"present": True}
+    else:
+        seo_checks["canonical"] = {"present": False}
+
+    # Viewport meta (10 pts)
+    seo_max += 10
+    if seo_parser.has_viewport:
+        seo_score += 10
+        seo_checks["viewport"] = {"present": True}
+    else:
+        seo_checks["viewport"] = {"present": False}
+
+    # Lang attribute (10 pts)
+    seo_max += 10
+    if seo_parser.has_lang:
+        seo_score += 10
+        seo_checks["lang_attribute"] = {"present": True, "value": seo_parser.lang_value}
+    else:
+        seo_checks["lang_attribute"] = {"present": False}
+
+    # Open Graph tags (10 pts)
+    seo_max += 10
+    if seo_parser.has_og_title and seo_parser.has_og_description:
+        seo_score += 10
+        seo_checks["open_graph"] = {"present": True}
+    elif seo_parser.has_og_title or seo_parser.has_og_description:
+        seo_score += 5
+        seo_checks["open_graph"] = {"partial": True, "note": "Missing og:title or og:description"}
+    else:
+        seo_checks["open_graph"] = {"present": False}
+
+    # Image alt tags (15 pts)
+    seo_max += 15
+    if seo_parser.img_count > 0:
+        alt_ratio = 1 - (seo_parser.img_without_alt / seo_parser.img_count)
+        img_score = round(alt_ratio * 15)
+        seo_score += img_score
+        seo_checks["image_alt_tags"] = {
+            "total_images": seo_parser.img_count,
+            "missing_alt": seo_parser.img_without_alt,
+            "coverage": f"{round(alt_ratio * 100)}%",
+        }
+    else:
+        seo_score += 15  # No images = no issue
+        seo_checks["image_alt_tags"] = {"total_images": 0, "note": "No images found"}
+
+    seo_score_pct = round((seo_score / seo_max) * 100) if seo_max else 0
+
+    # ------------------------------------------------------------------
+    # CATEGORY 5: Availability (15%)
+    # ------------------------------------------------------------------
+    if site_down:
+        avail_score = 0
+    elif status_code and 200 <= status_code < 300:
+        avail_score = 100
+    elif status_code and 300 <= status_code < 400:
+        avail_score = 90  # Redirect — acceptable
+    elif status_code and 400 <= status_code < 500:
+        avail_score = 30  # Client error
+    else:
+        avail_score = 0
+
+    avail_details = {
+        "status_code": status_code,
+        "response_time_ms": response_time_ms,
+        "is_up": not site_down,
+        "final_url": final_url,
+    }
+
+    # ------------------------------------------------------------------
+    # OVERALL SCORE (weighted)
+    # ------------------------------------------------------------------
+    overall_score = round(
+        perf_score * 0.20 +
+        sec_score * 0.25 +
+        ssl_score * 0.20 +
+        seo_score_pct * 0.20 +
+        avail_score * 0.15
+    )
+    overall_grade = _score_to_grade(overall_score)
+
+    # ------------------------------------------------------------------
+    # RECOMMENDATIONS
+    # ------------------------------------------------------------------
+    recommendations = []
+
+    # Performance recs
+    if response_time_ms and response_time_ms > 1000:
+        recommendations.append("Improve server response time (currently {0}ms, aim for under 500ms)".format(response_time_ms))
+    if response_time_ms and response_time_ms > 3000:
+        recommendations.append("Critical: Response time over 3 seconds will cause users to leave")
+
+    # Security recs
+    if "Strict-Transport-Security" in sec_missing:
+        recommendations.append("Add Strict-Transport-Security (HSTS) header to enforce HTTPS")
+    if "Content-Security-Policy" in sec_missing:
+        recommendations.append("Add Content-Security-Policy header to prevent XSS and injection attacks")
+    if "X-Frame-Options" in sec_missing:
+        recommendations.append("Add X-Frame-Options header to prevent clickjacking")
+    if "X-Content-Type-Options" in sec_missing:
+        recommendations.append("Add X-Content-Type-Options: nosniff to prevent MIME-type sniffing")
+    if "Referrer-Policy" in sec_missing:
+        recommendations.append("Add Referrer-Policy header to control referrer information")
+    if "Permissions-Policy" in sec_missing:
+        recommendations.append("Add Permissions-Policy header to control browser features")
+
+    # SSL recs
+    if not ssl_valid:
+        recommendations.append("Fix SSL certificate - your site is not secure for visitors")
+    elif ssl_details.get("days_remaining") is not None and ssl_details["days_remaining"] < 30:
+        recommendations.append("SSL certificate expires in {0} days - renew soon".format(ssl_details["days_remaining"]))
+    if not https_redirect.get("redirects_to_https"):
+        recommendations.append("Set up HTTP to HTTPS redirect to ensure all traffic is encrypted")
+
+    # SEO recs
+    if not seo_parser.title:
+        recommendations.append("Add a <title> tag - essential for search engine rankings")
+    elif seo_parser.title and (len(seo_parser.title) < 10 or len(seo_parser.title) > 70):
+        recommendations.append("Optimize title tag length (currently {0} chars, aim for 10-70)".format(len(seo_parser.title)))
+    if not seo_parser.meta_description:
+        recommendations.append("Add a meta description - improves click-through rates from search results")
+    if not seo_parser.has_h1:
+        recommendations.append("Add an H1 heading - important for SEO and accessibility")
+    elif seo_parser.h1_count > 1:
+        recommendations.append("Use only one H1 tag per page (found {0})".format(seo_parser.h1_count))
+    if not seo_parser.has_canonical:
+        recommendations.append("Add a canonical URL to prevent duplicate content issues")
+    if not seo_parser.has_viewport:
+        recommendations.append("Add a viewport meta tag for mobile responsiveness")
+    if not seo_parser.has_lang:
+        recommendations.append("Add a lang attribute to the <html> tag for accessibility and SEO")
+    if not (seo_parser.has_og_title and seo_parser.has_og_description):
+        recommendations.append("Add Open Graph meta tags (og:title, og:description) for better social sharing")
+    if seo_parser.img_count > 0 and seo_parser.img_without_alt > 0:
+        recommendations.append("Add alt text to {0} image(s) for accessibility and SEO".format(seo_parser.img_without_alt))
+
+    # Availability recs
+    if site_down:
+        recommendations.append("Your website appears to be down - check your server immediately")
+
+    # ------------------------------------------------------------------
+    # Build response
+    # ------------------------------------------------------------------
+    # Detect technologies from headers
+    tech_hints = []
+    server_header = headers_lower.get("server", "")
+    if server_header:
+        tech_hints.append({"name": server_header, "category": "Server"})
+    powered_by = headers_lower.get("x-powered-by", "")
+    if powered_by:
+        tech_hints.append({"name": powered_by, "category": "Framework"})
+
+    return {
+        "url": url,
+        "final_url": final_url,
+        "hostname": hostname,
+        "grade": overall_grade,
+        "score": overall_score,
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "categories": {
+            "performance": {
+                "score": perf_score,
+                "grade": _score_to_grade(perf_score),
+                "weight": "20%",
+                "details": perf_details,
+            },
+            "security": {
+                "score": sec_score,
+                "grade": _score_to_grade(sec_score),
+                "weight": "25%",
+                "details": sec_details,
+            },
+            "ssl": {
+                "score": ssl_score,
+                "grade": _score_to_grade(ssl_score),
+                "weight": "20%",
+                "details": ssl_details,
+            },
+            "seo": {
+                "score": seo_score_pct,
+                "grade": _score_to_grade(seo_score_pct),
+                "weight": "20%",
+                "details": seo_checks,
+            },
+            "availability": {
+                "score": avail_score,
+                "grade": _score_to_grade(avail_score),
+                "weight": "15%",
+                "details": avail_details,
+            },
+        },
+        "recommendations": recommendations,
+        "technologies": tech_hints,
+    }
+
+
 def sanitize_domain(raw):
     """Extract and validate domain from user input."""
     if not raw:
@@ -558,11 +1148,22 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
             result = tech_detect(url)
             self.send_json(result)
 
+        elif path == "/api/grade":
+            url = params.get("url", [None])[0]
+            if not url:
+                self.send_json({"error": "Missing 'url' parameter"}, 400)
+                return
+            if len(url) > 2000:
+                self.send_json({"error": "URL too long"}, 400)
+                return
+            result = website_grade(url)
+            self.send_json(result)
+
         elif path == "/api/health":
             self.send_json({"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()})
 
         else:
-            self.send_json({"error": "Not found", "endpoints": ["/api/dns", "/api/ssl", "/api/headers", "/api/whois", "/api/redirect", "/api/status", "/api/email-validate", "/api/tech-detect", "/api/health"]}, 404)
+            self.send_json({"error": "Not found", "endpoints": ["/api/dns", "/api/ssl", "/api/headers", "/api/whois", "/api/redirect", "/api/status", "/api/email-validate", "/api/tech-detect", "/api/grade", "/api/health"]}, 404)
 
 
 if __name__ == "__main__":

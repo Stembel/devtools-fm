@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Grader - Free Website Score &amp; Analysis | ZeroKit.dev</title>
+  <meta name="description" content="Get your free website score. Analyze performance, security, SEO, SSL, and availability in seconds. Actionable recommendations to improve your site.">
+  <meta name="keywords" content="website grader, website score, site checker, website analysis, SEO checker, security checker, performance test, website audit, free website grader">
+  <link rel="canonical" href="https://zerokit.dev/tools/grader.html">
+  <meta property="og:title" content="Website Grader - Free Website Score &amp; Analysis | ZeroKit.dev">
+  <meta property="og:description" content="Get your free website score. Analyze performance, security, SEO, SSL, and availability with actionable recommendations.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zerokit.dev/tools/grader.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Website Grader - Free Website Score | ZeroKit.dev">
+  <meta name="twitter:description" content="Get your free website score. Analyze performance, security, SEO, SSL, and availability.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ============================================================
+       WEBSITE GRADER - FLAGSHIP PREMIUM TOOL
+       ============================================================ */
+
+    /* Hero Section */
+    .grader-hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+
+    .grader-hero h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #818cf8 0%, #6366f1 30%, #a78bfa 70%, #818cf8 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 6s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .grader-hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+
+    .grader-input-wrap {
+      display: flex;
+      gap: 0;
+      max-width: 620px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .grader-input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .grader-input-wrap input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      padding: 18px 24px;
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    .grader-input-wrap input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .grader-input-wrap button {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      border: none;
+      padding: 18px 36px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+
+    .grader-input-wrap button:hover {
+      opacity: 0.9;
+    }
+
+    .grader-input-wrap button:active {
+      transform: scale(0.98);
+    }
+
+    .grader-input-wrap button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Trust badges */
+    .trust-badges {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .trust-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .trust-badge svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Loading State */
+    .grader-loading {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading-progress {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .loading-spinner-ring {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 32px;
+      position: relative;
+    }
+
+    .loading-spinner-ring::before,
+    .loading-spinner-ring::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 3px solid transparent;
+    }
+
+    .loading-spinner-ring::before {
+      border-top-color: #6366f1;
+      border-right-color: #6366f1;
+      animation: spinRing 1s linear infinite;
+    }
+
+    .loading-spinner-ring::after {
+      border-bottom-color: #8b5cf6;
+      animation: spinRing 1.5s linear infinite reverse;
+    }
+
+    @keyframes spinRing {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .loading-steps {
+      text-align: left;
+      display: inline-block;
+    }
+
+    .loading-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+
+    .loading-step.active {
+      color: var(--text);
+    }
+
+    .loading-step.done {
+      color: var(--success);
+    }
+
+    .loading-step .step-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .loading-step .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+
+    .loading-step.active .step-dot {
+      background: var(--accent);
+      animation: pulse 1s infinite;
+    }
+
+    .loading-step.done .step-dot {
+      display: none;
+    }
+
+    .loading-step.done .step-icon::after {
+      content: '';
+      display: block;
+      width: 16px;
+      height: 16px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    /* Error State */
+    .grader-error {
+      display: none;
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 12px;
+      padding: 24px 28px;
+      color: var(--error);
+      font-size: 0.95rem;
+      margin: 24px auto;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .grader-error code {
+      font-family: var(--mono);
+      background: rgba(239, 68, 68, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    /* ============================================================
+       RESULTS SECTION
+       ============================================================ */
+    .grader-results {
+      display: none;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Score Hero Card */
+    .score-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 32px;
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      transition: background 0.5s;
+    }
+
+    .score-hero.grade-a::before { background: linear-gradient(90deg, transparent, #22c55e, transparent); }
+    .score-hero.grade-b::before { background: linear-gradient(90deg, transparent, #84cc16, transparent); }
+    .score-hero.grade-c::before { background: linear-gradient(90deg, transparent, #eab308, transparent); }
+    .score-hero.grade-d::before { background: linear-gradient(90deg, transparent, #f97316, transparent); }
+    .score-hero.grade-f::before { background: linear-gradient(90deg, transparent, #ef4444, transparent); }
+
+    .score-domain {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    /* Circular Grade Badge */
+    .grade-circle-wrap {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 24px;
+    }
+
+    .grade-circle-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 8;
+    }
+
+    .grade-circle-fg {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s;
+    }
+
+    .grade-circle-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .grade-letter {
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .grade-score-num {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .grade-a .grade-letter, .grade-a .grade-circle-fg { color: #22c55e; stroke: #22c55e; }
+    .grade-b .grade-letter, .grade-b .grade-circle-fg { color: #84cc16; stroke: #84cc16; }
+    .grade-c .grade-letter, .grade-c .grade-circle-fg { color: #eab308; stroke: #eab308; }
+    .grade-d .grade-letter, .grade-d .grade-circle-fg { color: #f97316; stroke: #f97316; }
+    .grade-f .grade-letter, .grade-f .grade-circle-fg { color: #ef4444; stroke: #ef4444; }
+
+    .score-summary {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 400px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Category Cards Grid */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .category-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .category-card:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .category-header:hover {
+      background: rgba(99, 102, 241, 0.03);
+    }
+
+    .category-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .category-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .category-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .cat-performance .category-icon { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .cat-security .category-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .cat-ssl .category-icon { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .cat-seo .category-icon { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+    .cat-availability .category-icon { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+
+    .category-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .category-weight {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .category-score-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .category-score-bar {
+      width: 60px;
+      height: 6px;
+      background: var(--surface-2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .category-score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .category-grade {
+      font-size: 1.1rem;
+      font-weight: 800;
+      min-width: 32px;
+      text-align: right;
+    }
+
+    .category-chevron {
+      color: var(--text-muted);
+      transition: transform 0.3s;
+      margin-left: 8px;
+    }
+
+    .category-card.expanded .category-chevron {
+      transform: rotate(180deg);
+    }
+
+    .category-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .category-card.expanded .category-details {
+      max-height: 800px;
+    }
+
+    .category-details-inner {
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      gap: 12px;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .detail-value {
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      color: var(--text);
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .detail-value.pass { color: #22c55e; }
+    .detail-value.warn { color: #eab308; }
+    .detail-value.fail { color: #ef4444; }
+
+    /* Recommendations */
+    .recommendations-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 32px;
+    }
+
+    .recommendations-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .recommendations-title svg {
+      width: 22px;
+      height: 22px;
+      color: var(--accent);
+    }
+
+    .rec-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .rec-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .rec-item:last-child {
+      border-bottom: none;
+    }
+
+    .rec-bullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 8px;
+    }
+
+    .rec-item.priority-high .rec-bullet { background: #ef4444; }
+    .rec-item.priority-medium .rec-bullet { background: #eab308; }
+    .rec-item.priority-low .rec-bullet { background: #22c55e; }
+
+    .no-recs {
+      text-align: center;
+      padding: 20px;
+      color: var(--success);
+      font-size: 0.95rem;
+    }
+
+    /* Share & Actions Section */
+    .actions-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .action-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .action-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-card h3 svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+    }
+
+    .share-text {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: var(--text);
+      margin-bottom: 12px;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      word-break: break-word;
+    }
+
+    .share-text:hover {
+      border-color: var(--accent);
+    }
+
+    .share-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      text-decoration: none;
+    }
+
+    .share-btn:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--accent);
+    }
+
+    .share-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .email-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .email-input-group input {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .email-input-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .email-input-group input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .email-input-group button {
+      padding: 10px 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+
+    .email-input-group button:hover {
+      opacity: 0.9;
+    }
+
+    .email-success {
+      display: none;
+      color: var(--success);
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+
+    .email-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    /* Check Another Button */
+    .check-another-wrap {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .btn-check-another {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-weight: 700;
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-check-another:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-check-another svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Educational Content */
+    .grader-education {
+      margin-top: 48px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .grader-education h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .grader-education p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .grader-education h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 28px 0 12px;
+      color: var(--text);
+    }
+
+    .scoring-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 20px 0 28px;
+    }
+
+    .scoring-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .scoring-card .sc-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .scoring-card .sc-weight {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .faq-item {
+      margin-bottom: 20px;
+    }
+
+    .faq-item h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .faq-item p {
+      margin-bottom: 0;
+      font-size: 0.88rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .grader-hero h1 {
+        font-size: 2rem;
+      }
+
+      .grader-hero .subtitle {
+        font-size: 1rem;
+      }
+
+      .grader-input-wrap {
+        flex-direction: column;
+        border-radius: 14px;
+      }
+
+      .grader-input-wrap input {
+        padding: 16px 20px;
+        font-size: 1rem;
+      }
+
+      .grader-input-wrap button {
+        padding: 16px 24px;
+      }
+
+      .trust-badges {
+        gap: 16px;
+      }
+
+      .categories-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions-section {
+        grid-template-columns: 1fr;
+      }
+
+      .grade-circle-wrap {
+        width: 150px;
+        height: 150px;
+      }
+
+      .grade-letter {
+        font-size: 2.6rem;
+      }
+
+      .score-hero {
+        padding: 36px 20px;
+      }
+
+      .scoring-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grader-hero h1 {
+        font-size: 1.65rem;
+      }
+
+      .email-input-group {
+        flex-direction: column;
+      }
+
+      .share-buttons {
+        flex-direction: column;
+      }
+
+      .share-btn {
+        justify-content: center;
+      }
+    }
+
+    /* Tooltip for copied */
+    .copied-toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 100;
+    }
+
+    .copied-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+
+    <!-- ============================================================
+         HERO SECTION
+         ============================================================ -->
+    <div class="grader-hero" id="hero-section">
+      <h1>Website Grader</h1>
+      <p class="subtitle">Get your free website score. We analyze performance, security, SEO, SSL, and availability &mdash; then tell you exactly what to fix.</p>
+
+      <div class="grader-input-wrap">
+        <input type="text" id="url-input" placeholder="example.com" autocomplete="off" spellcheck="false" autofocus>
+        <button id="grade-btn" onclick="runGrader()">Grade My Site</button>
+      </div>
+
+      <div class="trust-badges">
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Server-side analysis
+        </span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Results in seconds
+        </span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          100% free, no signup
+        </span>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         LOADING STATE
+         ============================================================ -->
+    <div class="grader-loading" id="loading-section">
+      <div class="loading-progress">
+        <div class="loading-spinner-ring"></div>
+        <div class="loading-title">Analyzing your website...</div>
+        <div class="loading-steps">
+          <div class="loading-step" id="step-connect">
+            <div class="step-icon"><div class="step-dot"></div></div>
+            <span>Connecting to server...</span>
+          </div>
+          <div class="loading-step" id="step-performance">
+            <div class="step-icon"><div class="step-dot"></div></div>
+            <span>Measuring performance...</span>
+          </div>
+          <div class="loading-step" id="step-security">
+            <div class="step-icon"><div class="step-dot"></div></div>
+            <span>Checking security headers...</span>
+          </div>
+          <div class="loading-step" id="step-ssl">
+            <div class="step-icon"><div class="step-dot"></div></div>
+            <span>Verifying SSL certificate...</span>
+          </div>
+          <div class="loading-step" id="step-seo">
+            <div class="step-icon"><div class="step-dot"></div></div>
+            <span>Analyzing SEO signals...</span>
+          </div>
+          <div class="loading-step" id="step-score">
+            <div class="step-icon"><div class="step-dot"></div></div>
+            <span>Calculating final score...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         ERROR STATE
+         ============================================================ -->
+    <div class="grader-error" id="error-section"></div>
+
+    <!-- ============================================================
+         RESULTS SECTION
+         ============================================================ -->
+    <div class="grader-results" id="results-section">
+
+      <!-- Score Hero -->
+      <div class="score-hero" id="score-hero">
+        <div class="score-domain" id="score-domain"></div>
+        <div class="grade-circle-wrap" id="grade-circle-wrap">
+          <svg viewBox="0 0 180 180" width="180" height="180">
+            <circle class="grade-circle-bg" cx="90" cy="90" r="82" />
+            <circle class="grade-circle-fg" id="grade-arc" cx="90" cy="90" r="82"
+              stroke-dasharray="515.22" stroke-dashoffset="515.22" />
+          </svg>
+          <div class="grade-circle-text">
+            <div class="grade-letter" id="grade-letter">--</div>
+            <div class="grade-score-num" id="grade-score-num">--/100</div>
+          </div>
+        </div>
+        <div class="score-summary" id="score-summary"></div>
+      </div>
+
+      <!-- Category Cards -->
+      <div class="categories-grid" id="categories-grid"></div>
+
+      <!-- Recommendations -->
+      <div class="recommendations-section" id="recommendations-section">
+        <div class="recommendations-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Recommendations
+        </div>
+        <ul class="rec-list" id="rec-list"></ul>
+      </div>
+
+      <!-- Share & Email -->
+      <div class="actions-section">
+        <div class="action-card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share Your Score
+          </h3>
+          <div class="share-text" id="share-text" onclick="copyShareText()">
+            Loading...
+          </div>
+          <div class="share-buttons">
+            <a class="share-btn" id="twitter-share" href="#" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              Post on X
+            </a>
+            <button class="share-btn" onclick="copyShareText()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+            <a class="share-btn" id="linkedin-share" href="#" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Get Detailed Report
+          </h3>
+          <p class="email-desc">Enter your email to receive a detailed PDF report with all findings and prioritized action items.</p>
+          <div class="email-input-group">
+            <input type="email" id="email-input" placeholder="you@example.com">
+            <button onclick="captureEmail()">Send Report</button>
+          </div>
+          <div class="email-success" id="email-success">Report request saved! We'll have this feature ready soon.</div>
+        </div>
+      </div>
+
+      <!-- Check Another -->
+      <div class="check-another-wrap">
+        <button class="btn-check-another" onclick="checkAnother()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Check Another Website
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         EDUCATIONAL CONTENT
+         ============================================================ -->
+    <div class="grader-education">
+      <h2>How Website Grading Works</h2>
+      <p>Our Website Grader performs a comprehensive server-side analysis of your website across five critical categories. Unlike client-side tools, we connect directly to your server to measure real-world performance and inspect security configurations.</p>
+
+      <h3>Scoring Categories</h3>
+      <div class="scoring-grid">
+        <div class="scoring-card">
+          <div class="sc-name">Performance</div>
+          <div class="sc-weight">20% weight</div>
+        </div>
+        <div class="scoring-card">
+          <div class="sc-name">Security Headers</div>
+          <div class="sc-weight">25% weight</div>
+        </div>
+        <div class="scoring-card">
+          <div class="sc-name">SSL / HTTPS</div>
+          <div class="sc-weight">20% weight</div>
+        </div>
+        <div class="scoring-card">
+          <div class="sc-name">SEO Basics</div>
+          <div class="sc-weight">20% weight</div>
+        </div>
+        <div class="scoring-card">
+          <div class="sc-name">Availability</div>
+          <div class="sc-weight">15% weight</div>
+        </div>
+      </div>
+
+      <h3>Grading Scale</h3>
+      <p>Scores are converted to letter grades using standard academic grading: <strong>A+ (97-100)</strong>, <strong>A (93-96)</strong>, <strong>A- (90-92)</strong>, <strong>B+ (87-89)</strong>, <strong>B (83-86)</strong>, and so on down to <strong>F (below 60)</strong>. Most well-maintained websites score between B and A.</p>
+
+      <h3>Frequently Asked Questions</h3>
+      <div class="faq-item">
+        <h4>Is this tool really free?</h4>
+        <p>Yes, completely free with no signup required. We believe every developer and site owner should have access to website analysis tools.</p>
+      </div>
+      <div class="faq-item">
+        <h4>How accurate is the performance score?</h4>
+        <p>We measure server response time from our servers in Europe. This reflects how quickly your server responds to requests, not full page load time which depends on client-side factors.</p>
+      </div>
+      <div class="faq-item">
+        <h4>What security headers should I have?</h4>
+        <p>We check for 7 important security headers: Strict-Transport-Security (HSTS), Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and X-XSS-Protection. Most can be added with a few lines of server configuration.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Why is SEO included?</h4>
+        <p>Basic SEO elements like title tags, meta descriptions, and heading structure are foundational to any website. Missing these elements means search engines can't properly understand and rank your content.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Can I grade any website?</h4>
+        <p>You can grade any publicly accessible website. Sites behind authentication, firewalls, or on private networks cannot be analyzed.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">ZeroKit.dev &mdash; Free developer tools.</div></footer>
+
+  <!-- Copied Toast -->
+  <div class="copied-toast" id="copied-toast">Copied to clipboard!</div>
+
+  <script>
+    const API_DOMAIN = '65-109-129-230.sslip.io';
+    const HETZNER_IP = '65.109.129.230';
+    const urlInput = document.getElementById('url-input');
+    const gradeBtn = document.getElementById('grade-btn');
+
+    let currentResult = null;
+
+    function buildApiUrl(url) {
+      const hostname = window.location.hostname;
+      if (hostname === HETZNER_IP || hostname === API_DOMAIN) {
+        return '/api/grade?url=' + encodeURIComponent(url);
+      }
+      return 'https://' + API_DOMAIN + '/api/grade?url=' + encodeURIComponent(url);
+    }
+
+    function sanitizeUrl(input) {
+      let u = input.trim();
+      if (!u) return '';
+      // Remove protocol for display, keep for API
+      return u;
+    }
+
+    function hideAll() {
+      document.getElementById('loading-section').style.display = 'none';
+      document.getElementById('error-section').style.display = 'none';
+      document.getElementById('results-section').style.display = 'none';
+    }
+
+    function showError(msg) {
+      hideAll();
+      const el = document.getElementById('error-section');
+      el.innerHTML = msg;
+      el.style.display = 'block';
+    }
+
+    function gradeColor(grade) {
+      if (!grade) return '#6b7280';
+      const letter = grade.charAt(0).toUpperCase();
+      if (letter === 'A') return '#22c55e';
+      if (letter === 'B') return '#84cc16';
+      if (letter === 'C') return '#eab308';
+      if (letter === 'D') return '#f97316';
+      return '#ef4444';
+    }
+
+    function gradeClass(grade) {
+      if (!grade) return 'grade-f';
+      const letter = grade.charAt(0).toUpperCase();
+      if (letter === 'A') return 'grade-a';
+      if (letter === 'B') return 'grade-b';
+      if (letter === 'C') return 'grade-c';
+      if (letter === 'D') return 'grade-d';
+      return 'grade-f';
+    }
+
+    // Loading step animation
+    const loadingSteps = ['step-connect', 'step-performance', 'step-security', 'step-ssl', 'step-seo', 'step-score'];
+    let loadingInterval = null;
+
+    function startLoadingAnimation() {
+      let idx = 0;
+      loadingSteps.forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'loading-step';
+      });
+
+      document.getElementById(loadingSteps[0]).classList.add('active');
+
+      loadingInterval = setInterval(() => {
+        if (idx < loadingSteps.length) {
+          document.getElementById(loadingSteps[idx]).classList.remove('active');
+          document.getElementById(loadingSteps[idx]).classList.add('done');
+        }
+        idx++;
+        if (idx < loadingSteps.length) {
+          document.getElementById(loadingSteps[idx]).classList.add('active');
+        } else {
+          clearInterval(loadingInterval);
+        }
+      }, 800);
+    }
+
+    function stopLoadingAnimation() {
+      if (loadingInterval) {
+        clearInterval(loadingInterval);
+        loadingInterval = null;
+      }
+      // Mark all done
+      loadingSteps.forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'loading-step done';
+      });
+    }
+
+    // Category icons SVG
+    const catIcons = {
+      performance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+      security: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+      ssl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+      seo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+      availability: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+    };
+
+    const catNames = {
+      performance: 'Performance',
+      security: 'Security Headers',
+      ssl: 'SSL / HTTPS',
+      seo: 'SEO Basics',
+      availability: 'Availability'
+    };
+
+    async function runGrader() {
+      const raw = urlInput.value;
+      const url = sanitizeUrl(raw);
+
+      if (!url) {
+        showError('Please enter a URL, e.g. <code>example.com</code>');
+        return;
+      }
+
+      hideAll();
+      document.getElementById('loading-section').style.display = 'block';
+      document.getElementById('hero-section').style.display = 'none';
+      gradeBtn.disabled = true;
+      gradeBtn.textContent = 'Grading...';
+
+      startLoadingAnimation();
+
+      const apiUrl = buildApiUrl(url);
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 45000);
+
+        const resp = await fetch(apiUrl, { signal: controller.signal });
+        clearTimeout(timeout);
+
+        if (!resp.ok) {
+          const errText = await resp.text().catch(() => 'Unknown error');
+          throw new Error('API returned ' + resp.status + ': ' + errText);
+        }
+
+        const data = await resp.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        stopLoadingAnimation();
+        // Brief delay for visual satisfaction
+        await new Promise(r => setTimeout(r, 600));
+
+        currentResult = data;
+        displayResults(data);
+
+      } catch (err) {
+        stopLoadingAnimation();
+        if (err.name === 'AbortError') {
+          showError('Request timed out. The analysis is taking longer than expected. Please try again.');
+        } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('Load failed')) {
+          showError('Could not reach the grading API. Please try again in a moment.');
+        } else {
+          showError('Error: ' + err.message);
+        }
+      } finally {
+        gradeBtn.disabled = false;
+        gradeBtn.textContent = 'Grade My Site';
+      }
+    }
+
+    function displayResults(data) {
+      hideAll();
+      document.getElementById('results-section').style.display = 'block';
+
+      const gc = gradeClass(data.grade);
+
+      // Score hero
+      const hero = document.getElementById('score-hero');
+      hero.className = 'score-hero ' + gc;
+
+      document.getElementById('score-domain').textContent = data.hostname || data.url;
+      document.getElementById('grade-letter').textContent = data.grade;
+      document.getElementById('grade-score-num').textContent = data.score + '/100';
+
+      // Animate arc
+      const arc = document.getElementById('grade-arc');
+      const circumference = 515.22;
+      const offset = circumference - (data.score / 100) * circumference;
+      arc.style.stroke = gradeColor(data.grade);
+      // Force reflow, then animate
+      arc.style.strokeDashoffset = circumference;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          arc.style.strokeDashoffset = offset;
+        });
+      });
+
+      // Grade circle wrapper class for coloring
+      document.getElementById('grade-circle-wrap').className = 'grade-circle-wrap ' + gc;
+
+      // Summary text
+      const summaryEl = document.getElementById('score-summary');
+      if (data.score >= 90) {
+        summaryEl.textContent = 'Excellent! Your website is performing very well across all categories.';
+      } else if (data.score >= 75) {
+        summaryEl.textContent = 'Good score! A few improvements could push you into the A range.';
+      } else if (data.score >= 60) {
+        summaryEl.textContent = 'Decent foundation, but there are important areas to improve.';
+      } else if (data.score >= 40) {
+        summaryEl.textContent = 'Your website needs attention in several critical areas.';
+      } else {
+        summaryEl.textContent = 'Significant issues detected. Review the recommendations below.';
+      }
+
+      // Category cards
+      renderCategories(data.categories);
+
+      // Recommendations
+      renderRecommendations(data.recommendations || []);
+
+      // Share text
+      const shareText = 'My website ' + (data.hostname || '') + ' scored ' + data.score + '/100 (' + data.grade + ') on ZeroKit.dev Website Grader! Check yours: https://zerokit.dev/tools/grader.html';
+      document.getElementById('share-text').textContent = shareText;
+
+      // Twitter share link
+      const tweetText = encodeURIComponent('My website scored ' + data.score + '/100 (' + data.grade + ') on @ZeroKitDev Website Grader!\n\nCheck yours for free:');
+      const tweetUrl = encodeURIComponent('https://zerokit.dev/tools/grader.html');
+      document.getElementById('twitter-share').href = 'https://twitter.com/intent/tweet?text=' + tweetText + '&url=' + tweetUrl;
+
+      // LinkedIn share
+      const liUrl = encodeURIComponent('https://zerokit.dev/tools/grader.html');
+      document.getElementById('linkedin-share').href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + liUrl;
+
+      // Scroll to results
+      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderCategories(categories) {
+      const grid = document.getElementById('categories-grid');
+      grid.innerHTML = '';
+
+      const order = ['performance', 'security', 'ssl', 'seo', 'availability'];
+
+      order.forEach(key => {
+        const cat = categories[key];
+        if (!cat) return;
+
+        const card = document.createElement('div');
+        card.className = 'category-card cat-' + key;
+
+        const color = gradeColor(cat.grade);
+
+        card.innerHTML = `
+          <div class="category-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="category-info">
+              <div class="category-icon">${catIcons[key]}</div>
+              <div>
+                <div class="category-name">${catNames[key]}</div>
+                <div class="category-weight">${cat.weight} of total score</div>
+              </div>
+            </div>
+            <div class="category-score-wrap">
+              <div class="category-score-bar">
+                <div class="category-score-bar-fill" style="width: 0%; background: ${color};"></div>
+              </div>
+              <div class="category-grade" style="color: ${color};">${cat.grade}</div>
+              <svg class="category-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="category-details">
+            <div class="category-details-inner" id="details-${key}">
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+
+        // Animate score bar
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            card.querySelector('.category-score-bar-fill').style.width = cat.score + '%';
+          });
+        });
+
+        // Render details
+        const detailsEl = card.querySelector(`#details-${key}`);
+        renderCategoryDetails(key, cat, detailsEl);
+      });
+    }
+
+    function renderCategoryDetails(key, cat, container) {
+      const details = cat.details || {};
+      let html = '';
+
+      if (key === 'performance') {
+        html += detailRow('Response Time', details.response_time_ms != null ? details.response_time_ms + ' ms' : '--',
+          details.response_time_ms != null ? (details.response_time_ms < 500 ? 'pass' : details.response_time_ms < 1000 ? 'warn' : 'fail') : '');
+        html += detailRow('Status Code', details.status_code || '--',
+          details.status_code && details.status_code >= 200 && details.status_code < 300 ? 'pass' : 'fail');
+        html += detailRow('Score', cat.score + '/100', '');
+      }
+
+      else if (key === 'security') {
+        html += detailRow('Headers Found', (details.found || 0) + ' / ' + (details.total || 7),
+          details.found >= 6 ? 'pass' : details.found >= 3 ? 'warn' : 'fail');
+
+        // Show present headers
+        const present = details.headers_present || {};
+        Object.keys(present).forEach(h => {
+          const val = present[h];
+          const displayVal = val.length > 60 ? val.substring(0, 57) + '...' : val;
+          html += detailRow(h, displayVal, 'pass');
+        });
+
+        // Show missing headers
+        const missing = details.headers_missing || [];
+        missing.forEach(h => {
+          html += detailRow(h, 'Missing', 'fail');
+        });
+      }
+
+      else if (key === 'ssl') {
+        html += detailRow('Certificate Valid', details.valid ? 'Yes' : 'No', details.valid ? 'pass' : 'fail');
+        if (details.days_remaining != null) {
+          html += detailRow('Days Until Expiry', details.days_remaining,
+            details.days_remaining > 30 ? 'pass' : details.days_remaining > 7 ? 'warn' : 'fail');
+        }
+        html += detailRow('HTTPS Redirect', details.https_redirect ? 'Yes' : 'No',
+          details.https_redirect ? 'pass' : 'fail');
+        if (details.cipher) {
+          html += detailRow('Cipher', details.cipher.name || '--', '');
+          html += detailRow('Protocol', details.cipher.protocol || '--', '');
+          if (details.cipher.bits) {
+            html += detailRow('Encryption Bits', details.cipher.bits, details.cipher.bits >= 256 ? 'pass' : 'warn');
+          }
+        }
+        if (details.issuer) {
+          const issuerName = details.issuer.organizationName || details.issuer.O || details.issuer.commonName || '--';
+          html += detailRow('Issuer', issuerName, '');
+        }
+        if (details.error) {
+          html += detailRow('Error', details.error, 'fail');
+        }
+      }
+
+      else if (key === 'seo') {
+        const checks = details;
+        // Title
+        if (checks.title) {
+          html += detailRow('Title Tag', checks.title.present ? (checks.title.value || 'Present') : 'Missing',
+            checks.title.present ? (checks.title.optimal ? 'pass' : 'warn') : 'fail');
+          if (checks.title.length != null) {
+            html += detailRow('Title Length', checks.title.length + ' chars',
+              checks.title.optimal ? 'pass' : 'warn');
+          }
+        }
+        // Meta Description
+        if (checks.meta_description) {
+          html += detailRow('Meta Description', checks.meta_description.present ? 'Present' : 'Missing',
+            checks.meta_description.present ? (checks.meta_description.optimal ? 'pass' : 'warn') : 'fail');
+          if (checks.meta_description.length != null) {
+            html += detailRow('Description Length', checks.meta_description.length + ' chars',
+              checks.meta_description.optimal ? 'pass' : 'warn');
+          }
+        }
+        // H1
+        if (checks.h1) {
+          html += detailRow('H1 Tag', checks.h1.present ? (checks.h1.count + ' found') : 'Missing',
+            checks.h1.present ? (checks.h1.optimal ? 'pass' : 'warn') : 'fail');
+        }
+        // Canonical
+        if (checks.canonical) {
+          html += detailRow('Canonical URL', checks.canonical.present ? 'Present' : 'Missing',
+            checks.canonical.present ? 'pass' : 'fail');
+        }
+        // Viewport
+        if (checks.viewport) {
+          html += detailRow('Viewport Meta', checks.viewport.present ? 'Present' : 'Missing',
+            checks.viewport.present ? 'pass' : 'fail');
+        }
+        // Lang
+        if (checks.lang_attribute) {
+          html += detailRow('Lang Attribute', checks.lang_attribute.present ? (checks.lang_attribute.value || 'Present') : 'Missing',
+            checks.lang_attribute.present ? 'pass' : 'fail');
+        }
+        // Open Graph
+        if (checks.open_graph) {
+          html += detailRow('Open Graph Tags', checks.open_graph.present ? 'Present' : (checks.open_graph.partial ? 'Partial' : 'Missing'),
+            checks.open_graph.present ? 'pass' : (checks.open_graph.partial ? 'warn' : 'fail'));
+        }
+        // Images
+        if (checks.image_alt_tags) {
+          if (checks.image_alt_tags.total_images > 0) {
+            html += detailRow('Images', checks.image_alt_tags.total_images + ' found', '');
+            html += detailRow('Alt Text Coverage', checks.image_alt_tags.coverage || '--',
+              checks.image_alt_tags.missing_alt === 0 ? 'pass' : 'warn');
+          } else {
+            html += detailRow('Images', 'None found', '');
+          }
+        }
+      }
+
+      else if (key === 'availability') {
+        html += detailRow('Status', details.is_up ? 'Online' : 'Offline', details.is_up ? 'pass' : 'fail');
+        html += detailRow('Status Code', details.status_code || '--',
+          details.status_code && details.status_code >= 200 && details.status_code < 400 ? 'pass' : 'fail');
+        html += detailRow('Response Time', details.response_time_ms != null ? details.response_time_ms + ' ms' : '--', '');
+        if (details.final_url) {
+          const displayUrl = details.final_url.length > 50 ? details.final_url.substring(0, 47) + '...' : details.final_url;
+          html += detailRow('Final URL', displayUrl, '');
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    function detailRow(label, value, status) {
+      const cls = status ? ' ' + status : '';
+      return `<div class="detail-row">
+        <span class="detail-label">${label}</span>
+        <span class="detail-value${cls}">${value}</span>
+      </div>`;
+    }
+
+    function renderRecommendations(recs) {
+      const list = document.getElementById('rec-list');
+      list.innerHTML = '';
+
+      if (recs.length === 0) {
+        list.innerHTML = '<div class="no-recs">No recommendations -- your website is looking great!</div>';
+        return;
+      }
+
+      recs.forEach((rec, i) => {
+        const priority = i < 3 ? 'priority-high' : (i < 6 ? 'priority-medium' : 'priority-low');
+        const li = document.createElement('li');
+        li.className = 'rec-item ' + priority;
+        li.innerHTML = `<div class="rec-bullet"></div><span>${rec}</span>`;
+        list.appendChild(li);
+      });
+    }
+
+    function copyShareText() {
+      const text = document.getElementById('share-text').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast();
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast();
+      });
+    }
+
+    function showToast() {
+      const toast = document.getElementById('copied-toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function captureEmail() {
+      const email = document.getElementById('email-input').value.trim();
+      if (!email || !email.includes('@')) {
+        document.getElementById('email-input').style.borderColor = '#ef4444';
+        return;
+      }
+
+      // Store in localStorage
+      const stored = JSON.parse(localStorage.getItem('grader_emails') || '[]');
+      stored.push({
+        email: email,
+        url: currentResult ? currentResult.url : '',
+        score: currentResult ? currentResult.score : 0,
+        grade: currentResult ? currentResult.grade : '',
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('grader_emails', JSON.stringify(stored));
+
+      document.getElementById('email-input').style.borderColor = 'var(--border)';
+      document.getElementById('email-success').style.display = 'block';
+      document.getElementById('email-input').value = '';
+    }
+
+    function checkAnother() {
+      hideAll();
+      document.getElementById('hero-section').style.display = 'block';
+      urlInput.value = '';
+      urlInput.focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Enter key triggers grading
+    urlInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        runGrader();
+      }
+    });
+
+    // Pre-fill from URL params
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const urlParam = params.get('url');
+      if (urlParam) {
+        urlInput.value = urlParam;
+        runGrader();
+      }
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
