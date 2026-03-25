@@ -186,6 +186,30 @@
       { id: 'sql2mongo', name: 'SQL to MongoDB', icon: 'MDB' },
       { id: 'tailwind', name: 'Tailwind Lookup', icon: 'TW' },
       { id: 'jsondiff', name: 'JSON Diff', icon: 'J<>' },
+      { id: 'sshkeygen', name: 'SSH Key Gen', icon: 'SSH' },
+      { id: 'json2yaml', name: 'JSON to YAML', icon: 'YML' },
+      { id: 'base58', name: 'Base58 Encoder', icon: 'B58' },
+      { id: 'colorpicker', name: 'Color Picker', icon: 'CP' },
+      { id: 'regexref', name: 'Regex Reference', icon: 'RX' },
+      { id: 'clippath', name: 'CSS Clip-Path', icon: 'CP' },
+      { id: 'githubprofile', name: 'GitHub README', icon: 'GH' },
+      { id: 'jsontree', name: 'JSON Tree', icon: 'JT' },
+      { id: 'textshadow', name: 'Text Shadow', icon: 'TS' },
+      { id: 'ipconvert', name: 'IP Converter', icon: 'IPC' },
+      { id: 'shortcuts', name: 'Keyboard Shortcuts', icon: 'KB' },
+      { id: 'curl2code', name: 'cURL to Code', icon: 'cU' },
+      { id: 'htmlcolors', name: 'HTML Colors', icon: 'HC' },
+      { id: 'dataurl', name: 'Data URL', icon: 'DU' },
+      { id: 'hmac', name: 'HMAC Generator', icon: 'HM' },
+      { id: 'sqlref', name: 'SQL Reference', icon: 'SQ' },
+      { id: 'cssfilter', name: 'CSS Filter', icon: 'FI' },
+      { id: 'fontpreview', name: 'Font Preview', icon: 'FP' },
+      { id: 'httpmethods', name: 'HTTP Methods', icon: 'GET' },
+      { id: 'json2schema', name: 'JSON Schema Gen', icon: 'JSG' },
+      { id: 'manifest', name: 'PWA Manifest', icon: 'PWA' },
+      { id: 'semver', name: 'SemVer Check', icon: 'SV' },
+      { id: 'subnetvisual', name: 'Subnet Visual', icon: 'SN' },
+      { id: 'emoji', name: 'Emoji Picker', icon: 'EM' },
     ];
 
     const others = allTools.filter(t => t.id !== currentTool);
@@ -386,7 +410,7 @@
         '@type': 'WebSite',
         'name': 'DevTools.fm',
         'url': 'https://zerokit.dev/',
-        'description': 'Free online developer tools. JSON formatter, Base64 encoder, hash generator, regex tester, and 35+ more tools.',
+        'description': 'Free online developer tools. 100+ tools including JSON formatter, Base64 encoder, hash generator, regex tester, DNS lookup, and more.',
         'potentialAction': {
           '@type': 'SearchAction',
           'target': 'https://zerokit.dev/?q={search_term_string}',
@@ -397,7 +421,7 @@
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         'name': 'Developer Tools',
-        'numberOfItems': 76,
+        'numberOfItems': 100,
         'itemListElement': Array.from(document.querySelectorAll('.tool-card')).slice(0, 10).map(function(card, i) {
           const link = card.querySelector('a') || card;
           const name = card.querySelector('h3, .tool-name');
@@ -424,10 +448,22 @@
     var footer = document.querySelector('footer');
     if (!footer) return;
 
+    // Bottom ad (before footer) - all pages
     var adContainer = document.createElement('div');
     adContainer.style.cssText = 'max-width:1200px;margin:0 auto;padding:16px 24px;text-align:center;';
-    adContainer.innerHTML = '<div id="frame" style="width:100%;margin:auto;position:relative;z-index:1;"><iframe data-aa="2431745" src="//acceptable.a-ads.com/2431745/?size=Adaptive" style="border:0;padding:0;width:70%;height:auto;overflow:hidden;display:block;margin:auto"></iframe></div>';
+    adContainer.innerHTML = '<div style="width:100%;margin:auto;position:relative;z-index:1;"><iframe data-aa="2431745" src="//acceptable.a-ads.com/2431745/?size=Adaptive" style="border:0;padding:0;width:70%;height:auto;overflow:hidden;display:block;margin:auto"></iframe></div>';
     footer.parentNode.insertBefore(adContainer, footer);
+
+    // Top ad (after tool description) - tool pages only
+    if (document.querySelector('.tool-page')) {
+      var desc = document.querySelector('.tool-page .description, .tool-page p:first-of-type');
+      if (desc) {
+        var topAd = document.createElement('div');
+        topAd.style.cssText = 'max-width:1200px;margin:16px auto;padding:8px 24px;text-align:center;';
+        topAd.innerHTML = '<div style="width:100%;margin:auto;"><iframe data-aa="2431745" src="//acceptable.a-ads.com/2431745/?size=728x90" style="border:0;padding:0;width:728px;max-width:100%;height:90px;overflow:hidden;display:block;margin:auto"></iframe></div>';
+        desc.parentNode.insertBefore(topAd, desc.nextSibling);
+      }
+    }
   }
 
   // === INIT ===
