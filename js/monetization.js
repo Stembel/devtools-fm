@@ -173,6 +173,19 @@
       { id: 'jwtbuilder', name: 'JWT Builder', icon: 'JW+' },
       { id: 'toml', name: 'TOML Converter', icon: 'TML' },
       { id: 'crontab', name: 'Crontab Tester', icon: 'CT' },
+      { id: 'csvviewer', name: 'CSV Viewer', icon: 'CSV' },
+      { id: 'colorblind', name: 'Color Blindness', icon: 'CB' },
+      { id: 'nginx', name: 'Nginx Config', icon: 'NGX' },
+      { id: 'dockercompose', name: 'Docker Compose', icon: 'DC' },
+      { id: 'json2ts', name: 'JSON to TypeScript', icon: 'TS' },
+      { id: 'envfile', name: '.env Editor', icon: '.env' },
+      { id: 'gitcheat', name: 'Git Cheatsheet', icon: 'GIT' },
+      { id: 'htmlformat', name: 'HTML Formatter', icon: 'HTM' },
+      { id: 'asciiart', name: 'ASCII Art', icon: 'A#' },
+      { id: 'cssunits', name: 'CSS Units', icon: 'px' },
+      { id: 'sql2mongo', name: 'SQL to MongoDB', icon: 'MDB' },
+      { id: 'tailwind', name: 'Tailwind Lookup', icon: 'TW' },
+      { id: 'jsondiff', name: 'JSON Diff', icon: 'J<>' },
     ];
 
     const others = allTools.filter(t => t.id !== currentTool);
@@ -384,7 +397,7 @@
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         'name': 'Developer Tools',
-        'numberOfItems': 53,
+        'numberOfItems': 76,
         'itemListElement': Array.from(document.querySelectorAll('.tool-card')).slice(0, 10).map(function(card, i) {
           const link = card.querySelector('a') || card;
           const name = card.querySelector('h3, .tool-name');

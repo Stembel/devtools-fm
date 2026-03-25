@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Pricing - ZeroKit.dev | Server-Side Developer Tools API</title>
+  <meta name="description" content="ZeroKit API pricing plans. Free tier with 30 req/min, or upgrade for higher limits, API keys, and priority support. 8 server-side tools: DNS, SSL, Headers, WHOIS, Redirect, Status, Email, Tech Detection.">
+  <link rel="canonical" href="https://zerokit.dev/pricing.html">
+  <meta property="og:title" content="API Pricing - ZeroKit.dev">
+  <meta property="og:description" content="ZeroKit API pricing plans for 8 server-side developer tools. Free tier available. Paid plans from $9/month.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zerokit.dev/pricing.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="API Pricing - ZeroKit.dev">
+  <meta name="twitter:description" content="ZeroKit API pricing plans for 8 server-side developer tools. Free tier available. Paid plans from $9/month.">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .pricing-hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+    .pricing-hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .pricing-hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Pricing Grid */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin: 48px 0 64px;
+    }
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .pricing-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .pricing-card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 0 24px rgba(99, 102, 241, 0.15);
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pricing-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .pricing-price {
+      margin-bottom: 20px;
+    }
+    .pricing-price .amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .pricing-price .period {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .pricing-price .sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .pricing-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px;
+      flex: 1;
+    }
+    .pricing-features li {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .pricing-features li:last-child {
+      border-bottom: none;
+    }
+    .pricing-features .check {
+      color: var(--success);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .pricing-cta {
+      display: block;
+      text-align: center;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.15s;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .pricing-cta:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .pricing-cta.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .pricing-cta.primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: white;
+    }
+
+    /* Already using section */
+    .already-using {
+      text-align: center;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+    .already-using h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .already-using p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .already-using a.docs-link {
+      display: inline-block;
+      padding: 10px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .already-using a.docs-link:hover {
+      border-color: var(--accent);
+      background: var(--surface-2);
+    }
+
+    /* FAQ */
+    .faq-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding-bottom: 80px;
+    }
+    .faq-section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      text-align: center;
+      color: var(--text);
+    }
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 18px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: color 0.15s;
+    }
+    .faq-question:hover {
+      color: var(--accent);
+    }
+    .faq-arrow {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-arrow {
+      transform: rotate(180deg);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .faq-answer-inner {
+      padding: 0 20px 18px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .faq-answer-inner a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .faq-answer-inner a:hover {
+      text-decoration: underline;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+      .pricing-hero h1 {
+        font-size: 1.75rem;
+      }
+      .pricing-hero {
+        padding: 40px 0 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="./" class="logo">
+        <span>&gt;_</span> DevTools.fm
+      </a>
+      <nav>
+        <a href="./">Tools</a>
+        <a href="api-docs.html">API Docs</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero -->
+    <section class="pricing-hero">
+      <h1>ZeroKit API</h1>
+      <p>Reliable server-side developer tools via REST API. DNS, SSL, WHOIS, Headers, Redirects, Status, Email Validation, and Tech Detection &mdash; all in one place.</p>
+    </section>
+
+    <!-- Pricing Cards -->
+    <div class="pricing-grid">
+      <!-- Free Tier -->
+      <div class="pricing-card">
+        <h3>Free</h3>
+        <div class="pricing-price">
+          <span class="amount">$0</span>
+          <span class="period">/ forever</span>
+          <div class="sub">No credit card required</div>
+        </div>
+        <ul class="pricing-features">
+          <li><span class="check">&#10003;</span> 30 requests / minute</li>
+          <li><span class="check">&#10003;</span> All 8 endpoints</li>
+          <li><span class="check">&#10003;</span> No API key needed</li>
+          <li><span class="check">&#10003;</span> CORS enabled</li>
+          <li><span class="check">&#10003;</span> JSON responses</li>
+          <li><span class="check">&#10003;</span> Community support</li>
+        </ul>
+        <a href="api-docs.html" class="pricing-cta">Get Started</a>
+      </div>
+
+      <!-- Starter Tier -->
+      <div class="pricing-card">
+        <h3>Starter</h3>
+        <div class="pricing-price">
+          <span class="amount">$9</span>
+          <span class="period">/ month</span>
+          <div class="sub">For side projects &amp; MVPs</div>
+        </div>
+        <ul class="pricing-features">
+          <li><span class="check">&#10003;</span> 1,000 requests / day</li>
+          <li><span class="check">&#10003;</span> All 8 endpoints</li>
+          <li><span class="check">&#10003;</span> Personal API key</li>
+          <li><span class="check">&#10003;</span> CORS enabled</li>
+          <li><span class="check">&#10003;</span> Priority email support</li>
+          <li><span class="check">&#10003;</span> Usage dashboard</li>
+        </ul>
+        <a href="mailto:support@veloiq.de?subject=ZeroKit%20API%20%E2%80%93%20Starter%20Plan&body=Hi%2C%0A%0AI%E2%80%99d%20like%20to%20sign%20up%20for%20the%20Starter%20plan%20(%249%2Fmonth).%0A%0APlease%20let%20me%20know%20how%20to%20proceed.%0A%0AThanks!" class="pricing-cta">Contact Sales</a>
+      </div>
+
+      <!-- Pro Tier -->
+      <div class="pricing-card featured">
+        <span class="pricing-badge">Popular</span>
+        <h3>Pro</h3>
+        <div class="pricing-price">
+          <span class="amount">$29</span>
+          <span class="period">/ month</span>
+          <div class="sub">For growing products</div>
+        </div>
+        <ul class="pricing-features">
+          <li><span class="check">&#10003;</span> 10,000 requests / day</li>
+          <li><span class="check">&#10003;</span> All 8 endpoints</li>
+          <li><span class="check">&#10003;</span> Personal API key</li>
+          <li><span class="check">&#10003;</span> Bulk endpoints</li>
+          <li><span class="check">&#10003;</span> Priority email support</li>
+          <li><span class="check">&#10003;</span> Usage dashboard</li>
+        </ul>
+        <a href="mailto:support@veloiq.de?subject=ZeroKit%20API%20%E2%80%93%20Pro%20Plan&body=Hi%2C%0A%0AI%E2%80%99d%20like%20to%20sign%20up%20for%20the%20Pro%20plan%20(%2429%2Fmonth).%0A%0APlease%20let%20me%20know%20how%20to%20proceed.%0A%0AThanks!" class="pricing-cta primary">Contact Sales</a>
+      </div>
+
+      <!-- Enterprise Tier -->
+      <div class="pricing-card">
+        <h3>Enterprise</h3>
+        <div class="pricing-price">
+          <span class="amount">$99</span>
+          <span class="period">/ month</span>
+          <div class="sub">For teams &amp; high-volume use</div>
+        </div>
+        <ul class="pricing-features">
+          <li><span class="check">&#10003;</span> Unlimited requests</li>
+          <li><span class="check">&#10003;</span> All 8 endpoints</li>
+          <li><span class="check">&#10003;</span> Personal API key</li>
+          <li><span class="check">&#10003;</span> Bulk endpoints</li>
+          <li><span class="check">&#10003;</span> Dedicated support &amp; SLA</li>
+          <li><span class="check">&#10003;</span> Custom integrations</li>
+        </ul>
+        <a href="mailto:support@veloiq.de?subject=ZeroKit%20API%20%E2%80%93%20Enterprise%20Plan&body=Hi%2C%0A%0AI%E2%80%99m%20interested%20in%20the%20Enterprise%20plan%20(%2499%2Fmonth).%0A%0APlease%20let%20me%20know%20how%20to%20proceed.%0A%0AThanks!" class="pricing-cta">Contact Sales</a>
+      </div>
+    </div>
+
+    <!-- Already using section -->
+    <section class="already-using">
+      <h2>Already using our free API?</h2>
+      <p>Check out the full documentation for all 8 endpoints, request examples, and response schemas.</p>
+      <a href="api-docs.html" class="docs-link">View API Documentation &rarr;</a>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="faq-item open">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          How do I get an API key?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Email us at <a href="mailto:support@veloiq.de">support@veloiq.de</a> with your chosen plan. We will set up your account and send you a personal API key within one business day. The free tier does not require an API key &mdash; you can start using the API immediately.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          What endpoints are included?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            All plans include all 8 server-side endpoints: DNS Lookup, SSL Checker, HTTP Headers, WHOIS Lookup, Redirect Checker, Website Status, Email Validation, and Tech Detection. See the <a href="api-docs.html">API Documentation</a> for full details on each endpoint.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Can I exceed the rate limit?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            If you hit your plan's rate limit, the API will return a <code style="font-family: var(--mono); font-size: 0.85rem; background: var(--surface-2); padding: 2px 6px; border-radius: 3px;">429 Too Many Requests</code> response. You can upgrade to a higher plan at any time. If you have temporary spikes, contact us and we can discuss a custom arrangement.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          How do I pay?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Contact us at <a href="mailto:support@veloiq.de">support@veloiq.de</a> to get started. We will send you an invoice. Payment integration for self-service checkout is coming soon.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; Server-side developer tools API. Free tier available.</div>
+      <div style="font-size: 0.8rem;"><a href="about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:support@veloiq.de" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) {
+        item.classList.add('open');
+      }
+    }
+  </script>
+  <script src="js/monetization.js"></script>
+</body>
+</html>
