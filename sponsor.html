@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advertise on ZeroKit.dev - Reach Thousands of Developers</title>
+  <meta name="description" content="Sponsor ZeroKit.dev and reach thousands of developers. Banner ads, sponsored tools, newsletter sponsorships, and custom integrations. Direct placement, no ad network middleman.">
+  <link rel="canonical" href="https://zerokit.dev/sponsor.html">
+  <meta property="og:title" content="Advertise on ZeroKit.dev">
+  <meta property="og:description" content="Reach thousands of developers with clean, non-intrusive ad placements. Banner ads from $100/mo, sponsored tools from $250/mo.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zerokit.dev/sponsor.html">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Advertise on ZeroKit.dev">
+  <meta name="twitter:description" content="Reach thousands of developers with clean, non-intrusive ad placements. Banner ads from $100/mo, sponsored tools from $250/mo.">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Hero */
+    .sponsor-hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+    .sponsor-hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .sponsor-hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Stats Section */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin: 48px 0 64px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .stat-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 6px;
+      font-family: var(--font);
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Section headings */
+    .section-heading {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .section-heading h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .section-heading p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Ad Placement Cards */
+    .placement-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 80px;
+    }
+    .placement-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .placement-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .placement-card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 0 24px rgba(99, 102, 241, 0.15);
+    }
+    .placement-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .placement-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+    .placement-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .placement-price {
+      margin-bottom: 16px;
+    }
+    .placement-price .amount {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .placement-price .period {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .placement-price .sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .placement-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px;
+      flex: 1;
+    }
+    .placement-features li {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .placement-features li:last-child {
+      border-bottom: none;
+    }
+    .placement-features .check {
+      color: var(--success);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .placement-cta {
+      display: block;
+      text-align: center;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.15s;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .placement-cta:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .placement-cta.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .placement-cta.primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: white;
+    }
+    .coming-soon-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* Why Advertise */
+    .why-section {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 0;
+      margin-bottom: 64px;
+    }
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 36px;
+    }
+    .why-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: border-color 0.2s;
+    }
+    .why-card:hover {
+      border-color: var(--accent);
+    }
+    .why-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .why-card h3 span {
+      font-size: 1.1rem;
+    }
+    .why-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      text-align: center;
+      padding: 0 0 64px;
+    }
+    .cta-section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .cta-section p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+      margin: 0 auto 28px;
+      line-height: 1.7;
+    }
+    .cta-button {
+      display: inline-block;
+      padding: 14px 36px;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .cta-button:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: white;
+    }
+    .cta-subtext {
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* FAQ */
+    .faq-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding-bottom: 80px;
+    }
+    .faq-section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      text-align: center;
+      color: var(--text);
+    }
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 18px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: color 0.15s;
+    }
+    .faq-question:hover {
+      color: var(--accent);
+    }
+    .faq-arrow {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-arrow {
+      transform: rotate(180deg);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .faq-answer-inner {
+      padding: 0 20px 18px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .faq-answer-inner a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .faq-answer-inner a:hover {
+      text-decoration: underline;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats-grid,
+      .placement-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .stats-grid,
+      .placement-grid {
+        grid-template-columns: 1fr;
+      }
+      .why-grid {
+        grid-template-columns: 1fr;
+      }
+      .sponsor-hero h1 {
+        font-size: 1.75rem;
+      }
+      .sponsor-hero {
+        padding: 40px 0 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="./" class="logo">
+        <span>&gt;_</span> DevTools.fm
+      </a>
+      <nav>
+        <a href="./">Tools</a>
+        <a href="api-docs.html">API Docs</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero -->
+    <section class="sponsor-hero">
+      <h1>Advertise on ZeroKit.dev</h1>
+      <p>Put your developer tool, API, or SaaS product in front of thousands of engaged developers. Clean placements, transparent pricing, no ad network middleman.</p>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">76+</div>
+        <div class="stat-label">Developer Tools</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">80+</div>
+        <div class="stat-label">Indexed Pages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">SEO</div>
+        <div class="stat-label">Growing Organic Traffic</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">Devs</div>
+        <div class="stat-label">High-Value Tech Audience</div>
+      </div>
+    </div>
+
+    <!-- Ad Placement Options -->
+    <div class="section-heading">
+      <h2>Sponsorship Options</h2>
+      <p>Choose the placement that fits your goals and budget. All options include analytics and a direct relationship &mdash; no middleman.</p>
+    </div>
+
+    <div class="placement-grid">
+      <!-- Banner Ad -->
+      <div class="placement-card">
+        <div class="placement-icon">&#128220;</div>
+        <h3>Banner Ad</h3>
+        <div class="placement-price">
+          <span class="amount">$100</span>
+          <span class="period">/ month</span>
+          <div class="sub">Shown across all tool pages</div>
+        </div>
+        <ul class="placement-features">
+          <li><span class="check">&#10003;</span> Displayed on every tool page</li>
+          <li><span class="check">&#10003;</span> Above-the-fold placement</li>
+          <li><span class="check">&#10003;</span> Your logo, tagline &amp; link</li>
+          <li><span class="check">&#10003;</span> Monthly impression report</li>
+          <li><span class="check">&#10003;</span> Clean, non-intrusive design</li>
+        </ul>
+        <a href="mailto:support@veloiq.de?subject=Sponsorship%20Inquiry%20%E2%80%93%20Banner%20Ad&body=Hi%2C%0A%0AI%E2%80%99m%20interested%20in%20a%20Banner%20Ad%20placement%20on%20ZeroKit.dev.%0A%0ACompany%3A%20%0AWebsite%3A%20%0ABudget%3A%20%0A%0APlease%20let%20me%20know%20how%20to%20proceed.%0A%0AThanks!" class="placement-cta">Get Started</a>
+      </div>
+
+      <!-- Sponsored Tool -->
+      <div class="placement-card featured">
+        <span class="placement-badge">Best Value</span>
+        <div class="placement-icon">&#11088;</div>
+        <h3>Sponsored Tool</h3>
+        <div class="placement-price">
+          <span class="amount">$250</span>
+          <span class="period">/ month</span>
+          <div class="sub">Your tool featured prominently</div>
+        </div>
+        <ul class="placement-features">
+          <li><span class="check">&#10003;</span> Dedicated tool page for your product</li>
+          <li><span class="check">&#10003;</span> Featured in homepage grid</li>
+          <li><span class="check">&#10003;</span> &ldquo;Sponsored&rdquo; badge (transparent)</li>
+          <li><span class="check">&#10003;</span> Custom description &amp; CTA</li>
+          <li><span class="check">&#10003;</span> Monthly click &amp; impression stats</li>
+        </ul>
+        <a href="mailto:support@veloiq.de?subject=Sponsorship%20Inquiry%20%E2%80%93%20Sponsored%20Tool&body=Hi%2C%0A%0AI%E2%80%99m%20interested%20in%20a%20Sponsored%20Tool%20placement%20on%20ZeroKit.dev.%0A%0ACompany%3A%20%0ATool%20Name%3A%20%0AWebsite%3A%20%0ABudget%3A%20%0A%0APlease%20let%20me%20know%20how%20to%20proceed.%0A%0AThanks!" class="placement-cta primary">Get Started</a>
+      </div>
+
+      <!-- Newsletter Sponsor -->
+      <div class="placement-card">
+        <div class="placement-icon">&#9993;</div>
+        <h3>Newsletter Sponsor <span class="coming-soon-tag">Coming Soon</span></h3>
+        <div class="placement-price">
+          <span class="amount">$50</span>
+          <span class="period">/ issue</span>
+          <div class="sub">Reach our subscriber list</div>
+        </div>
+        <ul class="placement-features">
+          <li><span class="check">&#10003;</span> Dedicated sponsor slot per issue</li>
+          <li><span class="check">&#10003;</span> 150-word blurb + link</li>
+          <li><span class="check">&#10003;</span> Sent to developer subscribers</li>
+          <li><span class="check">&#10003;</span> Open rate &amp; click tracking</li>
+          <li><span class="check">&#10003;</span> Book single or multi-issue runs</li>
+        </ul>
+        <a href="mailto:support@veloiq.de?subject=Sponsorship%20Inquiry%20%E2%80%93%20Newsletter&body=Hi%2C%0A%0AI%E2%80%99m%20interested%20in%20sponsoring%20the%20ZeroKit.dev%20newsletter%20when%20it%20launches.%0A%0ACompany%3A%20%0AWebsite%3A%20%0A%0APlease%20keep%20me%20posted.%0A%0AThanks!" class="placement-cta">Join Waitlist</a>
+      </div>
+
+      <!-- Custom Integration -->
+      <div class="placement-card">
+        <div class="placement-icon">&#128295;</div>
+        <h3>Custom Integration</h3>
+        <div class="placement-price">
+          <span class="amount">Custom</span>
+          <span class="period"></span>
+          <div class="sub">Tailored to your needs</div>
+        </div>
+        <ul class="placement-features">
+          <li><span class="check">&#10003;</span> Co-branded tool or feature</li>
+          <li><span class="check">&#10003;</span> API integration showcase</li>
+          <li><span class="check">&#10003;</span> Dedicated landing page</li>
+          <li><span class="check">&#10003;</span> Long-term partnership options</li>
+          <li><span class="check">&#10003;</span> Custom reporting &amp; analytics</li>
+        </ul>
+        <a href="mailto:support@veloiq.de?subject=Sponsorship%20Inquiry%20%E2%80%93%20Custom%20Integration&body=Hi%2C%0A%0AI%E2%80%99m%20interested%20in%20a%20custom%20sponsorship%20integration%20on%20ZeroKit.dev.%0A%0ACompany%3A%20%0AWebsite%3A%20%0AIdea%3A%20%0A%0APlease%20let%20me%20know%20how%20to%20proceed.%0A%0AThanks!" class="placement-cta">Contact Us</a>
+      </div>
+    </div>
+
+    <!-- Why Advertise With Us -->
+    <section class="why-section">
+      <div class="section-heading">
+        <h2>Why Advertise With Us</h2>
+        <p>We built ZeroKit.dev for developers, and we treat sponsors the same way &mdash; with respect and transparency.</p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card">
+          <h3><span>&#127919;</span> Developer Audience</h3>
+          <p>Our users are software engineers, DevOps professionals, and technical decision-makers &mdash; a high-intent, high-income audience that is difficult to reach through generic ad networks.</p>
+        </div>
+        <div class="why-card">
+          <h3><span>&#128274;</span> Privacy-First Approach</h3>
+          <p>We respect user privacy. That builds trust &mdash; and trust means your ad gets seen by an audience that is not running ad blockers or ignoring banners out of habit.</p>
+        </div>
+        <div class="why-card">
+          <h3><span>&#129309;</span> Direct Placement</h3>
+          <p>No ad network middleman taking a cut. You work directly with us, get transparent reporting, and know exactly where your budget goes. Better ROI, simpler relationship.</p>
+        </div>
+        <div class="why-card">
+          <h3><span>&#10024;</span> Clean Ad Formats</h3>
+          <p>No pop-ups, no auto-play video, no dark patterns. Your brand appears in clean, native-feeling placements that developers actually respect rather than dismiss.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>Ready to Reach Developers?</h2>
+      <p>Drop us a line and we will put together a proposal tailored to your goals, audience, and budget. No commitment required.</p>
+      <a href="mailto:support@veloiq.de?subject=Sponsorship%20Inquiry" class="cta-button">Get in Touch &rarr;</a>
+      <div class="cta-subtext">Typically respond within 24 hours &middot; No commitment required</div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="faq-item open">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          What is the minimum sponsorship duration?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            The minimum booking is one month for Banner Ads and Sponsored Tools. Newsletter sponsorships can be booked per individual issue. We offer a 10% discount for quarterly commitments (3+ months) and 20% off for annual commitments.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          What ad formats do you accept?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            For Banner Ads, we accept a logo (SVG or PNG, max 200&times;50px), a short tagline (up to 80 characters), and a destination URL. For Sponsored Tools, provide a tool name, description (up to 200 characters), icon, and link. We handle the integration to ensure it matches the site's look and feel.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Can I see traffic and engagement stats?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            Yes. All sponsors receive a monthly report with impressions, clicks, and CTR for their placements. We can also share general site analytics (page views, unique visitors, top pages) under NDA before you commit. Contact us at <a href="mailto:support@veloiq.de">support@veloiq.de</a> to request a media kit with current numbers.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Do you use third-party ad tracking?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            No. We use simple, privacy-respecting click tracking (server-side counts, no cookies or fingerprinting). This aligns with our privacy-first approach and means your ad reaches users who trust our site &mdash; including the many developers who block traditional ad trackers.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          How do I pay?
+          <span class="faq-arrow">&#9660;</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            We send invoices via email. Payment can be made via bank transfer or PayPal. For annual commitments, we can arrange quarterly billing. Contact <a href="mailto:support@veloiq.de">support@veloiq.de</a> to discuss payment options.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom: 8px;">ZeroKit.dev &mdash; Server-side developer tools API. Free tier available.</div>
+      <div style="font-size: 0.8rem;"><a href="about.html" style="color: var(--text-muted); text-decoration: none;">About</a> &middot; <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a> &middot; <a href="impressum.html" style="color: var(--text-muted); text-decoration: none;">Impressum</a> &middot; <a href="mailto:support@veloiq.de" style="color: var(--text-muted); text-decoration: none;">Contact</a></div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) {
+        item.classList.add('open');
+      }
+    }
+  </script>
+  <script src="js/monetization.js"></script>
+</body>
+</html>
