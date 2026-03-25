@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cURL to Code - Convert cURL to Python, JavaScript, Go | ZeroKit.dev</title>
+  <meta name="description" content="Convert cURL commands to Python, JavaScript, PHP, Go, Node.js, and Ruby code. Free, fast, no signup. Supports all common curl flags.">
+  <link rel="canonical" href="https://zerokit.dev/tools/curl2code.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .lang-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .lang-tab {
+      padding: 10px 18px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .lang-tab:hover { color: var(--text); }
+    .lang-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .code-output {
+      position: relative;
+      flex: 1;
+      overflow: auto;
+    }
+    .code-output pre {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+      min-height: 350px;
+    }
+    /* Syntax highlighting */
+    .code-output .kw { color: #c678dd; }
+    .code-output .str { color: #98c379; }
+    .code-output .func { color: #61afef; }
+    .code-output .num { color: #d19a66; }
+    .code-output .cmt { color: #5c6370; font-style: italic; }
+    .code-output .punct { color: #abb2bf; }
+    .code-output .var { color: #e06c75; }
+    .code-output .type { color: #e5c07b; }
+    .examples-section {
+      margin-top: 32px;
+    }
+    .examples-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 12px;
+    }
+    .example-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .example-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .example-card .example-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .example-card code {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all 0.15s;
+      z-index: 2;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .output-panel {
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 768px) {
+      .examples-grid { grid-template-columns: 1fr; }
+      .lang-tab { padding: 8px 12px; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>cURL to Code Converter</h1>
+    <p class="description">Paste a cURL command and convert it to code in your favorite language. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="convert()">Convert</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">cURL Command</div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste your curl command here...
+
+curl -X POST https://api.example.com/data \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d &apos;{"key": "value"}&apos;'></textarea>
+      </div>
+      <div class="tool-panel output-panel">
+        <div class="lang-tabs" id="langTabs">
+          <button class="lang-tab active" data-lang="javascript">JavaScript</button>
+          <button class="lang-tab" data-lang="python">Python</button>
+          <button class="lang-tab" data-lang="php">PHP</button>
+          <button class="lang-tab" data-lang="go">Go</button>
+          <button class="lang-tab" data-lang="nodejs">Node.js</button>
+          <button class="lang-tab" data-lang="ruby">Ruby</button>
+        </div>
+        <div class="code-output" id="outputWrap">
+          <button class="copy-btn" onclick="copyCode()">Copy</button>
+          <pre id="output"><span class="cmt">// Converted code will appear here...</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="examples-section">
+      <h2>Example cURL Commands</h2>
+      <div class="examples-grid">
+        <div class="example-card" onclick="loadExample(0)">
+          <div class="example-title">Simple GET Request</div>
+          <code>curl https://api.example.com/users</code>
+        </div>
+        <div class="example-card" onclick="loadExample(1)">
+          <div class="example-title">POST with JSON Body</div>
+          <code>curl -X POST -H "Content-Type: application/json" -d '{"name":"John"}' ...</code>
+        </div>
+        <div class="example-card" onclick="loadExample(2)">
+          <div class="example-title">Authentication with Bearer Token</div>
+          <code>curl -H "Authorization: Bearer sk-abc123" ...</code>
+        </div>
+        <div class="example-card" onclick="loadExample(3)">
+          <div class="example-title">Basic Auth (-u flag)</div>
+          <code>curl -u admin:secret123 https://api.example.com/admin</code>
+        </div>
+        <div class="example-card" onclick="loadExample(4)">
+          <div class="example-title">Form Data with Cookies</div>
+          <code>curl -X POST -d "user=test&pass=123" -b "session=abc" ...</code>
+        </div>
+        <div class="example-card" onclick="loadExample(5)">
+          <div class="example-title">Follow Redirects + Insecure</div>
+          <code>curl -L -k --compressed https://example.com/api</code>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const langTabs = document.querySelectorAll('.lang-tab');
+    let currentLang = 'javascript';
+    let lastParsed = null;
+
+    const examples = [
+      'curl https://api.example.com/users',
+      `curl -X POST https://api.example.com/users \\
+  -H "Content-Type: application/json" \\
+  -d '{"name": "John", "email": "john@example.com"}'`,
+      `curl https://api.example.com/data \\
+  -H "Authorization: Bearer sk-abc123" \\
+  -H "Accept: application/json"`,
+      'curl -u admin:secret123 https://api.example.com/admin/stats',
+      `curl -X POST https://example.com/login \\
+  -d "username=testuser&password=pass123" \\
+  -b "session=abc123def456" \\
+  -H "Content-Type: application/x-www-form-urlencoded"`,
+      'curl -L -k --compressed https://example.com/api/redirect'
+    ];
+
+    // Tab switching
+    langTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        langTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentLang = tab.dataset.lang;
+        if (lastParsed) renderCode(lastParsed);
+      });
+    });
+
+    function loadExample(idx) {
+      $input.value = examples[idx];
+      convert();
+    }
+
+    // Parse curl command
+    function parseCurl(raw) {
+      const input = raw.trim();
+      if (!input) return null;
+
+      // Normalize line continuations
+      let cmd = input.replace(/\\\s*\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+      // Strip leading 'curl' (with optional $)
+      cmd = cmd.replace(/^\$?\s*curl\s+/, '');
+
+      const result = {
+        method: 'GET',
+        url: '',
+        headers: {},
+        data: null,
+        basicAuth: null,
+        cookies: null,
+        followRedirects: false,
+        insecure: false,
+        compressed: false
+      };
+
+      const tokens = tokenize(cmd);
+      let i = 0;
+
+      while (i < tokens.length) {
+        const tok = tokens[i];
+
+        if (tok === '-X' || tok === '--request') {
+          i++;
+          if (i < tokens.length) result.method = tokens[i].toUpperCase();
+        } else if (tok === '-H' || tok === '--header') {
+          i++;
+          if (i < tokens.length) {
+            const hdr = tokens[i];
+            const colonIdx = hdr.indexOf(':');
+            if (colonIdx > 0) {
+              const key = hdr.substring(0, colonIdx).trim();
+              const val = hdr.substring(colonIdx + 1).trim();
+              result.headers[key] = val;
+            }
+          }
+        } else if (tok === '-d' || tok === '--data' || tok === '--data-raw' || tok === '--data-binary') {
+          i++;
+          if (i < tokens.length) {
+            result.data = tokens[i];
+            if (result.method === 'GET') result.method = 'POST';
+          }
+        } else if (tok === '-u' || tok === '--user') {
+          i++;
+          if (i < tokens.length) result.basicAuth = tokens[i];
+        } else if (tok === '-b' || tok === '--cookie') {
+          i++;
+          if (i < tokens.length) result.cookies = tokens[i];
+        } else if (tok === '-L' || tok === '--location') {
+          result.followRedirects = true;
+        } else if (tok === '-k' || tok === '--insecure') {
+          result.insecure = true;
+        } else if (tok === '--compressed') {
+          result.compressed = true;
+        } else if (!tok.startsWith('-')) {
+          result.url = tok;
+        }
+
+        i++;
+      }
+
+      return result;
+    }
+
+    // Tokenizer: handles quoted strings properly
+    function tokenize(str) {
+      const tokens = [];
+      let i = 0;
+      while (i < str.length) {
+        // Skip whitespace
+        while (i < str.length && str[i] === ' ') i++;
+        if (i >= str.length) break;
+
+        if (str[i] === "'" || str[i] === '"') {
+          const quote = str[i];
+          i++;
+          let tok = '';
+          while (i < str.length && str[i] !== quote) {
+            if (str[i] === '\\' && i + 1 < str.length) {
+              tok += str[i + 1];
+              i += 2;
+            } else {
+              tok += str[i];
+              i++;
+            }
+          }
+          i++; // skip closing quote
+          tokens.push(tok);
+        } else {
+          let tok = '';
+          while (i < str.length && str[i] !== ' ') {
+            tok += str[i];
+            i++;
+          }
+          tokens.push(tok);
+        }
+      }
+      return tokens;
+    }
+
+    // Escape helpers
+    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function jsStr(s) { return JSON.stringify(s); }
+    function pyStr(s) {
+      if (s.includes("'") && !s.includes('"')) return '"' + s + '"';
+      return "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
+    }
+    function goStr(s) { return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
+    function phpStr(s) { return "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'"; }
+    function rubyStr(s) { return "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'"; }
+
+    // Code generators
+    function genJavaScript(p) {
+      let lines = [];
+      let opts = [];
+
+      opts.push(`  method: <span class="str">${esc(jsStr(p.method))}</span>,`);
+
+      const hdrs = { ...p.headers };
+      if (p.basicAuth) {
+        const encoded = btoa(p.basicAuth);
+        hdrs['Authorization'] = 'Basic ' + encoded;
+      }
+      if (p.cookies) hdrs['Cookie'] = p.cookies;
+
+      if (Object.keys(hdrs).length) {
+        opts.push(`  headers: {`);
+        Object.entries(hdrs).forEach(([k, v]) => {
+          opts.push(`    <span class="str">${esc(jsStr(k))}</span>: <span class="str">${esc(jsStr(v))}</span>,`);
+        });
+        opts.push(`  },`);
+      }
+
+      if (p.data) {
+        opts.push(`  body: <span class="str">${esc(jsStr(p.data))}</span>,`);
+      }
+
+      if (p.followRedirects === false) {
+        opts.push(`  redirect: <span class="str">"manual"</span>,`);
+      }
+
+      lines.push(`<span class="kw">const</span> <span class="var">response</span> = <span class="kw">await</span> <span class="func">fetch</span>(<span class="str">${esc(jsStr(p.url))}</span>, {`);
+      lines.push(...opts);
+      lines.push(`});`);
+      lines.push('');
+      lines.push(`<span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span> <span class="var">response</span>.<span class="func">json</span>();`);
+      lines.push(`<span class="func">console</span>.<span class="func">log</span>(<span class="var">data</span>);`);
+
+      return lines.join('\n');
+    }
+
+    function genPython(p) {
+      let lines = [];
+      lines.push(`<span class="kw">import</span> <span class="var">requests</span>`);
+      lines.push('');
+
+      const hdrs = { ...p.headers };
+      if (p.cookies) hdrs['Cookie'] = p.cookies;
+
+      if (Object.keys(hdrs).length) {
+        lines.push(`<span class="var">headers</span> = {`);
+        Object.entries(hdrs).forEach(([k, v]) => {
+          lines.push(`    <span class="str">${esc(pyStr(k))}</span>: <span class="str">${esc(pyStr(v))}</span>,`);
+        });
+        lines.push(`}`);
+        lines.push('');
+      }
+
+      let args = [`<span class="str">${esc(pyStr(p.url))}</span>`];
+      if (Object.keys(hdrs).length) args.push(`headers=<span class="var">headers</span>`);
+      if (p.data) args.push(`data=<span class="str">${esc(pyStr(p.data))}</span>`);
+      if (p.basicAuth) {
+        const parts = p.basicAuth.split(':');
+        const user = parts[0];
+        const pass = parts.slice(1).join(':');
+        args.push(`auth=(<span class="str">${esc(pyStr(user))}</span>, <span class="str">${esc(pyStr(pass))}</span>)`);
+      }
+      if (!p.followRedirects) args.push(`allow_redirects=<span class="num">False</span>`);
+      if (p.insecure) args.push(`verify=<span class="num">False</span>`);
+
+      const method = p.method.toLowerCase();
+      lines.push(`<span class="var">response</span> = <span class="var">requests</span>.<span class="func">${esc(method)}</span>(`);
+      args.forEach((a, idx) => {
+        lines.push(`    ${a}${idx < args.length - 1 ? ',' : ''}`);
+      });
+      lines.push(`)`);
+      lines.push('');
+      lines.push(`<span class="func">print</span>(<span class="var">response</span>.<span class="func">json</span>())`);
+
+      return lines.join('\n');
+    }
+
+    function genPHP(p) {
+      let lines = [];
+      lines.push(`<span class="kw">&lt;?php</span>`);
+      lines.push('');
+      lines.push(`<span class="var">$ch</span> = <span class="func">curl_init</span>();`);
+      lines.push('');
+      lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_URL</span>, <span class="str">${esc(phpStr(p.url))}</span>);`);
+      lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_RETURNTRANSFER</span>, <span class="num">true</span>);`);
+
+      if (p.method !== 'GET') {
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_CUSTOMREQUEST</span>, <span class="str">${esc(phpStr(p.method))}</span>);`);
+      }
+
+      const hdrs = { ...p.headers };
+      if (p.cookies) hdrs['Cookie'] = p.cookies;
+
+      if (Object.keys(hdrs).length) {
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_HTTPHEADER</span>, [`);
+        Object.entries(hdrs).forEach(([k, v]) => {
+          lines.push(`    <span class="str">${esc(phpStr(k + ': ' + v))}</span>,`);
+        });
+        lines.push(`]);`);
+      }
+
+      if (p.data) {
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_POSTFIELDS</span>, <span class="str">${esc(phpStr(p.data))}</span>);`);
+      }
+
+      if (p.basicAuth) {
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_USERPWD</span>, <span class="str">${esc(phpStr(p.basicAuth))}</span>);`);
+      }
+
+      if (p.followRedirects) {
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_FOLLOWLOCATION</span>, <span class="num">true</span>);`);
+      }
+
+      if (p.insecure) {
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_SSL_VERIFYPEER</span>, <span class="num">false</span>);`);
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_SSL_VERIFYHOST</span>, <span class="num">false</span>);`);
+      }
+
+      if (p.compressed) {
+        lines.push(`<span class="func">curl_setopt</span>(<span class="var">$ch</span>, <span class="type">CURLOPT_ENCODING</span>, <span class="str">''</span>);`);
+      }
+
+      lines.push('');
+      lines.push(`<span class="var">$response</span> = <span class="func">curl_exec</span>(<span class="var">$ch</span>);`);
+      lines.push(`<span class="func">curl_close</span>(<span class="var">$ch</span>);`);
+      lines.push('');
+      lines.push(`<span class="func">echo</span> <span class="var">$response</span>;`);
+
+      return lines.join('\n');
+    }
+
+    function genGo(p) {
+      let lines = [];
+      let imports = ['"fmt"', '"net/http"', '"io"'];
+      if (p.data) imports.push('"strings"');
+      if (p.insecure) { imports.push('"crypto/tls"'); }
+
+      lines.push(`<span class="kw">package</span> <span class="var">main</span>`);
+      lines.push('');
+      lines.push(`<span class="kw">import</span> (`);
+      imports.forEach(im => lines.push(`    <span class="str">${esc(im)}</span>`));
+      lines.push(`)`);
+      lines.push('');
+      lines.push(`<span class="kw">func</span> <span class="func">main</span>() {`);
+
+      if (p.data) {
+        lines.push(`    <span class="var">body</span> := <span class="var">strings</span>.<span class="func">NewReader</span>(<span class="str">${esc(goStr(p.data))}</span>)`);
+        lines.push(`    <span class="var">req</span>, <span class="var">err</span> := <span class="var">http</span>.<span class="func">NewRequest</span>(<span class="str">${esc(goStr(p.method))}</span>, <span class="str">${esc(goStr(p.url))}</span>, <span class="var">body</span>)`);
+      } else {
+        lines.push(`    <span class="var">req</span>, <span class="var">err</span> := <span class="var">http</span>.<span class="func">NewRequest</span>(<span class="str">${esc(goStr(p.method))}</span>, <span class="str">${esc(goStr(p.url))}</span>, <span class="num">nil</span>)`);
+      }
+
+      lines.push(`    <span class="kw">if</span> <span class="var">err</span> != <span class="num">nil</span> {`);
+      lines.push(`        <span class="func">panic</span>(<span class="var">err</span>)`);
+      lines.push(`    }`);
+
+      const hdrs = { ...p.headers };
+      if (p.cookies) hdrs['Cookie'] = p.cookies;
+      if (p.basicAuth) {
+        const parts = p.basicAuth.split(':');
+        const user = parts[0];
+        const pass = parts.slice(1).join(':');
+        lines.push(`    <span class="var">req</span>.<span class="func">SetBasicAuth</span>(<span class="str">${esc(goStr(user))}</span>, <span class="str">${esc(goStr(pass))}</span>)`);
+      }
+
+      Object.entries(hdrs).forEach(([k, v]) => {
+        lines.push(`    <span class="var">req</span>.<span class="var">Header</span>.<span class="func">Set</span>(<span class="str">${esc(goStr(k))}</span>, <span class="str">${esc(goStr(v))}</span>)`);
+      });
+
+      if (p.compressed) {
+        lines.push(`    <span class="var">req</span>.<span class="var">Header</span>.<span class="func">Set</span>(<span class="str">"Accept-Encoding"</span>, <span class="str">"gzip, deflate"</span>)`);
+      }
+
+      lines.push('');
+
+      if (p.insecure) {
+        lines.push(`    <span class="var">tr</span> := &amp;<span class="var">http</span>.<span class="type">Transport</span>{`);
+        lines.push(`        <span class="var">TLSClientConfig</span>: &amp;<span class="var">tls</span>.<span class="type">Config</span>{<span class="var">InsecureSkipVerify</span>: <span class="num">true</span>},`);
+        lines.push(`    }`);
+        lines.push(`    <span class="var">client</span> := &amp;<span class="var">http</span>.<span class="type">Client</span>{<span class="var">Transport</span>: <span class="var">tr</span>}`);
+      } else {
+        lines.push(`    <span class="var">client</span> := &amp;<span class="var">http</span>.<span class="type">Client</span>{}`);
+      }
+
+      if (!p.followRedirects) {
+        lines.push(`    <span class="var">client</span>.<span class="var">CheckRedirect</span> = <span class="kw">func</span>(<span class="var">req</span> *<span class="var">http</span>.<span class="type">Request</span>, <span class="var">via</span> []*<span class="var">http</span>.<span class="type">Request</span>) <span class="type">error</span> {`);
+        lines.push(`        <span class="kw">return</span> <span class="var">http</span>.<span class="var">ErrUseLastResponse</span>`);
+        lines.push(`    }`);
+      }
+
+      lines.push(`    <span class="var">resp</span>, <span class="var">err</span> := <span class="var">client</span>.<span class="func">Do</span>(<span class="var">req</span>)`);
+      lines.push(`    <span class="kw">if</span> <span class="var">err</span> != <span class="num">nil</span> {`);
+      lines.push(`        <span class="func">panic</span>(<span class="var">err</span>)`);
+      lines.push(`    }`);
+      lines.push(`    <span class="kw">defer</span> <span class="var">resp</span>.<span class="var">Body</span>.<span class="func">Close</span>()`);
+      lines.push('');
+      lines.push(`    <span class="var">respBody</span>, <span class="var">_</span> := <span class="var">io</span>.<span class="func">ReadAll</span>(<span class="var">resp</span>.<span class="var">Body</span>)`);
+      lines.push(`    <span class="var">fmt</span>.<span class="func">Println</span>(<span class="func">string</span>(<span class="var">respBody</span>))`);
+      lines.push(`}`);
+
+      return lines.join('\n');
+    }
+
+    function genNodejs(p) {
+      let lines = [];
+      lines.push(`<span class="kw">const</span> <span class="var">axios</span> = <span class="func">require</span>(<span class="str">'axios'</span>);`);
+      lines.push('');
+
+      const config = [];
+      config.push(`  method: <span class="str">${esc(jsStr(p.method.toLowerCase()))}</span>,`);
+      config.push(`  url: <span class="str">${esc(jsStr(p.url))}</span>,`);
+
+      const hdrs = { ...p.headers };
+      if (p.cookies) hdrs['Cookie'] = p.cookies;
+      if (p.basicAuth) {
+        const encoded = btoa(p.basicAuth);
+        hdrs['Authorization'] = 'Basic ' + encoded;
+      }
+
+      if (Object.keys(hdrs).length) {
+        config.push(`  headers: {`);
+        Object.entries(hdrs).forEach(([k, v]) => {
+          config.push(`    <span class="str">${esc(jsStr(k))}</span>: <span class="str">${esc(jsStr(v))}</span>,`);
+        });
+        config.push(`  },`);
+      }
+
+      if (p.data) {
+        // Try to detect JSON data
+        let isJson = false;
+        try { JSON.parse(p.data); isJson = true; } catch (e) {}
+        if (isJson) {
+          config.push(`  data: ${esc(JSON.stringify(JSON.parse(p.data), null, 4).split('\n').join('\n  '))},`);
+        } else {
+          config.push(`  data: <span class="str">${esc(jsStr(p.data))}</span>,`);
+        }
+      }
+
+      if (p.insecure) {
+        lines.push(`<span class="kw">const</span> <span class="var">https</span> = <span class="func">require</span>(<span class="str">'https'</span>);`);
+        lines.push(`<span class="kw">const</span> <span class="var">agent</span> = <span class="kw">new</span> <span class="var">https</span>.<span class="type">Agent</span>({ <span class="var">rejectUnauthorized</span>: <span class="num">false</span> });`);
+        lines.push('');
+        config.push(`  httpsAgent: <span class="var">agent</span>,`);
+      }
+
+      if (!p.followRedirects) {
+        config.push(`  maxRedirects: <span class="num">0</span>,`);
+      }
+
+      lines.push(`<span class="var">axios</span>({`);
+      lines.push(...config);
+      lines.push(`})`);
+      lines.push(`  .<span class="func">then</span>(<span class="var">response</span> =&gt; {`);
+      lines.push(`    <span class="var">console</span>.<span class="func">log</span>(<span class="var">response</span>.<span class="var">data</span>);`);
+      lines.push(`  })`);
+      lines.push(`  .<span class="func">catch</span>(<span class="var">error</span> =&gt; {`);
+      lines.push(`    <span class="var">console</span>.<span class="func">error</span>(<span class="var">error</span>.<span class="var">message</span>);`);
+      lines.push(`  });`);
+
+      return lines.join('\n');
+    }
+
+    function genRuby(p) {
+      let lines = [];
+      lines.push(`<span class="kw">require</span> <span class="str">'net/http'</span>`);
+      lines.push(`<span class="kw">require</span> <span class="str">'uri'</span>`);
+      if (p.data) {
+        lines.push(`<span class="kw">require</span> <span class="str">'json'</span>`);
+      }
+      lines.push('');
+
+      lines.push(`<span class="var">uri</span> = <span class="type">URI</span>.<span class="func">parse</span>(<span class="str">${esc(rubyStr(p.url))}</span>)`);
+      lines.push(`<span class="var">http</span> = <span class="type">Net::HTTP</span>.<span class="func">new</span>(<span class="var">uri</span>.<span class="var">host</span>, <span class="var">uri</span>.<span class="var">port</span>)`);
+
+      if (p.url.startsWith('https')) {
+        lines.push(`<span class="var">http</span>.<span class="var">use_ssl</span> = <span class="num">true</span>`);
+      }
+
+      if (p.insecure) {
+        lines.push(`<span class="var">http</span>.<span class="var">verify_mode</span> = <span class="type">OpenSSL::SSL::VERIFY_NONE</span>`);
+      }
+
+      lines.push('');
+
+      const methodMap = {
+        'GET': 'Get', 'POST': 'Post', 'PUT': 'Put', 'DELETE': 'Delete',
+        'PATCH': 'Patch', 'HEAD': 'Head', 'OPTIONS': 'Options'
+      };
+      const rubyMethod = methodMap[p.method] || 'Get';
+      lines.push(`<span class="var">request</span> = <span class="type">Net::HTTP::${esc(rubyMethod)}</span>.<span class="func">new</span>(<span class="var">uri</span>.<span class="var">request_uri</span>)`);
+
+      const hdrs = { ...p.headers };
+      if (p.cookies) hdrs['Cookie'] = p.cookies;
+
+      Object.entries(hdrs).forEach(([k, v]) => {
+        lines.push(`<span class="var">request</span>[<span class="str">${esc(rubyStr(k))}</span>] = <span class="str">${esc(rubyStr(v))}</span>`);
+      });
+
+      if (p.basicAuth) {
+        const parts = p.basicAuth.split(':');
+        const user = parts[0];
+        const pass = parts.slice(1).join(':');
+        lines.push(`<span class="var">request</span>.<span class="func">basic_auth</span>(<span class="str">${esc(rubyStr(user))}</span>, <span class="str">${esc(rubyStr(pass))}</span>)`);
+      }
+
+      if (p.data) {
+        lines.push(`<span class="var">request</span>.<span class="var">body</span> = <span class="str">${esc(rubyStr(p.data))}</span>`);
+      }
+
+      if (p.compressed) {
+        lines.push(`<span class="var">request</span>[<span class="str">'Accept-Encoding'</span>] = <span class="str">'gzip, deflate'</span>`);
+      }
+
+      lines.push('');
+      lines.push(`<span class="var">response</span> = <span class="var">http</span>.<span class="func">request</span>(<span class="var">request</span>)`);
+      lines.push(`<span class="func">puts</span> <span class="var">response</span>.<span class="var">body</span>`);
+
+      return lines.join('\n');
+    }
+
+    function renderCode(parsed) {
+      const generators = {
+        javascript: genJavaScript,
+        python: genPython,
+        php: genPHP,
+        go: genGo,
+        nodejs: genNodejs,
+        ruby: genRuby
+      };
+
+      const gen = generators[currentLang];
+      if (gen) {
+        $output.innerHTML = gen(parsed);
+      }
+    }
+
+    function convert() {
+      const raw = $input.value.trim();
+      if (!raw) return;
+
+      const parsed = parseCurl(raw);
+      if (!parsed || !parsed.url) {
+        $output.innerHTML = '<span class="cmt">// Error: Could not parse URL from curl command.\n// Make sure your command starts with "curl" followed by a URL.</span>';
+        lastParsed = null;
+        return;
+      }
+
+      lastParsed = parsed;
+      renderCode(parsed);
+    }
+
+    function copyCode() {
+      const text = $output.textContent;
+      if (text) {
+        navigator.clipboard.writeText(text);
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.innerHTML = '<span class="cmt">// Converted code will appear here...</span>';
+      lastParsed = null;
+    }
+
+    // Auto-convert on paste
+    $input.addEventListener('paste', () => setTimeout(convert, 50));
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

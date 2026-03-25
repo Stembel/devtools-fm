@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data URL Generator - Create data: URIs from Files | ZeroKit.dev</title>
+  <meta name="description" content="Convert files and text to data URIs (data:mimetype;base64,...). Upload images, SVGs, fonts, CSS, JS or paste text. Preview, compare sizes, decode. Free online tool.">
+  <link rel="canonical" href="https://zerokit.dev/tools/dataurl.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .tab { padding: 10px 20px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: var(--font); transition: all 0.15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+      margin-bottom: 16px;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(99, 102, 241, 0.05); }
+    .drop-zone p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px; }
+    .drop-zone .hint { font-size: 0.8rem; color: var(--text-muted); opacity: 0.6; }
+    .drop-zone input[type="file"] { display: none; }
+
+    .mime-row { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .mime-row label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+    .mime-row select, .mime-row input[type="text"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+      outline: none;
+    }
+    .mime-row select:focus, .mime-row input[type="text"]:focus { border-color: var(--accent); }
+    .mime-detected { font-size: 0.8rem; color: var(--accent); }
+
+    .size-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .size-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      text-align: center;
+    }
+    .size-box .size-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+    .size-box .size-value { font-family: var(--mono); font-size: 1rem; font-weight: 600; color: var(--text); }
+    .size-box .size-value.increase { color: var(--error); }
+    .size-box .size-value.decrease { color: var(--success); }
+
+    .output-area {
+      position: relative;
+    }
+    .output-area textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+    .output-area textarea:focus { border-color: var(--accent); }
+    .output-area textarea::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .preview-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      text-align: center;
+      display: none;
+    }
+    .preview-container img, .preview-container svg { max-width: 100%; max-height: 300px; border-radius: 4px; }
+    .preview-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; margin-bottom: 12px; }
+
+    .use-cases {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .use-case {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+    .use-case .use-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+    .use-case code {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text);
+      word-break: break-all;
+      display: block;
+      cursor: pointer;
+      padding: 6px 8px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .use-case code:hover { background: var(--border); }
+
+    .decode-output {
+      margin-top: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .size-comparison { grid-template-columns: 1fr; }
+      .mime-row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Data URL Generator</h1>
+    <p class="description">Convert files and text to data URIs. Upload an image, font, SVG, CSS, or JS file &mdash; or paste text. Decode existing data URLs back to their original content.</p>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('encode')">Encode</button>
+      <button class="tab" onclick="switchTab('decode')">Decode</button>
+    </div>
+
+    <!-- ENCODE TAB -->
+    <div id="tab-encode" class="tab-content active">
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <p>Drop a file here or click to browse</p>
+        <span class="hint">Images, SVGs, fonts, CSS, JS, or any file</span>
+        <input type="file" id="fileInput" onchange="handleFile(this.files[0])">
+      </div>
+
+      <div class="tool-panel" style="margin-bottom: 16px;">
+        <div class="panel-header">Or paste text content</div>
+        <textarea class="tool-textarea" id="textInput" style="min-height: 120px;" placeholder="Paste text content here (HTML, CSS, SVG, JS, etc.)..." oninput="handleTextInput()"></textarea>
+      </div>
+
+      <div class="mime-row">
+        <label>MIME Type:</label>
+        <select id="mimeSelect" onchange="updateMime()">
+          <option value="">-- Auto-detect --</option>
+          <optgroup label="Images">
+            <option value="image/png">image/png</option>
+            <option value="image/jpeg">image/jpeg</option>
+            <option value="image/gif">image/gif</option>
+            <option value="image/webp">image/webp</option>
+            <option value="image/svg+xml">image/svg+xml</option>
+            <option value="image/x-icon">image/x-icon</option>
+            <option value="image/avif">image/avif</option>
+            <option value="image/bmp">image/bmp</option>
+          </optgroup>
+          <optgroup label="Fonts">
+            <option value="font/woff">font/woff</option>
+            <option value="font/woff2">font/woff2</option>
+            <option value="font/ttf">font/ttf</option>
+            <option value="font/otf">font/otf</option>
+            <option value="application/vnd.ms-fontobject">application/vnd.ms-fontobject (EOT)</option>
+          </optgroup>
+          <optgroup label="Text / Code">
+            <option value="text/plain">text/plain</option>
+            <option value="text/html">text/html</option>
+            <option value="text/css">text/css</option>
+            <option value="text/javascript">text/javascript</option>
+            <option value="application/javascript">application/javascript</option>
+            <option value="application/json">application/json</option>
+            <option value="application/xml">application/xml</option>
+          </optgroup>
+          <optgroup label="Other">
+            <option value="application/pdf">application/pdf</option>
+            <option value="application/octet-stream">application/octet-stream</option>
+            <option value="audio/mpeg">audio/mpeg</option>
+            <option value="audio/wav">audio/wav</option>
+            <option value="video/mp4">video/mp4</option>
+          </optgroup>
+        </select>
+        <span id="detectedMime" class="mime-detected"></span>
+      </div>
+
+      <div class="action-bar">
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="generateDataUrl()">Generate Data URL</button>
+          <button class="btn" onclick="copyOutput()">Copy Data URL</button>
+          <button class="btn" onclick="clearEncode()">Clear</button>
+        </div>
+        <span id="encodeStatus"></span>
+      </div>
+
+      <div class="size-comparison" id="sizeComparison" style="display: none;">
+        <div class="size-box">
+          <div class="size-label">Original Size</div>
+          <div class="size-value" id="originalSize">-</div>
+        </div>
+        <div class="size-box">
+          <div class="size-label">Data URL Size</div>
+          <div class="size-value" id="dataUrlSize">-</div>
+        </div>
+        <div class="size-box">
+          <div class="size-label">Overhead</div>
+          <div class="size-value" id="overheadSize">-</div>
+        </div>
+      </div>
+
+      <div class="output-area">
+        <textarea id="dataUrlOutput" readonly placeholder="Data URL will appear here..."></textarea>
+      </div>
+
+      <div class="preview-container" id="previewContainer">
+        <div class="preview-label">Preview</div>
+        <div id="previewContent"></div>
+      </div>
+
+      <div class="use-cases" id="useCases" style="display: none;">
+        <div class="use-case">
+          <div class="use-label">CSS background-image</div>
+          <code id="cssBg" onclick="copyText(this.textContent)"></code>
+        </div>
+        <div class="use-case">
+          <div class="use-label">HTML img src</div>
+          <code id="htmlImg" onclick="copyText(this.textContent)"></code>
+        </div>
+        <div class="use-case">
+          <div class="use-label">CSS @font-face src</div>
+          <code id="cssFontFace" onclick="copyText(this.textContent)"></code>
+        </div>
+      </div>
+    </div>
+
+    <!-- DECODE TAB -->
+    <div id="tab-decode" class="tab-content">
+      <div class="tool-panel" style="margin-bottom: 16px;">
+        <div class="panel-header">Paste Data URL</div>
+        <textarea class="tool-textarea" id="decodeInput" style="min-height: 150px;" placeholder="Paste a data URL here (data:mimetype;base64,...)"></textarea>
+      </div>
+
+      <div class="action-bar">
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="decodeDataUrl()">Decode</button>
+          <button class="btn" onclick="downloadDecoded()">Download File</button>
+          <button class="btn" onclick="copyDecoded()">Copy Content</button>
+          <button class="btn" onclick="clearDecode()">Clear</button>
+        </div>
+        <span id="decodeStatus"></span>
+      </div>
+
+      <div class="decode-output" id="decodeOutput" style="display: none;">
+        <div class="mime-row">
+          <label>Detected MIME:</label>
+          <span id="decodedMime" class="mime-detected"></span>
+          <label style="margin-left: 16px;">Encoding:</label>
+          <span id="decodedEncoding" class="mime-detected"></span>
+        </div>
+
+        <div class="size-comparison">
+          <div class="size-box">
+            <div class="size-label">Data URL Size</div>
+            <div class="size-value" id="decDataUrlSize">-</div>
+          </div>
+          <div class="size-box">
+            <div class="size-label">Decoded Size</div>
+            <div class="size-value" id="decDecodedSize">-</div>
+          </div>
+          <div class="size-box">
+            <div class="size-label">MIME Type</div>
+            <div class="size-value" id="decMimeDisplay" style="font-size: 0.8rem;">-</div>
+          </div>
+        </div>
+
+        <div class="preview-container" id="decodePreview" style="display: none;">
+          <div class="preview-label">Preview</div>
+          <div id="decodePreviewContent"></div>
+        </div>
+
+        <div class="tool-panel">
+          <div class="panel-header">Decoded Content</div>
+          <textarea class="tool-textarea" id="decodedContent" readonly style="min-height: 150px;" placeholder="Decoded content will appear here..."></textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // State
+    let currentFile = null;
+    let currentBase64 = '';
+    let currentMime = '';
+    let originalBytes = 0;
+    let decodedBlob = null;
+
+    // MIME type map
+    const MIME_MAP = {
+      'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'gif': 'image/gif',
+      'webp': 'image/webp', 'svg': 'image/svg+xml', 'ico': 'image/x-icon', 'avif': 'image/avif',
+      'bmp': 'image/bmp', 'tiff': 'image/tiff', 'tif': 'image/tiff',
+      'woff': 'font/woff', 'woff2': 'font/woff2', 'ttf': 'font/ttf', 'otf': 'font/otf',
+      'eot': 'application/vnd.ms-fontobject',
+      'css': 'text/css', 'js': 'text/javascript', 'mjs': 'text/javascript',
+      'html': 'text/html', 'htm': 'text/html', 'xml': 'application/xml',
+      'json': 'application/json', 'txt': 'text/plain', 'csv': 'text/csv',
+      'pdf': 'application/pdf', 'mp3': 'audio/mpeg', 'wav': 'audio/wav',
+      'ogg': 'audio/ogg', 'mp4': 'video/mp4', 'webm': 'video/webm',
+      'zip': 'application/zip', 'wasm': 'application/wasm'
+    };
+
+    // Reverse map for decode file extension
+    const EXT_MAP = {};
+    for (const [ext, mime] of Object.entries(MIME_MAP)) {
+      if (!EXT_MAP[mime]) EXT_MAP[mime] = ext;
+    }
+
+    // Tab switching
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+    }
+
+    // Drag and drop
+    const dropZone = document.getElementById('dropZone');
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+    });
+    dropZone.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    // Detect MIME from filename
+    function detectMime(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      return MIME_MAP[ext] || 'application/octet-stream';
+    }
+
+    // Format bytes
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 2 : 0) + ' ' + units[i];
+    }
+
+    // Handle file upload
+    function handleFile(file) {
+      if (!file) return;
+      currentFile = file;
+      originalBytes = file.size;
+      const detected = file.type || detectMime(file.name);
+      currentMime = detected;
+
+      // Update UI
+      document.getElementById('detectedMime').textContent = 'Detected: ' + detected;
+      dropZone.querySelector('p').textContent = file.name;
+      dropZone.querySelector('.hint').textContent = formatBytes(file.size) + ' - ' + detected;
+
+      // Auto-select MIME if possible
+      const sel = document.getElementById('mimeSelect');
+      sel.value = '';
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === detected) { sel.value = detected; break; }
+      }
+
+      // Clear text input
+      document.getElementById('textInput').value = '';
+
+      // Read file to base64
+      const reader = new FileReader();
+      reader.onload = function() {
+        currentBase64 = reader.result.split(',')[1];
+        generateDataUrl();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Handle text input
+    function handleTextInput() {
+      const text = document.getElementById('textInput').value;
+      if (!text) return;
+      currentFile = null;
+      originalBytes = new Blob([text]).size;
+      currentBase64 = btoa(unescape(encodeURIComponent(text)));
+
+      const sel = document.getElementById('mimeSelect');
+      if (!sel.value) {
+        currentMime = 'text/plain';
+        document.getElementById('detectedMime').textContent = 'Default: text/plain (select to override)';
+      }
+      dropZone.querySelector('p').textContent = 'Drop a file here or click to browse';
+      dropZone.querySelector('.hint').textContent = 'Images, SVGs, fonts, CSS, JS, or any file';
+    }
+
+    // Update MIME from dropdown
+    function updateMime() {
+      const val = document.getElementById('mimeSelect').value;
+      if (val) {
+        currentMime = val;
+        document.getElementById('detectedMime').textContent = 'Override: ' + val;
+      } else if (currentFile) {
+        currentMime = currentFile.type || detectMime(currentFile.name);
+        document.getElementById('detectedMime').textContent = 'Detected: ' + currentMime;
+      } else {
+        currentMime = 'text/plain';
+        document.getElementById('detectedMime').textContent = '';
+      }
+    }
+
+    // Generate data URL
+    function generateDataUrl() {
+      const st = document.getElementById('encodeStatus');
+      if (!currentBase64) {
+        // Check text input
+        const text = document.getElementById('textInput').value;
+        if (text) {
+          handleTextInput();
+        } else {
+          st.textContent = 'Upload a file or enter text first';
+          st.className = 'status status-error';
+          return;
+        }
+      }
+
+      const mime = document.getElementById('mimeSelect').value || currentMime || 'application/octet-stream';
+      const dataUrl = 'data:' + mime + ';base64,' + currentBase64;
+
+      document.getElementById('dataUrlOutput').value = dataUrl;
+
+      // Size comparison
+      const dataUrlBytes = new Blob([dataUrl]).size;
+      document.getElementById('originalSize').textContent = formatBytes(originalBytes);
+      document.getElementById('dataUrlSize').textContent = formatBytes(dataUrlBytes);
+      const overhead = dataUrlBytes - originalBytes;
+      const pct = originalBytes > 0 ? ((overhead / originalBytes) * 100).toFixed(1) : 0;
+      const overheadEl = document.getElementById('overheadSize');
+      overheadEl.textContent = '+' + formatBytes(overhead) + ' (+' + pct + '%)';
+      overheadEl.className = 'size-value increase';
+      document.getElementById('sizeComparison').style.display = 'grid';
+
+      // Preview
+      showPreview(dataUrl, mime, 'previewContainer', 'previewContent');
+
+      // Use cases
+      showUseCases(dataUrl, mime);
+
+      st.textContent = 'Generated';
+      st.className = 'status status-success';
+    }
+
+    // Show preview
+    function showPreview(dataUrl, mime, containerId, contentId) {
+      const container = document.getElementById(containerId);
+      const content = document.getElementById(contentId);
+      content.innerHTML = '';
+
+      if (mime.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'Preview';
+        content.appendChild(img);
+        container.style.display = 'block';
+      } else if (mime === 'image/svg+xml') {
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'SVG Preview';
+        content.appendChild(img);
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    // Show use cases
+    function showUseCases(dataUrl, mime) {
+      const container = document.getElementById('useCases');
+      const truncated = dataUrl.length > 80 ? dataUrl.substring(0, 80) + '...' : dataUrl;
+
+      document.getElementById('cssBg').textContent = 'background-image: url(' + truncated + ');';
+      document.getElementById('htmlImg').textContent = '<img src="' + truncated + '" alt="">';
+
+      if (mime.startsWith('font/') || mime === 'application/vnd.ms-fontobject') {
+        const format = mime.includes('woff2') ? 'woff2' : mime.includes('woff') ? 'woff' : mime.includes('ttf') ? 'truetype' : mime.includes('otf') ? 'opentype' : 'embedded-opentype';
+        document.getElementById('cssFontFace').textContent = "src: url(" + truncated + ") format('" + format + "');";
+        document.getElementById('cssFontFace').parentElement.style.display = 'block';
+      } else {
+        document.getElementById('cssFontFace').parentElement.style.display = 'none';
+      }
+
+      // Store full data URL in data attributes for copy
+      document.getElementById('cssBg').dataset.full = 'background-image: url(' + dataUrl + ');';
+      document.getElementById('htmlImg').dataset.full = '<img src="' + dataUrl + '" alt="">';
+      if (mime.startsWith('font/') || mime === 'application/vnd.ms-fontobject') {
+        const format = mime.includes('woff2') ? 'woff2' : mime.includes('woff') ? 'woff' : mime.includes('ttf') ? 'truetype' : mime.includes('otf') ? 'opentype' : 'embedded-opentype';
+        document.getElementById('cssFontFace').dataset.full = "src: url(" + dataUrl + ") format('" + format + "');";
+      }
+
+      container.style.display = 'grid';
+
+      // Rebind click handlers for full copy
+      document.querySelectorAll('.use-case code').forEach(el => {
+        el.onclick = function() { copyText(this.dataset.full || this.textContent); };
+      });
+    }
+
+    // Copy helpers
+    function copyOutput() {
+      const val = document.getElementById('dataUrlOutput').value;
+      if (val) {
+        navigator.clipboard.writeText(val);
+        const st = document.getElementById('encodeStatus');
+        st.textContent = 'Copied!';
+        st.className = 'status status-success';
+      }
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      const st = document.getElementById('encodeStatus');
+      st.textContent = 'Copied!';
+      st.className = 'status status-success';
+    }
+
+    // Clear encode
+    function clearEncode() {
+      currentFile = null;
+      currentBase64 = '';
+      currentMime = '';
+      originalBytes = 0;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('textInput').value = '';
+      document.getElementById('dataUrlOutput').value = '';
+      document.getElementById('mimeSelect').value = '';
+      document.getElementById('detectedMime').textContent = '';
+      document.getElementById('encodeStatus').textContent = '';
+      document.getElementById('sizeComparison').style.display = 'none';
+      document.getElementById('previewContainer').style.display = 'none';
+      document.getElementById('useCases').style.display = 'none';
+      dropZone.querySelector('p').textContent = 'Drop a file here or click to browse';
+      dropZone.querySelector('.hint').textContent = 'Images, SVGs, fonts, CSS, JS, or any file';
+    }
+
+    // === DECODE ===
+
+    function decodeDataUrl() {
+      const input = document.getElementById('decodeInput').value.trim();
+      const st = document.getElementById('decodeStatus');
+
+      if (!input) {
+        st.textContent = 'Paste a data URL first';
+        st.className = 'status status-error';
+        return;
+      }
+
+      // Parse data URL: data:[<mediatype>][;base64],<data>
+      const match = input.match(/^data:([^;,]+)?(;base64)?,(.*)$/s);
+      if (!match) {
+        st.textContent = 'Invalid data URL format. Expected data:[mimetype][;base64],data';
+        st.className = 'status status-error';
+        return;
+      }
+
+      const mime = match[1] || 'text/plain';
+      const isBase64 = !!match[2];
+      const rawData = match[3];
+
+      document.getElementById('decodedMime').textContent = mime;
+      document.getElementById('decodedEncoding').textContent = isBase64 ? 'base64' : 'percent-encoded';
+      document.getElementById('decMimeDisplay').textContent = mime;
+
+      let decoded, decodedBytes;
+      try {
+        if (isBase64) {
+          const binaryString = atob(rawData);
+          decodedBytes = binaryString.length;
+          // Check if it's text-based MIME
+          if (mime.startsWith('text/') || mime === 'application/json' || mime === 'application/xml' || mime === 'application/javascript' || mime === 'image/svg+xml') {
+            decoded = decodeURIComponent(escape(binaryString));
+          } else {
+            decoded = '[Binary data - ' + formatBytes(decodedBytes) + '] Use "Download File" to save.';
+          }
+          // Create blob for download
+          const byteArray = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            byteArray[i] = binaryString.charCodeAt(i);
+          }
+          decodedBlob = new Blob([byteArray], { type: mime });
+        } else {
+          decoded = decodeURIComponent(rawData);
+          decodedBytes = new Blob([decoded]).size;
+          decodedBlob = new Blob([decoded], { type: mime });
+        }
+      } catch (e) {
+        st.textContent = 'Decode error: ' + e.message;
+        st.className = 'status status-error';
+        return;
+      }
+
+      document.getElementById('decodedContent').value = decoded;
+
+      // Sizes
+      const dataUrlBytes = new Blob([input]).size;
+      document.getElementById('decDataUrlSize').textContent = formatBytes(dataUrlBytes);
+      document.getElementById('decDecodedSize').textContent = formatBytes(decodedBytes);
+
+      // Preview
+      if (mime.startsWith('image/')) {
+        const preview = document.getElementById('decodePreview');
+        const content = document.getElementById('decodePreviewContent');
+        content.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = input;
+        img.alt = 'Decoded preview';
+        content.appendChild(img);
+        preview.style.display = 'block';
+      } else {
+        document.getElementById('decodePreview').style.display = 'none';
+      }
+
+      document.getElementById('decodeOutput').style.display = 'block';
+      st.textContent = 'Decoded';
+      st.className = 'status status-success';
+    }
+
+    function downloadDecoded() {
+      if (!decodedBlob) return;
+      const mime = document.getElementById('decodedMime').textContent;
+      const ext = EXT_MAP[mime] || 'bin';
+      const url = URL.createObjectURL(decodedBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'decoded.' + ext;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function copyDecoded() {
+      const val = document.getElementById('decodedContent').value;
+      if (val) {
+        navigator.clipboard.writeText(val);
+        const st = document.getElementById('decodeStatus');
+        st.textContent = 'Copied!';
+        st.className = 'status status-success';
+      }
+    }
+
+    function clearDecode() {
+      document.getElementById('decodeInput').value = '';
+      document.getElementById('decodedContent').value = '';
+      document.getElementById('decodeStatus').textContent = '';
+      document.getElementById('decodeOutput').style.display = 'none';
+      document.getElementById('decodePreview').style.display = 'none';
+      decodedBlob = null;
+    }
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

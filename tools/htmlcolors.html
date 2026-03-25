@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Color Names - All 147 CSS Named Colors Reference | ZeroKit.dev</title>
+  <meta name="description" content="Complete reference of all 147 CSS/HTML named colors. Search by name or hex, sort by hue, lightness or saturation, grouped by color family. Click to copy hex or name. Contrast preview included.">
+  <link rel="canonical" href="https://zerokit.dev/tools/htmlcolors.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .sort-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sort-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .category-tab .tab-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .sort-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .sort-btn:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .sort-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .category-section {
+      margin-bottom: 32px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-badge {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .category-header .cat-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+
+    .color-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .color-card:hover {
+      border-color: var(--text-muted);
+      transform: translateY(-1px);
+    }
+
+    .color-swatch {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+    }
+    .contrast-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      border-radius: 4px;
+      opacity: 0.9;
+    }
+    .contrast-black {
+      color: #000;
+    }
+    .contrast-white {
+      color: #fff;
+    }
+
+    .color-info {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .color-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .color-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .color-name:hover {
+      color: var(--accent);
+    }
+    .color-family-tag {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      background: var(--surface-2);
+      padding: 2px 8px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .color-values {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .color-hex, .color-rgb {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .color-hex:hover, .color-rgb:hover {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--accent);
+      color: white;
+      padding: 10px 24px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .copy-toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-swatch {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      border: 2px dashed var(--border);
+      margin: 0 auto 16px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    .quick-jump {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .quick-jump:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+    .quick-jump.visible {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .color-grid {
+        grid-template-columns: 1fr;
+      }
+      .controls-row {
+        gap: 8px;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      .sort-btn {
+        padding: 5px 10px;
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>HTML Color Names</h1>
+    <p class="description">Complete reference for all 147 CSS/HTML named colors. Search by name or hex value, sort by hue, lightness, or saturation. Click any value to copy it to your clipboard.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by name or hex... (e.g. coral, #ff6347)" autofocus spellcheck="false">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="controls-row">
+      <div class="sort-group">
+        <span class="sort-label">Sort:</span>
+        <button class="sort-btn active" data-sort="name">Name</button>
+        <button class="sort-btn" data-sort="hue">Hue</button>
+        <button class="sort-btn" data-sort="lightness">Lightness</button>
+        <button class="sort-btn" data-sort="saturation">Saturation</button>
+      </div>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs">
+      <button class="category-tab active" data-cat="all">All <span class="tab-count" id="countAll"></span></button>
+      <button class="category-tab" data-cat="Reds">Reds</button>
+      <button class="category-tab" data-cat="Oranges">Oranges</button>
+      <button class="category-tab" data-cat="Yellows">Yellows</button>
+      <button class="category-tab" data-cat="Greens">Greens</button>
+      <button class="category-tab" data-cat="Blues">Blues</button>
+      <button class="category-tab" data-cat="Purples">Purples</button>
+      <button class="category-tab" data-cat="Pinks">Pinks</button>
+      <button class="category-tab" data-cat="Browns">Browns</button>
+      <button class="category-tab" data-cat="Grays">Grays</button>
+      <button class="category-tab" data-cat="Whites">Whites</button>
+    </div>
+
+    <div id="colorList"></div>
+    <div id="noResults" class="no-results" style="display:none">
+      <div class="nr-swatch"></div>
+      <p>No colors match your search.</p>
+    </div>
+
+    <div class="copy-toast" id="copyToast"></div>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    // All 147 CSS named colors with hex values and color families
+    const COLORS = [
+      // Reds
+      { name: "IndianRed", hex: "#CD5C5C", family: "Reds" },
+      { name: "LightCoral", hex: "#F08080", family: "Reds" },
+      { name: "Salmon", hex: "#FA8072", family: "Reds" },
+      { name: "DarkSalmon", hex: "#E9967A", family: "Reds" },
+      { name: "LightSalmon", hex: "#FFA07A", family: "Reds" },
+      { name: "Crimson", hex: "#DC143C", family: "Reds" },
+      { name: "Red", hex: "#FF0000", family: "Reds" },
+      { name: "FireBrick", hex: "#B22222", family: "Reds" },
+      { name: "DarkRed", hex: "#8B0000", family: "Reds" },
+
+      // Pinks
+      { name: "Pink", hex: "#FFC0CB", family: "Pinks" },
+      { name: "LightPink", hex: "#FFB6C1", family: "Pinks" },
+      { name: "HotPink", hex: "#FF69B4", family: "Pinks" },
+      { name: "DeepPink", hex: "#FF1493", family: "Pinks" },
+      { name: "MediumVioletRed", hex: "#C71585", family: "Pinks" },
+      { name: "PaleVioletRed", hex: "#DB7093", family: "Pinks" },
+
+      // Oranges
+      { name: "Coral", hex: "#FF7F50", family: "Oranges" },
+      { name: "Tomato", hex: "#FF6347", family: "Oranges" },
+      { name: "OrangeRed", hex: "#FF4500", family: "Oranges" },
+      { name: "DarkOrange", hex: "#FF8C00", family: "Oranges" },
+      { name: "Orange", hex: "#FFA500", family: "Oranges" },
+
+      // Yellows
+      { name: "Gold", hex: "#FFD700", family: "Yellows" },
+      { name: "Yellow", hex: "#FFFF00", family: "Yellows" },
+      { name: "LightYellow", hex: "#FFFFE0", family: "Yellows" },
+      { name: "LemonChiffon", hex: "#FFFACD", family: "Yellows" },
+      { name: "LightGoldenRodYellow", hex: "#FAFAD2", family: "Yellows" },
+      { name: "PapayaWhip", hex: "#FFEFD5", family: "Yellows" },
+      { name: "Moccasin", hex: "#FFE4B5", family: "Yellows" },
+      { name: "PeachPuff", hex: "#FFDAB9", family: "Yellows" },
+      { name: "PaleGoldenRod", hex: "#EEE8AA", family: "Yellows" },
+      { name: "Khaki", hex: "#F0E68C", family: "Yellows" },
+      { name: "DarkKhaki", hex: "#BDB76B", family: "Yellows" },
+
+      // Purples
+      { name: "Lavender", hex: "#E6E6FA", family: "Purples" },
+      { name: "Thistle", hex: "#D8BFD8", family: "Purples" },
+      { name: "Plum", hex: "#DDA0DD", family: "Purples" },
+      { name: "Violet", hex: "#EE82EE", family: "Purples" },
+      { name: "Orchid", hex: "#DA70D6", family: "Purples" },
+      { name: "Fuchsia", hex: "#FF00FF", family: "Purples" },
+      { name: "Magenta", hex: "#FF00FF", family: "Purples" },
+      { name: "MediumOrchid", hex: "#BA55D3", family: "Purples" },
+      { name: "MediumPurple", hex: "#9370DB", family: "Purples" },
+      { name: "RebeccaPurple", hex: "#663399", family: "Purples" },
+      { name: "BlueViolet", hex: "#8A2BE2", family: "Purples" },
+      { name: "DarkViolet", hex: "#9400D3", family: "Purples" },
+      { name: "DarkOrchid", hex: "#9932CC", family: "Purples" },
+      { name: "DarkMagenta", hex: "#8B008B", family: "Purples" },
+      { name: "Purple", hex: "#800080", family: "Purples" },
+      { name: "Indigo", hex: "#4B0082", family: "Purples" },
+      { name: "SlateBlue", hex: "#6A5ACD", family: "Purples" },
+      { name: "DarkSlateBlue", hex: "#483D8B", family: "Purples" },
+      { name: "MediumSlateBlue", hex: "#7B68EE", family: "Purples" },
+
+      // Greens
+      { name: "GreenYellow", hex: "#ADFF2F", family: "Greens" },
+      { name: "Chartreuse", hex: "#7FFF00", family: "Greens" },
+      { name: "LawnGreen", hex: "#7CFC00", family: "Greens" },
+      { name: "Lime", hex: "#00FF00", family: "Greens" },
+      { name: "LimeGreen", hex: "#32CD32", family: "Greens" },
+      { name: "PaleGreen", hex: "#98FB98", family: "Greens" },
+      { name: "LightGreen", hex: "#90EE90", family: "Greens" },
+      { name: "MediumSpringGreen", hex: "#00FA9A", family: "Greens" },
+      { name: "SpringGreen", hex: "#00FF7F", family: "Greens" },
+      { name: "MediumSeaGreen", hex: "#3CB371", family: "Greens" },
+      { name: "SeaGreen", hex: "#2E8B57", family: "Greens" },
+      { name: "ForestGreen", hex: "#228B22", family: "Greens" },
+      { name: "Green", hex: "#008000", family: "Greens" },
+      { name: "DarkGreen", hex: "#006400", family: "Greens" },
+      { name: "YellowGreen", hex: "#9ACD32", family: "Greens" },
+      { name: "OliveDrab", hex: "#6B8E23", family: "Greens" },
+      { name: "Olive", hex: "#808000", family: "Greens" },
+      { name: "DarkOliveGreen", hex: "#556B2F", family: "Greens" },
+      { name: "MediumAquaMarine", hex: "#66CDAA", family: "Greens" },
+      { name: "DarkSeaGreen", hex: "#8FBC8B", family: "Greens" },
+      { name: "LightSeaGreen", hex: "#20B2AA", family: "Greens" },
+      { name: "DarkCyan", hex: "#008B8B", family: "Greens" },
+      { name: "Teal", hex: "#008080", family: "Greens" },
+
+      // Blues
+      { name: "Aqua", hex: "#00FFFF", family: "Blues" },
+      { name: "Cyan", hex: "#00FFFF", family: "Blues" },
+      { name: "LightCyan", hex: "#E0FFFF", family: "Blues" },
+      { name: "PaleTurquoise", hex: "#AFEEEE", family: "Blues" },
+      { name: "Aquamarine", hex: "#7FFFD4", family: "Blues" },
+      { name: "Turquoise", hex: "#40E0D0", family: "Blues" },
+      { name: "MediumTurquoise", hex: "#48D1CC", family: "Blues" },
+      { name: "DarkTurquoise", hex: "#00CED1", family: "Blues" },
+      { name: "CadetBlue", hex: "#5F9EA0", family: "Blues" },
+      { name: "SteelBlue", hex: "#4682B4", family: "Blues" },
+      { name: "LightSteelBlue", hex: "#B0C4DE", family: "Blues" },
+      { name: "PowderBlue", hex: "#B0E0E6", family: "Blues" },
+      { name: "LightBlue", hex: "#ADD8E6", family: "Blues" },
+      { name: "SkyBlue", hex: "#87CEEB", family: "Blues" },
+      { name: "LightSkyBlue", hex: "#87CEFA", family: "Blues" },
+      { name: "DeepSkyBlue", hex: "#00BFFF", family: "Blues" },
+      { name: "DodgerBlue", hex: "#1E90FF", family: "Blues" },
+      { name: "CornflowerBlue", hex: "#6495ED", family: "Blues" },
+      { name: "RoyalBlue", hex: "#4169E1", family: "Blues" },
+      { name: "Blue", hex: "#0000FF", family: "Blues" },
+      { name: "MediumBlue", hex: "#0000CD", family: "Blues" },
+      { name: "DarkBlue", hex: "#00008B", family: "Blues" },
+      { name: "Navy", hex: "#000080", family: "Blues" },
+      { name: "MidnightBlue", hex: "#191970", family: "Blues" },
+
+      // Browns
+      { name: "Cornsilk", hex: "#FFF8DC", family: "Browns" },
+      { name: "BlanchedAlmond", hex: "#FFEBCD", family: "Browns" },
+      { name: "Bisque", hex: "#FFE4C4", family: "Browns" },
+      { name: "NavajoWhite", hex: "#FFDEAD", family: "Browns" },
+      { name: "Wheat", hex: "#F5DEB3", family: "Browns" },
+      { name: "BurlyWood", hex: "#DEB887", family: "Browns" },
+      { name: "Tan", hex: "#D2B48C", family: "Browns" },
+      { name: "RosyBrown", hex: "#BC8F8F", family: "Browns" },
+      { name: "SandyBrown", hex: "#F4A460", family: "Browns" },
+      { name: "GoldenRod", hex: "#DAA520", family: "Browns" },
+      { name: "DarkGoldenRod", hex: "#B8860B", family: "Browns" },
+      { name: "Peru", hex: "#CD853F", family: "Browns" },
+      { name: "Chocolate", hex: "#D2691E", family: "Browns" },
+      { name: "SaddleBrown", hex: "#8B4513", family: "Browns" },
+      { name: "Sienna", hex: "#A0522D", family: "Browns" },
+      { name: "Brown", hex: "#A52A2A", family: "Browns" },
+      { name: "Maroon", hex: "#800000", family: "Browns" },
+
+      // Whites
+      { name: "White", hex: "#FFFFFF", family: "Whites" },
+      { name: "Snow", hex: "#FFFAFA", family: "Whites" },
+      { name: "HoneyDew", hex: "#F0FFF0", family: "Whites" },
+      { name: "MintCream", hex: "#F5FFFA", family: "Whites" },
+      { name: "Azure", hex: "#F0FFFF", family: "Whites" },
+      { name: "AliceBlue", hex: "#F0F8FF", family: "Whites" },
+      { name: "GhostWhite", hex: "#F8F8FF", family: "Whites" },
+      { name: "WhiteSmoke", hex: "#F5F5F5", family: "Whites" },
+      { name: "SeaShell", hex: "#FFF5EE", family: "Whites" },
+      { name: "Beige", hex: "#F5F5DC", family: "Whites" },
+      { name: "OldLace", hex: "#FDF5E6", family: "Whites" },
+      { name: "FloralWhite", hex: "#FFFAF0", family: "Whites" },
+      { name: "Ivory", hex: "#FFFFF0", family: "Whites" },
+      { name: "AntiqueWhite", hex: "#FAEBD7", family: "Whites" },
+      { name: "Linen", hex: "#FAF0E6", family: "Whites" },
+      { name: "LavenderBlush", hex: "#FFF0F5", family: "Whites" },
+      { name: "MistyRose", hex: "#FFE4E1", family: "Whites" },
+
+      // Grays
+      { name: "Gainsboro", hex: "#DCDCDC", family: "Grays" },
+      { name: "LightGray", hex: "#D3D3D3", family: "Grays" },
+      { name: "Silver", hex: "#C0C0C0", family: "Grays" },
+      { name: "DarkGray", hex: "#A9A9A9", family: "Grays" },
+      { name: "Gray", hex: "#808080", family: "Grays" },
+      { name: "DimGray", hex: "#696969", family: "Grays" },
+      { name: "LightSlateGray", hex: "#778899", family: "Grays" },
+      { name: "SlateGray", hex: "#708090", family: "Grays" },
+      { name: "DarkSlateGray", hex: "#2F4F4F", family: "Grays" },
+      { name: "Black", hex: "#000000", family: "Grays" }
+    ];
+
+    // Color family display order
+    const FAMILY_ORDER = ["Reds", "Oranges", "Yellows", "Greens", "Blues", "Purples", "Pinks", "Browns", "Grays", "Whites"];
+
+    // Representative colors for category badges
+    const FAMILY_BADGE_COLORS = {
+      Reds: "#DC143C", Oranges: "#FF8C00", Yellows: "#FFD700",
+      Greens: "#228B22", Blues: "#4169E1", Purples: "#8A2BE2",
+      Pinks: "#FF69B4", Browns: "#8B4513", Grays: "#808080", Whites: "#D3D3D3"
+    };
+
+    // Parse hex to RGB
+    function hexToRgb(hex) {
+      const h = hex.replace('#', '');
+      return {
+        r: parseInt(h.substring(0, 2), 16),
+        g: parseInt(h.substring(2, 4), 16),
+        b: parseInt(h.substring(4, 6), 16)
+      };
+    }
+
+    // RGB to HSL
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return { h: h * 360, s: s * 100, l: l * 100 };
+    }
+
+    // Relative luminance for contrast calculation
+    function luminance(r, g, b) {
+      const [rs, gs, bs] = [r, g, b].map(c => {
+        c /= 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+
+    // Precompute RGB, HSL, luminance for each color
+    COLORS.forEach(c => {
+      const rgb = hexToRgb(c.hex);
+      c.r = rgb.r; c.g = rgb.g; c.b = rgb.b;
+      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+      c.h = hsl.h; c.s = hsl.s; c.l = hsl.l;
+      c.lum = luminance(rgb.r, rgb.g, rgb.b);
+    });
+
+    // State
+    let currentFamily = 'all';
+    let currentSort = 'name';
+    let searchQuery = '';
+    let toastTimeout;
+
+    // DOM refs
+    const searchInput = document.getElementById('searchInput');
+    const searchCount = document.getElementById('searchCount');
+    const colorList = document.getElementById('colorList');
+    const noResults = document.getElementById('noResults');
+    const copyToast = document.getElementById('copyToast');
+    const countAll = document.getElementById('countAll');
+
+    // Search
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      render();
+    });
+
+    // Category tabs
+    document.getElementById('categoryTabs').addEventListener('click', e => {
+      const tab = e.target.closest('.category-tab');
+      if (!tab) return;
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentFamily = tab.dataset.cat;
+      render();
+    });
+
+    // Sort buttons
+    document.querySelector('.controls-row').addEventListener('click', e => {
+      const btn = e.target.closest('.sort-btn');
+      if (!btn) return;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSort = btn.dataset.sort;
+      render();
+    });
+
+    // Copy to clipboard
+    function copyValue(text, label) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied: ${text}`);
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast(`Copied: ${text}`);
+      });
+    }
+
+    function showToast(msg) {
+      copyToast.textContent = msg;
+      copyToast.classList.add('visible');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        copyToast.classList.remove('visible');
+      }, 1800);
+    }
+
+    // Filter colors
+    function getFilteredColors() {
+      let filtered = COLORS;
+
+      // Search filter
+      if (searchQuery) {
+        filtered = filtered.filter(c => {
+          const q = searchQuery;
+          const nameMatch = c.name.toLowerCase().includes(q);
+          const hexMatch = c.hex.toLowerCase().includes(q.replace('#', ''));
+          const hexWithHash = q.startsWith('#') ? c.hex.toLowerCase() === q : false;
+          return nameMatch || hexMatch || hexWithHash;
+        });
+      }
+
+      // Family filter
+      if (currentFamily !== 'all') {
+        filtered = filtered.filter(c => c.family === currentFamily);
+      }
+
+      return filtered;
+    }
+
+    // Sort colors
+    function sortColors(colors) {
+      const arr = [...colors];
+      switch (currentSort) {
+        case 'name':
+          arr.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'hue':
+          arr.sort((a, b) => a.h - b.h || a.s - b.s || a.l - b.l);
+          break;
+        case 'lightness':
+          arr.sort((a, b) => b.l - a.l || a.h - b.h);
+          break;
+        case 'saturation':
+          arr.sort((a, b) => b.s - a.s || a.h - b.h);
+          break;
+      }
+      return arr;
+    }
+
+    // Render
+    function render() {
+      const filtered = getFilteredColors();
+      const sorted = sortColors(filtered);
+
+      // Update counts
+      countAll.textContent = COLORS.length;
+      searchCount.textContent = searchQuery ? `${filtered.length} of ${COLORS.length} colors` : `${COLORS.length} colors`;
+
+      if (sorted.length === 0) {
+        colorList.innerHTML = '';
+        noResults.style.display = '';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      let html = '';
+
+      // Group by family or flat list depending on sort
+      if (currentSort === 'name' && currentFamily === 'all' && !searchQuery) {
+        // Group by family
+        FAMILY_ORDER.forEach(family => {
+          const familyColors = sorted.filter(c => c.family === family);
+          if (familyColors.length === 0) return;
+
+          html += `<div class="category-section">`;
+          html += `<div class="category-header">`;
+          html += `<span class="category-badge" style="background:${FAMILY_BADGE_COLORS[family]}"></span>`;
+          html += `<h2>${family}</h2>`;
+          html += `<span class="cat-count">${familyColors.length}</span>`;
+          html += `</div>`;
+          html += `<div class="color-grid">`;
+
+          familyColors.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => {
+            html += renderCard(c);
+          });
+
+          html += `</div></div>`;
+        });
+      } else {
+        // Flat grid
+        html += `<div class="color-grid">`;
+        sorted.forEach(c => {
+          html += renderCard(c);
+        });
+        html += `</div>`;
+      }
+
+      colorList.innerHTML = html;
+    }
+
+    function renderCard(c) {
+      const rgbStr = `rgb(${c.r}, ${c.g}, ${c.b})`;
+      const useWhiteText = c.lum < 0.179;
+
+      let card = `<div class="color-card">`;
+      card += `<div class="color-swatch" style="background:${c.hex}">`;
+      card += `<span class="contrast-text contrast-black" style="color:#000">Aa</span>`;
+      card += `<span class="contrast-text contrast-white" style="color:#fff">Aa</span>`;
+      card += `</div>`;
+      card += `<div class="color-info">`;
+      card += `<div class="color-name-row">`;
+      card += `<span class="color-name" onclick="copyValue('${c.name}','name')" title="Click to copy name">${c.name}</span>`;
+      card += `<span class="color-family-tag">${c.family}</span>`;
+      card += `</div>`;
+      card += `<div class="color-values">`;
+      card += `<span class="color-hex" onclick="copyValue('${c.hex}','hex')" title="Click to copy hex">${c.hex}</span>`;
+      card += `<span class="color-rgb" onclick="copyValue('${rgbStr}','rgb')" title="Click to copy RGB">${rgbStr}</span>`;
+      card += `</div>`;
+      card += `</div></div>`;
+      return card;
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // Scroll to top
+    window.addEventListener('scroll', () => {
+      const btn = document.querySelector('.quick-jump');
+      // No quick-jump needed for this tool
+    });
+
+    // Keyboard shortcut: focus search on any key press
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (/^[a-zA-Z0-9#]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        searchInput.focus();
+      }
+    });
+
+    // Initial render
+    render();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
