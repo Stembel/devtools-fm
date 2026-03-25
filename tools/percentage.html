@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Percentage Calculator — Calculate %, Change, Difference | ZeroKit.dev</title>
+  <meta name="description" content="Free percentage calculator: find X% of Y, calculate percentage change between two numbers, and find percentage difference. Three calculators in one.">
+  <link rel="canonical" href="https://zerokit.dev/tools/percentage.html">
+  <meta property="og:title" content="Percentage Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Calculate percentages: X% of Y, percentage change, and percentage difference. Free and instant.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Percentage Calculator</h1>
+    <p class="description">Three percentage calculators: X% of Y, percentage change, and percentage difference.</p>
+
+    <div class="calc-layout">
+      <!-- Calculator 1: X% of Y -->
+      <div class="calc-panel">
+        <div class="panel-header">What is X% of Y?</div>
+        <div class="panel-body">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="color:var(--text-muted);font-size:0.85rem;">What is</span>
+            <input type="number" id="pct1" value="15" step="any" style="width:80px;padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:0.9rem;text-align:center;outline:none;">
+            <span style="color:var(--text-muted);font-size:0.85rem;">% of</span>
+            <input type="number" id="val1" value="200" step="any" style="width:100px;padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:0.9rem;text-align:center;outline:none;">
+            <span style="color:var(--text-muted);font-size:0.85rem;">?</span>
+          </div>
+          <div style="margin-top:16px;padding:16px;background:var(--surface-2);border-radius:6px;text-align:center;">
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Result</div>
+            <div style="font-family:var(--mono);font-size:1.75rem;font-weight:700;color:var(--accent);margin-top:4px;" id="result1">30</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculator 2: X is what % of Y -->
+      <div class="calc-panel">
+        <div class="panel-header">X is what % of Y?</div>
+        <div class="panel-body">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <input type="number" id="val2a" value="30" step="any" style="width:100px;padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:0.9rem;text-align:center;outline:none;">
+            <span style="color:var(--text-muted);font-size:0.85rem;">is what % of</span>
+            <input type="number" id="val2b" value="200" step="any" style="width:100px;padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:0.9rem;text-align:center;outline:none;">
+            <span style="color:var(--text-muted);font-size:0.85rem;">?</span>
+          </div>
+          <div style="margin-top:16px;padding:16px;background:var(--surface-2);border-radius:6px;text-align:center;">
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Result</div>
+            <div style="font-family:var(--mono);font-size:1.75rem;font-weight:700;color:var(--accent);margin-top:4px;" id="result2">15%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculator 3: Percentage Change -->
+      <div class="calc-panel">
+        <div class="panel-header">Percentage Change</div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>From (old value)</label>
+              <input type="number" id="from" value="80" step="any">
+            </div>
+            <div class="form-group">
+              <label>To (new value)</label>
+              <input type="number" id="to" value="100" step="any">
+            </div>
+          </div>
+          <div style="margin-top:8px;padding:16px;background:var(--surface-2);border-radius:6px;text-align:center;">
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Percentage Change</div>
+            <div style="font-family:var(--mono);font-size:1.75rem;font-weight:700;margin-top:4px;" id="result3">+25%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculator 4: Percentage Difference -->
+      <div class="calc-panel">
+        <div class="panel-header">Percentage Difference</div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Value 1</label>
+              <input type="number" id="diff1" value="50" step="any">
+            </div>
+            <div class="form-group">
+              <label>Value 2</label>
+              <input type="number" id="diff2" value="75" step="any">
+            </div>
+          </div>
+          <div style="margin-top:8px;padding:16px;background:var(--surface-2);border-radius:6px;text-align:center;">
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Percentage Difference</div>
+            <div style="font-family:var(--mono);font-size:1.75rem;font-weight:700;color:var(--accent);margin-top:4px;" id="result4">40%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>Percentage Formulas</h2>
+      <ul>
+        <li><strong>X% of Y:</strong> (X / 100) x Y</li>
+        <li><strong>X is what % of Y:</strong> (X / Y) x 100</li>
+        <li><strong>Percentage Change:</strong> ((New - Old) / |Old|) x 100</li>
+        <li><strong>Percentage Difference:</strong> (|V1 - V2| / ((V1 + V2) / 2)) x 100</li>
+      </ul>
+      <p>Percentage change measures how much a value has increased or decreased relative to the original. Percentage difference measures the relative difference between two values without implying direction.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    // Calc 1: X% of Y
+    function calc1() {
+      var p = parseFloat(document.getElementById('pct1').value) || 0;
+      var v = parseFloat(document.getElementById('val1').value) || 0;
+      var r = (p / 100) * v;
+      document.getElementById('result1').textContent = parseFloat(r.toFixed(6));
+    }
+
+    // Calc 2: X is what % of Y
+    function calc2() {
+      var x = parseFloat(document.getElementById('val2a').value) || 0;
+      var y = parseFloat(document.getElementById('val2b').value) || 0;
+      var r = y !== 0 ? (x / y) * 100 : 0;
+      document.getElementById('result2').textContent = parseFloat(r.toFixed(4)) + '%';
+    }
+
+    // Calc 3: Percentage Change
+    function calc3() {
+      var from = parseFloat(document.getElementById('from').value) || 0;
+      var to = parseFloat(document.getElementById('to').value) || 0;
+      var r = from !== 0 ? ((to - from) / Math.abs(from)) * 100 : 0;
+      var el = document.getElementById('result3');
+      el.textContent = (r >= 0 ? '+' : '') + parseFloat(r.toFixed(4)) + '%';
+      el.style.color = r >= 0 ? 'var(--accent)' : 'var(--error)';
+    }
+
+    // Calc 4: Percentage Difference
+    function calc4() {
+      var a = parseFloat(document.getElementById('diff1').value) || 0;
+      var b = parseFloat(document.getElementById('diff2').value) || 0;
+      var avg = (a + b) / 2;
+      var r = avg !== 0 ? (Math.abs(a - b) / avg) * 100 : 0;
+      document.getElementById('result4').textContent = parseFloat(r.toFixed(4)) + '%';
+    }
+
+    document.querySelectorAll('#pct1,#val1').forEach(function(el) { el.addEventListener('input', calc1); });
+    document.querySelectorAll('#val2a,#val2b').forEach(function(el) { el.addEventListener('input', calc2); });
+    document.querySelectorAll('#from,#to').forEach(function(el) { el.addEventListener('input', calc3); });
+    document.querySelectorAll('#diff1,#diff2').forEach(function(el) { el.addEventListener('input', calc4); });
+
+    calc1(); calc2(); calc3(); calc4();
+  })();
+  </script>
+</body>
+</html>

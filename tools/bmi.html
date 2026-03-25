@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMI Calculator — Body Mass Index with WHO Categories | ZeroKit.dev</title>
+  <meta name="description" content="Free BMI calculator: calculate your Body Mass Index with WHO health categories and a visual scale. Supports both imperial and metric units.">
+  <link rel="canonical" href="https://zerokit.dev/tools/bmi.html">
+  <meta property="og:title" content="BMI Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Calculate your BMI with WHO categories and visual health scale. Supports imperial and metric.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>BMI Calculator</h1>
+    <p class="description">Calculate your Body Mass Index with WHO categories and a visual health scale.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">
+          Your Measurements
+          <select id="units" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:0.8rem;">
+            <option value="imperial">Imperial (lb/ft)</option>
+            <option value="metric">Metric (kg/cm)</option>
+          </select>
+        </div>
+        <div class="panel-body">
+          <div id="imperialInputs">
+            <div class="form-group">
+              <label>Weight (lbs)</label>
+              <input type="number" id="weightLbs" value="170" min="1" step="1">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Height (feet)</label>
+                <input type="number" id="heightFt" value="5" min="1" max="9" step="1">
+              </div>
+              <div class="form-group">
+                <label>Height (inches)</label>
+                <input type="number" id="heightIn" value="10" min="0" max="11" step="1">
+              </div>
+            </div>
+          </div>
+          <div id="metricInputs" style="display:none;">
+            <div class="form-group">
+              <label>Weight (kg)</label>
+              <input type="number" id="weightKg" value="77" min="1" step="0.5">
+            </div>
+            <div class="form-group">
+              <label>Height (cm)</label>
+              <input type="number" id="heightCm" value="178" min="50" max="300" step="1">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Your BMI</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="bmi">0</div>
+            <div class="result-label" id="category">—</div>
+          </div>
+
+          <!-- Visual Scale -->
+          <div style="margin:24px 0 8px;">
+            <div class="scale-bar">
+              <div class="scale-marker" id="marker"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);">
+              <span>Underweight<br>&lt;18.5</span>
+              <span>Normal<br>18.5-24.9</span>
+              <span>Overweight<br>25-29.9</span>
+              <span>Obese<br>30+</span>
+            </div>
+          </div>
+
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="healthyLow">—</div>
+              <div class="label">Healthy Range Low</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="healthyHigh">—</div>
+              <div class="label">Healthy Range High</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHO Categories Table -->
+    <div class="calc-panel calc-panel-full" style="margin-top:16px;">
+      <div class="panel-header">WHO BMI Categories</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead><tr><th>Category</th><th>BMI Range</th><th>Risk Level</th></tr></thead>
+          <tbody>
+            <tr><td>Severe Underweight</td><td style="font-family:var(--mono);">&lt; 16.0</td><td style="color:#ef4444;">High</td></tr>
+            <tr><td>Moderate Underweight</td><td style="font-family:var(--mono);">16.0 - 16.9</td><td style="color:#f59e0b;">Moderate</td></tr>
+            <tr><td>Mild Underweight</td><td style="font-family:var(--mono);">17.0 - 18.4</td><td style="color:#f59e0b;">Low</td></tr>
+            <tr><td>Normal</td><td style="font-family:var(--mono);">18.5 - 24.9</td><td style="color:#22c55e;">Low</td></tr>
+            <tr><td>Overweight</td><td style="font-family:var(--mono);">25.0 - 29.9</td><td style="color:#f59e0b;">Increased</td></tr>
+            <tr><td>Obese Class I</td><td style="font-family:var(--mono);">30.0 - 34.9</td><td style="color:#ef4444;">High</td></tr>
+            <tr><td>Obese Class II</td><td style="font-family:var(--mono);">35.0 - 39.9</td><td style="color:#ef4444;">Very High</td></tr>
+            <tr><td>Obese Class III</td><td style="font-family:var(--mono);">&ge; 40.0</td><td style="color:#ef4444;">Extremely High</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>About BMI</h2>
+      <p>Body Mass Index (BMI) is a simple measure of body fat based on height and weight. It's calculated as weight (kg) divided by height (m) squared:</p>
+      <p><strong>BMI = weight (kg) / height (m)^2</strong></p>
+      <ul>
+        <li>BMI is a screening tool, not a diagnostic measure of body fat or health</li>
+        <li>It doesn't account for muscle mass, bone density, age, sex, or ethnicity</li>
+        <li>Athletes may have a high BMI due to muscle mass, not excess fat</li>
+        <li>For a more complete picture, consult a healthcare provider who can assess waist circumference, body composition, and other factors</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var unitsSelect = document.getElementById('units');
+
+    unitsSelect.addEventListener('change', function() {
+      var imperial = this.value === 'imperial';
+      document.getElementById('imperialInputs').style.display = imperial ? '' : 'none';
+      document.getElementById('metricInputs').style.display = imperial ? 'none' : '';
+      calc();
+    });
+
+    function calc() {
+      var isImperial = unitsSelect.value === 'imperial';
+      var weightKg, heightM;
+
+      if (isImperial) {
+        var lbs = parseFloat(document.getElementById('weightLbs').value) || 0;
+        var ft = parseFloat(document.getElementById('heightFt').value) || 0;
+        var inches = parseFloat(document.getElementById('heightIn').value) || 0;
+        weightKg = lbs * 0.453592;
+        heightM = (ft * 12 + inches) * 0.0254;
+      } else {
+        weightKg = parseFloat(document.getElementById('weightKg').value) || 0;
+        heightM = (parseFloat(document.getElementById('heightCm').value) || 0) / 100;
+      }
+
+      if (weightKg <= 0 || heightM <= 0) return;
+
+      var bmi = weightKg / (heightM * heightM);
+      document.getElementById('bmi').textContent = bmi.toFixed(1);
+
+      // Category
+      var cat, color;
+      if (bmi < 16) { cat = 'Severe Underweight'; color = '#ef4444'; }
+      else if (bmi < 17) { cat = 'Moderate Underweight'; color = '#f59e0b'; }
+      else if (bmi < 18.5) { cat = 'Mild Underweight'; color = '#f59e0b'; }
+      else if (bmi < 25) { cat = 'Normal Weight'; color = '#22c55e'; }
+      else if (bmi < 30) { cat = 'Overweight'; color = '#f59e0b'; }
+      else if (bmi < 35) { cat = 'Obese Class I'; color = '#ef4444'; }
+      else if (bmi < 40) { cat = 'Obese Class II'; color = '#ef4444'; }
+      else { cat = 'Obese Class III'; color = '#dc2626'; }
+
+      document.getElementById('category').textContent = cat;
+      document.getElementById('category').style.color = color;
+      document.getElementById('bmi').style.color = color;
+
+      // Marker position (BMI 10-45 range mapped to 0-100%)
+      var pct = Math.max(0, Math.min(100, ((bmi - 10) / 35) * 100));
+      document.getElementById('marker').style.left = pct + '%';
+
+      // Healthy weight range
+      var lowKg = 18.5 * heightM * heightM;
+      var highKg = 24.9 * heightM * heightM;
+      if (isImperial) {
+        document.getElementById('healthyLow').textContent = Math.round(lowKg / 0.453592) + ' lbs';
+        document.getElementById('healthyHigh').textContent = Math.round(highKg / 0.453592) + ' lbs';
+      } else {
+        document.getElementById('healthyLow').textContent = lowKg.toFixed(1) + ' kg';
+        document.getElementById('healthyHigh').textContent = highKg.toFixed(1) + ' kg';
+      }
+    }
+
+    document.querySelectorAll('#weightLbs,#heightFt,#heightIn,#weightKg,#heightCm').forEach(function(el) {
+      el.addEventListener('input', calc);
+    });
+    calc();
+  })();
+  </script>
+</body>
+</html>

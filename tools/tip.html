@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tip Calculator — Split Bill & Custom Tip % | ZeroKit.dev</title>
+  <meta name="description" content="Free tip calculator: calculate tips for restaurants, split bills between people, and compare different tip percentages. Quick and easy.">
+  <link rel="canonical" href="https://zerokit.dev/tools/tip.html">
+  <meta property="og:title" content="Tip Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Calculate tips and split bills between people. Compare tip amounts at different percentages.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Tip Calculator</h1>
+    <p class="description">Calculate tips, split bills between people, and compare custom tip percentages.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Bill Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Bill Amount ($)</label>
+            <input type="number" id="bill" value="65.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Tip Percentage (%)</label>
+            <input type="range" id="tipRange" min="0" max="50" value="18" style="width:100%;accent-color:var(--accent);">
+            <div style="display:flex;justify-content:space-between;margin-top:4px;">
+              <span style="font-size:0.75rem;color:var(--text-muted);">0%</span>
+              <span style="font-family:var(--mono);font-size:0.9rem;font-weight:700;color:var(--accent);" id="tipPctDisplay">18%</span>
+              <span style="font-size:0.75rem;color:var(--text-muted);">50%</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Custom Tip %</label>
+            <input type="number" id="tipCustom" value="18" min="0" max="100" step="0.5">
+          </div>
+          <div class="form-group">
+            <label>Split Between (people)</label>
+            <input type="number" id="people" value="1" min="1" max="100" step="1">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+            <button class="btn" onclick="setTip(10)">10%</button>
+            <button class="btn" onclick="setTip(15)">15%</button>
+            <button class="btn btn-primary" onclick="setTip(18)">18%</button>
+            <button class="btn" onclick="setTip(20)">20%</button>
+            <button class="btn" onclick="setTip(25)">25%</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Results</div>
+        <div class="panel-body">
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="value" id="tipAmount">$0.00</div>
+              <div class="label">Tip Amount</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="totalBill">$0.00</div>
+              <div class="label">Total with Tip</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="perPerson">$0.00</div>
+              <div class="label">Per Person</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="tipPerPerson">$0.00</div>
+              <div class="label">Tip Per Person</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tip comparison -->
+    <div class="calc-panel calc-panel-full" style="margin-top:16px;">
+      <div class="panel-header">Tip Comparison</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead><tr><th>Tip %</th><th>Tip Amount</th><th>Total</th><th>Per Person</th></tr></thead>
+          <tbody id="compareBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>Tipping Guidelines</h2>
+      <ul>
+        <li><strong>15%</strong> — Standard for adequate service</li>
+        <li><strong>18%</strong> — Good service (most common default)</li>
+        <li><strong>20%</strong> — Great service</li>
+        <li><strong>25%+</strong> — Exceptional service</li>
+      </ul>
+      <p>Tips are typically calculated on the pre-tax bill amount. In the US, servers often rely on tips as a significant part of their income. When splitting a bill, make sure the total tip still reflects the quality of service you received.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  var fmtD = function(n) { return '$' + n.toFixed(2); };
+
+  function setTip(pct) {
+    document.getElementById('tipRange').value = pct;
+    document.getElementById('tipCustom').value = pct;
+    calcTip();
+  }
+
+  function calcTip() {
+    var bill = parseFloat(document.getElementById('bill').value) || 0;
+    var tipPct = parseFloat(document.getElementById('tipCustom').value) || 0;
+    var people = parseInt(document.getElementById('people').value) || 1;
+
+    document.getElementById('tipRange').value = Math.min(50, tipPct);
+    document.getElementById('tipPctDisplay').textContent = tipPct + '%';
+
+    var tip = bill * (tipPct / 100);
+    var total = bill + tip;
+    var perPerson = total / people;
+    var tipPerPerson = tip / people;
+
+    document.getElementById('tipAmount').textContent = fmtD(tip);
+    document.getElementById('totalBill').textContent = fmtD(total);
+    document.getElementById('perPerson').textContent = fmtD(perPerson);
+    document.getElementById('tipPerPerson').textContent = fmtD(tipPerPerson);
+
+    // Comparison table
+    var pcts = [10, 15, 18, 20, 25, 30];
+    if (pcts.indexOf(tipPct) === -1) pcts.push(tipPct);
+    pcts.sort(function(a, b) { return a - b; });
+
+    var tbody = document.getElementById('compareBody');
+    tbody.innerHTML = '';
+    for (var i = 0; i < pcts.length; i++) {
+      var t = bill * (pcts[i] / 100);
+      var tot = bill + t;
+      var pp = tot / people;
+      var isYours = pcts[i] === tipPct;
+      var style = isYours ? ' style="background:var(--accent-dim);font-weight:600;"' : '';
+      tbody.innerHTML += '<tr' + style + '><td>' + pcts[i] + '%' + (isYours ? ' \u2190' : '') + '</td><td>' + fmtD(t) + '</td><td>' + fmtD(tot) + '</td><td>' + fmtD(pp) + '</td></tr>';
+    }
+  }
+
+  document.getElementById('tipRange').addEventListener('input', function() {
+    document.getElementById('tipCustom').value = this.value;
+    calcTip();
+  });
+
+  document.querySelectorAll('#bill,#tipCustom,#people').forEach(function(el) {
+    el.addEventListener('input', calcTip);
+  });
+
+  calcTip();
+  </script>
+</body>
+</html>

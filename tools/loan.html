@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Payment Calculator — Auto & Personal Loan with APR | ZeroKit.dev</title>
+  <meta name="description" content="Free loan payment calculator: calculate monthly payments for auto or personal loans. Compare APR rates, view total interest, and see a full amortization breakdown.">
+  <link rel="canonical" href="https://zerokit.dev/tools/loan.html">
+  <meta property="og:title" content="Loan Payment Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Calculate monthly loan payments for auto or personal loans. Compare APR rates and view total interest.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Loan Payment Calculator</h1>
+    <p class="description">Calculate monthly payments for auto or personal loans with APR comparison.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Loan Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Loan Amount ($)</label>
+            <input type="number" id="amount" value="25000" min="0" step="500">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Interest Rate / APR (%)</label>
+              <input type="number" id="rate" value="6.9" min="0" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Loan Term</label>
+              <select id="term">
+                <option value="12">1 year</option>
+                <option value="24">2 years</option>
+                <option value="36">3 years</option>
+                <option value="48">4 years</option>
+                <option value="60" selected>5 years</option>
+                <option value="72">6 years</option>
+                <option value="84">7 years</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Payment Summary</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="monthly">$0</div>
+            <div class="result-label">Monthly Payment</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="totalInterest">$0</div>
+              <div class="label">Total Interest</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="totalCost">$0</div>
+              <div class="label">Total Cost</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APR Comparison -->
+    <div class="calc-panel calc-panel-full" style="margin-top:16px;">
+      <div class="panel-header">APR Comparison</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead><tr><th>APR</th><th>Monthly Payment</th><th>Total Interest</th><th>Total Cost</th><th>Savings vs Yours</th></tr></thead>
+          <tbody id="compareBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>Understanding Loan Payments</h2>
+      <p>Loan payments are calculated using the same amortization formula as mortgages. The monthly payment stays constant, but the split between principal and interest changes each month.</p>
+      <p><strong>Key factors that affect your payment:</strong></p>
+      <ul>
+        <li><strong>Loan Amount:</strong> A larger loan means larger payments</li>
+        <li><strong>Interest Rate (APR):</strong> Higher rates significantly increase total cost</li>
+        <li><strong>Loan Term:</strong> Longer terms mean lower monthly payments but more total interest</li>
+        <li><strong>APR vs Interest Rate:</strong> APR includes fees and other costs, giving a truer picture of borrowing cost</li>
+      </ul>
+      <p>Tip: Even a 1% difference in APR can save hundreds or thousands over the life of a loan. Always compare offers from multiple lenders.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+    var fmtD = function(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+    function calcPayment(principal, annualRate, months) {
+      if (months <= 0 || principal <= 0) return { payment: 0, totalInterest: 0, totalCost: 0 };
+      var r = annualRate / 100 / 12;
+      var pmt;
+      if (r > 0) {
+        pmt = principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
+      } else {
+        pmt = principal / months;
+      }
+      var totalCost = pmt * months;
+      return { payment: pmt, totalInterest: totalCost - principal, totalCost: totalCost };
+    }
+
+    function calc() {
+      var amount = parseFloat(document.getElementById('amount').value) || 0;
+      var rate = parseFloat(document.getElementById('rate').value) || 0;
+      var months = parseInt(document.getElementById('term').value) || 60;
+
+      var result = calcPayment(amount, rate, months);
+      document.getElementById('monthly').textContent = fmtD(result.payment);
+      document.getElementById('totalInterest').textContent = fmt(result.totalInterest);
+      document.getElementById('totalCost').textContent = fmt(result.totalCost);
+
+      // APR comparison
+      var rates = [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 15.0];
+      if (rates.indexOf(rate) === -1) rates.push(rate);
+      rates.sort(function(a, b) { return a - b; });
+
+      var tbody = document.getElementById('compareBody');
+      tbody.innerHTML = '';
+      for (var i = 0; i < rates.length; i++) {
+        var r2 = calcPayment(amount, rates[i], months);
+        var savings = result.totalCost - r2.totalCost;
+        var isYours = rates[i] === rate;
+        var style = isYours ? ' style="background:var(--accent-dim);font-weight:600;"' : '';
+        tbody.innerHTML += '<tr' + style + '><td>' + rates[i].toFixed(1) + '%' + (isYours ? ' (yours)' : '') + '</td><td>' + fmtD(r2.payment) + '</td><td>' + fmt(r2.totalInterest) + '</td><td>' + fmt(r2.totalCost) + '</td><td style="color:' + (savings > 0 ? 'var(--accent)' : savings < 0 ? 'var(--error)' : 'var(--text-muted)') + ';">' + (savings > 0 ? '+' : '') + fmt(savings) + '</td></tr>';
+      }
+    }
+
+    document.querySelectorAll('#amount,#rate,#term').forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+    calc();
+  })();
+  </script>
+</body>
+</html>
