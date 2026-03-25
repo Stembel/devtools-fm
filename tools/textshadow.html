@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Text Shadow Generator - Visual Shadow Builder | ZeroKit.dev</title>
+  <meta name="description" content="Create CSS text-shadow effects visually with multiple layers. Adjust offset, blur, and color. Includes presets like Neon Glow, Letterpress, 3D, Fire, Retro, and Outline. Copy CSS code instantly.">
+  <link rel="canonical" href="https://zerokit.dev/tools/textshadow.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .shadow-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .shadow-preview-area { display: flex; align-items: center; justify-content: center; min-height: 350px; background: #1a1a2e; overflow: hidden; }
+    .shadow-preview-text { transition: text-shadow 0.15s; white-space: nowrap; }
+    .shadow-controls { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .slider-group { display: flex; flex-direction: column; gap: 4px; }
+    .slider-group .slider-header { display: flex; justify-content: space-between; align-items: center; }
+    .slider-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .slider-group .slider-value { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); }
+    .slider-group input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .shadow-row { display: flex; gap: 12px; align-items: center; }
+    .shadow-row input[type="color"] { width: 36px; height: 30px; border: none; cursor: pointer; border-radius: 4px; }
+    .shadow-row label { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .layers-list { display: flex; flex-direction: column; gap: 6px; }
+    .layer-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--surface-2); border-radius: 4px; font-size: 0.8rem; cursor: pointer; border: 1px solid transparent; }
+    .layer-item.active { border: 1px solid var(--accent); }
+    .layer-item .remove-layer { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1rem; margin-left: auto; }
+    .layer-item .layer-label { flex: 1; color: var(--text-muted); font-family: var(--mono); font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .layer-item .layer-color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .layer-actions { display: flex; gap: 8px; }
+    .layer-actions button { font-size: 0.8rem; padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); cursor: pointer; }
+    .layer-actions button:hover { border-color: var(--accent); color: var(--accent); }
+    .css-out { padding: 16px; }
+    .css-out pre { background: var(--surface-2); padding: 12px; border-radius: 4px; font-family: var(--mono); font-size: 0.8rem; color: var(--text); cursor: pointer; white-space: pre-wrap; word-break: break-all; }
+    .shadow-presets { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 0 8px; }
+    .shadow-preset { padding: 6px 12px; background: var(--surface-2); border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+    .shadow-preset:hover { border-color: var(--accent); color: var(--text); }
+    .text-input-group { display: flex; flex-direction: column; gap: 4px; }
+    .text-input-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .text-input-group input, .text-input-group select { background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; color: var(--text); font-size: 0.85rem; font-family: var(--font); }
+    .text-input-group input:focus, .text-input-group select:focus { outline: none; border-color: var(--accent); }
+    .text-controls-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .section-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+    .copy-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600; font-family: var(--font); }
+    .copy-btn:hover { background: var(--accent-hover); }
+    @media (max-width: 768px) { .shadow-layout { grid-template-columns: 1fr; } .text-controls-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Text Shadow Generator</h1>
+    <p class="description">Design text shadows visually with multiple layers. Includes presets for popular effects. Copy CSS with one click.</p>
+
+    <div class="shadow-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Controls</div>
+        <div class="shadow-controls">
+          <div class="section-label">Presets</div>
+          <div class="shadow-presets" id="presets"></div>
+
+          <div class="section-label">Text Settings</div>
+          <div class="text-input-group">
+            <label>Preview Text</label>
+            <input type="text" id="previewText" value="Shadow" oninput="update()" maxlength="50">
+          </div>
+          <div class="text-controls-row">
+            <div class="text-input-group">
+              <label>Font Size</label>
+              <input type="number" id="fontSize" value="64" min="12" max="200" oninput="update()">
+            </div>
+            <div class="text-input-group">
+              <label>Font Family</label>
+              <select id="fontFamily" onchange="update()">
+                <option value="'Inter', sans-serif">Inter</option>
+                <option value="'Arial', sans-serif">Arial</option>
+                <option value="'Georgia', serif">Georgia</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="'Verdana', sans-serif">Verdana</option>
+                <option value="'Impact', sans-serif">Impact</option>
+                <option value="system-ui, sans-serif">System UI</option>
+              </select>
+            </div>
+          </div>
+          <div class="shadow-row">
+            <input type="color" id="textColor" value="#e4e4e7" onchange="update()">
+            <label>Text Color</label>
+          </div>
+
+          <div class="section-label">Shadow Layers</div>
+          <div class="layers-list" id="layersList"></div>
+          <div class="layer-actions">
+            <button onclick="addLayer()">+ Add Layer</button>
+          </div>
+
+          <div class="section-label">Layer Settings</div>
+          <div class="slider-group">
+            <div class="slider-header"><label>X Offset</label><span class="slider-value" id="hVal">2px</span></div>
+            <input type="range" id="hOffset" min="-50" max="50" value="2" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Y Offset</label><span class="slider-value" id="vVal">2px</span></div>
+            <input type="range" id="vOffset" min="-50" max="50" value="2" oninput="update()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-header"><label>Blur Radius</label><span class="slider-value" id="bVal">4px</span></div>
+            <input type="range" id="blur" min="0" max="100" value="4" oninput="update()">
+          </div>
+          <div class="shadow-row">
+            <input type="color" id="shadowColor" value="#000000" onchange="update()">
+            <div class="slider-group" style="flex:1;">
+              <div class="slider-header"><label>Opacity</label><span class="slider-value" id="oVal">80%</span></div>
+              <input type="range" id="opacity" min="0" max="100" value="80" oninput="update()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-panel" style="display:flex; flex-direction:column;">
+        <div class="panel-header">Preview</div>
+        <div class="shadow-preview-area" style="flex:1;">
+          <div class="shadow-preview-text" id="previewEl">Shadow</div>
+        </div>
+        <div class="css-out">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-size:0.75rem; color:var(--text-muted);">Generated CSS</span>
+            <button class="copy-btn" onclick="copyCSS()">Copy CSS</button>
+          </div>
+          <pre id="cssOutput"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // Layer data
+    let layers = [
+      { h: 2, v: 2, b: 4, color: '#000000', opacity: 80 }
+    ];
+    let activeLayer = 0;
+
+    // Preset definitions
+    const presets = {
+      'Neon Glow': [
+        { h: 0, v: 0, b: 7, color: '#ffffff', opacity: 100 },
+        { h: 0, v: 0, b: 10, color: '#ffffff', opacity: 100 },
+        { h: 0, v: 0, b: 21, color: '#0fa', opacity: 100 },
+        { h: 0, v: 0, b: 42, color: '#0fa', opacity: 100 },
+        { h: 0, v: 0, b: 82, color: '#0fa', opacity: 80 }
+      ],
+      'Letterpress': [
+        { h: 0, v: 1, b: 0, color: '#000000', opacity: 60 },
+        { h: 0, v: -1, b: 0, color: '#ffffff', opacity: 15 }
+      ],
+      '3D': [
+        { h: 1, v: 1, b: 0, color: '#7a5c3e', opacity: 100 },
+        { h: 2, v: 2, b: 0, color: '#6e5237', opacity: 100 },
+        { h: 3, v: 3, b: 0, color: '#624830', opacity: 100 },
+        { h: 4, v: 4, b: 0, color: '#563e29', opacity: 100 },
+        { h: 5, v: 5, b: 0, color: '#4a3422', opacity: 100 },
+        { h: 6, v: 6, b: 5, color: '#000000', opacity: 30 }
+      ],
+      'Fire': [
+        { h: 0, v: 0, b: 4, color: '#ffffff', opacity: 100 },
+        { h: 0, v: -5, b: 4, color: '#fffc00', opacity: 100 },
+        { h: 0, v: -10, b: 10, color: '#ff9a00', opacity: 100 },
+        { h: 0, v: -15, b: 20, color: '#ff4400', opacity: 90 },
+        { h: 0, v: -20, b: 40, color: '#ff0000', opacity: 50 }
+      ],
+      'Retro': [
+        { h: 3, v: 3, b: 0, color: '#6366f1', opacity: 100 },
+        { h: 6, v: 6, b: 0, color: '#4f46e5', opacity: 80 }
+      ],
+      'Outline': [
+        { h: -1, v: -1, b: 0, color: '#6366f1', opacity: 100 },
+        { h: 1, v: -1, b: 0, color: '#6366f1', opacity: 100 },
+        { h: -1, v: 1, b: 0, color: '#6366f1', opacity: 100 },
+        { h: 1, v: 1, b: 0, color: '#6366f1', opacity: 100 }
+      ]
+    };
+
+    function hexToRgb(hex) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return { r, g, b };
+    }
+
+    function layerToCSS(l) {
+      const rgb = hexToRgb(l.color);
+      const a = (l.opacity / 100).toFixed(2).replace(/\.?0+$/, '') || '0';
+      return `${l.h}px ${l.v}px ${l.b}px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${a})`;
+    }
+
+    function getFullShadowCSS() {
+      return layers.map(l => layerToCSS(l)).join(',\n    ');
+    }
+
+    function selectLayer(index) {
+      activeLayer = index;
+      loadLayerToControls(layers[activeLayer]);
+      renderLayers();
+      updateSliderValues();
+    }
+
+    function loadLayerToControls(l) {
+      document.getElementById('hOffset').value = l.h;
+      document.getElementById('vOffset').value = l.v;
+      document.getElementById('blur').value = l.b;
+      document.getElementById('shadowColor').value = l.color;
+      document.getElementById('opacity').value = l.opacity;
+    }
+
+    function saveControlsToLayer() {
+      if (activeLayer >= layers.length) return;
+      layers[activeLayer].h = parseInt(document.getElementById('hOffset').value);
+      layers[activeLayer].v = parseInt(document.getElementById('vOffset').value);
+      layers[activeLayer].b = parseInt(document.getElementById('blur').value);
+      layers[activeLayer].color = document.getElementById('shadowColor').value;
+      layers[activeLayer].opacity = parseInt(document.getElementById('opacity').value);
+    }
+
+    function addLayer() {
+      layers.push({ h: 0, v: 0, b: 8, color: '#6366f1', opacity: 60 });
+      activeLayer = layers.length - 1;
+      loadLayerToControls(layers[activeLayer]);
+      update();
+    }
+
+    function removeLayer(index, e) {
+      e.stopPropagation();
+      if (layers.length <= 1) return;
+      layers.splice(index, 1);
+      if (activeLayer >= layers.length) activeLayer = layers.length - 1;
+      loadLayerToControls(layers[activeLayer]);
+      update();
+    }
+
+    function renderLayers() {
+      const container = document.getElementById('layersList');
+      container.innerHTML = '';
+      layers.forEach((l, i) => {
+        const div = document.createElement('div');
+        div.className = 'layer-item' + (i === activeLayer ? ' active' : '');
+        const rgb = hexToRgb(l.color);
+        div.innerHTML = `
+          <span class="layer-color-dot" style="background:rgba(${rgb.r},${rgb.g},${rgb.b},${l.opacity/100})"></span>
+          <span class="layer-label">${layerToCSS(l)}</span>
+          <button class="remove-layer" onclick="removeLayer(${i}, event)" title="Remove layer">&times;</button>
+        `;
+        div.onclick = () => selectLayer(i);
+        container.appendChild(div);
+      });
+    }
+
+    function updateSliderValues() {
+      document.getElementById('hVal').textContent = document.getElementById('hOffset').value + 'px';
+      document.getElementById('vVal').textContent = document.getElementById('vOffset').value + 'px';
+      document.getElementById('bVal').textContent = document.getElementById('blur').value + 'px';
+      document.getElementById('oVal').textContent = document.getElementById('opacity').value + '%';
+    }
+
+    function update() {
+      saveControlsToLayer();
+      updateSliderValues();
+      renderLayers();
+
+      const previewEl = document.getElementById('previewEl');
+      const text = document.getElementById('previewText').value || 'Shadow';
+      const fontSize = document.getElementById('fontSize').value || 64;
+      const fontFamily = document.getElementById('fontFamily').value;
+      const textColor = document.getElementById('textColor').value;
+
+      previewEl.textContent = text;
+      previewEl.style.fontSize = fontSize + 'px';
+      previewEl.style.fontFamily = fontFamily;
+      previewEl.style.color = textColor;
+      previewEl.style.fontWeight = '700';
+
+      const shadowValue = getFullShadowCSS();
+      previewEl.style.textShadow = layers.map(l => layerToCSS(l)).join(', ');
+
+      const cssLines = [];
+      cssLines.push(`color: ${textColor};`);
+      cssLines.push(`font-size: ${fontSize}px;`);
+      if (layers.length === 1) {
+        cssLines.push(`text-shadow: ${layerToCSS(layers[0])};`);
+      } else {
+        cssLines.push(`text-shadow: ${getFullShadowCSS()};`);
+      }
+
+      document.getElementById('cssOutput').textContent = cssLines.join('\n');
+    }
+
+    function applyPreset(name) {
+      const preset = presets[name];
+      if (!preset) return;
+      layers = preset.map(l => ({ ...l }));
+      activeLayer = 0;
+      loadLayerToControls(layers[0]);
+      update();
+    }
+
+    function renderPresets() {
+      const container = document.getElementById('presets');
+      Object.keys(presets).forEach(name => {
+        const btn = document.createElement('div');
+        btn.className = 'shadow-preset';
+        btn.textContent = name;
+        btn.onclick = () => applyPreset(name);
+        container.appendChild(btn);
+      });
+    }
+
+    function copyCSS() {
+      const text = document.getElementById('cssOutput').textContent;
+      navigator.clipboard.writeText(text);
+      const el = document.getElementById('cssOutput');
+      const orig = el.textContent;
+      el.textContent = 'Copied!';
+      setTimeout(() => el.textContent = orig, 1000);
+    }
+
+    renderPresets();
+    update();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

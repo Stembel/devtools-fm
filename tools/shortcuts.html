@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyboard Shortcuts Reference - VS Code, Terminal, Chrome | ZeroKit.dev</title>
+  <meta name="description" content="Searchable keyboard shortcuts reference for VS Code, Terminal, Chrome DevTools, macOS, Windows, Vim, Git, and IntelliJ. Toggle between Mac and Windows keybindings. 150+ shortcuts with copy button.">
+  <link rel="canonical" href="https://zerokit.dev/tools/shortcuts.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 240px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+    .search-bar input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .search-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .platform-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .platform-toggle label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 56px;
+      height: 28px;
+      cursor: pointer;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.3s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      left: 2px;
+      top: 2px;
+      background: var(--accent);
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(28px);
+    }
+    .platform-label {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      min-width: 24px;
+      text-align: center;
+    }
+    .platform-label.active {
+      color: var(--accent);
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .category-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .category-tab:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+    .category-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    .category-tab .tab-count {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    .category-section {
+      margin-bottom: 32px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .category-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .cat-vscode .category-badge { background: rgba(0, 122, 204, 0.15); color: #0098ff; }
+    .cat-terminal .category-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-chrome .category-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .cat-macos .category-badge { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .cat-windows .category-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .cat-vim .category-badge { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .cat-git .category-badge { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .cat-jetbrains .category-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    .cat-vscode .category-header { border-bottom-color: rgba(0, 122, 204, 0.2); }
+    .cat-terminal .category-header { border-bottom-color: rgba(34, 197, 94, 0.2); }
+    .cat-chrome .category-header { border-bottom-color: rgba(234, 179, 8, 0.2); }
+    .cat-macos .category-header { border-bottom-color: rgba(168, 85, 247, 0.2); }
+    .cat-windows .category-header { border-bottom-color: rgba(59, 130, 246, 0.2); }
+    .cat-vim .category-header { border-bottom-color: rgba(34, 197, 94, 0.2); }
+    .cat-git .category-header { border-bottom-color: rgba(249, 115, 22, 0.2); }
+    .cat-jetbrains .category-header { border-bottom-color: rgba(239, 68, 68, 0.2); }
+
+    .shortcut-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 20px;
+      transition: border-color 0.15s;
+    }
+    .shortcut-card:hover {
+      border-color: var(--text-muted);
+    }
+    .shortcut-card.starred {
+      border-left: 3px solid var(--accent);
+    }
+    .shortcut-star {
+      font-size: 0.7rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      width: 16px;
+      text-align: center;
+    }
+
+    .shortcut-keys {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-width: 200px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+    .key-sep {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+
+    .shortcut-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .shortcut-desc {
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .shortcut-context {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .shortcut-copy {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .shortcut-copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .shortcut-copy.copied {
+      border-color: #4ade80;
+      color: #4ade80;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .no-results .nr-code {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--border);
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      font-size: 0.9rem;
+    }
+
+    .scroll-top {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .scroll-top:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+    .scroll-top.visible {
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-star {
+      color: var(--accent);
+      font-size: 0.7rem;
+    }
+    .legend-line {
+      width: 20px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .shortcut-card {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 14px;
+      }
+      .shortcut-keys {
+        min-width: unset;
+        flex-basis: auto;
+      }
+      .shortcut-info {
+        flex-basis: 100%;
+        order: 3;
+      }
+      .shortcut-copy {
+        order: 4;
+      }
+      .category-tabs {
+        gap: 6px;
+      }
+      .category-tab {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      .platform-toggle {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Keyboard Shortcuts Reference</h1>
+    <p class="description">Search 150+ keyboard shortcuts for VS Code, Terminal, Chrome DevTools, macOS, Windows, Vim, Git, and JetBrains IDEs. Toggle between Mac and Windows keybindings.</p>
+
+    <div class="platform-toggle">
+      <span class="platform-label active" id="labelMac">Mac</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="platformToggle">
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="platform-label" id="labelWin">Win</span>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search shortcuts... (e.g. copy, save, terminal)" autofocus spellcheck="false">
+      <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-star">&#9733;</span> Most useful shortcuts</div>
+      <div class="legend-item"><span class="legend-line"></span> Highlighted with accent border</div>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs"></div>
+
+    <div id="shortcutList"></div>
+    <div id="noResults" class="no-results" style="display:none">
+      <div class="nr-code">?_?</div>
+      <p>No shortcuts match your search.</p>
+    </div>
+
+    <button class="scroll-top" id="scrollTop" title="Scroll to top">&#8593; Top</button>
+  </main>
+
+  <footer>
+    <div class="container">DevTools.fm &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script>
+    // Shortcut data: mac/win keys, description, context, starred (most useful)
+    const SHORTCUTS = [
+      // === VS Code ===
+      { cat: "vscode", mac: "Cmd+Shift+P", win: "Ctrl+Shift+P", desc: "Open Command Palette", context: "Global", starred: true },
+      { cat: "vscode", mac: "Cmd+P", win: "Ctrl+P", desc: "Quick Open file by name", context: "Global", starred: true },
+      { cat: "vscode", mac: "Cmd+Shift+F", win: "Ctrl+Shift+F", desc: "Search across files", context: "Global", starred: true },
+      { cat: "vscode", mac: "Cmd+Shift+E", win: "Ctrl+Shift+E", desc: "Show Explorer / Toggle sidebar", context: "Global" },
+      { cat: "vscode", mac: "Cmd+B", win: "Ctrl+B", desc: "Toggle sidebar visibility", context: "Global" },
+      { cat: "vscode", mac: "Cmd+J", win: "Ctrl+J", desc: "Toggle integrated terminal", context: "Global", starred: true },
+      { cat: "vscode", mac: "Cmd+`", win: "Ctrl+`", desc: "Toggle terminal panel", context: "Global" },
+      { cat: "vscode", mac: "Cmd+,", win: "Ctrl+,", desc: "Open Settings", context: "Global" },
+      { cat: "vscode", mac: "Cmd+K Cmd+S", win: "Ctrl+K Ctrl+S", desc: "Open Keyboard Shortcuts editor", context: "Global" },
+      { cat: "vscode", mac: "Cmd+Shift+N", win: "Ctrl+Shift+N", desc: "New window / instance", context: "Global" },
+      { cat: "vscode", mac: "Cmd+W", win: "Ctrl+W", desc: "Close current editor tab", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+\\", win: "Ctrl+\\", desc: "Split editor", context: "Editor", starred: true },
+      { cat: "vscode", mac: "Cmd+D", win: "Ctrl+D", desc: "Select next occurrence of word", context: "Editor", starred: true },
+      { cat: "vscode", mac: "Cmd+Shift+L", win: "Ctrl+Shift+L", desc: "Select all occurrences of word", context: "Editor" },
+      { cat: "vscode", mac: "Alt+Up", win: "Alt+Up", desc: "Move line up", context: "Editor", starred: true },
+      { cat: "vscode", mac: "Alt+Down", win: "Alt+Down", desc: "Move line down", context: "Editor" },
+      { cat: "vscode", mac: "Shift+Alt+Up", win: "Shift+Alt+Up", desc: "Copy line up", context: "Editor" },
+      { cat: "vscode", mac: "Shift+Alt+Down", win: "Shift+Alt+Down", desc: "Copy line down", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Shift+K", win: "Ctrl+Shift+K", desc: "Delete entire line", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Enter", win: "Ctrl+Enter", desc: "Insert line below", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Shift+Enter", win: "Ctrl+Shift+Enter", desc: "Insert line above", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Shift+\\", win: "Ctrl+Shift+\\", desc: "Jump to matching bracket", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+]", win: "Ctrl+]", desc: "Indent line", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+[", win: "Ctrl+[", desc: "Outdent line", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+/", win: "Ctrl+/", desc: "Toggle line comment", context: "Editor", starred: true },
+      { cat: "vscode", mac: "Shift+Alt+A", win: "Shift+Alt+A", desc: "Toggle block comment", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Shift+[", win: "Ctrl+Shift+[", desc: "Fold (collapse) region", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Shift+]", win: "Ctrl+Shift+]", desc: "Unfold (expand) region", context: "Editor" },
+      { cat: "vscode", mac: "F12", win: "F12", desc: "Go to Definition", context: "Editor", starred: true },
+      { cat: "vscode", mac: "Alt+F12", win: "Alt+F12", desc: "Peek Definition", context: "Editor" },
+      { cat: "vscode", mac: "Shift+F12", win: "Shift+F12", desc: "Show all References", context: "Editor" },
+      { cat: "vscode", mac: "F2", win: "F2", desc: "Rename symbol", context: "Editor", starred: true },
+      { cat: "vscode", mac: "Cmd+.", win: "Ctrl+.", desc: "Quick Fix / Code Actions", context: "Editor", starred: true },
+      { cat: "vscode", mac: "Cmd+Shift+Space", win: "Ctrl+Shift+Space", desc: "Trigger parameter hints", context: "Editor" },
+      { cat: "vscode", mac: "Ctrl+Space", win: "Ctrl+Space", desc: "Trigger IntelliSense suggestions", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+K Cmd+F", win: "Ctrl+K Ctrl+F", desc: "Format selection", context: "Editor" },
+      { cat: "vscode", mac: "Shift+Alt+F", win: "Shift+Alt+F", desc: "Format entire document", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+G", win: "Ctrl+G", desc: "Go to line number", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Shift+O", win: "Ctrl+Shift+O", desc: "Go to symbol in file", context: "Editor" },
+      { cat: "vscode", mac: "Cmd+Shift+M", win: "Ctrl+Shift+M", desc: "Show Problems panel", context: "Global" },
+      { cat: "vscode", mac: "Cmd+K Z", win: "Ctrl+K Z", desc: "Zen Mode (distraction-free)", context: "Global" },
+
+      // === Terminal / Bash ===
+      { cat: "terminal", mac: "Ctrl+C", win: "Ctrl+C", desc: "Cancel / kill current command", context: "Any shell", starred: true },
+      { cat: "terminal", mac: "Ctrl+Z", win: "Ctrl+Z", desc: "Suspend current process (bg/fg to resume)", context: "Any shell" },
+      { cat: "terminal", mac: "Ctrl+D", win: "Ctrl+D", desc: "Exit shell / send EOF", context: "Any shell", starred: true },
+      { cat: "terminal", mac: "Ctrl+L", win: "Ctrl+L", desc: "Clear terminal screen", context: "Any shell", starred: true },
+      { cat: "terminal", mac: "Ctrl+R", win: "Ctrl+R", desc: "Reverse search command history", context: "Bash/Zsh", starred: true },
+      { cat: "terminal", mac: "Ctrl+A", win: "Ctrl+A", desc: "Move cursor to start of line", context: "Bash/Zsh", starred: true },
+      { cat: "terminal", mac: "Ctrl+E", win: "Ctrl+E", desc: "Move cursor to end of line", context: "Bash/Zsh", starred: true },
+      { cat: "terminal", mac: "Ctrl+W", win: "Ctrl+W", desc: "Delete word before cursor", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Alt+B", win: "Alt+B", desc: "Move cursor back one word", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Alt+F", win: "Alt+F", desc: "Move cursor forward one word", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Ctrl+U", win: "Ctrl+U", desc: "Delete from cursor to start of line", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Ctrl+K", win: "Ctrl+K", desc: "Delete from cursor to end of line", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Ctrl+Y", win: "Ctrl+Y", desc: "Paste last deleted text (yank)", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Ctrl+T", win: "Ctrl+T", desc: "Swap current char with previous", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Tab", win: "Tab", desc: "Auto-complete file/command name", context: "Any shell", starred: true },
+      { cat: "terminal", mac: "Up", win: "Up", desc: "Previous command in history", context: "Any shell" },
+      { cat: "terminal", mac: "Down", win: "Down", desc: "Next command in history", context: "Any shell" },
+      { cat: "terminal", mac: "!!", win: "!!", desc: "Repeat last command", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "!$", win: "!$", desc: "Last argument of previous command", context: "Bash/Zsh" },
+      { cat: "terminal", mac: "Ctrl+Shift+T", win: "Ctrl+Shift+T", desc: "Open new terminal tab", context: "Terminal app" },
+
+      // === Chrome DevTools ===
+      { cat: "chrome", mac: "Cmd+Option+I", win: "Ctrl+Shift+I", desc: "Open DevTools", context: "Browser", starred: true },
+      { cat: "chrome", mac: "Cmd+Option+J", win: "Ctrl+Shift+J", desc: "Open DevTools Console", context: "Browser", starred: true },
+      { cat: "chrome", mac: "Cmd+Option+C", win: "Ctrl+Shift+C", desc: "Inspect element (pick mode)", context: "Browser", starred: true },
+      { cat: "chrome", mac: "Cmd+Shift+M", win: "Ctrl+Shift+M", desc: "Toggle device toolbar (responsive)", context: "DevTools", starred: true },
+      { cat: "chrome", mac: "Cmd+Shift+P", win: "Ctrl+Shift+P", desc: "Open Command Menu in DevTools", context: "DevTools" },
+      { cat: "chrome", mac: "Cmd+P", win: "Ctrl+P", desc: "Open file in Sources panel", context: "DevTools" },
+      { cat: "chrome", mac: "Cmd+Shift+R", win: "Ctrl+Shift+R", desc: "Hard reload (bypass cache)", context: "Browser", starred: true },
+      { cat: "chrome", mac: "Cmd+Option+U", win: "Ctrl+U", desc: "View page source", context: "Browser" },
+      { cat: "chrome", mac: "F8", win: "F8", desc: "Pause / resume script execution", context: "Sources panel" },
+      { cat: "chrome", mac: "F10", win: "F10", desc: "Step over next function call", context: "Sources panel" },
+      { cat: "chrome", mac: "F11", win: "F11", desc: "Step into function call", context: "Sources panel" },
+      { cat: "chrome", mac: "Shift+F11", win: "Shift+F11", desc: "Step out of current function", context: "Sources panel" },
+      { cat: "chrome", mac: "Cmd+F", win: "Ctrl+F", desc: "Search within current panel", context: "DevTools" },
+      { cat: "chrome", mac: "Cmd+Shift+D", win: "Ctrl+Shift+D", desc: "Toggle DevTools dock position", context: "DevTools" },
+      { cat: "chrome", mac: "Cmd+[", win: "Ctrl+[", desc: "Switch to previous panel", context: "DevTools" },
+      { cat: "chrome", mac: "Cmd+]", win: "Ctrl+]", desc: "Switch to next panel", context: "DevTools" },
+      { cat: "chrome", mac: "Ctrl+`", win: "Ctrl+`", desc: "Toggle Console drawer", context: "DevTools" },
+      { cat: "chrome", mac: "Cmd+K", win: "Ctrl+K", desc: "Clear Console", context: "Console" },
+      { cat: "chrome", mac: "Cmd+Option+N", win: "Ctrl+Shift+N", desc: "Open new Incognito window", context: "Browser" },
+      { cat: "chrome", mac: "Cmd+L", win: "Ctrl+L", desc: "Focus address bar", context: "Browser", starred: true },
+
+      // === macOS ===
+      { cat: "macos", mac: "Cmd+Space", win: "Win+S", desc: "Open Spotlight search", context: "System", starred: true },
+      { cat: "macos", mac: "Cmd+Tab", win: "Alt+Tab", desc: "Switch between applications", context: "System", starred: true },
+      { cat: "macos", mac: "Cmd+`", win: "Alt+`", desc: "Switch between windows of same app", context: "System" },
+      { cat: "macos", mac: "Cmd+Q", win: "Alt+F4", desc: "Quit application", context: "System", starred: true },
+      { cat: "macos", mac: "Cmd+H", win: "Win+D", desc: "Hide current application", context: "System" },
+      { cat: "macos", mac: "Cmd+Option+H", win: "N/A", desc: "Hide all other applications", context: "System" },
+      { cat: "macos", mac: "Cmd+M", win: "Win+Down", desc: "Minimize window", context: "System" },
+      { cat: "macos", mac: "Cmd+W", win: "Ctrl+W", desc: "Close current window/tab", context: "System" },
+      { cat: "macos", mac: "Cmd+Option+Esc", win: "Ctrl+Shift+Esc", desc: "Force Quit applications", context: "System", starred: true },
+      { cat: "macos", mac: "Cmd+Shift+3", win: "Win+Shift+S", desc: "Screenshot full screen", context: "System", starred: true },
+      { cat: "macos", mac: "Cmd+Shift+4", win: "Win+Shift+S", desc: "Screenshot selected area", context: "System", starred: true },
+      { cat: "macos", mac: "Cmd+Shift+5", win: "Win+Shift+S", desc: "Screenshot / recording options", context: "System" },
+      { cat: "macos", mac: "Ctrl+Up", win: "Win+Tab", desc: "Mission Control (show all windows)", context: "System" },
+      { cat: "macos", mac: "Ctrl+Down", win: "N/A", desc: "Show all windows of current app", context: "System" },
+      { cat: "macos", mac: "Ctrl+Left", win: "Ctrl+Win+Left", desc: "Move to previous desktop space", context: "System" },
+      { cat: "macos", mac: "Ctrl+Right", win: "Ctrl+Win+Right", desc: "Move to next desktop space", context: "System" },
+      { cat: "macos", mac: "Cmd+Delete", win: "Delete", desc: "Move to Trash", context: "Finder" },
+      { cat: "macos", mac: "Cmd+Shift+.", win: "N/A", desc: "Show/hide hidden files in Finder", context: "Finder", starred: true },
+      { cat: "macos", mac: "Cmd+Shift+G", win: "N/A", desc: "Go to folder (type path)", context: "Finder" },
+      { cat: "macos", mac: "Cmd+Option+D", win: "N/A", desc: "Show/hide Dock", context: "System" },
+
+      // === Windows ===
+      { cat: "windows", mac: "N/A", win: "Win+E", desc: "Open File Explorer", context: "System", starred: true },
+      { cat: "windows", mac: "N/A", win: "Win+I", desc: "Open Settings", context: "System", starred: true },
+      { cat: "windows", mac: "N/A", win: "Win+L", desc: "Lock computer", context: "System", starred: true },
+      { cat: "windows", mac: "N/A", win: "Win+D", desc: "Show/hide desktop", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+V", desc: "Open clipboard history", context: "System", starred: true },
+      { cat: "windows", mac: "N/A", win: "Win+.", desc: "Open emoji picker", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+Tab", desc: "Task View (virtual desktops)", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+Shift+S", desc: "Snip & Sketch screenshot", context: "System", starred: true },
+      { cat: "windows", mac: "N/A", win: "Alt+Tab", desc: "Switch between open windows", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+Left", desc: "Snap window to left half", context: "System", starred: true },
+      { cat: "windows", mac: "N/A", win: "Win+Right", desc: "Snap window to right half", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+Up", desc: "Maximize window", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+Down", desc: "Minimize / restore window", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Ctrl+Shift+Esc", desc: "Open Task Manager", context: "System", starred: true },
+      { cat: "windows", mac: "N/A", win: "Win+R", desc: "Open Run dialog", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+X", desc: "Open Power User menu", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+Ctrl+D", desc: "Create new virtual desktop", context: "System" },
+      { cat: "windows", mac: "N/A", win: "Win+Ctrl+F4", desc: "Close current virtual desktop", context: "System" },
+      { cat: "windows", mac: "N/A", win: "F11", desc: "Toggle fullscreen in apps", context: "Apps" },
+      { cat: "windows", mac: "N/A", win: "Win+P", desc: "Project/display mode (extend, duplicate)", context: "System" },
+
+      // === Vim ===
+      { cat: "vim", mac: "i", win: "i", desc: "Enter Insert mode", context: "Normal mode", starred: true },
+      { cat: "vim", mac: "Esc", win: "Esc", desc: "Return to Normal mode", context: "Any mode", starred: true },
+      { cat: "vim", mac: ":", win: ":", desc: "Enter Command-line mode", context: "Normal mode", starred: true },
+      { cat: "vim", mac: ":w", win: ":w", desc: "Save file (write)", context: "Command mode", starred: true },
+      { cat: "vim", mac: ":q", win: ":q", desc: "Quit Vim", context: "Command mode", starred: true },
+      { cat: "vim", mac: ":wq", win: ":wq", desc: "Save and quit", context: "Command mode", starred: true },
+      { cat: "vim", mac: ":q!", win: ":q!", desc: "Quit without saving", context: "Command mode" },
+      { cat: "vim", mac: "dd", win: "dd", desc: "Delete (cut) entire line", context: "Normal mode", starred: true },
+      { cat: "vim", mac: "yy", win: "yy", desc: "Yank (copy) entire line", context: "Normal mode", starred: true },
+      { cat: "vim", mac: "p", win: "p", desc: "Paste after cursor", context: "Normal mode" },
+      { cat: "vim", mac: "u", win: "u", desc: "Undo", context: "Normal mode", starred: true },
+      { cat: "vim", mac: "Ctrl+R", win: "Ctrl+R", desc: "Redo", context: "Normal mode" },
+      { cat: "vim", mac: "/pattern", win: "/pattern", desc: "Search forward for pattern", context: "Normal mode", starred: true },
+      { cat: "vim", mac: "n", win: "n", desc: "Repeat search forward", context: "Normal mode" },
+      { cat: "vim", mac: "N", win: "N", desc: "Repeat search backward", context: "Normal mode" },
+      { cat: "vim", mac: "gg", win: "gg", desc: "Go to first line of file", context: "Normal mode" },
+      { cat: "vim", mac: "G", win: "G", desc: "Go to last line of file", context: "Normal mode" },
+      { cat: "vim", mac: "0", win: "0", desc: "Go to start of line", context: "Normal mode" },
+      { cat: "vim", mac: "$", win: "$", desc: "Go to end of line", context: "Normal mode" },
+      { cat: "vim", mac: "w", win: "w", desc: "Move forward one word", context: "Normal mode" },
+      { cat: "vim", mac: "b", win: "b", desc: "Move back one word", context: "Normal mode" },
+      { cat: "vim", mac: "v", win: "v", desc: "Enter Visual mode (select)", context: "Normal mode" },
+      { cat: "vim", mac: "V", win: "V", desc: "Enter Visual Line mode", context: "Normal mode" },
+      { cat: "vim", mac: "Ctrl+V", win: "Ctrl+V", desc: "Enter Visual Block mode", context: "Normal mode" },
+      { cat: "vim", mac: "ciw", win: "ciw", desc: "Change inner word", context: "Normal mode" },
+      { cat: "vim", mac: ">", win: ">", desc: "Indent selected lines", context: "Visual mode" },
+      { cat: "vim", mac: "<", win: "<", desc: "Unindent selected lines", context: "Visual mode" },
+      { cat: "vim", mac: ":%s/old/new/g", win: ":%s/old/new/g", desc: "Find and replace all in file", context: "Command mode" },
+      { cat: "vim", mac: ".", win: ".", desc: "Repeat last command", context: "Normal mode" },
+      { cat: "vim", mac: "Ctrl+O", win: "Ctrl+O", desc: "Jump to previous location", context: "Normal mode" },
+
+      // === Git ===
+      { cat: "git", mac: "git status", win: "git status", desc: "Show working tree status", context: "Repository" },
+      { cat: "git", mac: "git add -p", win: "git add -p", desc: "Stage changes interactively (patch mode)", context: "Repository", starred: true },
+      { cat: "git", mac: "git commit -m", win: "git commit -m", desc: "Commit staged changes with message", context: "Repository", starred: true },
+      { cat: "git", mac: "git log --oneline", win: "git log --oneline", desc: "Show compact commit history", context: "Repository", starred: true },
+      { cat: "git", mac: "git diff", win: "git diff", desc: "Show unstaged changes", context: "Repository", starred: true },
+      { cat: "git", mac: "git diff --staged", win: "git diff --staged", desc: "Show staged changes", context: "Repository" },
+      { cat: "git", mac: "git stash", win: "git stash", desc: "Stash current changes", context: "Repository", starred: true },
+      { cat: "git", mac: "git stash pop", win: "git stash pop", desc: "Apply and remove last stash", context: "Repository" },
+      { cat: "git", mac: "git checkout -b name", win: "git checkout -b name", desc: "Create and switch to new branch", context: "Repository", starred: true },
+      { cat: "git", mac: "git rebase -i HEAD~n", win: "git rebase -i HEAD~n", desc: "Interactive rebase last n commits", context: "Repository", starred: true },
+      { cat: "git", mac: "git cherry-pick hash", win: "git cherry-pick hash", desc: "Apply specific commit to current branch", context: "Repository" },
+      { cat: "git", mac: "git reset --soft HEAD~1", win: "git reset --soft HEAD~1", desc: "Undo last commit, keep changes staged", context: "Repository", starred: true },
+      { cat: "git", mac: "git blame file", win: "git blame file", desc: "Show who changed each line", context: "Repository" },
+      { cat: "git", mac: "git log --graph", win: "git log --graph", desc: "Show branch graph in history", context: "Repository" },
+      { cat: "git", mac: "git reflog", win: "git reflog", desc: "Show all ref changes (undo safety net)", context: "Repository" },
+      { cat: "git", mac: "git bisect start", win: "git bisect start", desc: "Binary search for bug-introducing commit", context: "Repository" },
+      { cat: "git", mac: "git remote -v", win: "git remote -v", desc: "Show remote repository URLs", context: "Repository" },
+      { cat: "git", mac: "git fetch --all", win: "git fetch --all", desc: "Fetch all remotes", context: "Repository" },
+      { cat: "git", mac: "git pull --rebase", win: "git pull --rebase", desc: "Pull with rebase instead of merge", context: "Repository", starred: true },
+      { cat: "git", mac: "git clean -fd", win: "git clean -fd", desc: "Remove untracked files and directories", context: "Repository" },
+
+      // === IntelliJ / JetBrains ===
+      { cat: "jetbrains", mac: "Cmd+Shift+A", win: "Ctrl+Shift+A", desc: "Find Action (command palette)", context: "Global", starred: true },
+      { cat: "jetbrains", mac: "Shift Shift", win: "Shift Shift", desc: "Search Everywhere", context: "Global", starred: true },
+      { cat: "jetbrains", mac: "Cmd+N", win: "Alt+Insert", desc: "Generate code (getters, constructors)", context: "Editor", starred: true },
+      { cat: "jetbrains", mac: "Cmd+E", win: "Ctrl+E", desc: "Recent files popup", context: "Global" },
+      { cat: "jetbrains", mac: "Cmd+Shift+E", win: "Ctrl+Shift+E", desc: "Recent locations popup", context: "Global" },
+      { cat: "jetbrains", mac: "Cmd+B", win: "Ctrl+B", desc: "Go to declaration", context: "Editor", starred: true },
+      { cat: "jetbrains", mac: "Cmd+Option+B", win: "Ctrl+Alt+B", desc: "Go to implementation", context: "Editor" },
+      { cat: "jetbrains", mac: "Alt+Enter", win: "Alt+Enter", desc: "Show intention actions / quick fix", context: "Editor", starred: true },
+      { cat: "jetbrains", mac: "Cmd+Option+L", win: "Ctrl+Alt+L", desc: "Reformat code", context: "Editor", starred: true },
+      { cat: "jetbrains", mac: "Cmd+Option+O", win: "Ctrl+Alt+O", desc: "Optimize imports", context: "Editor" },
+      { cat: "jetbrains", mac: "Cmd+/", win: "Ctrl+/", desc: "Toggle line comment", context: "Editor" },
+      { cat: "jetbrains", mac: "Cmd+Shift+/", win: "Ctrl+Shift+/", desc: "Toggle block comment", context: "Editor" },
+      { cat: "jetbrains", mac: "Shift+F6", win: "Shift+F6", desc: "Rename refactoring", context: "Editor", starred: true },
+      { cat: "jetbrains", mac: "Cmd+Shift+F", win: "Ctrl+Shift+F", desc: "Find in path (search project)", context: "Global" },
+      { cat: "jetbrains", mac: "Cmd+Shift+R", win: "Ctrl+Shift+R", desc: "Replace in path", context: "Global" },
+      { cat: "jetbrains", mac: "Ctrl+R", win: "Shift+F10", desc: "Run current configuration", context: "Global" },
+      { cat: "jetbrains", mac: "Ctrl+D", win: "Shift+F9", desc: "Debug current configuration", context: "Global" },
+      { cat: "jetbrains", mac: "Cmd+F8", win: "Ctrl+F8", desc: "Toggle breakpoint", context: "Editor" },
+      { cat: "jetbrains", mac: "Cmd+Option+T", win: "Ctrl+Alt+T", desc: "Surround with (if, try, etc.)", context: "Editor" },
+      { cat: "jetbrains", mac: "Cmd+Option+M", win: "Ctrl+Alt+M", desc: "Extract method refactoring", context: "Editor", starred: true },
+    ];
+
+    const CATEGORIES = {
+      vscode:     { label: "VS Code",           icon: "VS" },
+      terminal:   { label: "Terminal / Bash",    icon: "SH" },
+      chrome:     { label: "Chrome DevTools",    icon: "DT" },
+      macos:      { label: "macOS",              icon: "&#63743;" },
+      windows:    { label: "Windows",            icon: "Win" },
+      vim:        { label: "Vim",                icon: "Vi" },
+      git:        { label: "Git",                icon: "Git" },
+      jetbrains:  { label: "IntelliJ / JetBrains", icon: "JB" },
+    };
+
+    const CAT_ORDER = ["vscode", "terminal", "chrome", "macos", "windows", "vim", "git", "jetbrains"];
+
+    let currentPlatform = "mac"; // "mac" or "win"
+    let currentCat = "all";
+
+    const searchInput = document.getElementById("searchInput");
+    const searchCount = document.getElementById("searchCount");
+    const categoryTabs = document.getElementById("categoryTabs");
+    const shortcutList = document.getElementById("shortcutList");
+    const noResults = document.getElementById("noResults");
+    const platformToggle = document.getElementById("platformToggle");
+    const labelMac = document.getElementById("labelMac");
+    const labelWin = document.getElementById("labelWin");
+    const scrollTopBtn = document.getElementById("scrollTop");
+
+    // Build category tabs
+    function buildTabs() {
+      let html = `<button class="category-tab active" data-cat="all">All <span class="tab-count">${SHORTCUTS.length}</span></button>`;
+      CAT_ORDER.forEach(cat => {
+        const count = SHORTCUTS.filter(s => s.cat === cat).length;
+        const info = CATEGORIES[cat];
+        html += `<button class="category-tab" data-cat="${cat}">${info.label} <span class="tab-count">${count}</span></button>`;
+      });
+      categoryTabs.innerHTML = html;
+
+      categoryTabs.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          currentCat = tab.dataset.cat;
+          categoryTabs.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          render();
+        });
+      });
+    }
+
+    // Platform toggle
+    platformToggle.addEventListener('change', () => {
+      currentPlatform = platformToggle.checked ? "win" : "mac";
+      labelMac.classList.toggle('active', currentPlatform === 'mac');
+      labelWin.classList.toggle('active', currentPlatform === 'win');
+      render();
+    });
+
+    // Search
+    searchInput.addEventListener('input', () => render());
+
+    // Render shortcuts
+    function render() {
+      const query = searchInput.value.toLowerCase().trim();
+
+      let filtered = SHORTCUTS.filter(s => {
+        if (currentCat !== "all" && s.cat !== currentCat) return false;
+        if (query) {
+          const keyStr = (currentPlatform === "mac" ? s.mac : s.win).toLowerCase();
+          const haystack = `${keyStr} ${s.desc.toLowerCase()} ${s.context.toLowerCase()} ${CATEGORIES[s.cat].label.toLowerCase()}`;
+          return haystack.includes(query);
+        }
+        return true;
+      });
+
+      searchCount.textContent = query ? `${filtered.length} match${filtered.length !== 1 ? 'es' : ''}` : `${filtered.length} shortcuts`;
+
+      if (filtered.length === 0) {
+        shortcutList.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      // Group by category
+      const groups = {};
+      filtered.forEach(s => {
+        if (!groups[s.cat]) groups[s.cat] = [];
+        groups[s.cat].push(s);
+      });
+
+      let html = '';
+      CAT_ORDER.forEach(cat => {
+        if (!groups[cat]) return;
+        const info = CATEGORIES[cat];
+        html += `<div class="category-section cat-${cat}">`;
+        html += `<div class="category-header">`;
+        html += `<span class="category-badge">${info.icon}</span>`;
+        html += `<h2>${escHtml(info.label)}</h2>`;
+        html += `</div>`;
+
+        groups[cat].forEach((s, idx) => {
+          const keyStr = currentPlatform === "mac" ? s.mac : s.win;
+          const keysHtml = formatKeys(keyStr);
+          const uid = `${s.cat}-${idx}`;
+          html += `<div class="shortcut-card${s.starred ? ' starred' : ''}">`;
+          html += `<span class="shortcut-star">${s.starred ? '&#9733;' : ''}</span>`;
+          html += `<span class="shortcut-keys">${keysHtml}</span>`;
+          html += `<div class="shortcut-info">`;
+          html += `<div class="shortcut-desc">${escHtml(s.desc)}</div>`;
+          html += `<div class="shortcut-context">${escHtml(s.context)}</div>`;
+          html += `</div>`;
+          html += `<button class="shortcut-copy" onclick="copyShortcut(this, '${escAttr(keyStr)}')" title="Copy shortcut">Copy</button>`;
+          html += `</div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      shortcutList.innerHTML = html;
+    }
+
+    function formatKeys(keyStr) {
+      // Split by space to get key combos, but keep multi-word commands together
+      // For git commands or vim commands with spaces, keep as single key
+      if (keyStr.startsWith('git ') || keyStr.startsWith(':') || keyStr.startsWith('!') || keyStr.startsWith('%')) {
+        return `<span class="key">${escHtml(keyStr)}</span>`;
+      }
+
+      const parts = keyStr.split(/\s+/);
+      return parts.map(part => {
+        // Split by + but keep the + in modifiers
+        const keys = part.split('+');
+        return keys.map(k => `<span class="key">${escHtml(k)}</span>`).join('<span class="key-sep">+</span>');
+      }).join(' ');
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function escAttr(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function copyShortcut(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+
+    // Scroll to top button
+    window.addEventListener('scroll', () => {
+      scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+    });
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Keyboard shortcut: / to focus search
+    document.addEventListener('keydown', e => {
+      if (e.target === searchInput) return;
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    // Auto-detect platform
+    if (navigator.platform && (navigator.platform.indexOf('Win') > -1 || navigator.userAgent.indexOf('Windows') > -1)) {
+      platformToggle.checked = true;
+      currentPlatform = 'win';
+      labelMac.classList.remove('active');
+      labelWin.classList.add('active');
+    }
+
+    // Initial render
+    buildTabs();
+    render();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
