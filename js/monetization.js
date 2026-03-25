@@ -433,6 +433,89 @@
     });
   }
 
+  // === FAQ SCHEMA FOR RICH SNIPPETS ===
+  function injectFAQSchema() {
+    if (!document.querySelector('.tool-page')) return;
+
+    var toolId = location.pathname.split('/').pop().replace('.html', '');
+    var faqs = {
+      'json': [
+        {q:'What is a JSON formatter?', a:'A JSON formatter takes raw or minified JSON data and reformats it with proper indentation and line breaks, making it easier to read and debug.'},
+        {q:'Is my data safe when using this JSON formatter?', a:'Yes. This tool runs entirely in your browser. Your JSON data is never sent to any server.'},
+        {q:'Can I validate JSON online?', a:'Yes. This tool automatically validates your JSON and shows syntax errors with line numbers.'}
+      ],
+      'base64': [
+        {q:'What is Base64 encoding?', a:'Base64 is a binary-to-text encoding scheme that represents binary data as ASCII text. It is commonly used in email, URLs, and data URIs.'},
+        {q:'Is Base64 encryption?', a:'No. Base64 is encoding, not encryption. It does not provide security — anyone can decode Base64 data.'},
+        {q:'When should I use Base64?', a:'Use Base64 when you need to embed binary data (images, files) in text-based formats like HTML, CSS, JSON, or email.'}
+      ],
+      'hash': [
+        {q:'What is a hash function?', a:'A hash function takes input data and produces a fixed-size string of characters (the hash). Common algorithms include MD5, SHA-1, SHA-256, and SHA-512.'},
+        {q:'Are hashes reversible?', a:'No. Cryptographic hash functions are one-way — you cannot reverse a hash to get the original input.'},
+        {q:'Which hash algorithm should I use?', a:'Use SHA-256 or SHA-512 for security purposes. MD5 and SHA-1 are considered weak and should only be used for checksums, not security.'}
+      ],
+      'regex': [
+        {q:'What is regex?', a:'Regex (regular expressions) is a pattern-matching language used to search, match, and manipulate text. It is supported in virtually all programming languages.'},
+        {q:'How do I test a regular expression?', a:'Paste your regex pattern and test string into this tool. It highlights matches in real-time and shows capture groups.'},
+        {q:'What does the g flag mean in regex?', a:'The g (global) flag finds all matches in the string, not just the first one.'}
+      ],
+      'jwt': [
+        {q:'What is a JWT token?', a:'JWT (JSON Web Token) is a compact, URL-safe token format used for authentication and information exchange. It contains a header, payload, and signature.'},
+        {q:'Can you decode a JWT without the secret?', a:'Yes. The header and payload of a JWT are Base64-encoded (not encrypted). Only the signature requires the secret key to verify.'},
+        {q:'Are JWT tokens secure?', a:'JWTs are secure when properly implemented — use strong secrets, short expiration times, and HTTPS.'}
+      ],
+      'dns-lookup': [
+        {q:'What is DNS lookup?', a:'DNS lookup queries Domain Name System servers to find the IP address and other records (MX, AAAA, PTR) associated with a domain name.'},
+        {q:'What are MX records?', a:'MX (Mail Exchanger) records specify which mail servers handle email for a domain.'},
+        {q:'Why does DNS lookup matter?', a:'DNS lookups help debug email delivery issues, verify domain configuration, and troubleshoot website connectivity problems.'}
+      ],
+      'ssl-checker': [
+        {q:'How do I check if an SSL certificate is valid?', a:'Enter the domain name in this tool. It checks the certificate chain, expiry date, issuer, and cipher strength.'},
+        {q:'What happens when an SSL certificate expires?', a:'Browsers show security warnings, users lose trust, and search engines may penalize the site ranking.'},
+        {q:'Is SSL the same as TLS?', a:'SSL (Secure Sockets Layer) is the predecessor of TLS (Transport Layer Security). Modern HTTPS uses TLS, but the term SSL is still commonly used.'}
+      ],
+      'color': [
+        {q:'How do I convert HEX to RGB?', a:'Enter a HEX color code (e.g., #6366f1) and this tool instantly converts it to RGB, HSL, and other formats.'},
+        {q:'What is the difference between HEX and RGB?', a:'HEX uses hexadecimal notation (#RRGGBB), while RGB uses decimal values (0-255) for red, green, and blue channels. They represent the same colors.'}
+      ],
+      'flexbox': [
+        {q:'What is CSS Flexbox?', a:'Flexbox is a CSS layout module that provides an efficient way to align, distribute, and space items within a container, even when their sizes are unknown.'},
+        {q:'When should I use Flexbox vs Grid?', a:'Use Flexbox for one-dimensional layouts (row OR column). Use CSS Grid for two-dimensional layouts (rows AND columns simultaneously).'}
+      ],
+      'password': [
+        {q:'How long should a password be?', a:'At least 12-16 characters. Longer passwords are exponentially harder to crack. Use a mix of uppercase, lowercase, numbers, and special characters.'},
+        {q:'Is this password generator safe?', a:'Yes. Passwords are generated entirely in your browser using the Web Crypto API. No passwords are ever sent to a server.'}
+      ],
+      'qrcode': [
+        {q:'What is a QR code?', a:'A QR (Quick Response) code is a 2D barcode that can store URLs, text, contact info, and other data. It can be scanned by smartphone cameras.'},
+        {q:'Can I generate a QR code for free?', a:'Yes. This tool generates QR codes instantly in your browser for any text or URL, completely free.'}
+      ]
+    };
+
+    var toolFaqs = faqs[toolId];
+    if (!toolFaqs) return;
+
+    var faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': toolFaqs.map(function(faq) {
+        return {
+          '@type': 'Question',
+          'name': faq.q,
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text': faq.a
+          }
+        };
+      })
+    };
+
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(script);
+  }
+
   // === AADS CRYPTO ADS ===
   function injectAADS() {
     var footer = document.querySelector('footer');
@@ -461,6 +544,7 @@
     injectFavicon();
     injectOGTags();
     injectStructuredData();
+    injectFAQSchema();
     trackPageView();
     injectRelatedTools();
     injectResourceLinks();
