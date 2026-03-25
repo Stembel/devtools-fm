@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Units Converter - px to rem, em, vw, vh | ZeroKit.dev</title>
+  <meta name="description" content="Convert between CSS units: px, rem, em, %, vw, vh, pt, cm, mm, in. Real-time bidirectional conversion. Free, fast, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/cssunits.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .settings-bar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+    .settings-bar label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .settings-bar input[type="number"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: var(--mono);
+      width: 80px;
+      outline: none;
+    }
+    .settings-bar input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+    .converter-input-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .converter-input-row .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .converter-input-row .field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .converter-input-row .field input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 1rem;
+      width: 180px;
+      outline: none;
+    }
+    .converter-input-row .field input:focus {
+      border-color: var(--accent);
+    }
+    .converter-input-row .field select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-family: var(--font);
+      outline: none;
+      cursor: pointer;
+    }
+    .converter-input-row .field select:focus {
+      border-color: var(--accent);
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .result-card:hover {
+      border-color: var(--accent);
+    }
+    .result-card.active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    .result-card .unit-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .result-card .unit-value {
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .result-card .unit-css {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .result-card .copy-hint {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .result-card:hover .copy-hint {
+      opacity: 1;
+    }
+    .result-card .copied-msg {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 0.65rem;
+      color: var(--success);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .result-card .copied-msg.show {
+      opacity: 1;
+    }
+    .ref-table-wrapper {
+      margin-top: 8px;
+    }
+    .ref-table-wrapper h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .ref-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    .ref-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .ref-table tr:hover td {
+      background: var(--surface);
+    }
+    .ref-table td:first-child {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .section-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    @media (max-width: 768px) {
+      .converter-input-row .field input {
+        width: 140px;
+      }
+      .results-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Units Converter</h1>
+    <p class="description">Convert between CSS units in real time. Enter a value in any unit and see all conversions instantly. Click any result to copy.</p>
+
+    <div class="settings-bar">
+      <label>Base font size:
+        <input type="number" id="baseFontSize" value="16" min="1" max="200" step="1"> px
+      </label>
+      <label>Viewport width:
+        <input type="number" id="viewportWidth" value="1920" min="1" max="10000" step="1"> px
+      </label>
+      <label>Viewport height:
+        <input type="number" id="viewportHeight" value="1080" min="1" max="10000" step="1"> px
+      </label>
+    </div>
+
+    <div class="converter-input-row">
+      <div class="field">
+        <label>Value</label>
+        <input type="number" id="inputValue" value="16" step="any" placeholder="Enter value...">
+      </div>
+      <div class="field">
+        <label>Unit</label>
+        <select id="inputUnit">
+          <option value="px" selected>px</option>
+          <option value="rem">rem</option>
+          <option value="em">em</option>
+          <option value="percent">%</option>
+          <option value="vw">vw</option>
+          <option value="vh">vh</option>
+          <option value="pt">pt</option>
+          <option value="cm">cm</option>
+          <option value="mm">mm</option>
+          <option value="in">in</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="results-grid" id="results">
+      <!-- Generated by JS -->
+    </div>
+
+    <div class="tool-panel ref-table-wrapper">
+      <div class="panel-header">Common Conversions Quick Reference</div>
+      <div style="overflow-x: auto;">
+        <table class="ref-table" id="refTable">
+          <thead>
+            <tr>
+              <th>px</th>
+              <th>rem</th>
+              <th>em</th>
+              <th>pt</th>
+              <th>% (of 16px)</th>
+            </tr>
+          </thead>
+          <tbody id="refBody">
+            <!-- Generated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="section-note" style="margin-top: 12px;">Reference table assumes base font size of 16px. rem and em values are relative to the base font size. Percentage is relative to the parent element's font size (16px default).</p>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const UNITS = ['px', 'rem', 'em', 'percent', 'vw', 'vh', 'pt', 'cm', 'mm', 'in'];
+    const UNIT_LABELS = {
+      px: 'px', rem: 'rem', em: 'em', percent: '%',
+      vw: 'vw', vh: 'vh', pt: 'pt', cm: 'cm', mm: 'mm', in: 'in'
+    };
+    const UNIT_DESCRIPTIONS = {
+      px: 'Pixels',
+      rem: 'Root em (relative to base font)',
+      em: 'Em (relative to parent font)',
+      percent: 'Percentage (of parent)',
+      vw: 'Viewport width units',
+      vh: 'Viewport height units',
+      pt: 'Points (1pt = 1/72 in)',
+      cm: 'Centimeters',
+      mm: 'Millimeters',
+      in: 'Inches'
+    };
+
+    // 1 inch = 96px (CSS specification)
+    const PX_PER_INCH = 96;
+    const PX_PER_CM = PX_PER_INCH / 2.54;
+    const PX_PER_MM = PX_PER_CM / 10;
+    const PX_PER_PT = PX_PER_INCH / 72;
+
+    const $inputValue = document.getElementById('inputValue');
+    const $inputUnit = document.getElementById('inputUnit');
+    const $baseFontSize = document.getElementById('baseFontSize');
+    const $viewportWidth = document.getElementById('viewportWidth');
+    const $viewportHeight = document.getElementById('viewportHeight');
+    const $results = document.getElementById('results');
+
+    function getBase() { return parseFloat($baseFontSize.value) || 16; }
+    function getVW() { return parseFloat($viewportWidth.value) || 1920; }
+    function getVH() { return parseFloat($viewportHeight.value) || 1080; }
+
+    // Convert any unit to px
+    function toPx(value, unit) {
+      const base = getBase();
+      const vw = getVW();
+      const vh = getVH();
+      switch (unit) {
+        case 'px':      return value;
+        case 'rem':     return value * base;
+        case 'em':      return value * base;
+        case 'percent': return (value / 100) * base;
+        case 'vw':      return (value / 100) * vw;
+        case 'vh':      return (value / 100) * vh;
+        case 'pt':      return value * PX_PER_PT;
+        case 'cm':      return value * PX_PER_CM;
+        case 'mm':      return value * PX_PER_MM;
+        case 'in':      return value * PX_PER_INCH;
+        default:        return value;
+      }
+    }
+
+    // Convert px to any unit
+    function fromPx(px, unit) {
+      const base = getBase();
+      const vw = getVW();
+      const vh = getVH();
+      switch (unit) {
+        case 'px':      return px;
+        case 'rem':     return px / base;
+        case 'em':      return px / base;
+        case 'percent': return (px / base) * 100;
+        case 'vw':      return (px / vw) * 100;
+        case 'vh':      return (px / vh) * 100;
+        case 'pt':      return px / PX_PER_PT;
+        case 'cm':      return px / PX_PER_CM;
+        case 'mm':      return px / PX_PER_MM;
+        case 'in':      return px / PX_PER_INCH;
+        default:        return px;
+      }
+    }
+
+    function formatValue(num) {
+      if (num === 0) return '0';
+      if (Number.isInteger(num)) return num.toString();
+      // Show up to 6 decimal places, trimming trailing zeros
+      const s = num.toFixed(6).replace(/\.?0+$/, '');
+      return s;
+    }
+
+    function buildResults() {
+      $results.innerHTML = '';
+      UNITS.forEach(function(unit) {
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.dataset.unit = unit;
+        card.innerHTML =
+          '<span class="unit-label">' + UNIT_LABELS[unit] + ' &mdash; ' + UNIT_DESCRIPTIONS[unit] + '</span>' +
+          '<span class="unit-value" data-unit="' + unit + '">0</span>' +
+          '<span class="unit-css" data-unit="' + unit + '"></span>' +
+          '<span class="copy-hint">Click to copy</span>' +
+          '<span class="copied-msg">Copied!</span>';
+        card.addEventListener('click', function() { copyResult(unit); });
+        $results.appendChild(card);
+      });
+    }
+
+    function convert() {
+      const value = parseFloat($inputValue.value);
+      const sourceUnit = $inputUnit.value;
+
+      if (isNaN(value)) {
+        UNITS.forEach(function(unit) {
+          const valEl = $results.querySelector('.unit-value[data-unit="' + unit + '"]');
+          const cssEl = $results.querySelector('.unit-css[data-unit="' + unit + '"]');
+          if (valEl) valEl.textContent = '—';
+          if (cssEl) cssEl.textContent = '';
+        });
+        // Highlight active
+        $results.querySelectorAll('.result-card').forEach(function(c) {
+          c.classList.toggle('active', c.dataset.unit === sourceUnit);
+        });
+        return;
+      }
+
+      const px = toPx(value, sourceUnit);
+
+      UNITS.forEach(function(unit) {
+        const converted = fromPx(px, unit);
+        const formatted = formatValue(converted);
+        const label = UNIT_LABELS[unit];
+        const valEl = $results.querySelector('.unit-value[data-unit="' + unit + '"]');
+        const cssEl = $results.querySelector('.unit-css[data-unit="' + unit + '"]');
+        const card = $results.querySelector('.result-card[data-unit="' + unit + '"]');
+
+        if (valEl) valEl.textContent = formatted;
+        if (cssEl) cssEl.textContent = formatted + label;
+        if (card) card.classList.toggle('active', unit === sourceUnit);
+      });
+    }
+
+    function copyResult(unit) {
+      const cssEl = $results.querySelector('.unit-css[data-unit="' + unit + '"]');
+      const card = $results.querySelector('.result-card[data-unit="' + unit + '"]');
+      if (!cssEl || !cssEl.textContent) return;
+
+      navigator.clipboard.writeText(cssEl.textContent).then(function() {
+        var msg = card.querySelector('.copied-msg');
+        var hint = card.querySelector('.copy-hint');
+        if (msg) { msg.classList.add('show'); hint.style.opacity = '0'; }
+        setTimeout(function() {
+          if (msg) { msg.classList.remove('show'); hint.style.opacity = ''; }
+        }, 1000);
+      });
+    }
+
+    function buildRefTable() {
+      var refValues = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 64, 72, 96];
+      var tbody = document.getElementById('refBody');
+      tbody.innerHTML = '';
+      refValues.forEach(function(px) {
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + px + 'px</td>' +
+          '<td>' + formatValue(px / 16) + 'rem</td>' +
+          '<td>' + formatValue(px / 16) + 'em</td>' +
+          '<td>' + formatValue(px / PX_PER_PT) + 'pt</td>' +
+          '<td>' + formatValue((px / 16) * 100) + '%</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Event listeners — real-time conversion
+    $inputValue.addEventListener('input', convert);
+    $inputUnit.addEventListener('change', convert);
+    $baseFontSize.addEventListener('input', convert);
+    $viewportWidth.addEventListener('input', convert);
+    $viewportHeight.addEventListener('input', convert);
+
+    // Init
+    buildResults();
+    convert();
+    buildRefTable();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

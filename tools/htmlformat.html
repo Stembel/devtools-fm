@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Formatter & Prettifier - Format HTML Code Online | ZeroKit.dev</title>
+  <meta name="description" content="Format, prettify, and minify HTML online. Proper indentation, syntax highlighting, inline vs block element handling. Free, fast, runs in your browser.">
+  <link rel="canonical" href="https://zerokit.dev/tools/htmlformat.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .output-highlight {
+      width: 100%;
+      min-height: 400px;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      overflow: auto;
+      white-space: pre;
+      tab-size: 2;
+      -moz-tab-size: 2;
+    }
+    .output-highlight .hl-tag { color: #f472b6; }
+    .output-highlight .hl-attr { color: #c084fc; }
+    .output-highlight .hl-val { color: #34d399; }
+    .output-highlight .hl-comment { color: #6b7280; font-style: italic; }
+    .output-highlight .hl-doctype { color: #6b7280; }
+    .output-highlight .hl-text { color: var(--text); }
+    .output-highlight .hl-entity { color: #fbbf24; }
+    .size-stats {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 8px 16px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+    .size-stats .saved { color: var(--success); }
+    .size-stats .grew { color: var(--error); }
+    .options-row input[type="number"] {
+      width: 60px;
+    }
+    .options-row input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>HTML Formatter & Prettifier</h1>
+    <p class="description">Paste your HTML to format, prettify, or minify. Handles inline vs block elements correctly. Everything runs locally in your browser.</p>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="formatHTML()">Format</button>
+        <button class="btn" onclick="minifyHTML()">Minify</button>
+        <button class="btn" onclick="copyOutput()">Copy</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+    <div class="options-row">
+      <label>Indent:
+        <select id="indent">
+          <option value="2" selected>2 spaces</option>
+          <option value="4">4 spaces</option>
+          <option value="tab">Tab</option>
+        </select>
+      </label>
+      <label>Wrap at:
+        <input type="number" id="wrapLength" value="0" min="0" step="10" placeholder="0 = off" title="Line wrap length (0 = no wrap)">
+        <span style="font-size:0.75rem;color:var(--text-muted)">cols</span>
+      </label>
+      <label>
+        <input type="checkbox" id="preserveNewlines"> Preserve newlines
+      </label>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Input</div>
+        <textarea class="tool-textarea" id="input" placeholder='Paste HTML here...
+
+<div class="container"><h1>Hello</h1><p>World <strong>bold</strong> text</p></div>'></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Output
+          <span id="status"></span>
+        </div>
+        <div class="output-highlight" id="outputHighlight"></div>
+        <textarea class="tool-textarea" id="outputRaw" style="display:none"></textarea>
+        <div class="size-stats" id="sizeStats" style="display:none">
+          <span>Before: <strong id="sizeBefore">0 B</strong></span>
+          <span>After: <strong id="sizeAfter">0 B</strong></span>
+          <span id="sizeDiff"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $outputHL = document.getElementById('outputHighlight');
+    const $outputRaw = document.getElementById('outputRaw');
+    const $status = document.getElementById('status');
+    const $indent = document.getElementById('indent');
+    const $wrapLength = document.getElementById('wrapLength');
+    const $preserveNewlines = document.getElementById('preserveNewlines');
+    const $sizeStats = document.getElementById('sizeStats');
+
+    // HTML elements classified by display behavior
+    const VOID_ELEMENTS = new Set([
+      'area','base','br','col','embed','hr','img','input',
+      'link','meta','param','source','track','wbr'
+    ]);
+
+    const INLINE_ELEMENTS = new Set([
+      'a','abbr','acronym','b','bdo','big','br','button','cite','code',
+      'dfn','em','i','img','input','kbd','label','map','object',
+      'output','q','samp','select','small','span','strong','sub',
+      'sup','textarea','time','tt','u','var','mark','s','del','ins'
+    ]);
+
+    const RAW_TEXT_ELEMENTS = new Set(['script','style','pre','code','textarea']);
+
+    const PRE_LIKE_ELEMENTS = new Set(['pre','textarea']);
+
+    function getIndent() {
+      const v = $indent.value;
+      return v === 'tab' ? '\t' : ' '.repeat(Number(v));
+    }
+
+    // =====================
+    // HTML Tokenizer
+    // =====================
+    function tokenize(html) {
+      const tokens = [];
+      let i = 0;
+      const len = html.length;
+
+      while (i < len) {
+        if (html[i] === '<') {
+          // Comment
+          if (html.substr(i, 4) === '<!--') {
+            const end = html.indexOf('-->', i + 4);
+            if (end === -1) {
+              tokens.push({ type: 'comment', value: html.slice(i) });
+              break;
+            }
+            tokens.push({ type: 'comment', value: html.slice(i, end + 3) });
+            i = end + 3;
+            continue;
+          }
+
+          // Doctype
+          if (html.substr(i, 9).toLowerCase() === '<!doctype') {
+            const end = html.indexOf('>', i);
+            if (end === -1) {
+              tokens.push({ type: 'doctype', value: html.slice(i) });
+              break;
+            }
+            tokens.push({ type: 'doctype', value: html.slice(i, end + 1) });
+            i = end + 1;
+            continue;
+          }
+
+          // CDATA
+          if (html.substr(i, 9) === '<![CDATA[') {
+            const end = html.indexOf(']]>', i + 9);
+            if (end === -1) {
+              tokens.push({ type: 'cdata', value: html.slice(i) });
+              break;
+            }
+            tokens.push({ type: 'cdata', value: html.slice(i, end + 3) });
+            i = end + 3;
+            continue;
+          }
+
+          // Closing tag
+          if (html[i + 1] === '/') {
+            const end = html.indexOf('>', i);
+            if (end === -1) {
+              tokens.push({ type: 'text', value: html.slice(i) });
+              break;
+            }
+            const tag = html.slice(i, end + 1);
+            const tagName = tag.replace(/<\/\s*(\S+)\s*>/, '$1').toLowerCase();
+            tokens.push({ type: 'close', value: tag, tagName });
+            i = end + 1;
+            continue;
+          }
+
+          // Opening / self-closing tag
+          const end = html.indexOf('>', i);
+          if (end === -1) {
+            tokens.push({ type: 'text', value: html.slice(i) });
+            break;
+          }
+          const tag = html.slice(i, end + 1);
+          const selfClosing = tag.endsWith('/>');
+          const match = tag.match(/^<\s*([a-zA-Z][a-zA-Z0-9-]*)/);
+          const tagName = match ? match[1].toLowerCase() : '';
+          const isVoid = VOID_ELEMENTS.has(tagName);
+
+          // Handle raw text elements (script, style, pre)
+          if (RAW_TEXT_ELEMENTS.has(tagName) && !selfClosing && !isVoid) {
+            const closePattern = new RegExp('</' + tagName + '\\s*>', 'i');
+            const rest = html.slice(end + 1);
+            const closeMatch = rest.match(closePattern);
+            if (closeMatch) {
+              const rawContent = rest.slice(0, closeMatch.index);
+              const closeTag = closeMatch[0];
+              tokens.push({ type: 'open', value: tag, tagName, selfClosing: false, isVoid: false });
+              if (rawContent) {
+                tokens.push({ type: 'text', value: rawContent, raw: true, parentTag: tagName });
+              }
+              tokens.push({ type: 'close', value: closeTag, tagName });
+              i = end + 1 + closeMatch.index + closeTag.length;
+              continue;
+            }
+          }
+
+          tokens.push({
+            type: selfClosing || isVoid ? 'selfclose' : 'open',
+            value: tag,
+            tagName,
+            selfClosing: selfClosing || isVoid,
+            isVoid
+          });
+          i = end + 1;
+          continue;
+        }
+
+        // Text node
+        let next = html.indexOf('<', i);
+        if (next === -1) next = len;
+        const text = html.slice(i, next);
+        if (text) {
+          tokens.push({ type: 'text', value: text });
+        }
+        i = next;
+      }
+      return tokens;
+    }
+
+    // =====================
+    // HTML Formatter
+    // =====================
+    function format(html) {
+      const indentStr = getIndent();
+      const wrapLen = parseInt($wrapLength.value) || 0;
+      const preserveNL = $preserveNewlines.checked;
+
+      const tokens = tokenize(html);
+      const lines = [];
+      let depth = 0;
+
+      function addLine(content, d) {
+        if (d === undefined) d = depth;
+        const prefix = indentStr.repeat(Math.max(0, d));
+        if (wrapLen > 0 && (prefix.length + content.length) > wrapLen) {
+          // Try to wrap attributes in opening tags
+          const attrMatch = content.match(/^(<[a-zA-Z][a-zA-Z0-9-]*)((\s+[^>]+))(\/?>)$/);
+          if (attrMatch) {
+            const tagStart = attrMatch[1];
+            const attrs = attrMatch[3].trim();
+            const tagEnd = attrMatch[4];
+            const attrIndent = prefix + indentStr;
+            // Split attributes
+            const attrParts = [];
+            const attrRegex = /([a-zA-Z_:][\w:.-]*)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/g;
+            let m;
+            while ((m = attrRegex.exec(attrs)) !== null) {
+              attrParts.push(m[0]);
+            }
+            if (attrParts.length > 1) {
+              lines.push(prefix + tagStart);
+              attrParts.forEach((a, i) => {
+                lines.push(attrIndent + a + (i === attrParts.length - 1 ? tagEnd : ''));
+              });
+              return;
+            }
+          }
+        }
+        lines.push(prefix + content);
+      }
+
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        switch (token.type) {
+          case 'doctype':
+            addLine(token.value, 0);
+            break;
+
+          case 'comment':
+            addLine(token.value);
+            break;
+
+          case 'cdata':
+            addLine(token.value);
+            break;
+
+          case 'open': {
+            const tagName = token.tagName;
+            const isInline = INLINE_ELEMENTS.has(tagName);
+
+            // Check if this is an inline element that should stay on the same line
+            // Look ahead: if content is short text + close tag, keep inline
+            if (isInline && i + 2 < tokens.length) {
+              const next = tokens[i + 1];
+              const afterNext = tokens[i + 2];
+              if (next.type === 'text' && !next.raw &&
+                  afterNext.type === 'close' && afterNext.tagName === tagName) {
+                const textContent = next.value.trim();
+                if (textContent.length < 80) {
+                  addLine(token.value + textContent + afterNext.value);
+                  i += 2;
+                  break;
+                }
+              }
+            }
+
+            // Self-close-like open with immediate close (empty block element)
+            if (i + 1 < tokens.length && tokens[i + 1].type === 'close' && tokens[i + 1].tagName === tagName) {
+              addLine(token.value + tokens[i + 1].value);
+              i += 1;
+              break;
+            }
+
+            addLine(token.value);
+            if (!PRE_LIKE_ELEMENTS.has(tagName)) {
+              depth++;
+            }
+            break;
+          }
+
+          case 'close': {
+            const tagName = token.tagName;
+            if (!PRE_LIKE_ELEMENTS.has(tagName)) {
+              depth = Math.max(0, depth - 1);
+            }
+            addLine(token.value);
+            break;
+          }
+
+          case 'selfclose':
+            addLine(token.value);
+            break;
+
+          case 'text': {
+            const text = token.value;
+            if (token.raw) {
+              // Raw content inside script/style/pre - preserve as-is
+              if (PRE_LIKE_ELEMENTS.has(token.parentTag)) {
+                lines.push(text);
+              } else {
+                // For script/style, indent the content
+                const rawLines = text.split('\n');
+                const trimmedLines = rawLines.map(l => l.trim()).filter((l, idx) => {
+                  if (idx === 0 && !l) return false;
+                  if (idx === rawLines.length - 1 && !l) return false;
+                  return true;
+                });
+                if (trimmedLines.length === 0 && rawLines.some(l => l.trim())) {
+                  trimmedLines.push(...rawLines.filter(l => l.trim()).map(l => l.trim()));
+                }
+                trimmedLines.forEach(l => {
+                  if (l) addLine(l);
+                  else lines.push('');
+                });
+              }
+              break;
+            }
+
+            if (preserveNL) {
+              const parts = text.split('\n');
+              parts.forEach(part => {
+                const trimmed = part.trim();
+                if (trimmed) addLine(trimmed);
+              });
+            } else {
+              const trimmed = text.replace(/\s+/g, ' ').trim();
+              if (trimmed) addLine(trimmed);
+            }
+            break;
+          }
+        }
+      }
+
+      return lines.join('\n');
+    }
+
+    // =====================
+    // HTML Minifier
+    // =====================
+    function minify(html) {
+      const tokens = tokenize(html);
+      let result = '';
+
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        switch (token.type) {
+          case 'doctype':
+            result += token.value;
+            break;
+          case 'comment':
+            // Strip comments in minify mode
+            break;
+          case 'cdata':
+            result += token.value;
+            break;
+          case 'open':
+          case 'selfclose':
+            // Collapse whitespace in attributes
+            result += token.value.replace(/\s+/g, ' ').replace(/\s+>/g, '>').replace(/\s+\/>/g, '/>');
+            break;
+          case 'close':
+            result += token.value.replace(/\s+/g, '');
+            break;
+          case 'text':
+            if (token.raw) {
+              if (PRE_LIKE_ELEMENTS.has(token.parentTag)) {
+                result += token.value;
+              } else {
+                // Minify script/style content (basic)
+                result += token.value.replace(/\s+/g, ' ').trim();
+              }
+            } else {
+              const trimmed = token.value.replace(/\s+/g, ' ');
+              // Preserve a single space between inline elements
+              if (trimmed === ' ') {
+                const prev = tokens[i - 1];
+                const next = tokens[i + 1];
+                if (prev && next) {
+                  const prevInline = (prev.type === 'close' && INLINE_ELEMENTS.has(prev.tagName)) ||
+                                     (prev.type === 'text');
+                  const nextInline = (next.type === 'open' && INLINE_ELEMENTS.has(next.tagName)) ||
+                                     (next.type === 'text');
+                  if (prevInline && nextInline) {
+                    result += ' ';
+                    break;
+                  }
+                }
+                break;
+              }
+              result += trimmed.trim();
+            }
+            break;
+        }
+      }
+
+      return result;
+    }
+
+    // =====================
+    // Syntax Highlighting
+    // =====================
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function highlightHTML(formatted) {
+      return formatted.replace(/<!--[\s\S]*?-->/g, function(m) {
+        return '<span class="hl-comment">' + escapeHtml(m) + '</span>';
+      }).replace(/<!\s*[Dd][Oo][Cc][Tt][Yy][Pp][Ee][^>]*>/g, function(m) {
+        return '<span class="hl-doctype">' + escapeHtml(m) + '</span>';
+      }).replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^>]*)?\/?>/g, function(tag) {
+        // Parse the tag into parts
+        const closeSlash = tag.startsWith('</') ? '/' : '';
+        const selfClose = tag.endsWith('/>') ? '/' : '';
+        const inner = tag.slice(closeSlash ? 2 : 1, selfClose ? -2 : -1).trim();
+
+        // Extract tag name
+        const nameMatch = inner.match(/^([a-zA-Z][a-zA-Z0-9-]*)/);
+        if (!nameMatch) return escapeHtml(tag);
+        const tagName = nameMatch[1];
+        const rest = inner.slice(tagName.length);
+
+        // Highlight attributes
+        let attrHL = '';
+        if (rest.trim()) {
+          attrHL = rest.replace(/([a-zA-Z_:][\w:.-]*)(\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?/g, function(m, name, valPart) {
+            let result = '<span class="hl-attr">' + escapeHtml(name) + '</span>';
+            if (valPart) {
+              const eqAndVal = valPart;
+              const eqMatch = eqAndVal.match(/^(\s*=\s*)([\s\S]*)$/);
+              if (eqMatch) {
+                result += escapeHtml(eqMatch[1]) + '<span class="hl-val">' + escapeHtml(eqMatch[2]) + '</span>';
+              } else {
+                result += escapeHtml(valPart);
+              }
+            }
+            return result;
+          });
+        }
+
+        return '&lt;' + (closeSlash ? '/' : '') +
+               '<span class="hl-tag">' + escapeHtml(tagName) + '</span>' +
+               attrHL +
+               (selfClose ? '/' : '') + '&gt;';
+      }).replace(/&amp;[a-zA-Z0-9#]+;/g, function(m) {
+        return '<span class="hl-entity">' + m + '</span>';
+      });
+    }
+
+    // =====================
+    // Size Display
+    // =====================
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function showSizeComparison(before, after) {
+      const beforeSize = new Blob([before]).size;
+      const afterSize = new Blob([after]).size;
+      const diff = afterSize - beforeSize;
+      const pct = beforeSize > 0 ? Math.round(Math.abs(diff) / beforeSize * 100) : 0;
+
+      document.getElementById('sizeBefore').textContent = formatSize(beforeSize);
+      document.getElementById('sizeAfter').textContent = formatSize(afterSize);
+
+      const $diff = document.getElementById('sizeDiff');
+      if (diff < 0) {
+        $diff.textContent = formatSize(Math.abs(diff)) + ' smaller (' + pct + '% saved)';
+        $diff.className = 'saved';
+      } else if (diff > 0) {
+        $diff.textContent = formatSize(diff) + ' larger (+' + pct + '%)';
+        $diff.className = 'grew';
+      } else {
+        $diff.textContent = 'Same size';
+        $diff.className = '';
+      }
+      $sizeStats.style.display = 'flex';
+    }
+
+    // =====================
+    // Actions
+    // =====================
+    let lastRawOutput = '';
+
+    function formatHTML() {
+      const raw = $input.value;
+      if (!raw.trim()) return;
+
+      try {
+        const result = format(raw);
+        lastRawOutput = result;
+        $outputRaw.value = result;
+        $outputHL.innerHTML = highlightHTML(result);
+        showStatus('Formatted', true);
+        showSizeComparison(raw, result);
+      } catch (e) {
+        showStatus('Error: ' + e.message, false);
+      }
+    }
+
+    function minifyHTML() {
+      const raw = $input.value;
+      if (!raw.trim()) return;
+
+      try {
+        const result = minify(raw);
+        lastRawOutput = result;
+        $outputRaw.value = result;
+        $outputHL.innerHTML = highlightHTML(result);
+        showStatus('Minified', true);
+        showSizeComparison(raw, result);
+      } catch (e) {
+        showStatus('Error: ' + e.message, false);
+      }
+    }
+
+    function copyOutput() {
+      if (lastRawOutput) {
+        navigator.clipboard.writeText(lastRawOutput);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $outputHL.innerHTML = '';
+      $outputRaw.value = '';
+      lastRawOutput = '';
+      $status.textContent = '';
+      $status.className = '';
+      $sizeStats.style.display = 'none';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    // Auto-format on paste
+    $input.addEventListener('paste', () => setTimeout(formatHTML, 50));
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
