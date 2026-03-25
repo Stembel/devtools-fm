@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Profile README Generator - Create Profile README | ZeroKit.dev</title>
+  <meta name="description" content="Generate a stunning GitHub Profile README with live Markdown preview. Add skills, stats, social links, and activity sections. Free, no signup required.">
+  <link rel="canonical" href="https://zerokit.dev/tools/githubprofile.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .profile-form {
+      display: grid;
+      gap: 24px;
+    }
+    .form-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .section-header:hover {
+      background: var(--surface-2);
+    }
+    .section-header .badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+    }
+    .section-header .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .section-header.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+    .section-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      overflow: hidden;
+    }
+    .section-body.collapsed {
+      max-height: 0;
+      padding: 0 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.5;
+    }
+    .form-group select {
+      cursor: pointer;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Skills grid */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    .skill-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      user-select: none;
+    }
+    .skill-toggle:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .skill-toggle.active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--text);
+    }
+    .skill-toggle input[type="checkbox"] {
+      display: none;
+    }
+    .skill-toggle .check-icon {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      font-size: 0.65rem;
+    }
+    .skill-toggle.active .check-icon {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .skills-category {
+      margin-bottom: 12px;
+    }
+    .skills-category:last-child {
+      margin-bottom: 0;
+    }
+    .skills-category-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    /* Stats toggles */
+    .stats-toggles {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stat-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .stat-toggle:hover {
+      border-color: var(--accent);
+    }
+    .stat-toggle.active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+    .stat-toggle input[type="checkbox"] {
+      display: none;
+    }
+    .stat-toggle .toggle-track {
+      width: 36px;
+      height: 20px;
+      border-radius: 10px;
+      background: var(--border);
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .stat-toggle.active .toggle-track {
+      background: var(--accent);
+    }
+    .stat-toggle .toggle-track::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+    }
+    .stat-toggle.active .toggle-track::after {
+      transform: translateX(16px);
+    }
+    .stat-toggle .stat-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-toggle .stat-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .stat-toggle .stat-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* Template selector */
+    .template-selector {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .template-btn {
+      padding: 10px 20px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .template-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .template-btn.active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+    }
+
+    /* Preview and Output */
+    .preview-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: sticky;
+      top: 24px;
+    }
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-header span {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .preview-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-tab {
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .preview-tab:hover {
+      color: var(--text);
+    }
+    .preview-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .preview-content {
+      padding: 20px;
+      min-height: 300px;
+      max-height: 700px;
+      overflow-y: auto;
+    }
+    .preview-content.markdown-view {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--text);
+    }
+    .preview-content.rendered-view {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* Rendered Markdown Styles */
+    .rendered-view h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .rendered-view h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+    .rendered-view h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    .rendered-view p {
+      margin-bottom: 12px;
+    }
+    .rendered-view ul {
+      margin-bottom: 12px;
+      padding-left: 24px;
+    }
+    .rendered-view li {
+      margin-bottom: 4px;
+    }
+    .rendered-view img {
+      max-width: 100%;
+      border-radius: 6px;
+    }
+    .rendered-view a {
+      color: var(--accent);
+    }
+    .rendered-view .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .rendered-view .badges img {
+      height: 28px;
+      border-radius: 4px;
+    }
+    .rendered-view hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+    .rendered-view .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .rendered-view .stats-row img {
+      border-radius: 6px;
+      max-width: 48%;
+    }
+    .rendered-view .center {
+      text-align: center;
+    }
+    .rendered-view .wave {
+      display: inline-block;
+      animation: wave 1.8s ease-in-out infinite;
+      transform-origin: 70% 70%;
+    }
+    @keyframes wave {
+      0%, 60%, 100% { transform: rotate(0deg); }
+      10%, 30% { transform: rotate(14deg); }
+      20% { transform: rotate(-8deg); }
+      40% { transform: rotate(-4deg); }
+      50% { transform: rotate(10deg); }
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Copy toast */
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>GitHub Profile README Generator</h1>
+    <p class="description">Create a stunning GitHub Profile README with live preview. Pick a style template, fill in your details, and copy the Markdown.</p>
+
+    <!-- Template Selector -->
+    <div style="margin-bottom: 24px;">
+      <div class="form-group" style="margin-bottom: 10px;">
+        <label>Style Template</label>
+      </div>
+      <div class="template-selector">
+        <button class="template-btn active" onclick="setTemplate('minimal')">Minimal</button>
+        <button class="template-btn" onclick="setTemplate('full')">Full</button>
+        <button class="template-btn" onclick="setTemplate('creative')">Creative</button>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Left column: Form -->
+      <div class="profile-form">
+
+        <!-- Basic Info -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Basic Info <span class="badge">Required</span></span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="prof-name" placeholder="John Doe" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>Subtitle / Tagline</label>
+              <input type="text" id="prof-tagline" placeholder="Full Stack Developer | Open Source Enthusiast" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>About</label>
+              <textarea id="prof-about" placeholder="Passionate developer with 5+ years of experience building web applications..." oninput="update()"></textarea>
+            </div>
+            <div class="form-group">
+              <label>GitHub Username</label>
+              <input type="text" id="prof-github-user" placeholder="johndoe (used for stats cards)" oninput="update()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Skills & Technologies</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="skills-category">
+              <div class="skills-category-label">Languages</div>
+              <div class="skills-grid" id="skills-languages"></div>
+            </div>
+            <div class="skills-category">
+              <div class="skills-category-label">Frameworks & Libraries</div>
+              <div class="skills-grid" id="skills-frameworks"></div>
+            </div>
+            <div class="skills-category">
+              <div class="skills-category-label">Tools & Platforms</div>
+              <div class="skills-grid" id="skills-tools"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Social Links</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label>GitHub</label>
+                <input type="text" id="social-github" placeholder="https://github.com/johndoe" oninput="update()">
+              </div>
+              <div class="form-group">
+                <label>Twitter / X</label>
+                <input type="text" id="social-twitter" placeholder="https://twitter.com/johndoe" oninput="update()">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>LinkedIn</label>
+                <input type="text" id="social-linkedin" placeholder="https://linkedin.com/in/johndoe" oninput="update()">
+              </div>
+              <div class="form-group">
+                <label>Website</label>
+                <input type="text" id="social-website" placeholder="https://johndoe.dev" oninput="update()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="social-email" placeholder="john@example.com" oninput="update()">
+            </div>
+          </div>
+        </div>
+
+        <!-- GitHub Stats -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>GitHub Stats Cards</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;">Requires GitHub username above. Uses <a href="https://github.com/anuraghazra/github-readme-stats" target="_blank" rel="noopener">github-readme-stats</a>.</p>
+            <div class="stats-toggles">
+              <label class="stat-toggle" onclick="toggleStat(this, 'stats')">
+                <input type="checkbox" id="stat-stats">
+                <span class="toggle-track"></span>
+                <span class="stat-info">
+                  <span class="stat-name">GitHub Stats Card</span>
+                  <span class="stat-desc">Stars, commits, PRs, issues, contributions</span>
+                </span>
+              </label>
+              <label class="stat-toggle" onclick="toggleStat(this, 'streak')">
+                <input type="checkbox" id="stat-streak">
+                <span class="toggle-track"></span>
+                <span class="stat-info">
+                  <span class="stat-name">Streak Stats</span>
+                  <span class="stat-desc">Current streak, longest streak, total contributions</span>
+                </span>
+              </label>
+              <label class="stat-toggle" onclick="toggleStat(this, 'languages')">
+                <input type="checkbox" id="stat-languages">
+                <span class="toggle-track"></span>
+                <span class="stat-info">
+                  <span class="stat-name">Top Languages</span>
+                  <span class="stat-desc">Most used programming languages breakdown</span>
+                </span>
+              </label>
+            </div>
+            <div class="form-group" style="margin-top: 6px;">
+              <label>Stats Theme</label>
+              <select id="stats-theme" onchange="update()">
+                <option value="dark">Dark</option>
+                <option value="radical">Radical</option>
+                <option value="tokyonight">Tokyo Night</option>
+                <option value="dracula">Dracula</option>
+                <option value="gruvbox">Gruvbox</option>
+                <option value="onedark">One Dark</option>
+                <option value="cobalt">Cobalt</option>
+                <option value="synthwave">Synthwave</option>
+                <option value="github_dark">GitHub Dark</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="form-section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>Current Activity</span>
+            <span class="chevron">&#9660;</span>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label>Currently working on</label>
+              <input type="text" id="act-working" placeholder="An awesome open source project" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>Currently learning</label>
+              <input type="text" id="act-learning" placeholder="Rust and WebAssembly" oninput="update()">
+            </div>
+            <div class="form-group">
+              <label>Looking to collaborate on</label>
+              <input type="text" id="act-collaborate" placeholder="Interesting open source projects" oninput="update()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: Preview -->
+      <div class="preview-panel">
+        <div class="preview-header">
+          <span>Preview</span>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="copyMarkdown()">Copy Markdown</button>
+          </div>
+        </div>
+        <div class="preview-tabs">
+          <button class="preview-tab active" onclick="switchTab(this, 'rendered')">Preview</button>
+          <button class="preview-tab" onclick="switchTab(this, 'markdown')">Markdown</button>
+        </div>
+        <div class="preview-content rendered-view" id="preview-rendered"></div>
+        <div class="preview-content markdown-view" id="preview-markdown" style="display:none;"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <div class="copy-toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    // ---- Skill definitions ----
+    const skillData = {
+      languages: [
+        { id: 'javascript', name: 'JavaScript', badge: 'javascript' },
+        { id: 'typescript', name: 'TypeScript', badge: 'typescript' },
+        { id: 'python', name: 'Python', badge: 'python' },
+        { id: 'java', name: 'Java', badge: 'java' },
+        { id: 'go', name: 'Go', badge: 'go' },
+        { id: 'rust', name: 'Rust', badge: 'rust' },
+        { id: 'csharp', name: 'C#', badge: 'c%23' },
+        { id: 'cpp', name: 'C++', badge: 'c%2B%2B' },
+        { id: 'ruby', name: 'Ruby', badge: 'ruby' },
+        { id: 'php', name: 'PHP', badge: 'php' },
+        { id: 'swift', name: 'Swift', badge: 'swift' },
+        { id: 'kotlin', name: 'Kotlin', badge: 'kotlin' },
+        { id: 'html5', name: 'HTML5', badge: 'html5' },
+        { id: 'css3', name: 'CSS3', badge: 'css3' },
+        { id: 'sql', name: 'SQL', badge: 'mysql' },
+      ],
+      frameworks: [
+        { id: 'react', name: 'React', badge: 'react' },
+        { id: 'vue', name: 'Vue.js', badge: 'vue.js' },
+        { id: 'angular', name: 'Angular', badge: 'angular' },
+        { id: 'nextjs', name: 'Next.js', badge: 'next.js' },
+        { id: 'svelte', name: 'Svelte', badge: 'svelte' },
+        { id: 'nodejs', name: 'Node.js', badge: 'node.js' },
+        { id: 'express', name: 'Express', badge: 'express' },
+        { id: 'django', name: 'Django', badge: 'django' },
+        { id: 'flask', name: 'Flask', badge: 'flask' },
+        { id: 'spring', name: 'Spring', badge: 'spring' },
+        { id: 'rails', name: 'Rails', badge: 'ruby%20on%20rails' },
+        { id: 'laravel', name: 'Laravel', badge: 'laravel' },
+        { id: 'tailwind', name: 'Tailwind CSS', badge: 'tailwindcss' },
+        { id: 'bootstrap', name: 'Bootstrap', badge: 'bootstrap' },
+      ],
+      tools: [
+        { id: 'docker', name: 'Docker', badge: 'docker' },
+        { id: 'kubernetes', name: 'Kubernetes', badge: 'kubernetes' },
+        { id: 'git', name: 'Git', badge: 'git' },
+        { id: 'github-actions', name: 'GitHub Actions', badge: 'github%20actions' },
+        { id: 'aws', name: 'AWS', badge: 'amazonaws' },
+        { id: 'gcp', name: 'GCP', badge: 'googlecloud' },
+        { id: 'azure', name: 'Azure', badge: 'microsoftazure' },
+        { id: 'linux', name: 'Linux', badge: 'linux' },
+        { id: 'nginx', name: 'Nginx', badge: 'nginx' },
+        { id: 'postgresql', name: 'PostgreSQL', badge: 'postgresql' },
+        { id: 'mongodb', name: 'MongoDB', badge: 'mongodb' },
+        { id: 'redis', name: 'Redis', badge: 'redis' },
+        { id: 'figma', name: 'Figma', badge: 'figma' },
+        { id: 'vscode', name: 'VS Code', badge: 'visualstudiocode' },
+      ],
+    };
+
+    const selectedSkills = new Set();
+    let currentTemplate = 'minimal';
+    let currentTab = 'rendered';
+
+    // ---- Build skill toggles ----
+    function buildSkillToggles() {
+      Object.entries(skillData).forEach(([category, items]) => {
+        const container = document.getElementById('skills-' + category);
+        container.innerHTML = '';
+        items.forEach(skill => {
+          const label = document.createElement('label');
+          label.className = 'skill-toggle';
+          label.innerHTML = `
+            <input type="checkbox" value="${skill.id}" onchange="toggleSkill('${skill.id}', this.checked)">
+            <span class="check-icon"></span>
+            <span>${skill.name}</span>
+          `;
+          label.onclick = function(e) {
+            if (e.target.tagName === 'INPUT') return;
+            const cb = label.querySelector('input');
+            cb.checked = !cb.checked;
+            toggleSkill(skill.id, cb.checked);
+          };
+          container.appendChild(label);
+        });
+      });
+    }
+
+    function toggleSkill(id, checked) {
+      const label = document.querySelector(`input[value="${id}"]`).closest('.skill-toggle');
+      if (checked) {
+        selectedSkills.add(id);
+        label.classList.add('active');
+        label.querySelector('.check-icon').textContent = '\u2713';
+      } else {
+        selectedSkills.delete(id);
+        label.classList.remove('active');
+        label.querySelector('.check-icon').textContent = '';
+      }
+      update();
+    }
+
+    function toggleStat(label, statId) {
+      // Delay to let the checkbox toggle first
+      setTimeout(() => {
+        const cb = document.getElementById('stat-' + statId);
+        label.classList.toggle('active', cb.checked);
+        update();
+      }, 0);
+    }
+
+    // ---- Template handling ----
+    function setTemplate(name) {
+      currentTemplate = name;
+      document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.template-btn[onclick="setTemplate('${name}')"]`).classList.add('active');
+      update();
+    }
+
+    // ---- Get form values ----
+    function getValues() {
+      return {
+        name: document.getElementById('prof-name').value.trim(),
+        tagline: document.getElementById('prof-tagline').value.trim(),
+        about: document.getElementById('prof-about').value.trim(),
+        githubUser: document.getElementById('prof-github-user').value.trim(),
+        github: document.getElementById('social-github').value.trim(),
+        twitter: document.getElementById('social-twitter').value.trim(),
+        linkedin: document.getElementById('social-linkedin').value.trim(),
+        website: document.getElementById('social-website').value.trim(),
+        email: document.getElementById('social-email').value.trim(),
+        showStats: document.getElementById('stat-stats').checked,
+        showStreak: document.getElementById('stat-streak').checked,
+        showLanguages: document.getElementById('stat-languages').checked,
+        statsTheme: document.getElementById('stats-theme').value,
+        working: document.getElementById('act-working').value.trim(),
+        learning: document.getElementById('act-learning').value.trim(),
+        collaborate: document.getElementById('act-collaborate').value.trim(),
+      };
+    }
+
+    // ---- Find skill by id ----
+    function findSkill(id) {
+      for (const cat of Object.values(skillData)) {
+        const found = cat.find(s => s.id === id);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    // ---- Generate badge URL ----
+    function badgeUrl(skill) {
+      const colors = {
+        javascript: 'F7DF1E', typescript: '3178C6', python: '3776AB', java: 'ED8B00',
+        go: '00ADD8', rust: '000000', csharp: '239120', cpp: '00599C',
+        ruby: 'CC342D', php: '777BB4', swift: 'FA7343', kotlin: '7F52FF',
+        html5: 'E34F26', css3: '1572B6', sql: '4479A1',
+        react: '61DAFB', vue: '4FC08D', angular: 'DD0031', nextjs: '000000',
+        svelte: 'FF3E00', nodejs: '339933', express: '000000', django: '092E20',
+        flask: '000000', spring: '6DB33F', rails: 'CC0000', laravel: 'FF2D20',
+        tailwind: '06B6D4', bootstrap: '7952B3',
+        docker: '2496ED', kubernetes: '326CE5', git: 'F05032',
+        'github-actions': '2088FF', aws: '232F3E', gcp: '4285F4', azure: '0078D4',
+        linux: 'FCC624', nginx: '009639', postgresql: '4169E1', mongodb: '47A248',
+        redis: 'DC382D', figma: 'F24E1E', vscode: '007ACC',
+      };
+      const color = colors[skill.id] || '555555';
+      const logoColor = ['javascript', 'linux'].includes(skill.id) ? '000000' : 'white';
+      return `https://img.shields.io/badge/${encodeURIComponent(skill.name)}-${color}?style=for-the-badge&logo=${skill.badge}&logoColor=${logoColor}`;
+    }
+
+    // ---- Generate Markdown for each template ----
+    function generateMarkdown(v) {
+      switch (currentTemplate) {
+        case 'minimal': return generateMinimal(v);
+        case 'full': return generateFull(v);
+        case 'creative': return generateCreative(v);
+        default: return generateMinimal(v);
+      }
+    }
+
+    function generateMinimal(v) {
+      const lines = [];
+      if (v.name) lines.push(`# Hi, I'm ${v.name}`);
+      else lines.push(`# Hi there`);
+      if (v.tagline) lines.push(`\n**${v.tagline}**`);
+      if (v.about) lines.push(`\n${v.about}`);
+
+      // Activity
+      const acts = [];
+      if (v.working) acts.push(`- I'm currently working on **${v.working}**`);
+      if (v.learning) acts.push(`- I'm currently learning **${v.learning}**`);
+      if (v.collaborate) acts.push(`- I'm looking to collaborate on **${v.collaborate}**`);
+      if (acts.length) lines.push('\n' + acts.join('\n'));
+
+      // Skills
+      if (selectedSkills.size > 0) {
+        lines.push('\n## Tech Stack');
+        const badges = [...selectedSkills].map(id => {
+          const skill = findSkill(id);
+          return skill ? `![${skill.name}](${badgeUrl(skill)})` : '';
+        }).filter(Boolean);
+        lines.push(badges.join(' '));
+      }
+
+      // Social
+      const socials = buildSocialLinks(v);
+      if (socials.length) {
+        lines.push('\n## Connect');
+        lines.push(socials.join(' '));
+      }
+
+      // Stats
+      if (v.githubUser && (v.showStats || v.showStreak || v.showLanguages)) {
+        lines.push('\n## GitHub Stats');
+        if (v.showStats) {
+          lines.push(`![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${v.githubUser}&show_icons=true&theme=${v.statsTheme})`);
+        }
+        if (v.showStreak) {
+          lines.push(`![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=${v.githubUser}&theme=${v.statsTheme})`);
+        }
+        if (v.showLanguages) {
+          lines.push(`![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${v.githubUser}&layout=compact&theme=${v.statsTheme})`);
+        }
+      }
+
+      return lines.join('\n');
+    }
+
+    function generateFull(v) {
+      const lines = [];
+      lines.push(`<div align="center">`);
+      if (v.name) lines.push(`\n# Hi there, I'm ${v.name} \ud83d\udc4b`);
+      else lines.push(`\n# Hi there \ud83d\udc4b`);
+      if (v.tagline) lines.push(`\n### ${v.tagline}`);
+      lines.push(`\n</div>`);
+
+      if (v.about) {
+        lines.push('\n---');
+        lines.push(`\n### About Me`);
+        lines.push(`\n${v.about}`);
+      }
+
+      // Activity
+      const acts = [];
+      if (v.working) acts.push(`- \ud83d\udd2d I'm currently working on **${v.working}**`);
+      if (v.learning) acts.push(`- \ud83c\udf31 I'm currently learning **${v.learning}**`);
+      if (v.collaborate) acts.push(`- \ud83d\udc2f Looking to collaborate on **${v.collaborate}**`);
+      if (v.email) acts.push(`- \ud83d\udceb Reach me at **${v.email}**`);
+      if (acts.length) lines.push('\n' + acts.join('\n'));
+
+      // Skills
+      if (selectedSkills.size > 0) {
+        lines.push('\n---');
+        lines.push('\n### \ud83d\udee0\ufe0f Tech Stack');
+        const badges = [...selectedSkills].map(id => {
+          const skill = findSkill(id);
+          return skill ? `![${skill.name}](${badgeUrl(skill)})` : '';
+        }).filter(Boolean);
+        lines.push('\n' + badges.join(' '));
+      }
+
+      // Stats
+      if (v.githubUser && (v.showStats || v.showStreak || v.showLanguages)) {
+        lines.push('\n---');
+        lines.push('\n### \ud83d\udcca GitHub Stats');
+        lines.push('\n<div align="center">');
+        if (v.showStats) {
+          lines.push(`\n![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${v.githubUser}&show_icons=true&theme=${v.statsTheme})`);
+        }
+        if (v.showStreak) {
+          lines.push(`\n![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=${v.githubUser}&theme=${v.statsTheme})`);
+        }
+        if (v.showLanguages) {
+          lines.push(`\n![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${v.githubUser}&layout=compact&theme=${v.statsTheme})`);
+        }
+        lines.push('\n</div>');
+      }
+
+      // Social
+      const socials = buildSocialBadges(v);
+      if (socials.length) {
+        lines.push('\n---');
+        lines.push('\n### \ud83c\udf10 Connect with Me');
+        lines.push('\n<div align="center">');
+        lines.push('\n' + socials.join(' '));
+        lines.push('\n</div>');
+      }
+
+      return lines.join('\n');
+    }
+
+    function generateCreative(v) {
+      const lines = [];
+      lines.push(`<div align="center">`);
+      lines.push(`\n![Header](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=${encodeURIComponent(v.name || 'Hello World')}&fontSize=42&fontColor=fff&animation=twinkling&fontAlignY=35)`);
+      lines.push(`\n</div>`);
+
+      if (v.tagline) {
+        lines.push(`\n<h3 align="center">${v.tagline}</h3>`);
+      }
+
+      // Social badges centered
+      const socials = buildSocialBadges(v);
+      if (socials.length) {
+        lines.push(`\n<p align="center">`);
+        lines.push(socials.join(' '));
+        lines.push(`</p>`);
+      }
+
+      if (v.about) {
+        lines.push('\n---');
+        lines.push(`\n### \ud83e\uddd1\u200d\ud83d\udcbb About Me`);
+        lines.push(`\n> ${v.about}`);
+      }
+
+      // Activity
+      const acts = [];
+      if (v.working) acts.push(`| \ud83d\udd2d | Currently working on | **${v.working}** |`);
+      if (v.learning) acts.push(`| \ud83c\udf31 | Currently learning | **${v.learning}** |`);
+      if (v.collaborate) acts.push(`| \ud83e\udd1d | Looking to collaborate on | **${v.collaborate}** |`);
+      if (v.email) acts.push(`| \ud83d\udcec | Reach me at | **${v.email}** |`);
+      if (acts.length) {
+        lines.push('\n| | | |');
+        lines.push('|---|---|---|');
+        lines.push(acts.join('\n'));
+      }
+
+      // Skills
+      if (selectedSkills.size > 0) {
+        lines.push('\n---');
+        lines.push('\n### \ud83d\ude80 Tech Stack\n');
+        lines.push('<div align="center">\n');
+        const badges = [...selectedSkills].map(id => {
+          const skill = findSkill(id);
+          return skill ? `![${skill.name}](${badgeUrl(skill)})` : '';
+        }).filter(Boolean);
+        lines.push(badges.join('\n'));
+        lines.push('\n</div>');
+      }
+
+      // Stats
+      if (v.githubUser && (v.showStats || v.showStreak || v.showLanguages)) {
+        lines.push('\n---');
+        lines.push('\n### \ud83d\udcc8 GitHub Stats\n');
+        lines.push('<div align="center">\n');
+        if (v.showStats && v.showLanguages) {
+          lines.push(`<img src="https://github-readme-stats.vercel.app/api?username=${v.githubUser}&show_icons=true&theme=${v.statsTheme}" alt="GitHub Stats" height="170" />`);
+          lines.push(`<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=${v.githubUser}&layout=compact&theme=${v.statsTheme}" alt="Top Languages" height="170" />`);
+        } else {
+          if (v.showStats) {
+            lines.push(`<img src="https://github-readme-stats.vercel.app/api?username=${v.githubUser}&show_icons=true&theme=${v.statsTheme}" alt="GitHub Stats" />`);
+          }
+          if (v.showLanguages) {
+            lines.push(`<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=${v.githubUser}&layout=compact&theme=${v.statsTheme}" alt="Top Languages" />`);
+          }
+        }
+        if (v.showStreak) {
+          lines.push(`\n<img src="https://github-readme-streak-stats.herokuapp.com/?user=${v.githubUser}&theme=${v.statsTheme}" alt="GitHub Streak" />`);
+        }
+        lines.push('\n</div>');
+      }
+
+      // Footer wave
+      lines.push(`\n<div align="center">`);
+      lines.push(`\n![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer)`);
+      lines.push(`\n</div>`);
+
+      return lines.join('\n');
+    }
+
+    // ---- Social link helpers ----
+    function buildSocialLinks(v) {
+      const links = [];
+      if (v.github) links.push(`[\ud83d\udcbb GitHub](${v.github})`);
+      if (v.twitter) links.push(`[\ud83d\udc26 Twitter](${v.twitter})`);
+      if (v.linkedin) links.push(`[\ud83d\udcbc LinkedIn](${v.linkedin})`);
+      if (v.website) links.push(`[\ud83c\udf10 Website](${v.website})`);
+      if (v.email) links.push(`[\u2709\ufe0f Email](mailto:${v.email})`);
+      return links;
+    }
+
+    function buildSocialBadges(v) {
+      const badges = [];
+      if (v.github) {
+        const user = extractFromUrl(v.github, 'github.com');
+        badges.push(`[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](${v.github})`);
+      }
+      if (v.twitter) {
+        badges.push(`[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](${v.twitter})`);
+      }
+      if (v.linkedin) {
+        badges.push(`[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](${v.linkedin})`);
+      }
+      if (v.website) {
+        badges.push(`[![Website](https://img.shields.io/badge/Website-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](${v.website})`);
+      }
+      if (v.email) {
+        badges.push(`[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:${v.email})`);
+      }
+      return badges;
+    }
+
+    function extractFromUrl(url, domain) {
+      try {
+        const u = new URL(url);
+        return u.pathname.replace(/^\//, '').replace(/\/$/, '');
+      } catch {
+        return '';
+      }
+    }
+
+    // ---- Render preview ----
+    function renderPreview(md) {
+      // Simple markdown to HTML conversion for preview
+      let html = md;
+
+      // HTML passthrough blocks (div, p, img, h3 align, table)
+      // We'll do a simple conversion
+
+      // Escape HTML first for non-html blocks, but we need to handle raw HTML
+      // Simpler approach: convert markdown parts and pass HTML through
+
+      // Handle images: ![alt](url)
+      html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:6px;">');
+
+      // Handle links: [text](url)
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+      // Headers
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+      // Bold
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+      // Blockquotes
+      html = html.replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid var(--accent);padding-left:12px;color:var(--text-muted);margin:12px 0;">$1</blockquote>');
+
+      // Horizontal rules
+      html = html.replace(/^---$/gm, '<hr>');
+
+      // List items
+      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+
+      // Wrap consecutive li's in ul (simple approach)
+      html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+      // Tables
+      html = html.replace(/^\|(.+)\|$/gm, function(match) {
+        const cells = match.split('|').filter(c => c.trim() !== '');
+        if (cells.every(c => c.trim().match(/^[-]+$/))) return '';
+        const row = cells.map(c => `<td style="padding:6px 12px;">${c.trim()}</td>`).join('');
+        return `<tr>${row}</tr>`;
+      });
+      html = html.replace(/(<tr>.*<\/tr>\n?)+/g, '<table style="border-collapse:collapse;margin:12px 0;">$&</table>');
+
+      // Paragraphs: lines that aren't already HTML
+      html = html.replace(/^(?!<[a-z/]|$)(.+)$/gm, '<p>$1</p>');
+
+      // Clean up empty paragraphs
+      html = html.replace(/<p>\s*<\/p>/g, '');
+
+      return html;
+    }
+
+    // ---- Tab switching ----
+    function switchTab(btn, tab) {
+      currentTab = tab;
+      document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('preview-rendered').style.display = tab === 'rendered' ? '' : 'none';
+      document.getElementById('preview-markdown').style.display = tab === 'markdown' ? '' : 'none';
+    }
+
+    // ---- Main update ----
+    function update() {
+      const v = getValues();
+      const md = generateMarkdown(v);
+
+      // Markdown view
+      document.getElementById('preview-markdown').textContent = md;
+
+      // Rendered view
+      document.getElementById('preview-rendered').innerHTML = renderPreview(md);
+    }
+
+    // ---- Section toggle ----
+    function toggleSection(header) {
+      const body = header.nextElementSibling;
+      const isCollapsed = body.classList.toggle('collapsed');
+      header.classList.toggle('collapsed', isCollapsed);
+    }
+
+    // ---- Copy ----
+    function copyMarkdown() {
+      const v = getValues();
+      const md = generateMarkdown(v);
+      navigator.clipboard.writeText(md).then(() => {
+        showToast('Markdown copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy(md);
+      });
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied to clipboard!');
+      } catch {
+        showToast('Copy failed. Please select and copy manually.');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // ---- Init ----
+    buildSkillToggles();
+    update();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

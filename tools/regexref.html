@@ -835,6 +835,54 @@
         desc: 'IBAN (basic format)',
         example: 'IBAN pattern', match: 'DE89 3704 0044 0532 0130 00',
         cat: 'common', label: 'IBAN'
+      },
+      {
+        syntax: '^\\d{9,18}$',
+        desc: 'Bank account number (9-18 digits)',
+        example: 'Account number', match: '123456789012',
+        cat: 'common', label: 'Bank Account'
+      },
+      {
+        syntax: '^(?:ISBN(?:-1[03])?:?\\s)?(?=[0-9X]{10}$|(?=(?:[0-9]+[-\\s]){3})[-\\s0-9X]{13}$)[0-9]{1,5}[-\\s]?[0-9]+[-\\s]?[0-9]+[-\\s]?[0-9X]$',
+        desc: 'ISBN-10 book number',
+        example: 'ISBN pattern', match: '0-306-40615-2',
+        cat: 'common', label: 'ISBN-10'
+      },
+      {
+        syntax: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$',
+        desc: 'Password (min 8, upper+lower+digit)',
+        example: 'Password basic', match: 'Passw0rd',
+        cat: 'common', label: 'Password Basic'
+      },
+      {
+        syntax: '^[a-f0-9]{32}$',
+        desc: 'MD5 hash',
+        example: 'MD5 pattern', match: 'd41d8cd98f00b204e9800998ecf8427e',
+        cat: 'common', label: 'MD5 Hash'
+      },
+      {
+        syntax: '^[a-f0-9]{40}$',
+        desc: 'SHA-1 hash',
+        example: 'SHA-1 pattern', match: 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
+        cat: 'common', label: 'SHA-1 Hash'
+      },
+      {
+        syntax: '^\\d{1,3}(\\.\\d{1,3}){3}:\\d{1,5}$',
+        desc: 'IP address with port',
+        example: 'IP:port pattern', match: '192.168.1.1:8080',
+        cat: 'common', label: 'IP:Port'
+      },
+      {
+        syntax: '^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$',
+        desc: 'Time strict (HH:MM:SS 24h)',
+        example: 'Strict time', match: '23:59:59',
+        cat: 'common', label: 'Time Strict'
+      },
+      {
+        syntax: '^[A-Z]{2}\\d{2}[A-Z]{3}$',
+        desc: 'License plate (EU-style, simplified)',
+        example: 'Plate pattern', match: 'AB12CDE',
+        cat: 'common', label: 'License Plate'
       }
     ];
 

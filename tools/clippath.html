@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Clip-Path Generator - Visual Shape Builder | ZeroKit.dev</title>
+  <meta name="description" content="Create CSS clip-path shapes visually. Build polygons, circles, ellipses, and inset shapes with draggable points. Copy CSS code instantly. Free online clip-path generator.">
+  <link rel="canonical" href="https://zerokit.dev/tools/clippath.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .clip-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .clip-controls { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* Shape type selector */
+    .shape-tabs { display: flex; gap: 4px; }
+    .shape-tab {
+      flex: 1; padding: 8px 4px; text-align: center; font-size: 0.75rem; font-weight: 600;
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .shape-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .shape-tab:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+
+    /* Preview area */
+    .clip-preview-area {
+      position: relative; min-height: 400px; background: #1a1a2e;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      cursor: crosshair; user-select: none;
+    }
+    .clip-canvas {
+      position: relative; width: 300px; height: 300px;
+    }
+    .clip-element {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      transition: clip-path 0.05s;
+    }
+    .clip-element.has-image { background-size: cover; background-position: center; }
+    .clip-grid-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; opacity: 0.15;
+    }
+
+    /* Draggable points */
+    .clip-point {
+      position: absolute; width: 14px; height: 14px; border-radius: 50%;
+      background: var(--accent); border: 2px solid #fff; cursor: grab;
+      transform: translate(-50%, -50%); z-index: 10;
+      transition: box-shadow 0.15s;
+    }
+    .clip-point:hover, .clip-point.dragging {
+      box-shadow: 0 0 0 4px rgba(99,102,241,0.4); cursor: grabbing;
+    }
+    .clip-point .point-label {
+      position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+      font-size: 0.65rem; font-family: var(--mono); color: var(--accent);
+      white-space: nowrap; pointer-events: none;
+    }
+    .clip-point .remove-point {
+      position: absolute; top: -20px; right: -16px; width: 14px; height: 14px;
+      background: var(--error); color: #fff; border: none; border-radius: 50%;
+      font-size: 0.6rem; line-height: 14px; text-align: center; cursor: pointer;
+      display: none;
+    }
+    .clip-point:hover .remove-point { display: block; }
+
+    /* SVG overlay lines */
+    .clip-lines {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 5;
+    }
+    .clip-lines line, .clip-lines circle, .clip-lines ellipse {
+      stroke: rgba(99,102,241,0.5); stroke-width: 1; fill: none; stroke-dasharray: 4 3;
+    }
+
+    /* Slider group (reused pattern) */
+    .slider-group { display: flex; flex-direction: column; gap: 4px; }
+    .slider-group .slider-header { display: flex; justify-content: space-between; align-items: center; }
+    .slider-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .slider-group .slider-value { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); }
+    .slider-group input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+    /* Control row */
+    .ctrl-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .ctrl-row label {
+      font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+    }
+    .ctrl-row input[type="checkbox"] { accent-color: var(--accent); }
+    .ctrl-row select, .ctrl-row input[type="number"] {
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+      padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-family: var(--font);
+    }
+
+    /* Presets */
+    .clip-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+    .clip-preset {
+      width: 44px; height: 44px; background: var(--surface-2); border-radius: 6px;
+      cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s;
+      display: flex; align-items: center; justify-content: center; position: relative;
+    }
+    .clip-preset:hover { border-color: var(--accent); }
+    .clip-preset .preset-shape {
+      width: 28px; height: 28px; background: var(--accent); transition: clip-path 0.15s;
+    }
+    .clip-preset .preset-name {
+      position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%);
+      font-size: 0.55rem; color: var(--text-muted); white-space: nowrap; display: none;
+    }
+    .clip-preset:hover .preset-name { display: block; }
+
+    /* CSS output */
+    .css-out { padding: 16px; }
+    .css-out pre {
+      background: var(--surface-2); padding: 12px; border-radius: 4px;
+      font-family: var(--mono); font-size: 0.8rem; color: var(--text);
+      cursor: pointer; white-space: pre-wrap; word-break: break-all;
+    }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;
+    }
+
+    /* Shape-specific panels */
+    .shape-panel { display: none; flex-direction: column; gap: 12px; }
+    .shape-panel.active { display: flex; }
+
+    /* Polygon hint */
+    .polygon-hint {
+      font-size: 0.75rem; color: var(--text-muted); padding: 8px;
+      background: var(--surface-2); border-radius: 4px; line-height: 1.5;
+    }
+
+    /* Background options */
+    .bg-options { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .bg-option {
+      width: 32px; height: 32px; border-radius: 4px; cursor: pointer;
+      border: 2px solid transparent; transition: border-color 0.15s;
+    }
+    .bg-option:hover, .bg-option.active { border-color: var(--accent); }
+
+    /* Inset handles visual */
+    .inset-handle {
+      position: absolute; background: var(--accent); z-index: 10; cursor: pointer;
+    }
+    .inset-handle.top, .inset-handle.bottom { height: 3px; left: 0; right: 0; cursor: ns-resize; }
+    .inset-handle.left, .inset-handle.right { width: 3px; top: 0; bottom: 0; cursor: ew-resize; }
+
+    @media (max-width: 768px) {
+      .clip-layout { grid-template-columns: 1fr; }
+      .clip-canvas { width: 260px; height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>CSS Clip-Path Generator</h1>
+    <p class="description">Build clip-path shapes visually with draggable control points. Select a shape, adjust handles, and copy the CSS.</p>
+
+    <div class="clip-layout">
+      <!-- Left: Controls -->
+      <div class="tool-panel">
+        <div class="panel-header">Controls</div>
+        <div class="clip-controls">
+          <!-- Shape type tabs -->
+          <div>
+            <div class="section-label">Shape Type</div>
+            <div class="shape-tabs">
+              <div class="shape-tab active" data-shape="polygon">Polygon</div>
+              <div class="shape-tab" data-shape="circle">Circle</div>
+              <div class="shape-tab" data-shape="ellipse">Ellipse</div>
+              <div class="shape-tab" data-shape="inset">Inset</div>
+            </div>
+          </div>
+
+          <!-- Presets -->
+          <div>
+            <div class="section-label">Presets</div>
+            <div class="clip-presets" id="presets"></div>
+          </div>
+
+          <!-- Polygon controls -->
+          <div class="shape-panel active" id="panel-polygon">
+            <div class="polygon-hint">
+              Click on the preview area to add points. Drag points to reposition. Hover a point and click &times; to remove it.
+            </div>
+            <div class="ctrl-row">
+              <label><input type="checkbox" id="snapGrid" checked> Snap to grid (5%)</label>
+            </div>
+            <div class="btn-group">
+              <button class="btn" onclick="resetPolygon()">Reset Points</button>
+            </div>
+          </div>
+
+          <!-- Circle controls -->
+          <div class="shape-panel" id="panel-circle">
+            <div class="slider-group">
+              <div class="slider-header"><label>Radius</label><span class="slider-value" id="circRadVal">50%</span></div>
+              <input type="range" id="circRadius" min="0" max="100" value="50" step="1" oninput="updateCircle()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Center X</label><span class="slider-value" id="circCxVal">50%</span></div>
+              <input type="range" id="circCx" min="0" max="100" value="50" step="1" oninput="updateCircle()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Center Y</label><span class="slider-value" id="circCyVal">50%</span></div>
+              <input type="range" id="circCy" min="0" max="100" value="50" step="1" oninput="updateCircle()">
+            </div>
+          </div>
+
+          <!-- Ellipse controls -->
+          <div class="shape-panel" id="panel-ellipse">
+            <div class="slider-group">
+              <div class="slider-header"><label>Radius X</label><span class="slider-value" id="ellRxVal">50%</span></div>
+              <input type="range" id="ellRx" min="0" max="100" value="50" step="1" oninput="updateEllipse()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Radius Y</label><span class="slider-value" id="ellRyVal">40%</span></div>
+              <input type="range" id="ellRy" min="0" max="100" value="40" step="1" oninput="updateEllipse()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Center X</label><span class="slider-value" id="ellCxVal">50%</span></div>
+              <input type="range" id="ellCx" min="0" max="100" value="50" step="1" oninput="updateEllipse()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Center Y</label><span class="slider-value" id="ellCyVal">50%</span></div>
+              <input type="range" id="ellCy" min="0" max="100" value="50" step="1" oninput="updateEllipse()">
+            </div>
+          </div>
+
+          <!-- Inset controls -->
+          <div class="shape-panel" id="panel-inset">
+            <div class="slider-group">
+              <div class="slider-header"><label>Top</label><span class="slider-value" id="insTopVal">10%</span></div>
+              <input type="range" id="insTop" min="0" max="50" value="10" step="1" oninput="updateInset()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Right</label><span class="slider-value" id="insRightVal">10%</span></div>
+              <input type="range" id="insRight" min="0" max="50" value="10" step="1" oninput="updateInset()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Bottom</label><span class="slider-value" id="insBotVal">10%</span></div>
+              <input type="range" id="insBot" min="0" max="50" value="10" step="1" oninput="updateInset()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Left</label><span class="slider-value" id="insLeftVal">10%</span></div>
+              <input type="range" id="insLeft" min="0" max="50" value="10" step="1" oninput="updateInset()">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header"><label>Border Radius</label><span class="slider-value" id="insRoundVal">0%</span></div>
+              <input type="range" id="insRound" min="0" max="50" value="0" step="1" oninput="updateInset()">
+            </div>
+          </div>
+
+          <!-- Background options -->
+          <div>
+            <div class="section-label">Preview Background</div>
+            <div class="bg-options">
+              <div class="bg-option active" data-bg="gradient" style="background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);" onclick="setBg('gradient')"></div>
+              <div class="bg-option" data-bg="photo" style="background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22><rect fill=%22%23336%22 width=%2232%22 height=%2232%22/><text x=%224%22 y=%2220%22 fill=%22%23aaf%22 font-size=%2210%22>IMG</text></svg>') center/cover;" onclick="setBg('photo')"></div>
+              <div class="bg-option" data-bg="solid" style="background: #6366f1;" onclick="setBg('solid')"></div>
+              <div class="bg-option" data-bg="checker" style="background: repeating-conic-gradient(#333 0% 25%, #555 0% 50%) 0 0/8px 8px;" onclick="setBg('checker')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Preview + CSS -->
+      <div class="tool-panel" style="display:flex; flex-direction:column;">
+        <div class="panel-header">
+          Preview
+          <button class="btn" onclick="copyCSS()">Copy CSS</button>
+        </div>
+        <div class="clip-preview-area" id="previewArea">
+          <div class="clip-canvas" id="clipCanvas">
+            <div class="clip-element" id="clipElement"></div>
+            <svg class="clip-lines" id="clipLines"></svg>
+            <canvas class="clip-grid-overlay" id="gridOverlay" width="300" height="300"></canvas>
+            <!-- points injected here -->
+          </div>
+        </div>
+        <div class="css-out">
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">CSS (click to copy)</div>
+          <pre id="cssOutput" onclick="copyCSS()"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    /* ===== STATE ===== */
+    let shapeType = 'polygon';
+    let polygonPoints = []; // {x: 0-100, y: 0-100}
+    let draggingPoint = null;
+    let dragOffset = { x: 0, y: 0 };
+    let bgType = 'gradient';
+
+    const canvas = document.getElementById('clipCanvas');
+    const clipEl = document.getElementById('clipElement');
+    const linesEl = document.getElementById('clipLines');
+    const cssOutput = document.getElementById('cssOutput');
+    const gridCanvas = document.getElementById('gridOverlay');
+    const gridCtx = gridCanvas.getContext('2d');
+
+    /* ===== PRESETS ===== */
+    const presets = [
+      { name: 'Triangle',  type: 'polygon', points: [{x:50,y:0},{x:100,y:100},{x:0,y:100}] },
+      { name: 'Pentagon',  type: 'polygon', points: [{x:50,y:0},{x:100,y:38},{x:81,y:100},{x:19,y:100},{x:0,y:38}] },
+      { name: 'Hexagon',   type: 'polygon', points: [{x:25,y:0},{x:75,y:0},{x:100,y:50},{x:75,y:100},{x:25,y:100},{x:0,y:50}] },
+      { name: 'Star',      type: 'polygon', points: [{x:50,y:0},{x:61,y:35},{x:98,y:35},{x:68,y:57},{x:79,y:91},{x:50,y:70},{x:21,y:91},{x:32,y:57},{x:2,y:35},{x:39,y:35}] },
+      { name: 'Arrow',     type: 'polygon', points: [{x:40,y:0},{x:40,y:40},{x:0,y:40},{x:50,y:100},{x:100,y:40},{x:60,y:40},{x:60,y:0}] },
+      { name: 'Cross',     type: 'polygon', points: [{x:35,y:0},{x:65,y:0},{x:65,y:35},{x:100,y:35},{x:100,y:65},{x:65,y:65},{x:65,y:100},{x:35,y:100},{x:35,y:65},{x:0,y:65},{x:0,y:35},{x:35,y:35}] },
+      { name: 'Heart',     type: 'polygon', points: [{x:50,y:100},{x:5,y:55},{x:0,y:35},{x:5,y:15},{x:15,y:3},{x:30,y:0},{x:45,y:8},{x:50,y:20},{x:55,y:8},{x:70,y:0},{x:85,y:3},{x:95,y:15},{x:100,y:35},{x:95,y:55}] },
+      { name: 'Diamond',   type: 'polygon', points: [{x:50,y:0},{x:100,y:50},{x:50,y:100},{x:0,y:50}] },
+    ];
+
+    function renderPresets() {
+      const container = document.getElementById('presets');
+      presets.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'clip-preset';
+        const shape = document.createElement('div');
+        shape.className = 'preset-shape';
+        const pts = p.points.map(pt => `${pt.x}% ${pt.y}%`).join(', ');
+        shape.style.clipPath = `polygon(${pts})`;
+        div.appendChild(shape);
+        const nameEl = document.createElement('span');
+        nameEl.className = 'preset-name';
+        nameEl.textContent = p.name;
+        div.appendChild(nameEl);
+        div.onclick = () => applyPreset(p);
+        container.appendChild(div);
+      });
+    }
+
+    function applyPreset(p) {
+      setShapeType(p.type);
+      polygonPoints = p.points.map(pt => ({ ...pt }));
+      renderAll();
+    }
+
+    /* ===== SHAPE TABS ===== */
+    document.querySelectorAll('.shape-tab').forEach(tab => {
+      tab.onclick = () => setShapeType(tab.dataset.shape);
+    });
+
+    function setShapeType(type) {
+      shapeType = type;
+      document.querySelectorAll('.shape-tab').forEach(t => t.classList.toggle('active', t.dataset.shape === type));
+      document.querySelectorAll('.shape-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + type));
+      if (type === 'polygon' && polygonPoints.length === 0) {
+        polygonPoints = [{x:50,y:0},{x:100,y:100},{x:0,y:100}];
+      }
+      renderAll();
+    }
+
+    /* ===== GRID ===== */
+    function drawGrid() {
+      const w = gridCanvas.width, h = gridCanvas.height;
+      gridCtx.clearRect(0, 0, w, h);
+      if (!document.getElementById('snapGrid').checked) return;
+      gridCtx.strokeStyle = 'rgba(255,255,255,0.25)';
+      gridCtx.lineWidth = 0.5;
+      const step = 5; // 5%
+      for (let i = step; i < 100; i += step) {
+        const px = i / 100 * w;
+        const py = i / 100 * h;
+        gridCtx.beginPath(); gridCtx.moveTo(px, 0); gridCtx.lineTo(px, h); gridCtx.stroke();
+        gridCtx.beginPath(); gridCtx.moveTo(0, py); gridCtx.lineTo(w, py); gridCtx.stroke();
+      }
+    }
+
+    document.getElementById('snapGrid').onchange = () => { drawGrid(); };
+
+    /* ===== SNAP HELPER ===== */
+    function snap(val) {
+      if (!document.getElementById('snapGrid') || !document.getElementById('snapGrid').checked) return val;
+      return Math.round(val / 5) * 5;
+    }
+
+    /* ===== BACKGROUND ===== */
+    function setBg(type) {
+      bgType = type;
+      document.querySelectorAll('.bg-option').forEach(o => o.classList.toggle('active', o.dataset.bg === type));
+      applyBg();
+    }
+
+    function applyBg() {
+      clipEl.classList.remove('has-image');
+      switch (bgType) {
+        case 'gradient':
+          clipEl.style.background = 'linear-gradient(135deg, #6366f1, #a855f7, #ec4899)';
+          break;
+        case 'photo':
+          clipEl.style.background = 'url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=400&fit=crop") center/cover';
+          clipEl.classList.add('has-image');
+          break;
+        case 'solid':
+          clipEl.style.background = '#6366f1';
+          break;
+        case 'checker':
+          clipEl.style.background = 'repeating-conic-gradient(#444 0% 25%, #666 0% 50%) 0 0/20px 20px';
+          break;
+      }
+    }
+
+    /* ===== POLYGON RENDERING ===== */
+    function renderPolygon() {
+      // Remove old points
+      canvas.querySelectorAll('.clip-point').forEach(p => p.remove());
+
+      if (polygonPoints.length === 0) {
+        clipEl.style.clipPath = 'none';
+        cssOutput.textContent = 'clip-path: none;';
+        linesEl.innerHTML = '';
+        return;
+      }
+
+      const cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+
+      // Place point handles
+      polygonPoints.forEach((pt, i) => {
+        const el = document.createElement('div');
+        el.className = 'clip-point';
+        el.style.left = pt.x + '%';
+        el.style.top = pt.y + '%';
+        el.dataset.index = i;
+
+        const label = document.createElement('span');
+        label.className = 'point-label';
+        label.textContent = `${Math.round(pt.x)}%, ${Math.round(pt.y)}%`;
+        el.appendChild(label);
+
+        if (polygonPoints.length > 3) {
+          const rm = document.createElement('button');
+          rm.className = 'remove-point';
+          rm.textContent = '\u00d7';
+          rm.onclick = (e) => { e.stopPropagation(); removePoint(i); };
+          el.appendChild(rm);
+        }
+
+        el.onmousedown = (e) => startDrag(e, i);
+        el.ontouchstart = (e) => startDragTouch(e, i);
+        canvas.appendChild(el);
+      });
+
+      // Draw lines
+      let svgHTML = '';
+      for (let i = 0; i < polygonPoints.length; i++) {
+        const a = polygonPoints[i];
+        const b = polygonPoints[(i + 1) % polygonPoints.length];
+        svgHTML += `<line x1="${a.x}%" y1="${a.y}%" x2="${b.x}%" y2="${b.y}%" />`;
+      }
+      linesEl.innerHTML = svgHTML;
+
+      // Apply clip-path
+      const pts = polygonPoints.map(pt => `${Math.round(pt.x)}% ${Math.round(pt.y)}%`).join(', ');
+      const css = `polygon(${pts})`;
+      clipEl.style.clipPath = css;
+      cssOutput.textContent = `clip-path: ${css};`;
+    }
+
+    function addPoint(x, y) {
+      const rect = canvas.getBoundingClientRect();
+      let px = (x - rect.left) / rect.width * 100;
+      let py = (y - rect.top) / rect.height * 100;
+      px = Math.max(0, Math.min(100, snap(px)));
+      py = Math.max(0, Math.min(100, snap(py)));
+
+      // Insert point between the nearest edge
+      if (polygonPoints.length >= 3) {
+        let bestIdx = polygonPoints.length;
+        let bestDist = Infinity;
+        for (let i = 0; i < polygonPoints.length; i++) {
+          const a = polygonPoints[i];
+          const b = polygonPoints[(i + 1) % polygonPoints.length];
+          const d = distToSegment(px, py, a.x, a.y, b.x, b.y);
+          if (d < bestDist) { bestDist = d; bestIdx = i + 1; }
+        }
+        polygonPoints.splice(bestIdx, 0, { x: px, y: py });
+      } else {
+        polygonPoints.push({ x: px, y: py });
+      }
+      renderAll();
+    }
+
+    function removePoint(idx) {
+      if (polygonPoints.length <= 3) return;
+      polygonPoints.splice(idx, 1);
+      renderAll();
+    }
+
+    function resetPolygon() {
+      polygonPoints = [{x:50,y:0},{x:100,y:100},{x:0,y:100}];
+      renderAll();
+    }
+
+    /* ===== DISTANCE HELPER ===== */
+    function distToSegment(px, py, ax, ay, bx, by) {
+      const dx = bx - ax, dy = by - ay;
+      const lenSq = dx * dx + dy * dy;
+      if (lenSq === 0) return Math.hypot(px - ax, py - ay);
+      let t = ((px - ax) * dx + (py - ay) * dy) / lenSq;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+    }
+
+    /* ===== DRAGGING ===== */
+    function startDrag(e, idx) {
+      e.preventDefault();
+      draggingPoint = idx;
+      const el = e.target.closest('.clip-point');
+      el.classList.add('dragging');
+      document.addEventListener('mousemove', onDrag);
+      document.addEventListener('mouseup', stopDrag);
+    }
+
+    function startDragTouch(e, idx) {
+      e.preventDefault();
+      draggingPoint = idx;
+      const el = e.target.closest('.clip-point');
+      el.classList.add('dragging');
+      document.addEventListener('touchmove', onDragTouch, { passive: false });
+      document.addEventListener('touchend', stopDragTouch);
+    }
+
+    function onDrag(e) {
+      if (draggingPoint === null) return;
+      moveDrag(e.clientX, e.clientY);
+    }
+
+    function onDragTouch(e) {
+      if (draggingPoint === null) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      moveDrag(t.clientX, t.clientY);
+    }
+
+    function moveDrag(cx, cy) {
+      const rect = canvas.getBoundingClientRect();
+      let px = (cx - rect.left) / rect.width * 100;
+      let py = (cy - rect.top) / rect.height * 100;
+      px = Math.max(0, Math.min(100, snap(px)));
+      py = Math.max(0, Math.min(100, snap(py)));
+      polygonPoints[draggingPoint] = { x: px, y: py };
+      renderAll();
+    }
+
+    function stopDrag() {
+      draggingPoint = null;
+      document.querySelectorAll('.clip-point.dragging').forEach(el => el.classList.remove('dragging'));
+      document.removeEventListener('mousemove', onDrag);
+      document.removeEventListener('mouseup', stopDrag);
+    }
+
+    function stopDragTouch() {
+      draggingPoint = null;
+      document.querySelectorAll('.clip-point.dragging').forEach(el => el.classList.remove('dragging'));
+      document.removeEventListener('touchmove', onDragTouch);
+      document.removeEventListener('touchend', stopDragTouch);
+    }
+
+    /* ===== CLICK TO ADD POINT (polygon only) ===== */
+    document.getElementById('previewArea').addEventListener('click', (e) => {
+      if (shapeType !== 'polygon') return;
+      if (e.target.closest('.clip-point')) return;
+      addPoint(e.clientX, e.clientY);
+    });
+
+    /* ===== CIRCLE ===== */
+    function updateCircle() {
+      const r = +document.getElementById('circRadius').value;
+      const cx = +document.getElementById('circCx').value;
+      const cy = +document.getElementById('circCy').value;
+      document.getElementById('circRadVal').textContent = r + '%';
+      document.getElementById('circCxVal').textContent = cx + '%';
+      document.getElementById('circCyVal').textContent = cy + '%';
+
+      const css = `circle(${r}% at ${cx}% ${cy}%)`;
+      clipEl.style.clipPath = css;
+      cssOutput.textContent = `clip-path: ${css};`;
+
+      // Draw guide
+      canvas.querySelectorAll('.clip-point').forEach(p => p.remove());
+      const svgNs = 'http://www.w3.org/2000/svg';
+      linesEl.innerHTML = '';
+      const c = document.createElementNS(svgNs, 'circle');
+      c.setAttribute('cx', cx + '%');
+      c.setAttribute('cy', cy + '%');
+      c.setAttribute('r', r + '%');
+      linesEl.appendChild(c);
+
+      // Center point
+      const cPt = document.createElement('div');
+      cPt.className = 'clip-point';
+      cPt.style.left = cx + '%';
+      cPt.style.top = cy + '%';
+      cPt.style.background = '#fff';
+      cPt.style.width = '8px';
+      cPt.style.height = '8px';
+      cPt.style.cursor = 'default';
+      cPt.style.pointerEvents = 'none';
+      canvas.appendChild(cPt);
+    }
+
+    /* ===== ELLIPSE ===== */
+    function updateEllipse() {
+      const rx = +document.getElementById('ellRx').value;
+      const ry = +document.getElementById('ellRy').value;
+      const cx = +document.getElementById('ellCx').value;
+      const cy = +document.getElementById('ellCy').value;
+      document.getElementById('ellRxVal').textContent = rx + '%';
+      document.getElementById('ellRyVal').textContent = ry + '%';
+      document.getElementById('ellCxVal').textContent = cx + '%';
+      document.getElementById('ellCyVal').textContent = cy + '%';
+
+      const css = `ellipse(${rx}% ${ry}% at ${cx}% ${cy}%)`;
+      clipEl.style.clipPath = css;
+      cssOutput.textContent = `clip-path: ${css};`;
+
+      // Draw guide
+      canvas.querySelectorAll('.clip-point').forEach(p => p.remove());
+      const svgNs = 'http://www.w3.org/2000/svg';
+      linesEl.innerHTML = '';
+      const e = document.createElementNS(svgNs, 'ellipse');
+      e.setAttribute('cx', cx + '%');
+      e.setAttribute('cy', cy + '%');
+      e.setAttribute('rx', rx + '%');
+      e.setAttribute('ry', ry + '%');
+      linesEl.appendChild(e);
+
+      // Center point
+      const cPt = document.createElement('div');
+      cPt.className = 'clip-point';
+      cPt.style.left = cx + '%';
+      cPt.style.top = cy + '%';
+      cPt.style.background = '#fff';
+      cPt.style.width = '8px';
+      cPt.style.height = '8px';
+      cPt.style.cursor = 'default';
+      cPt.style.pointerEvents = 'none';
+      canvas.appendChild(cPt);
+    }
+
+    /* ===== INSET ===== */
+    function updateInset() {
+      const top = +document.getElementById('insTop').value;
+      const right = +document.getElementById('insRight').value;
+      const bot = +document.getElementById('insBot').value;
+      const left = +document.getElementById('insLeft').value;
+      const round = +document.getElementById('insRound').value;
+      document.getElementById('insTopVal').textContent = top + '%';
+      document.getElementById('insRightVal').textContent = right + '%';
+      document.getElementById('insBotVal').textContent = bot + '%';
+      document.getElementById('insLeftVal').textContent = left + '%';
+      document.getElementById('insRoundVal').textContent = round + '%';
+
+      let css = `inset(${top}% ${right}% ${bot}% ${left}%`;
+      if (round > 0) css += ` round ${round}%`;
+      css += ')';
+      clipEl.style.clipPath = css;
+      cssOutput.textContent = `clip-path: ${css};`;
+
+      // Draw guide rectangle
+      canvas.querySelectorAll('.clip-point').forEach(p => p.remove());
+      const svgNs = 'http://www.w3.org/2000/svg';
+      linesEl.innerHTML = '';
+      const x1 = left, y1 = top, x2 = 100 - right, y2 = 100 - bot;
+      let svgHTML = '';
+      svgHTML += `<line x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y1}%" />`;
+      svgHTML += `<line x1="${x2}%" y1="${y1}%" x2="${x2}%" y2="${y2}%" />`;
+      svgHTML += `<line x1="${x2}%" y1="${y2}%" x2="${x1}%" y2="${y2}%" />`;
+      svgHTML += `<line x1="${x1}%" y1="${y2}%" x2="${x1}%" y2="${y1}%" />`;
+      linesEl.innerHTML = svgHTML;
+    }
+
+    /* ===== RENDER ALL ===== */
+    function renderAll() {
+      drawGrid();
+      switch (shapeType) {
+        case 'polygon': renderPolygon(); break;
+        case 'circle': updateCircle(); break;
+        case 'ellipse': updateEllipse(); break;
+        case 'inset': updateInset(); break;
+      }
+    }
+
+    /* ===== COPY CSS ===== */
+    function copyCSS() {
+      const text = cssOutput.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = cssOutput.textContent;
+        cssOutput.textContent = 'Copied!';
+        setTimeout(() => cssOutput.textContent = orig, 1000);
+      });
+    }
+
+    /* ===== INIT ===== */
+    renderPresets();
+    polygonPoints = [{x:50,y:0},{x:100,y:100},{x:0,y:100}];
+    applyBg();
+    renderAll();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
