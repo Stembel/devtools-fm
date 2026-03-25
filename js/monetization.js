@@ -8,7 +8,7 @@
 
   // === CONFIGURATION ===
   const CONFIG = {
-    adsensePubId: '',  // Set when AdSense is approved: 'ca-pub-XXXXXXXXXX'
+    adsensePubId: 'ca-pub-5826340473830405',
     adsenseSlots: {
       toolTop: '',     // Ad slot ID for top of tool page
       toolBottom: '',  // Ad slot ID for bottom of tool page
