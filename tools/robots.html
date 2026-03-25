@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robots.txt Generator - Create robots.txt Online | ZeroKit.dev</title>
+  <meta name="description" content="Visually build a robots.txt file with user-agent rules, allow/disallow paths, sitemap, and crawl-delay. Presets for AI bots, search engines, and more.">
+  <link rel="canonical" href="https://zerokit.dev/tools/robots.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Robots.txt Generator</h1>
+    <p class="description">Visually build a robots.txt file with user-agent rules, sitemaps, and crawl-delay. Everything runs locally in your browser.</p>
+
+    <h3 class="section-label">Presets</h3>
+    <div class="preset-bar">
+      <button class="btn" onclick="applyPreset('allowAll')">Allow All</button>
+      <button class="btn" onclick="applyPreset('disallowAll')">Disallow All</button>
+      <button class="btn" onclick="applyPreset('blockAI')">Block AI Bots</button>
+      <button class="btn" onclick="applyPreset('standard')">Standard (block admin/api)</button>
+    </div>
+
+    <div class="tool-layout">
+      <div class="tool-panel">
+        <div class="panel-header">Rules Builder</div>
+        <div class="builder-area">
+          <div class="builder-section">
+            <h3 class="section-label">Sitemap URL</h3>
+            <input type="text" id="sitemapUrl" class="rb-input" placeholder="https://example.com/sitemap.xml" oninput="generate()">
+          </div>
+
+          <div class="builder-section">
+            <h3 class="section-label">User-Agent Rules</h3>
+            <div id="rulesContainer"></div>
+            <button class="btn btn-primary" onclick="addRule()" style="margin-top:12px">+ Add Rule Group</button>
+          </div>
+        </div>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Preview
+          <span id="status"></span>
+        </div>
+        <textarea class="tool-textarea" id="output" readonly placeholder="Generated robots.txt will appear here..."></textarea>
+        <div style="padding:12px 16px;border-top:1px solid var(--border)">
+          <button class="btn btn-primary" onclick="copyOutput()">Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <style>
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .builder-area {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .builder-section {
+      display: flex;
+      flex-direction: column;
+    }
+    .rb-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .rb-input:focus {
+      border-color: var(--accent);
+    }
+    .rb-select {
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .rb-select:focus {
+      border-color: var(--accent);
+    }
+    .rule-group {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .rule-group-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .rule-group-header .rb-select {
+      flex: 1;
+    }
+    .rule-group-header .rb-input {
+      flex: 1;
+    }
+    .directive-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .directive-row .rb-select {
+      min-width: 120px;
+    }
+    .directive-row .rb-input {
+      flex: 1;
+    }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .btn-sm:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+    .btn-add {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .btn-add:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .crawl-delay-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .crawl-delay-row label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .crawl-delay-row input[type="number"] {
+      width: 80px;
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .crawl-delay-row input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+    .directives-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+  </style>
+
+  <script>
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $sitemapUrl = document.getElementById('sitemapUrl');
+    const $rulesContainer = document.getElementById('rulesContainer');
+
+    const BOTS = [
+      { value: '*', label: '* (All bots)' },
+      { value: 'Googlebot', label: 'Googlebot' },
+      { value: 'Googlebot-Image', label: 'Googlebot-Image' },
+      { value: 'Bingbot', label: 'Bingbot' },
+      { value: 'Slurp', label: 'Yahoo Slurp' },
+      { value: 'DuckDuckBot', label: 'DuckDuckBot' },
+      { value: 'Baiduspider', label: 'Baiduspider' },
+      { value: 'YandexBot', label: 'YandexBot' },
+      { value: 'GPTBot', label: 'GPTBot (OpenAI)' },
+      { value: 'ChatGPT-User', label: 'ChatGPT-User (OpenAI)' },
+      { value: 'ClaudeBot', label: 'ClaudeBot (Anthropic)' },
+      { value: 'Claude-Web', label: 'Claude-Web (Anthropic)' },
+      { value: 'Bytespider', label: 'Bytespider (TikTok)' },
+      { value: 'CCBot', label: 'CCBot (Common Crawl)' },
+      { value: 'Google-Extended', label: 'Google-Extended (Gemini)' },
+      { value: 'FacebookBot', label: 'FacebookBot (Meta)' },
+      { value: 'Applebot', label: 'Applebot' },
+      { value: 'Twitterbot', label: 'Twitterbot' },
+      { value: 'custom', label: 'Custom...' }
+    ];
+
+    let rules = [];
+    let ruleIdCounter = 0;
+
+    function createBotSelect(selectedValue) {
+      const id = 'bot-' + ruleIdCounter;
+      let html = '<select class="rb-select" id="' + id + '-select" onchange="onBotSelectChange(\'' + id + '\')">';
+      BOTS.forEach(b => {
+        const sel = b.value === selectedValue ? ' selected' : '';
+        html += '<option value="' + b.value + '"' + sel + '>' + b.label + '</option>';
+      });
+      html += '</select>';
+      html += '<input type="text" class="rb-input" id="' + id + '-custom" placeholder="Custom bot name" style="display:' + (selectedValue === 'custom' ? 'block' : 'none') + '" oninput="generate()">';
+      return html;
+    }
+
+    function onBotSelectChange(id) {
+      const sel = document.getElementById(id + '-select');
+      const custom = document.getElementById(id + '-custom');
+      if (sel.value === 'custom') {
+        custom.style.display = 'block';
+        custom.focus();
+      } else {
+        custom.style.display = 'none';
+      }
+      generate();
+    }
+
+    function addRule(userAgent, directives, crawlDelay) {
+      userAgent = userAgent || '*';
+      directives = directives || [{ type: 'Disallow', path: '' }];
+      crawlDelay = crawlDelay || '';
+      const id = ruleIdCounter++;
+
+      const rule = { id, userAgent, directives, crawlDelay };
+      rules.push(rule);
+      renderRules();
+      generate();
+    }
+
+    function removeRule(id) {
+      rules = rules.filter(r => r.id !== id);
+      renderRules();
+      generate();
+    }
+
+    function addDirective(ruleId) {
+      const rule = rules.find(r => r.id === ruleId);
+      if (rule) {
+        rule.directives.push({ type: 'Disallow', path: '' });
+        renderRules();
+        generate();
+      }
+    }
+
+    function removeDirective(ruleId, dirIdx) {
+      const rule = rules.find(r => r.id === ruleId);
+      if (rule && rule.directives.length > 1) {
+        rule.directives.splice(dirIdx, 1);
+        renderRules();
+        generate();
+      }
+    }
+
+    function syncRulesFromDOM() {
+      rules.forEach(rule => {
+        const sel = document.getElementById('rule-' + rule.id + '-bot-select');
+        const custom = document.getElementById('rule-' + rule.id + '-bot-custom');
+        if (sel) {
+          rule.userAgent = sel.value === 'custom' ? (custom ? custom.value : '') : sel.value;
+        }
+        const delayInput = document.getElementById('rule-' + rule.id + '-delay');
+        if (delayInput) {
+          rule.crawlDelay = delayInput.value;
+        }
+        rule.directives.forEach((dir, idx) => {
+          const typeEl = document.getElementById('rule-' + rule.id + '-dir-' + idx + '-type');
+          const pathEl = document.getElementById('rule-' + rule.id + '-dir-' + idx + '-path');
+          if (typeEl) dir.type = typeEl.value;
+          if (pathEl) dir.path = pathEl.value;
+        });
+      });
+    }
+
+    function renderRules() {
+      syncRulesFromDOM();
+      let html = '';
+      rules.forEach(rule => {
+        const rId = 'rule-' + rule.id;
+        html += '<div class="rule-group">';
+        html += '<div class="rule-group-header">';
+
+        // Bot select
+        let botSelectHtml = '<select class="rb-select" id="' + rId + '-bot-select" onchange="onRuleBotChange(\'' + rId + '\')">';
+        const isCustom = !BOTS.some(b => b.value === rule.userAgent && b.value !== 'custom');
+        BOTS.forEach(b => {
+          let sel = '';
+          if (isCustom && b.value === 'custom') sel = ' selected';
+          else if (!isCustom && b.value === rule.userAgent) sel = ' selected';
+          botSelectHtml += '<option value="' + b.value + '"' + sel + '>' + b.label + '</option>';
+        });
+        botSelectHtml += '</select>';
+        html += botSelectHtml;
+        html += '<input type="text" class="rb-input" id="' + rId + '-bot-custom" placeholder="Custom bot name" value="' + escAttr(isCustom ? rule.userAgent : '') + '" style="display:' + (isCustom ? 'block' : 'none') + '" oninput="generate()">';
+        html += '<button class="btn-sm" onclick="removeRule(' + rule.id + ')" title="Remove rule group">&times;</button>';
+        html += '</div>';
+
+        // Directives
+        html += '<div class="directives-list">';
+        rule.directives.forEach((dir, idx) => {
+          html += '<div class="directive-row">';
+          html += '<select class="rb-select" id="' + rId + '-dir-' + idx + '-type" onchange="generate()">';
+          html += '<option value="Allow"' + (dir.type === 'Allow' ? ' selected' : '') + '>Allow</option>';
+          html += '<option value="Disallow"' + (dir.type === 'Disallow' ? ' selected' : '') + '>Disallow</option>';
+          html += '</select>';
+          html += '<input type="text" class="rb-input" id="' + rId + '-dir-' + idx + '-path" value="' + escAttr(dir.path) + '" placeholder="/path" oninput="generate()">';
+          html += '<button class="btn-sm" onclick="removeDirective(' + rule.id + ',' + idx + ')" title="Remove directive">&times;</button>';
+          html += '</div>';
+        });
+        html += '</div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap">';
+        html += '<button class="btn-add" onclick="addDirective(' + rule.id + ')">+ Add Path</button>';
+        html += '<div class="crawl-delay-row">';
+        html += '<label>Crawl-delay:</label>';
+        html += '<input type="number" id="' + rId + '-delay" min="0" max="120" value="' + escAttr(rule.crawlDelay) + '" placeholder="--" oninput="generate()">';
+        html += '<span style="font-size:0.75rem;color:var(--text-muted)">seconds</span>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '</div>';
+      });
+      $rulesContainer.innerHTML = html;
+    }
+
+    function onRuleBotChange(rId) {
+      const sel = document.getElementById(rId + '-bot-select');
+      const custom = document.getElementById(rId + '-bot-custom');
+      if (sel.value === 'custom') {
+        custom.style.display = 'block';
+        custom.focus();
+      } else {
+        custom.style.display = 'none';
+      }
+      generate();
+    }
+
+    function escAttr(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function generate() {
+      syncRulesFromDOM();
+      let lines = [];
+
+      // Sitemap
+      const sitemap = $sitemapUrl.value.trim();
+      if (sitemap) {
+        lines.push('Sitemap: ' + sitemap);
+        lines.push('');
+      }
+
+      // Rules
+      rules.forEach((rule, rIdx) => {
+        const ua = rule.userAgent || '*';
+        lines.push('User-agent: ' + ua);
+
+        rule.directives.forEach(dir => {
+          lines.push(dir.type + ': ' + dir.path);
+        });
+
+        if (rule.crawlDelay && parseInt(rule.crawlDelay) > 0) {
+          lines.push('Crawl-delay: ' + rule.crawlDelay);
+        }
+
+        if (rIdx < rules.length - 1) {
+          lines.push('');
+        }
+      });
+
+      $output.value = lines.join('\n');
+    }
+
+    function copyOutput() {
+      const text = $output.value;
+      if (text) {
+        navigator.clipboard.writeText(text);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+      setTimeout(() => { $status.textContent = ''; $status.className = ''; }, 2000);
+    }
+
+    function clearAll() {
+      rules = [];
+      ruleIdCounter = 0;
+      $sitemapUrl.value = '';
+      renderRules();
+      generate();
+    }
+
+    function applyPreset(preset) {
+      rules = [];
+      ruleIdCounter = 0;
+      $sitemapUrl.value = '';
+
+      switch (preset) {
+        case 'allowAll':
+          rules.push({ id: ruleIdCounter++, userAgent: '*', directives: [{ type: 'Allow', path: '/' }], crawlDelay: '' });
+          break;
+
+        case 'disallowAll':
+          rules.push({ id: ruleIdCounter++, userAgent: '*', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          break;
+
+        case 'blockAI':
+          rules.push({ id: ruleIdCounter++, userAgent: '*', directives: [{ type: 'Allow', path: '/' }], crawlDelay: '' });
+          rules.push({ id: ruleIdCounter++, userAgent: 'GPTBot', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          rules.push({ id: ruleIdCounter++, userAgent: 'ChatGPT-User', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          rules.push({ id: ruleIdCounter++, userAgent: 'ClaudeBot', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          rules.push({ id: ruleIdCounter++, userAgent: 'Claude-Web', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          rules.push({ id: ruleIdCounter++, userAgent: 'Google-Extended', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          rules.push({ id: ruleIdCounter++, userAgent: 'CCBot', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          rules.push({ id: ruleIdCounter++, userAgent: 'Bytespider', directives: [{ type: 'Disallow', path: '/' }], crawlDelay: '' });
+          break;
+
+        case 'standard':
+          rules.push({
+            id: ruleIdCounter++,
+            userAgent: '*',
+            directives: [
+              { type: 'Allow', path: '/' },
+              { type: 'Disallow', path: '/admin/' },
+              { type: 'Disallow', path: '/api/' },
+              { type: 'Disallow', path: '/private/' },
+              { type: 'Disallow', path: '/tmp/' },
+              { type: 'Disallow', path: '/*.json$' }
+            ],
+            crawlDelay: ''
+          });
+          $sitemapUrl.value = 'https://example.com/sitemap.xml';
+          break;
+      }
+
+      renderRules();
+      generate();
+    }
+
+    // Initialize with one empty rule
+    addRule('*', [{ type: 'Disallow', path: '' }], '');
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

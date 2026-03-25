@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Table Generator - Create MD Tables Visually | ZeroKit.dev</title>
+  <meta name="description" content="Create Markdown tables visually with a spreadsheet-like editor. Add rows, columns, set alignment, import CSV/TSV, and copy the output. Free, no signup.">
+  <link rel="canonical" href="https://zerokit.dev/tools/mdtable.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .table-editor-wrap {
+      overflow-x: auto;
+      padding: 16px;
+    }
+
+    .table-editor {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 400px;
+    }
+
+    .table-editor th,
+    .table-editor td {
+      padding: 0;
+      border: 1px solid var(--border);
+    }
+
+    .table-editor input[type="text"] {
+      width: 100%;
+      min-width: 100px;
+      padding: 8px 12px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .table-editor input[type="text"]:focus {
+      background: var(--surface-2);
+    }
+
+    .table-editor thead input[type="text"] {
+      font-weight: 600;
+    }
+
+    .col-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 2px;
+    }
+
+    .col-controls .align-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 20px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      padding: 0;
+      font-family: var(--mono);
+    }
+
+    .col-controls .align-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .col-controls .align-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .col-controls .remove-col-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 20px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      padding: 0;
+      margin-top: 2px;
+    }
+
+    .col-controls .remove-col-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .row-remove-cell {
+      padding: 0 4px !important;
+      border: none !important;
+      vertical-align: middle;
+    }
+
+    .remove-row-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      padding: 0;
+      opacity: 0.4;
+    }
+
+    .remove-row-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+      opacity: 1;
+    }
+
+    .align-row {
+      background: var(--surface-2);
+    }
+
+    .align-row td {
+      border-bottom: 2px solid var(--accent) !important;
+    }
+
+    .preview-md {
+      width: 100%;
+      min-height: 200px;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+    }
+
+    .rendered-preview {
+      padding: 16px;
+      overflow-x: auto;
+    }
+
+    .rendered-preview table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.875rem;
+    }
+
+    .rendered-preview th,
+    .rendered-preview td {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+    }
+
+    .rendered-preview th {
+      background: var(--surface-2);
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .rendered-preview tr:nth-child(even) td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .import-area {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      resize: vertical;
+      outline: none;
+      margin-bottom: 8px;
+    }
+
+    .import-area::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .import-section {
+      margin-bottom: 24px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .import-section summary {
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .import-section summary:hover { color: var(--text); }
+
+    .import-inner {
+      padding-top: 12px;
+    }
+
+    .import-inner .options-row {
+      padding: 8px 0 0;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .output-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Markdown Table Generator</h1>
+    <p class="description">Build Markdown tables visually with a spreadsheet-like editor. Everything runs locally in your browser.</p>
+
+    <details class="import-section">
+      <summary>Import from CSV / TSV</summary>
+      <div class="import-inner">
+        <textarea class="import-area" id="importArea" placeholder="Paste CSV or TSV data here..."></textarea>
+        <div class="options-row">
+          <label>Delimiter:
+            <select id="delimiter">
+              <option value="auto" selected>Auto-detect</option>
+              <option value=",">Comma (CSV)</option>
+              <option value="\t">Tab (TSV)</option>
+              <option value=";">Semicolon</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="firstRowHeader" checked> First row is header</label>
+        </div>
+        <div style="padding-top:8px;">
+          <button class="btn btn-primary" onclick="importData()">Import</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="addRow()">+ Row</button>
+        <button class="btn btn-primary" onclick="addColumn()">+ Column</button>
+        <button class="btn" onclick="copyMarkdown()">Copy Markdown</button>
+        <button class="btn" onclick="resetTable()">Reset</button>
+      </div>
+      <div class="options-row">
+        <label>Rows:
+          <input type="number" id="rowCount" min="1" max="100" value="3" style="width:60px" onchange="resizeTable()">
+        </label>
+        <label>Columns:
+          <input type="number" id="colCount" min="1" max="20" value="3" style="width:60px" onchange="resizeTable()">
+        </label>
+      </div>
+    </div>
+
+    <div class="tool-panel" style="margin-bottom:16px;">
+      <div class="panel-header">Table Editor <span id="status"></span></div>
+      <div class="table-editor-wrap">
+        <table class="table-editor" id="tableEditor">
+        </table>
+      </div>
+    </div>
+
+    <div class="output-grid">
+      <div class="tool-panel">
+        <div class="panel-header">Markdown Output</div>
+        <textarea class="preview-md" id="mdOutput" readonly placeholder="Markdown will appear here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">Rendered Preview</div>
+        <div class="rendered-preview" id="htmlPreview"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // State
+    let headers = ['Name', 'Type', 'Description'];
+    let rows = [
+      ['id', 'integer', 'Unique identifier'],
+      ['title', 'string', 'Item title'],
+      ['active', 'boolean', 'Whether the item is active']
+    ];
+    let alignments = ['left', 'left', 'left']; // 'left', 'center', 'right'
+
+    const $editor = document.getElementById('tableEditor');
+    const $mdOutput = document.getElementById('mdOutput');
+    const $htmlPreview = document.getElementById('htmlPreview');
+    const $status = document.getElementById('status');
+    const $rowCount = document.getElementById('rowCount');
+    const $colCount = document.getElementById('colCount');
+
+    function buildEditor() {
+      const colCount = headers.length;
+
+      let html = '<thead>';
+      // Alignment controls row
+      html += '<tr class="align-row">';
+      for (let c = 0; c < colCount; c++) {
+        html += '<td><div class="col-controls">';
+        html += '<div style="display:flex;gap:2px;">';
+        html += `<button class="align-btn${alignments[c]==='left'?' active':''}" onclick="setAlign(${c},'left')" title="Align left">L</button>`;
+        html += `<button class="align-btn${alignments[c]==='center'?' active':''}" onclick="setAlign(${c},'center')" title="Align center">C</button>`;
+        html += `<button class="align-btn${alignments[c]==='right'?' active':''}" onclick="setAlign(${c},'right')" title="Align right">R</button>`;
+        html += '</div>';
+        if (colCount > 1) {
+          html += `<button class="remove-col-btn" onclick="removeColumn(${c})" title="Remove column">&times;</button>`;
+        }
+        html += '</div></td>';
+      }
+      html += '<td class="row-remove-cell"></td>';
+      html += '</tr>';
+      // Header inputs row
+      html += '<tr>';
+      for (let c = 0; c < colCount; c++) {
+        html += `<th><input type="text" value="${escapeAttr(headers[c])}" data-type="header" data-col="${c}" onchange="updateHeader(${c}, this.value)" onkeydown="cellKeyDown(event, this)"></th>`;
+      }
+      html += '<td class="row-remove-cell"></td>';
+      html += '</tr>';
+      html += '</thead><tbody>';
+
+      for (let r = 0; r < rows.length; r++) {
+        html += '<tr>';
+        for (let c = 0; c < colCount; c++) {
+          const val = (rows[r] && rows[r][c]) || '';
+          html += `<td><input type="text" value="${escapeAttr(val)}" data-type="cell" data-row="${r}" data-col="${c}" onchange="updateCell(${r}, ${c}, this.value)" onkeydown="cellKeyDown(event, this)"></td>`;
+        }
+        if (rows.length > 1) {
+          html += `<td class="row-remove-cell"><button class="remove-row-btn" onclick="removeRow(${r})" title="Remove row">&times;</button></td>`;
+        } else {
+          html += '<td class="row-remove-cell"></td>';
+        }
+        html += '</tr>';
+      }
+
+      html += '</tbody>';
+      $editor.innerHTML = html;
+
+      $rowCount.value = rows.length;
+      $colCount.value = colCount;
+
+      generateMarkdown();
+    }
+
+    function escapeAttr(s) {
+      return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function escapeMdPipe(s) {
+      return s.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    }
+
+    function updateHeader(col, val) {
+      headers[col] = val;
+      generateMarkdown();
+    }
+
+    function updateCell(row, col, val) {
+      if (!rows[row]) rows[row] = [];
+      rows[row][col] = val;
+      generateMarkdown();
+    }
+
+    function setAlign(col, align) {
+      alignments[col] = align;
+      buildEditor();
+    }
+
+    function addRow() {
+      rows.push(new Array(headers.length).fill(''));
+      buildEditor();
+    }
+
+    function addColumn() {
+      headers.push('Header');
+      alignments.push('left');
+      for (let r = 0; r < rows.length; r++) {
+        rows[r].push('');
+      }
+      buildEditor();
+    }
+
+    function removeRow(r) {
+      if (rows.length <= 1) return;
+      rows.splice(r, 1);
+      buildEditor();
+    }
+
+    function removeColumn(c) {
+      if (headers.length <= 1) return;
+      headers.splice(c, 1);
+      alignments.splice(c, 1);
+      for (let r = 0; r < rows.length; r++) {
+        rows[r].splice(c, 1);
+      }
+      buildEditor();
+    }
+
+    function resizeTable() {
+      const newRows = Math.max(1, Math.min(100, parseInt($rowCount.value) || 1));
+      const newCols = Math.max(1, Math.min(20, parseInt($colCount.value) || 1));
+
+      // Adjust columns
+      while (headers.length < newCols) {
+        headers.push('Header');
+        alignments.push('left');
+        for (let r = 0; r < rows.length; r++) rows[r].push('');
+      }
+      while (headers.length > newCols) {
+        headers.pop();
+        alignments.pop();
+        for (let r = 0; r < rows.length; r++) rows[r].pop();
+      }
+
+      // Adjust rows
+      while (rows.length < newRows) {
+        rows.push(new Array(headers.length).fill(''));
+      }
+      while (rows.length > newRows) {
+        rows.pop();
+      }
+
+      buildEditor();
+    }
+
+    function resetTable() {
+      headers = ['Name', 'Type', 'Description'];
+      rows = [
+        ['id', 'integer', 'Unique identifier'],
+        ['title', 'string', 'Item title'],
+        ['active', 'boolean', 'Whether the item is active']
+      ];
+      alignments = ['left', 'left', 'left'];
+      buildEditor();
+    }
+
+    function generateMarkdown() {
+      const colCount = headers.length;
+
+      // Calculate column widths for padding
+      const widths = [];
+      for (let c = 0; c < colCount; c++) {
+        let max = headers[c].length;
+        for (let r = 0; r < rows.length; r++) {
+          const cell = (rows[r][c] || '');
+          if (cell.length > max) max = cell.length;
+        }
+        widths.push(Math.max(max, 3)); // minimum 3 for separator
+      }
+
+      // Build header
+      let md = '| ';
+      for (let c = 0; c < colCount; c++) {
+        md += escapeMdPipe(headers[c]).padEnd(widths[c]) + ' | ';
+      }
+      md = md.trimEnd() + '\n';
+
+      // Build separator
+      md += '| ';
+      for (let c = 0; c < colCount; c++) {
+        const w = widths[c];
+        const a = alignments[c];
+        let sep;
+        if (a === 'center') {
+          sep = ':' + '-'.repeat(Math.max(w - 2, 1)) + ':';
+        } else if (a === 'right') {
+          sep = '-'.repeat(Math.max(w - 1, 1)) + ':';
+        } else {
+          sep = '-'.repeat(w);
+        }
+        md += sep.padEnd(widths[c]) + ' | ';
+      }
+      md = md.trimEnd() + '\n';
+
+      // Build rows
+      for (let r = 0; r < rows.length; r++) {
+        md += '| ';
+        for (let c = 0; c < colCount; c++) {
+          const cell = escapeMdPipe(rows[r][c] || '');
+          md += cell.padEnd(widths[c]) + ' | ';
+        }
+        md = md.trimEnd() + '\n';
+      }
+
+      $mdOutput.value = md;
+      renderPreview(md);
+    }
+
+    function renderPreview() {
+      const colCount = headers.length;
+      let html = '<table>';
+      html += '<thead><tr>';
+      for (let c = 0; c < colCount; c++) {
+        const a = alignments[c];
+        const style = a !== 'left' ? ` style="text-align:${a}"` : '';
+        html += `<th${style}>${escapeHtml(headers[c])}</th>`;
+      }
+      html += '</tr></thead><tbody>';
+      for (let r = 0; r < rows.length; r++) {
+        html += '<tr>';
+        for (let c = 0; c < colCount; c++) {
+          const a = alignments[c];
+          const style = a !== 'left' ? ` style="text-align:${a}"` : '';
+          html += `<td${style}>${escapeHtml(rows[r][c] || '')}</td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      $htmlPreview.innerHTML = html;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function copyMarkdown() {
+      const md = $mdOutput.value;
+      if (md) {
+        navigator.clipboard.writeText(md);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+      setTimeout(() => { $status.textContent = ''; $status.className = ''; }, 2000);
+    }
+
+    // Tab key navigation between cells
+    function cellKeyDown(e, el) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const allInputs = Array.from($editor.querySelectorAll('input[type="text"]'));
+        const idx = allInputs.indexOf(el);
+        if (idx === -1) return;
+
+        let nextIdx;
+        if (e.shiftKey) {
+          nextIdx = idx - 1;
+          if (nextIdx < 0) nextIdx = allInputs.length - 1;
+        } else {
+          nextIdx = idx + 1;
+          if (nextIdx >= allInputs.length) nextIdx = 0;
+        }
+        allInputs[nextIdx].focus();
+        allInputs[nextIdx].select();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        // Move down one row in the same column
+        const type = el.dataset.type;
+        const col = parseInt(el.dataset.col);
+        const allInputs = Array.from($editor.querySelectorAll('input[type="text"]'));
+        const idx = allInputs.indexOf(el);
+
+        if (type === 'header') {
+          // Move to first body cell in same column
+          const target = $editor.querySelector(`input[data-type="cell"][data-row="0"][data-col="${col}"]`);
+          if (target) { target.focus(); target.select(); }
+        } else {
+          const row = parseInt(el.dataset.row);
+          const target = $editor.querySelector(`input[data-type="cell"][data-row="${row+1}"][data-col="${col}"]`);
+          if (target) { target.focus(); target.select(); }
+        }
+      }
+    }
+
+    // Import CSV/TSV
+    function importData() {
+      const raw = document.getElementById('importArea').value.trim();
+      if (!raw) return;
+
+      let delim = document.getElementById('delimiter').value;
+      const firstRowHeader = document.getElementById('firstRowHeader').checked;
+
+      // Auto-detect delimiter
+      if (delim === 'auto') {
+        const firstLine = raw.split('\n')[0];
+        if (firstLine.includes('\t')) delim = '\t';
+        else if (firstLine.includes(';')) delim = ';';
+        else delim = ',';
+      } else if (delim === '\\t') {
+        delim = '\t';
+      }
+
+      const lines = raw.split('\n').filter(l => l.trim() !== '');
+      if (lines.length === 0) return;
+
+      const parsed = lines.map(line => parseCSVLine(line, delim));
+      const maxCols = Math.max(...parsed.map(r => r.length));
+
+      // Normalize all rows to same length
+      for (let r = 0; r < parsed.length; r++) {
+        while (parsed[r].length < maxCols) parsed[r].push('');
+      }
+
+      if (firstRowHeader && parsed.length >= 2) {
+        headers = parsed[0];
+        rows = parsed.slice(1);
+      } else if (firstRowHeader && parsed.length === 1) {
+        headers = parsed[0];
+        rows = [new Array(maxCols).fill('')];
+      } else {
+        headers = [];
+        for (let c = 0; c < maxCols; c++) headers.push('Column ' + (c + 1));
+        rows = parsed;
+      }
+
+      alignments = new Array(headers.length).fill('left');
+      buildEditor();
+      showStatus('Imported ' + rows.length + ' rows', true);
+    }
+
+    function parseCSVLine(line, delim) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQuotes) {
+          if (ch === '"') {
+            if (i + 1 < line.length && line[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              inQuotes = false;
+            }
+          } else {
+            current += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === delim) {
+            result.push(current.trim());
+            current = '';
+          } else {
+            current += ch;
+          }
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    // Listen for input events to live-update markdown
+    $editor.addEventListener('input', (e) => {
+      if (e.target.tagName === 'INPUT') {
+        const type = e.target.dataset.type;
+        const col = parseInt(e.target.dataset.col);
+        if (type === 'header') {
+          headers[col] = e.target.value;
+        } else if (type === 'cell') {
+          const row = parseInt(e.target.dataset.row);
+          if (!rows[row]) rows[row] = [];
+          rows[row][col] = e.target.value;
+        }
+        generateMarkdown();
+      }
+    });
+
+    // Initialize
+    buildEditor();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSONPath Evaluator - Test JSONPath Expressions Online | ZeroKit.dev</title>
+  <meta name="description" content="Evaluate JSONPath expressions against JSON data in real-time. Free online JSONPath tester with cheatsheet, syntax highlighting, and instant results.">
+  <link rel="canonical" href="https://zerokit.dev/tools/jsonpath.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .jsonpath-expression {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .jsonpath-expression:focus { border-color: var(--accent); }
+    .jsonpath-expression::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+    .expression-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .expression-row label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .jsonpath-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .results-output {
+      width: 100%;
+      min-height: 400px;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+    }
+
+    .match-count {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .cheatsheet {
+      margin-top: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .cheatsheet-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .cheatsheet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .cheatsheet-item {
+      background: var(--surface);
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .cheatsheet-item:hover { background: var(--surface-2); }
+
+    .cheatsheet-expr {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .cheatsheet-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .jsonpath-layout { grid-template-columns: 1fr; }
+      .expression-row { flex-direction: column; align-items: stretch; }
+      .cheatsheet-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>JSONPath Evaluator</h1>
+    <p class="description">Test JSONPath expressions against your JSON data in real-time. Everything runs locally in your browser.</p>
+
+    <div class="expression-row">
+      <label for="expression">JSONPath:</label>
+      <input type="text" id="expression" class="jsonpath-expression" value="$.store.book[*].author" placeholder="Enter JSONPath expression, e.g. $.store.book[*].author">
+    </div>
+
+    <div class="action-bar">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="evaluate()">Evaluate</button>
+        <button class="btn" onclick="copyResults()">Copy Results</button>
+        <button class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <div class="jsonpath-layout">
+      <div class="tool-panel">
+        <div class="panel-header">JSON Data</div>
+        <textarea class="tool-textarea" id="input" placeholder="Paste JSON here..."></textarea>
+      </div>
+      <div class="tool-panel">
+        <div class="panel-header">
+          Results
+          <span id="status"></span>
+        </div>
+        <textarea class="results-output" id="output" readonly placeholder="Matched values will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="cheatsheet">
+      <div class="cheatsheet-header">JSONPath Cheatsheet &mdash; click an expression to try it</div>
+      <div class="cheatsheet-grid">
+        <div class="cheatsheet-item" onclick="tryExample('$')">
+          <div class="cheatsheet-expr">$</div>
+          <div class="cheatsheet-desc">Root object/element</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book')">
+          <div class="cheatsheet-expr">$.store.book</div>
+          <div class="cheatsheet-desc">Dot notation &mdash; child access</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book[0]')">
+          <div class="cheatsheet-expr">$.store.book[0]</div>
+          <div class="cheatsheet-desc">Array index &mdash; first element</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book[-1]')">
+          <div class="cheatsheet-expr">$.store.book[-1]</div>
+          <div class="cheatsheet-desc">Negative index &mdash; last element</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book[0:2]')">
+          <div class="cheatsheet-expr">$.store.book[0:2]</div>
+          <div class="cheatsheet-desc">Array slice &mdash; first two elements</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book[*].author')">
+          <div class="cheatsheet-expr">$.store.book[*].author</div>
+          <div class="cheatsheet-desc">Wildcard &mdash; all authors of all books</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$..author')">
+          <div class="cheatsheet-expr">$..author</div>
+          <div class="cheatsheet-desc">Recursive descent &mdash; all authors anywhere</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.*')">
+          <div class="cheatsheet-expr">$.store.*</div>
+          <div class="cheatsheet-desc">Wildcard &mdash; all direct children of store</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$..price')">
+          <div class="cheatsheet-expr">$..price</div>
+          <div class="cheatsheet-desc">Recursive descent &mdash; all prices</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book[?(@.price < 10)]')">
+          <div class="cheatsheet-expr">$.store.book[?(@.price &lt; 10)]</div>
+          <div class="cheatsheet-desc">Filter &mdash; books cheaper than 10</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book[?(@.isbn)]')">
+          <div class="cheatsheet-expr">$.store.book[?(@.isbn)]</div>
+          <div class="cheatsheet-desc">Filter &mdash; books that have ISBN</div>
+        </div>
+        <div class="cheatsheet-item" onclick="tryExample('$.store.book[?(@.author == \"Herman Melville\")]')">
+          <div class="cheatsheet-expr">$.store.book[?(@.author == "Herman Melville")]</div>
+          <div class="cheatsheet-desc">Filter &mdash; books by specific author</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <script>
+    const $input = document.getElementById('input');
+    const $output = document.getElementById('output');
+    const $status = document.getElementById('status');
+    const $expr = document.getElementById('expression');
+
+    // Pre-fill sample JSON
+    $input.value = JSON.stringify({
+      "store": {
+        "book": [
+          { "category": "reference", "author": "Nigel Rees", "title": "Sayings of the Century", "price": 8.95 },
+          { "category": "fiction", "author": "Evelyn Waugh", "title": "Sword of Honour", "price": 12.99 },
+          { "category": "fiction", "author": "Herman Melville", "title": "Moby Dick", "isbn": "0-553-21311-3", "price": 8.99 },
+          { "category": "fiction", "author": "J. R. R. Tolkien", "title": "The Lord of the Rings", "isbn": "0-395-19395-8", "price": 22.99 }
+        ],
+        "bicycle": {
+          "color": "red",
+          "price": 19.95
+        }
+      }
+    }, null, 2);
+
+    // --- Lightweight JSONPath Evaluator ---
+
+    function jsonpath(obj, expr) {
+      if (typeof expr !== 'string' || !expr.length) return [];
+
+      // Tokenize the expression
+      const tokens = tokenize(expr);
+      if (tokens === null) throw new Error('Invalid JSONPath expression');
+
+      let results = [obj];
+
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        if (token.type === 'root') {
+          results = [obj];
+        } else if (token.type === 'dot') {
+          results = accessProperty(results, token.key);
+        } else if (token.type === 'recursive') {
+          results = recursiveDescent(results, token.key);
+        } else if (token.type === 'wildcard') {
+          results = wildcardAccess(results);
+        } else if (token.type === 'index') {
+          results = indexAccess(results, token.value);
+        } else if (token.type === 'slice') {
+          results = sliceAccess(results, token.start, token.end);
+        } else if (token.type === 'wildcard_index') {
+          results = wildcardIndex(results);
+        } else if (token.type === 'filter') {
+          results = filterAccess(results, token.expr);
+        } else if (token.type === 'recursive_wildcard') {
+          results = recursiveAll(results);
+        }
+      }
+
+      return results;
+    }
+
+    function tokenize(expr) {
+      const tokens = [];
+      let i = 0;
+
+      if (expr[0] !== '$') return null;
+      tokens.push({ type: 'root' });
+      i = 1;
+
+      while (i < expr.length) {
+        if (expr[i] === '.' && expr[i + 1] === '.') {
+          // Recursive descent
+          i += 2;
+          if (i < expr.length && expr[i] === '*') {
+            tokens.push({ type: 'recursive_wildcard' });
+            i++;
+          } else if (i < expr.length && expr[i] === '[') {
+            // recursive followed by bracket - handle in next iteration
+            tokens.push({ type: 'recursive', key: null });
+            // Don't advance i; let the bracket handler pick it up
+          } else {
+            let key = '';
+            while (i < expr.length && expr[i] !== '.' && expr[i] !== '[') {
+              key += expr[i];
+              i++;
+            }
+            if (key) tokens.push({ type: 'recursive', key: key });
+          }
+        } else if (expr[i] === '.') {
+          i++;
+          if (i < expr.length && expr[i] === '*') {
+            tokens.push({ type: 'wildcard' });
+            i++;
+          } else {
+            let key = '';
+            while (i < expr.length && expr[i] !== '.' && expr[i] !== '[') {
+              key += expr[i];
+              i++;
+            }
+            if (key) tokens.push({ type: 'dot', key: key });
+          }
+        } else if (expr[i] === '[') {
+          i++; // skip [
+          // Check for filter
+          if (expr[i] === '?') {
+            i++; // skip ?
+            if (expr[i] !== '(') return null;
+            i++; // skip (
+            let depth = 1;
+            let filterExpr = '';
+            while (i < expr.length && depth > 0) {
+              if (expr[i] === '(') depth++;
+              if (expr[i] === ')') depth--;
+              if (depth > 0) filterExpr += expr[i];
+              i++;
+            }
+            if (expr[i] !== ']') return null;
+            i++; // skip ]
+            tokens.push({ type: 'filter', expr: filterExpr });
+          } else if (expr[i] === '*') {
+            tokens.push({ type: 'wildcard_index' });
+            i++; // skip *
+            if (expr[i] !== ']') return null;
+            i++; // skip ]
+          } else if (expr[i] === "'") {
+            // Quoted property name
+            i++; // skip opening quote
+            let key = '';
+            while (i < expr.length && expr[i] !== "'") {
+              key += expr[i];
+              i++;
+            }
+            i++; // skip closing quote
+            if (expr[i] !== ']') return null;
+            i++; // skip ]
+            tokens.push({ type: 'dot', key: key });
+          } else if (expr[i] === '"') {
+            // Double-quoted property name
+            i++; // skip opening quote
+            let key = '';
+            while (i < expr.length && expr[i] !== '"') {
+              key += expr[i];
+              i++;
+            }
+            i++; // skip closing quote
+            if (expr[i] !== ']') return null;
+            i++; // skip ]
+            tokens.push({ type: 'dot', key: key });
+          } else {
+            // Index or slice
+            let content = '';
+            while (i < expr.length && expr[i] !== ']') {
+              content += expr[i];
+              i++;
+            }
+            if (expr[i] !== ']') return null;
+            i++; // skip ]
+
+            if (content.includes(':')) {
+              // Slice
+              const parts = content.split(':');
+              const start = parts[0] === '' ? undefined : parseInt(parts[0], 10);
+              const end = parts[1] === '' ? undefined : parseInt(parts[1], 10);
+              tokens.push({ type: 'slice', start: start, end: end });
+            } else {
+              const idx = parseInt(content, 10);
+              if (isNaN(idx)) {
+                // Unquoted property name in brackets
+                tokens.push({ type: 'dot', key: content.trim() });
+              } else {
+                tokens.push({ type: 'index', value: idx });
+              }
+            }
+          }
+        } else {
+          // Skip unexpected character
+          i++;
+        }
+      }
+
+      return tokens;
+    }
+
+    function accessProperty(nodes, key) {
+      const result = [];
+      for (const node of nodes) {
+        if (node !== null && typeof node === 'object' && key in node) {
+          result.push(node[key]);
+        }
+      }
+      return result;
+    }
+
+    function wildcardAccess(nodes) {
+      const result = [];
+      for (const node of nodes) {
+        if (node !== null && typeof node === 'object') {
+          if (Array.isArray(node)) {
+            for (const item of node) result.push(item);
+          } else {
+            for (const key of Object.keys(node)) result.push(node[key]);
+          }
+        }
+      }
+      return result;
+    }
+
+    function wildcardIndex(nodes) {
+      const result = [];
+      for (const node of nodes) {
+        if (Array.isArray(node)) {
+          for (const item of node) result.push(item);
+        } else if (node !== null && typeof node === 'object') {
+          for (const key of Object.keys(node)) result.push(node[key]);
+        }
+      }
+      return result;
+    }
+
+    function indexAccess(nodes, idx) {
+      const result = [];
+      for (const node of nodes) {
+        if (Array.isArray(node)) {
+          const realIdx = idx < 0 ? node.length + idx : idx;
+          if (realIdx >= 0 && realIdx < node.length) {
+            result.push(node[realIdx]);
+          }
+        }
+      }
+      return result;
+    }
+
+    function sliceAccess(nodes, start, end) {
+      const result = [];
+      for (const node of nodes) {
+        if (Array.isArray(node)) {
+          const s = start !== undefined ? (start < 0 ? node.length + start : start) : 0;
+          const e = end !== undefined ? (end < 0 ? node.length + end : end) : node.length;
+          for (let i = s; i < e && i < node.length; i++) {
+            if (i >= 0) result.push(node[i]);
+          }
+        }
+      }
+      return result;
+    }
+
+    function recursiveDescent(nodes, key) {
+      const result = [];
+
+      function descend(node) {
+        if (node === null || typeof node !== 'object') return;
+        if (!Array.isArray(node) && key && key in node) {
+          result.push(node[key]);
+        }
+        if (Array.isArray(node)) {
+          for (const item of node) {
+            if (key && typeof item === 'object' && item !== null && key in item) {
+              result.push(item[key]);
+            }
+            descend(item);
+          }
+        } else {
+          for (const k of Object.keys(node)) {
+            if (typeof node[k] === 'object' && node[k] !== null) {
+              descend(node[k]);
+            }
+          }
+        }
+      }
+
+      for (const node of nodes) descend(node);
+      return result;
+    }
+
+    function recursiveAll(nodes) {
+      const result = [];
+
+      function descend(node) {
+        if (node === null || typeof node !== 'object') return;
+        if (Array.isArray(node)) {
+          for (const item of node) {
+            result.push(item);
+            descend(item);
+          }
+        } else {
+          for (const k of Object.keys(node)) {
+            result.push(node[k]);
+            if (typeof node[k] === 'object' && node[k] !== null) {
+              descend(node[k]);
+            }
+          }
+        }
+      }
+
+      for (const node of nodes) descend(node);
+      return result;
+    }
+
+    function filterAccess(nodes, filterExpr) {
+      const result = [];
+      for (const node of nodes) {
+        if (Array.isArray(node)) {
+          for (const item of node) {
+            if (evalFilter(item, filterExpr)) {
+              result.push(item);
+            }
+          }
+        } else if (node !== null && typeof node === 'object') {
+          for (const key of Object.keys(node)) {
+            if (evalFilter(node[key], filterExpr)) {
+              result.push(node[key]);
+            }
+          }
+        }
+      }
+      return result;
+    }
+
+    function evalFilter(item, expr) {
+      // Handle existence check: @.property
+      const existenceMatch = expr.match(/^@\.(\w+)$/);
+      if (existenceMatch) {
+        return item !== null && typeof item === 'object' && existenceMatch[1] in item;
+      }
+
+      // Handle comparisons: @.property op value
+      const compMatch = expr.match(/^@\.(\w+)\s*(==|!=|<|>|<=|>=)\s*(.+)$/);
+      if (compMatch) {
+        const prop = compMatch[1];
+        const op = compMatch[2];
+        let rhs = compMatch[3].trim();
+
+        if (item === null || typeof item !== 'object' || !(prop in item)) return false;
+        const lhs = item[prop];
+
+        // Parse right-hand side value
+        let rhsVal;
+        if ((rhs.startsWith('"') && rhs.endsWith('"')) || (rhs.startsWith("'") && rhs.endsWith("'"))) {
+          rhsVal = rhs.slice(1, -1);
+        } else if (rhs === 'true') {
+          rhsVal = true;
+        } else if (rhs === 'false') {
+          rhsVal = false;
+        } else if (rhs === 'null') {
+          rhsVal = null;
+        } else {
+          rhsVal = parseFloat(rhs);
+          if (isNaN(rhsVal)) rhsVal = rhs;
+        }
+
+        switch (op) {
+          case '==': return lhs === rhsVal;
+          case '!=': return lhs !== rhsVal;
+          case '<':  return lhs < rhsVal;
+          case '>':  return lhs > rhsVal;
+          case '<=': return lhs <= rhsVal;
+          case '>=': return lhs >= rhsVal;
+        }
+      }
+
+      return false;
+    }
+
+    // --- UI Functions ---
+
+    function evaluate() {
+      const raw = $input.value.trim();
+      const expr = $expr.value.trim();
+
+      if (!raw) {
+        showStatus('Enter JSON data', false);
+        $output.value = '';
+        return;
+      }
+
+      if (!expr) {
+        showStatus('Enter a JSONPath expression', false);
+        $output.value = '';
+        return;
+      }
+
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        showStatus('Invalid JSON: ' + e.message, false);
+        $output.value = '';
+        return;
+      }
+
+      try {
+        const results = jsonpath(data, expr);
+
+        if (results.length === 0) {
+          $output.value = 'No matches found.';
+          showStatus('0 matches', false);
+        } else {
+          $output.value = JSON.stringify(results.length === 1 ? results[0] : results, null, 2);
+          const countLabel = results.length === 1 ? '1 match' : results.length + ' matches';
+          showStatus(countLabel, true);
+        }
+      } catch (e) {
+        showStatus('Error: ' + e.message, false);
+        $output.value = '';
+      }
+    }
+
+    function copyResults() {
+      if ($output.value) {
+        navigator.clipboard.writeText($output.value);
+        showStatus('Copied!', true);
+      }
+    }
+
+    function clearAll() {
+      $input.value = '';
+      $output.value = '';
+      $expr.value = '';
+      $status.textContent = '';
+      $status.className = '';
+    }
+
+    function showStatus(msg, ok) {
+      $status.textContent = msg;
+      $status.className = ok ? 'status status-success' : 'status status-error';
+    }
+
+    function tryExample(expression) {
+      $expr.value = expression;
+      evaluate();
+    }
+
+    // Real-time evaluation
+    let debounceTimer;
+    function debounceEvaluate() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(evaluate, 200);
+    }
+
+    $input.addEventListener('input', debounceEvaluate);
+    $expr.addEventListener('input', debounceEvaluate);
+    $input.addEventListener('paste', () => setTimeout(evaluate, 50));
+
+    // Evaluate on load with sample data
+    evaluate();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
