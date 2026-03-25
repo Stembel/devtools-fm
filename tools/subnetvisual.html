@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Subnet Calculator - Split & Plan IP Ranges | ZeroKit.dev</title>
+  <meta name="description" content="Visually split and plan IP subnets. Interactive subnet tree with color-coded blocks, CIDR splitting, hierarchy view, and CSV export. Plan AWS VPCs, home networks, and more.">
+  <link rel="canonical" href="https://zerokit.dev/tools/subnetvisual.html">
+  <meta name="keywords" content="visual subnet calculator, subnet planner, CIDR split, subnet tree, IP address space, VLSM, AWS VPC subnets, subnet visualization, network planning, IP range splitter">
+  <meta property="og:title" content="Visual Subnet Calculator - Split & Plan IP Ranges | ZeroKit.dev">
+  <meta property="og:description" content="Visually split and plan IP subnets. Interactive subnet tree with color-coded blocks, CIDR splitting, hierarchy view, and CSV export.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .subnet-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      align-items: flex-end;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-wrapper label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .subnet-input-group input[type="text"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .subnet-input-group input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    .subnet-input-group input[type="text"]::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .subnet-input-group select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      min-width: 90px;
+    }
+
+    .subnet-input-group select:focus {
+      border-color: var(--accent);
+    }
+
+    .format-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+      margin-top: -16px;
+      margin-bottom: 20px;
+    }
+
+    /* Scenarios */
+    .scenarios {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .scenario-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .scenario-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* Visual Map */
+    .visual-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .visual-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .visual-section-body {
+      padding: 16px;
+    }
+
+    .visual-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .visual-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* Address Space Map */
+    .address-map {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      margin-bottom: 16px;
+      min-height: 40px;
+    }
+
+    .address-block {
+      height: 38px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0 4px;
+      position: relative;
+      min-width: 24px;
+    }
+
+    .address-block:hover {
+      filter: brightness(1.2);
+      transform: translateY(-1px);
+    }
+
+    .address-block .block-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Subnet Tree */
+    .tree-container {
+      padding: 8px 0;
+    }
+
+    .tree-node {
+      margin-left: 20px;
+      position: relative;
+    }
+
+    .tree-node::before {
+      content: '';
+      position: absolute;
+      left: -14px;
+      top: 0;
+      height: 100%;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .tree-node:last-child::before {
+      height: 16px;
+    }
+
+    .tree-node-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 0.82rem;
+      position: relative;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .tree-node-content::before {
+      content: '';
+      position: absolute;
+      left: -14px;
+      top: 50%;
+      width: 10px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .tree-node-content:hover {
+      background: var(--surface-2);
+    }
+
+    .tree-node-content .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .tree-node-content .node-cidr {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .tree-node-content .node-info {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .tree-node-content .node-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 4px;
+    }
+
+    .node-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .node-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .node-btn.split-btn:hover {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .node-btn.join-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .tree-root > .tree-node-content::before {
+      display: none;
+    }
+
+    .tree-root::before {
+      display: none;
+    }
+
+    /* Name input for subnets */
+    .subnet-name-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--border);
+      color: var(--accent);
+      font-family: var(--font);
+      font-size: 0.75rem;
+      padding: 1px 4px;
+      outline: none;
+      width: 80px;
+      transition: border-color 0.2s;
+    }
+
+    .subnet-name-input:focus {
+      border-color: var(--accent);
+    }
+
+    .subnet-name-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.4;
+    }
+
+    /* Details Table */
+    .subnet-table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+
+    .subnet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .subnet-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .subnet-table td {
+      padding: 9px 14px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      border-bottom: 1px solid rgba(42, 42, 48, 0.5);
+      white-space: nowrap;
+    }
+
+    .subnet-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .subnet-table tr:hover td {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .subnet-table .color-cell {
+      width: 4px;
+      padding: 0;
+    }
+
+    .subnet-table .color-cell div {
+      width: 4px;
+      height: 100%;
+      min-height: 32px;
+    }
+
+    .subnet-table td.name-cell {
+      font-family: var(--font);
+      color: var(--accent);
+    }
+
+    /* Export buttons */
+    .export-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .btn-export {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-export:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* Summary cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .summary-card .summary-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .summary-card .summary-value {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Error */
+    .subnet-error {
+      padding: 16px;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .subnet-error strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Education section */
+    .education-section {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+
+    .education-section h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .education-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .edu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .edu-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .edu-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .edu-card code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    .edu-card ul {
+      margin: 8px 0 0 0;
+      padding-left: 18px;
+    }
+
+    .edu-card li {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 2px;
+    }
+
+    .edu-card li code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface-2);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    /* Legend */
+    .map-legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .map-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .map-legend-item .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 768px) {
+      .subnet-input-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .education-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .subnet-table {
+        font-size: 0.75rem;
+      }
+
+      .subnet-table th, .subnet-table td {
+        padding: 7px 10px;
+      }
+
+      .tree-node {
+        margin-left: 12px;
+      }
+
+      .scenarios {
+        gap: 6px;
+      }
+
+      .scenario-btn {
+        font-size: 0.72rem;
+        padding: 5px 10px;
+      }
+
+      .export-bar {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> DevTools.fm</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Visual Subnet Calculator</h1>
+    <p class="description">Interactively split and visualize IP address ranges. Plan subnets with a visual map, hierarchy tree, and detailed table. Export your subnet plan as CSV or text.</p>
+
+    <div class="subnet-input-group">
+      <div class="input-wrapper" style="flex:2">
+        <label for="cidr-input">CIDR Range</label>
+        <input type="text" id="cidr-input" placeholder="10.0.0.0/16" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="input-wrapper" style="flex:0 0 auto">
+        <label for="prefix-select">Prefix</label>
+        <select id="prefix-select"></select>
+      </div>
+      <button class="btn btn-primary" id="visualize-btn">Visualize</button>
+    </div>
+    <p class="format-hint">Enter a CIDR range to visualize (e.g. 10.0.0.0/16). Click "Split" on any subnet to divide it into two halves.</p>
+
+    <!-- Common Scenarios -->
+    <div class="scenarios">
+      <button class="scenario-btn" data-cidr="10.0.0.0/16" data-split="24">AWS VPC /16 into /24s</button>
+      <button class="scenario-btn" data-cidr="192.168.1.0/24" data-split="">Home Network /24</button>
+      <button class="scenario-btn" data-cidr="172.16.0.0/12" data-split="16">Corporate /12 into /16s</button>
+      <button class="scenario-btn" data-cidr="10.100.0.0/16" data-split="20">Data Center /16 into /20s</button>
+      <button class="scenario-btn" data-cidr="192.168.0.0/22" data-split="24">Office /22 into /24s</button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid" id="summary-grid" style="display:none;">
+      <div class="summary-card">
+        <span class="summary-label">Parent Range</span>
+        <span class="summary-value" id="sum-range">--</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Total IPs</span>
+        <span class="summary-value" id="sum-total">--</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Subnets</span>
+        <span class="summary-value" id="sum-subnets">--</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Allocated</span>
+        <span class="summary-value" id="sum-allocated">--</span>
+      </div>
+    </div>
+
+    <!-- Visual Address Map -->
+    <div class="visual-section" id="map-section">
+      <div class="visual-section-header">
+        <span>Address Space Map</span>
+        <span id="map-cidr" style="font-family:var(--mono);font-size:0.8rem;color:var(--accent);"></span>
+      </div>
+      <div class="visual-section-body" id="map-body">
+        <div class="visual-placeholder">
+          <div class="placeholder-icon">&#127760;</div>
+          Enter a CIDR range above and click Visualize to see the address space.
+        </div>
+      </div>
+    </div>
+
+    <!-- Subnet Tree -->
+    <div class="visual-section" id="tree-section" style="display:none;">
+      <div class="visual-section-header">
+        <span>Subnet Hierarchy</span>
+        <button class="node-btn" id="reset-tree-btn" title="Reset to original range">Reset</button>
+      </div>
+      <div class="visual-section-body" id="tree-body"></div>
+    </div>
+
+    <!-- Subnet Details Table -->
+    <div id="table-section" style="display:none;">
+      <div class="export-bar">
+        <button class="btn-export" id="export-csv-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button class="btn-export" id="export-text-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Export Text
+        </button>
+        <button class="btn-export" id="copy-table-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Table
+        </button>
+      </div>
+      <div class="subnet-table-wrapper">
+        <table class="subnet-table" id="subnet-table">
+          <thead>
+            <tr>
+              <th style="width:4px;padding:0;"></th>
+              <th>Name</th>
+              <th>Subnet</th>
+              <th>CIDR</th>
+              <th>Netmask</th>
+              <th>Host Range</th>
+              <th>Broadcast</th>
+              <th># Hosts</th>
+            </tr>
+          </thead>
+          <tbody id="subnet-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="education-section">
+      <h2>Subnet Planning Guide</h2>
+      <div class="education-grid">
+        <div class="edu-card">
+          <h3>How Visual Subnet Splitting Works</h3>
+          <p>
+            Start with a parent CIDR range (e.g. <code>10.0.0.0/16</code>) and split it into two
+            equal halves by increasing the prefix by 1. A <code>/16</code> becomes two <code>/17</code>s,
+            each <code>/17</code> can be split into two <code>/18</code>s, and so on down to <code>/32</code>.
+            This is the basis of <strong>VLSM</strong> (Variable Length Subnet Masking) -- allocating
+            different-sized subnets as needed.
+          </p>
+        </div>
+        <div class="edu-card">
+          <h3>AWS VPC Subnet Planning</h3>
+          <p>
+            A typical AWS VPC uses <code>10.0.0.0/16</code> (65,536 IPs). Best practices:
+          </p>
+          <ul>
+            <li>Split into <code>/20</code>s or <code>/24</code>s per Availability Zone</li>
+            <li>Separate public subnets (load balancers) from private (app servers, databases)</li>
+            <li>Reserve space for future growth -- don't allocate everything immediately</li>
+            <li>AWS reserves 5 IPs per subnet (first 4 + broadcast)</li>
+          </ul>
+        </div>
+        <div class="edu-card">
+          <h3>Home and Office Networks</h3>
+          <p>
+            Most home networks use <code>192.168.1.0/24</code> (254 usable hosts). For larger setups:
+          </p>
+          <ul>
+            <li>Use <code>/22</code> for ~1000 devices across VLANs</li>
+            <li>Split by purpose: IoT on one subnet, workstations on another</li>
+            <li>A <code>/28</code> (14 hosts) works well for a management VLAN</li>
+            <li>Point-to-point links between routers use <code>/30</code> or <code>/31</code></li>
+          </ul>
+        </div>
+        <div class="edu-card">
+          <h3>CIDR Subnet Size Reference</h3>
+          <p>Quick reference for common subnet sizes:</p>
+          <ul>
+            <li><code>/8</code> -- 16,777,216 IPs (Class A)</li>
+            <li><code>/16</code> -- 65,536 IPs (Class B / VPC)</li>
+            <li><code>/20</code> -- 4,096 IPs (large subnet)</li>
+            <li><code>/24</code> -- 256 IPs (Class C / standard LAN)</li>
+            <li><code>/28</code> -- 16 IPs (small segment)</li>
+            <li><code>/30</code> -- 4 IPs (point-to-point)</li>
+            <li><code>/32</code> -- 1 IP (single host route)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div class="container">DevTools.fm &mdash; Free developer tools.</div></footer>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ============ DOM REFS ============
+      var cidrInput = document.getElementById('cidr-input');
+      var prefixSelect = document.getElementById('prefix-select');
+      var visualizeBtn = document.getElementById('visualize-btn');
+      var summaryGrid = document.getElementById('summary-grid');
+      var mapBody = document.getElementById('map-body');
+      var mapCidr = document.getElementById('map-cidr');
+      var treeSection = document.getElementById('tree-section');
+      var treeBody = document.getElementById('tree-body');
+      var tableSection = document.getElementById('table-section');
+      var subnetTbody = document.getElementById('subnet-tbody');
+      var resetTreeBtn = document.getElementById('reset-tree-btn');
+
+      // ============ STATE ============
+      var rootNode = null; // Tree root
+      var colorIndex = 0;
+      var COLORS = [
+        '#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#ec4899',
+        '#8b5cf6', '#06b6d4', '#f97316', '#14b8a6', '#e11d48',
+        '#a855f7', '#0ea5e9', '#84cc16', '#f43f5e', '#10b981',
+        '#d946ef', '#3b82f6', '#eab308', '#64748b', '#fb923c'
+      ];
+
+      // ============ POPULATE PREFIX DROPDOWN ============
+      for (var i = 0; i <= 32; i++) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = '/' + i;
+        if (i === 16) opt.selected = true;
+        prefixSelect.appendChild(opt);
+      }
+
+      // ============ IP UTILITIES ============
+
+      function parseIp(str) {
+        var parts = str.split('.');
+        if (parts.length !== 4) return null;
+        var result = 0;
+        for (var i = 0; i < 4; i++) {
+          var n = parseInt(parts[i], 10);
+          if (isNaN(n) || n < 0 || n > 255 || parts[i] !== String(n)) return null;
+          result = (result * 256) + n;
+        }
+        return result >>> 0;
+      }
+
+      function ipToString(ip) {
+        return [
+          (ip >>> 24) & 255,
+          (ip >>> 16) & 255,
+          (ip >>> 8) & 255,
+          ip & 255
+        ].join('.');
+      }
+
+      function cidrToMask(prefix) {
+        if (prefix === 0) return 0;
+        return ((0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF) >>> 0;
+      }
+
+      function formatNumber(n) {
+        return n.toLocaleString('en-US');
+      }
+
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      function nextColor() {
+        var c = COLORS[colorIndex % COLORS.length];
+        colorIndex++;
+        return c;
+      }
+
+      // ============ TREE NODE ============
+
+      function createNode(networkIp, prefix, parent, color) {
+        var mask = cidrToMask(prefix);
+        var wildcard = (~mask & 0xFFFFFFFF) >>> 0;
+        var network = (networkIp & mask) >>> 0;
+        var broadcast = (network | wildcard) >>> 0;
+        var totalIps = Math.pow(2, 32 - prefix);
+        var usableHosts;
+        var firstHost, lastHost;
+
+        if (prefix === 32) {
+          firstHost = network;
+          lastHost = network;
+          usableHosts = 1;
+        } else if (prefix === 31) {
+          firstHost = network;
+          lastHost = broadcast;
+          usableHosts = 2;
+        } else {
+          firstHost = (network + 1) >>> 0;
+          lastHost = (broadcast - 1) >>> 0;
+          usableHosts = totalIps - 2;
+        }
+
+        return {
+          network: network,
+          prefix: prefix,
+          mask: mask,
+          broadcast: broadcast,
+          totalIps: totalIps,
+          usableHosts: usableHosts,
+          firstHost: firstHost,
+          lastHost: lastHost,
+          color: color || nextColor(),
+          name: '',
+          children: [],
+          parent: parent || null
+        };
+      }
+
+      function isLeaf(node) {
+        return node.children.length === 0;
+      }
+
+      function getLeaves(node) {
+        if (isLeaf(node)) return [node];
+        var leaves = [];
+        for (var i = 0; i < node.children.length; i++) {
+          leaves = leaves.concat(getLeaves(node.children[i]));
+        }
+        return leaves;
+      }
+
+      function splitNode(node) {
+        if (node.prefix >= 32) return false;
+        var newPrefix = node.prefix + 1;
+        var halfSize = Math.pow(2, 32 - newPrefix);
+        var child1 = createNode(node.network, newPrefix, node, nextColor());
+        var child2 = createNode((node.network + halfSize) >>> 0, newPrefix, node, nextColor());
+        node.children = [child1, child2];
+        return true;
+      }
+
+      function joinNode(node) {
+        node.children = [];
+      }
+
+      function splitToPrefix(node, targetPrefix) {
+        if (node.prefix >= targetPrefix) return;
+        splitNode(node);
+        for (var i = 0; i < node.children.length; i++) {
+          splitToPrefix(node.children[i], targetPrefix);
+        }
+      }
+
+      // ============ EVENT HANDLERS ============
+
+      visualizeBtn.addEventListener('click', visualize);
+
+      cidrInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') visualize();
+      });
+
+      cidrInput.addEventListener('input', function() {
+        var val = cidrInput.value.trim();
+        var slashIdx = val.indexOf('/');
+        if (slashIdx !== -1) {
+          var p = parseInt(val.substring(slashIdx + 1), 10);
+          if (!isNaN(p) && p >= 0 && p <= 32) {
+            prefixSelect.value = p;
+          }
+        }
+      });
+
+      resetTreeBtn.addEventListener('click', function() {
+        if (rootNode) {
+          colorIndex = 0;
+          rootNode.children = [];
+          rootNode.color = nextColor();
+          renderAll();
+        }
+      });
+
+      // Scenario buttons
+      var scenarioBtns = document.querySelectorAll('.scenario-btn');
+      for (var s = 0; s < scenarioBtns.length; s++) {
+        scenarioBtns[s].addEventListener('click', function() {
+          var cidr = this.getAttribute('data-cidr');
+          var splitTarget = this.getAttribute('data-split');
+          cidrInput.value = cidr;
+          var parts = cidr.split('/');
+          prefixSelect.value = parts[1];
+          visualize();
+          if (splitTarget && rootNode) {
+            splitToPrefix(rootNode, parseInt(splitTarget, 10));
+            renderAll();
+          }
+        });
+      }
+
+      // Export buttons
+      document.getElementById('export-csv-btn').addEventListener('click', exportCSV);
+      document.getElementById('export-text-btn').addEventListener('click', exportText);
+      document.getElementById('copy-table-btn').addEventListener('click', copyTable);
+
+      cidrInput.focus();
+
+      // ============ VISUALIZE ============
+
+      function visualize() {
+        var raw = cidrInput.value.trim();
+        if (!raw) {
+          showError('Please enter a CIDR range.');
+          return;
+        }
+
+        var ip, prefix;
+
+        if (raw.indexOf('/') !== -1) {
+          var parts = raw.split('/');
+          ip = parts[0];
+          prefix = parseInt(parts[1], 10);
+          if (isNaN(prefix) || prefix < 0 || prefix > 32) {
+            showError('Invalid CIDR prefix. Must be between 0 and 32.');
+            return;
+          }
+          prefixSelect.value = prefix;
+        } else {
+          ip = raw;
+          prefix = parseInt(prefixSelect.value, 10);
+        }
+
+        var ipNum = parseIp(ip);
+        if (ipNum === null) {
+          showError('Invalid IP address format. Use dotted decimal notation (e.g. 10.0.0.0).');
+          return;
+        }
+
+        // Align to network boundary
+        var mask = cidrToMask(prefix);
+        var networkIp = (ipNum & mask) >>> 0;
+
+        colorIndex = 0;
+        rootNode = createNode(networkIp, prefix, null);
+
+        mapCidr.textContent = ipToString(networkIp) + '/' + prefix;
+        cidrInput.value = ipToString(networkIp) + '/' + prefix;
+
+        summaryGrid.style.display = '';
+        treeSection.style.display = '';
+        tableSection.style.display = '';
+
+        renderAll();
+      }
+
+      // ============ RENDER ALL ============
+
+      function renderAll() {
+        if (!rootNode) return;
+        renderSummary();
+        renderMap();
+        renderTree();
+        renderTable();
+      }
+
+      // ============ RENDER SUMMARY ============
+
+      function renderSummary() {
+        var leaves = getLeaves(rootNode);
+        document.getElementById('sum-range').textContent = ipToString(rootNode.network) + '/' + rootNode.prefix;
+        document.getElementById('sum-total').textContent = formatNumber(rootNode.totalIps);
+        document.getElementById('sum-subnets').textContent = formatNumber(leaves.length);
+
+        var allocatedHosts = 0;
+        for (var i = 0; i < leaves.length; i++) {
+          allocatedHosts += leaves[i].usableHosts;
+        }
+        document.getElementById('sum-allocated').textContent = formatNumber(allocatedHosts) + ' hosts';
+      }
+
+      // ============ RENDER ADDRESS MAP ============
+
+      function renderMap() {
+        var leaves = getLeaves(rootNode);
+        var totalIps = rootNode.totalIps;
+
+        var html = '<div class="address-map">';
+        for (var i = 0; i < leaves.length; i++) {
+          var leaf = leaves[i];
+          var pct = (leaf.totalIps / totalIps) * 100;
+          var minW = Math.max(pct, 1.5); // Minimum visible width
+          var label = ipToString(leaf.network) + '/' + leaf.prefix;
+          var displayLabel = pct > 8 ? label : (pct > 3 ? '/' + leaf.prefix : '');
+
+          html += '<div class="address-block" ' +
+            'style="flex:0 0 calc(' + minW + '% - 2px);background:' + leaf.color + ';" ' +
+            'title="' + escapeHtml(label) + ' (' + formatNumber(leaf.totalIps) + ' IPs)' +
+            (leaf.name ? ' - ' + escapeHtml(leaf.name) : '') + '" ' +
+            'data-leaf-idx="' + i + '">' +
+            '<span class="block-label">' + escapeHtml(displayLabel) + '</span>' +
+            '</div>';
+        }
+        html += '</div>';
+
+        // Legend
+        html += '<div class="map-legend">';
+        for (var j = 0; j < leaves.length && j < 12; j++) {
+          var l = leaves[j];
+          var lbl = l.name || (ipToString(l.network) + '/' + l.prefix);
+          html += '<div class="map-legend-item">' +
+            '<div class="legend-swatch" style="background:' + l.color + ';"></div>' +
+            '<span>' + escapeHtml(lbl) + '</span></div>';
+        }
+        if (leaves.length > 12) {
+          html += '<div class="map-legend-item"><span>... +' + (leaves.length - 12) + ' more</span></div>';
+        }
+        html += '</div>';
+
+        mapBody.innerHTML = html;
+
+        // Click handler for blocks
+        var blocks = mapBody.querySelectorAll('.address-block');
+        for (var b = 0; b < blocks.length; b++) {
+          blocks[b].addEventListener('click', function() {
+            var idx = parseInt(this.getAttribute('data-leaf-idx'), 10);
+            var leaves = getLeaves(rootNode);
+            if (idx >= 0 && idx < leaves.length) {
+              var leaf = leaves[idx];
+              if (splitNode(leaf)) {
+                renderAll();
+                showToast('Split ' + ipToString(leaf.network) + '/' + leaf.prefix + ' into /' + (leaf.prefix + 1) + 's');
+              }
+            }
+          });
+        }
+      }
+
+      // ============ RENDER TREE ============
+
+      function renderTree() {
+        treeBody.innerHTML = '<div class="tree-container">' + renderTreeNode(rootNode, true) + '</div>';
+        attachTreeEvents();
+      }
+
+      function renderTreeNode(node, isRoot) {
+        var cidrStr = ipToString(node.network) + '/' + node.prefix;
+        var leaf = isLeaf(node);
+
+        var html = '<div class="tree-node' + (isRoot ? ' tree-root' : '') + '">';
+        html += '<div class="tree-node-content" data-network="' + node.network + '" data-prefix="' + node.prefix + '">';
+        html += '<span class="color-dot" style="background:' + node.color + ';"></span>';
+        html += '<span class="node-cidr">' + escapeHtml(cidrStr) + '</span>';
+        html += '<span class="node-info">' + formatNumber(node.totalIps) + ' IPs / ' + formatNumber(node.usableHosts) + ' hosts</span>';
+
+        if (leaf) {
+          html += '<input class="subnet-name-input" type="text" placeholder="label..." ' +
+            'data-network="' + node.network + '" data-prefix="' + node.prefix + '" ' +
+            'value="' + escapeHtml(node.name) + '">';
+        }
+
+        html += '<span class="node-actions">';
+        if (leaf && node.prefix < 32) {
+          html += '<button class="node-btn split-btn" data-network="' + node.network + '" data-prefix="' + node.prefix + '">Split</button>';
+        }
+        if (!leaf) {
+          html += '<button class="node-btn join-btn" data-network="' + node.network + '" data-prefix="' + node.prefix + '">Join</button>';
+        }
+        html += '</span>';
+        html += '</div>';
+
+        if (!leaf) {
+          for (var i = 0; i < node.children.length; i++) {
+            html += renderTreeNode(node.children[i], false);
+          }
+        }
+
+        html += '</div>';
+        return html;
+      }
+
+      function attachTreeEvents() {
+        // Split buttons
+        var splitBtns = treeBody.querySelectorAll('.split-btn');
+        for (var i = 0; i < splitBtns.length; i++) {
+          splitBtns[i].addEventListener('click', function(e) {
+            e.stopPropagation();
+            var net = parseInt(this.getAttribute('data-network'), 10) >>> 0;
+            var pfx = parseInt(this.getAttribute('data-prefix'), 10);
+            var node = findNode(rootNode, net, pfx);
+            if (node && splitNode(node)) {
+              renderAll();
+            }
+          });
+        }
+
+        // Join buttons
+        var joinBtns = treeBody.querySelectorAll('.join-btn');
+        for (var i2 = 0; i2 < joinBtns.length; i2++) {
+          joinBtns[i2].addEventListener('click', function(e) {
+            e.stopPropagation();
+            var net = parseInt(this.getAttribute('data-network'), 10) >>> 0;
+            var pfx = parseInt(this.getAttribute('data-prefix'), 10);
+            var node = findNode(rootNode, net, pfx);
+            if (node) {
+              joinNode(node);
+              renderAll();
+            }
+          });
+        }
+
+        // Name inputs
+        var nameInputs = treeBody.querySelectorAll('.subnet-name-input');
+        for (var i3 = 0; i3 < nameInputs.length; i3++) {
+          nameInputs[i3].addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+          nameInputs[i3].addEventListener('input', function() {
+            var net = parseInt(this.getAttribute('data-network'), 10) >>> 0;
+            var pfx = parseInt(this.getAttribute('data-prefix'), 10);
+            var node = findNode(rootNode, net, pfx);
+            if (node) {
+              node.name = this.value;
+              // Re-render map and table but not tree (to keep focus)
+              renderMap();
+              renderTable();
+              renderSummary();
+            }
+          });
+        }
+      }
+
+      function findNode(node, networkIp, prefix) {
+        if (node.network === networkIp && node.prefix === prefix) return node;
+        for (var i = 0; i < node.children.length; i++) {
+          var found = findNode(node.children[i], networkIp, prefix);
+          if (found) return found;
+        }
+        return null;
+      }
+
+      // ============ RENDER TABLE ============
+
+      function renderTable() {
+        var leaves = getLeaves(rootNode);
+        var html = '';
+        for (var i = 0; i < leaves.length; i++) {
+          var l = leaves[i];
+          html += '<tr>';
+          html += '<td class="color-cell"><div style="background:' + l.color + ';"></div></td>';
+          html += '<td class="name-cell">' + escapeHtml(l.name || '--') + '</td>';
+          html += '<td>' + ipToString(l.network) + '</td>';
+          html += '<td>/' + l.prefix + '</td>';
+          html += '<td>' + ipToString(l.mask) + '</td>';
+          html += '<td>' + ipToString(l.firstHost) + ' - ' + ipToString(l.lastHost) + '</td>';
+          html += '<td>' + ipToString(l.broadcast) + '</td>';
+          html += '<td>' + formatNumber(l.usableHosts) + '</td>';
+          html += '</tr>';
+        }
+        subnetTbody.innerHTML = html;
+      }
+
+      // ============ EXPORT ============
+
+      function exportCSV() {
+        if (!rootNode) return;
+        var leaves = getLeaves(rootNode);
+        var lines = ['Name,Subnet,CIDR,Netmask,First Host,Last Host,Broadcast,Usable Hosts'];
+        for (var i = 0; i < leaves.length; i++) {
+          var l = leaves[i];
+          lines.push([
+            '"' + (l.name || '') + '"',
+            ipToString(l.network),
+            '/' + l.prefix,
+            ipToString(l.mask),
+            ipToString(l.firstHost),
+            ipToString(l.lastHost),
+            ipToString(l.broadcast),
+            l.usableHosts
+          ].join(','));
+        }
+        downloadFile('subnet-plan.csv', lines.join('\n'), 'text/csv');
+        showToast('Exported CSV');
+      }
+
+      function exportText() {
+        if (!rootNode) return;
+        var leaves = getLeaves(rootNode);
+        var lines = [];
+        lines.push('Subnet Plan: ' + ipToString(rootNode.network) + '/' + rootNode.prefix);
+        lines.push('Generated: ' + new Date().toISOString());
+        lines.push('Total IPs: ' + formatNumber(rootNode.totalIps));
+        lines.push('Subnets: ' + leaves.length);
+        lines.push('');
+        lines.push(padRight('Name', 20) + padRight('Subnet', 18) + padRight('CIDR', 6) + padRight('Netmask', 18) + padRight('Host Range', 36) + padRight('Broadcast', 18) + 'Hosts');
+        lines.push('-'.repeat(130));
+
+        for (var i = 0; i < leaves.length; i++) {
+          var l = leaves[i];
+          lines.push(
+            padRight(l.name || '--', 20) +
+            padRight(ipToString(l.network), 18) +
+            padRight('/' + l.prefix, 6) +
+            padRight(ipToString(l.mask), 18) +
+            padRight(ipToString(l.firstHost) + ' - ' + ipToString(l.lastHost), 36) +
+            padRight(ipToString(l.broadcast), 18) +
+            formatNumber(l.usableHosts)
+          );
+        }
+        downloadFile('subnet-plan.txt', lines.join('\n'), 'text/plain');
+        showToast('Exported Text');
+      }
+
+      function copyTable() {
+        if (!rootNode) return;
+        var leaves = getLeaves(rootNode);
+        var lines = ['Name\tSubnet\tCIDR\tNetmask\tHost Range\tBroadcast\tUsable Hosts'];
+        for (var i = 0; i < leaves.length; i++) {
+          var l = leaves[i];
+          lines.push([
+            l.name || '--',
+            ipToString(l.network),
+            '/' + l.prefix,
+            ipToString(l.mask),
+            ipToString(l.firstHost) + ' - ' + ipToString(l.lastHost),
+            ipToString(l.broadcast),
+            l.usableHosts
+          ].join('\t'));
+        }
+        var text = lines.join('\n');
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(function() {
+            showToast('Table copied to clipboard');
+          });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('Table copied to clipboard');
+        }
+      }
+
+      function padRight(str, len) {
+        while (str.length < len) str += ' ';
+        return str;
+      }
+
+      function downloadFile(filename, content, mimeType) {
+        var blob = new Blob([content], { type: mimeType });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // ============ UI HELPERS ============
+
+      function showError(msg) {
+        mapCidr.textContent = '';
+        summaryGrid.style.display = 'none';
+        treeSection.style.display = 'none';
+        tableSection.style.display = 'none';
+        mapBody.innerHTML = '<div class="subnet-error"><strong>Error</strong>' + escapeHtml(msg) + '</div>';
+      }
+
+      function showToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+      }
+
+    })();
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

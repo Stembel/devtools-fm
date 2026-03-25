@@ -419,6 +419,17 @@
     });
   }
 
+  // === AADS CRYPTO ADS ===
+  function injectAADS() {
+    var footer = document.querySelector('footer');
+    if (!footer) return;
+
+    var adContainer = document.createElement('div');
+    adContainer.style.cssText = 'max-width:1200px;margin:0 auto;padding:16px 24px;text-align:center;';
+    adContainer.innerHTML = '<div id="frame" style="width:100%;margin:auto;position:relative;z-index:1;"><iframe data-aa="2431745" src="//acceptable.a-ads.com/2431745/?size=Adaptive" style="border:0;padding:0;width:70%;height:auto;overflow:hidden;display:block;margin:auto"></iframe></div>';
+    footer.parentNode.insertBefore(adContainer, footer);
+  }
+
   // === INIT ===
   document.addEventListener('DOMContentLoaded', function() {
     injectFavicon();
@@ -430,5 +441,6 @@
     injectSponsorCTA();
     injectSupportBanner();
     injectAdSense();
+    injectAADS();
   });
 })();
