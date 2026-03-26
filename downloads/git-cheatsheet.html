@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Command Cheatsheet - ZeroKit.dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.35;
+    color: #1a1a2e;
+    background: #fff;
+    padding: 12mm 10mm 10mm 10mm;
+  }
+
+  h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2pt;
+    color: #0f0f23;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
+    margin-bottom: 8pt;
+    font-weight: 400;
+  }
+
+  .columns {
+    column-count: 2;
+    column-gap: 14pt;
+  }
+
+  .section {
+    break-inside: avoid;
+    margin-bottom: 7pt;
+    border: 1px solid #e0e0e0;
+    border-radius: 4pt;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 3pt 6pt;
+    font-weight: 700;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+  }
+
+  .s-setup .section-header    { background: #2563eb; }
+  .s-branch .section-header   { background: #7c3aed; }
+  .s-stage .section-header    { background: #059669; }
+  .s-commit .section-header   { background: #d97706; }
+  .s-remote .section-header   { background: #dc2626; }
+  .s-undo .section-header     { background: #e11d48; }
+  .s-history .section-header  { background: #0891b2; }
+  .s-stash .section-header    { background: #7c3aed; }
+  .s-tag .section-header      { background: #4f46e5; }
+  .s-config .section-header   { background: #475569; }
+
+  .section-body { padding: 4pt 6pt; }
+
+  .cmd-row {
+    display: flex;
+    align-items: baseline;
+    padding: 1pt 0;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .cmd-row:last-child { border-bottom: none; }
+
+  .cmd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7pt;
+    color: #1e40af;
+    white-space: nowrap;
+    min-width: 55%;
+    flex-shrink: 0;
+  }
+
+  .desc {
+    font-size: 7pt;
+    color: #555;
+    padding-left: 4pt;
+  }
+
+  .branding {
+    text-align: center;
+    margin-top: 6pt;
+    font-size: 7pt;
+    color: #999;
+  }
+
+  .branding a { color: #999; text-decoration: none; }
+
+  @media print {
+    body { padding: 8mm 8mm 6mm 8mm; }
+    @page { size: A4; margin: 0; }
+    .section { border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Git Command Cheatsheet</h1>
+<p class="subtitle">The essential commands for everyday Git workflows</p>
+
+<div class="columns">
+
+<!-- SETUP & INIT -->
+<div class="section s-setup">
+  <div class="section-header">Setup &amp; Init</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git init</span><span class="desc">Initialize a new repo</span></div>
+    <div class="cmd-row"><span class="cmd">git clone &lt;url&gt;</span><span class="desc">Clone a remote repo</span></div>
+    <div class="cmd-row"><span class="cmd">git clone --depth 1 &lt;url&gt;</span><span class="desc">Shallow clone (latest only)</span></div>
+    <div class="cmd-row"><span class="cmd">git remote add origin &lt;url&gt;</span><span class="desc">Link to remote</span></div>
+    <div class="cmd-row"><span class="cmd">git remote -v</span><span class="desc">Show remotes</span></div>
+    <div class="cmd-row"><span class="cmd">git remote set-url origin &lt;url&gt;</span><span class="desc">Change remote URL</span></div>
+  </div>
+</div>
+
+<!-- BRANCHING -->
+<div class="section s-branch">
+  <div class="section-header">Branching &amp; Merging</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git branch</span><span class="desc">List local branches</span></div>
+    <div class="cmd-row"><span class="cmd">git branch -a</span><span class="desc">List all branches (incl. remote)</span></div>
+    <div class="cmd-row"><span class="cmd">git branch &lt;name&gt;</span><span class="desc">Create new branch</span></div>
+    <div class="cmd-row"><span class="cmd">git checkout &lt;branch&gt;</span><span class="desc">Switch to branch</span></div>
+    <div class="cmd-row"><span class="cmd">git checkout -b &lt;name&gt;</span><span class="desc">Create &amp; switch to branch</span></div>
+    <div class="cmd-row"><span class="cmd">git switch &lt;branch&gt;</span><span class="desc">Switch branch (modern)</span></div>
+    <div class="cmd-row"><span class="cmd">git switch -c &lt;name&gt;</span><span class="desc">Create &amp; switch (modern)</span></div>
+    <div class="cmd-row"><span class="cmd">git merge &lt;branch&gt;</span><span class="desc">Merge branch into current</span></div>
+    <div class="cmd-row"><span class="cmd">git merge --no-ff &lt;branch&gt;</span><span class="desc">Merge with merge commit</span></div>
+    <div class="cmd-row"><span class="cmd">git rebase &lt;branch&gt;</span><span class="desc">Rebase current onto branch</span></div>
+    <div class="cmd-row"><span class="cmd">git branch -d &lt;name&gt;</span><span class="desc">Delete merged branch</span></div>
+    <div class="cmd-row"><span class="cmd">git branch -D &lt;name&gt;</span><span class="desc">Force delete branch</span></div>
+    <div class="cmd-row"><span class="cmd">git branch -m &lt;old&gt; &lt;new&gt;</span><span class="desc">Rename branch</span></div>
+  </div>
+</div>
+
+<!-- STAGING -->
+<div class="section s-stage">
+  <div class="section-header">Staging &amp; Status</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git status</span><span class="desc">Show working tree status</span></div>
+    <div class="cmd-row"><span class="cmd">git status -s</span><span class="desc">Short status</span></div>
+    <div class="cmd-row"><span class="cmd">git add &lt;file&gt;</span><span class="desc">Stage a file</span></div>
+    <div class="cmd-row"><span class="cmd">git add .</span><span class="desc">Stage all changes</span></div>
+    <div class="cmd-row"><span class="cmd">git add -p</span><span class="desc">Stage interactively (hunks)</span></div>
+    <div class="cmd-row"><span class="cmd">git reset &lt;file&gt;</span><span class="desc">Unstage a file</span></div>
+    <div class="cmd-row"><span class="cmd">git diff</span><span class="desc">Show unstaged changes</span></div>
+    <div class="cmd-row"><span class="cmd">git diff --staged</span><span class="desc">Show staged changes</span></div>
+    <div class="cmd-row"><span class="cmd">git diff &lt;a&gt; &lt;b&gt;</span><span class="desc">Diff between two refs</span></div>
+  </div>
+</div>
+
+<!-- COMMITTING -->
+<div class="section s-commit">
+  <div class="section-header">Committing</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git commit -m "msg"</span><span class="desc">Commit with message</span></div>
+    <div class="cmd-row"><span class="cmd">git commit -am "msg"</span><span class="desc">Stage tracked + commit</span></div>
+    <div class="cmd-row"><span class="cmd">git commit --amend</span><span class="desc">Amend last commit</span></div>
+    <div class="cmd-row"><span class="cmd">git commit --amend --no-edit</span><span class="desc">Amend without changing msg</span></div>
+    <div class="cmd-row"><span class="cmd">git commit --allow-empty -m "msg"</span><span class="desc">Empty commit (CI trigger)</span></div>
+    <div class="cmd-row"><span class="cmd">git cherry-pick &lt;sha&gt;</span><span class="desc">Apply specific commit</span></div>
+  </div>
+</div>
+
+<!-- REMOTE -->
+<div class="section s-remote">
+  <div class="section-header">Remote &amp; Sync</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git fetch</span><span class="desc">Download remote changes</span></div>
+    <div class="cmd-row"><span class="cmd">git fetch --prune</span><span class="desc">Fetch &amp; remove stale refs</span></div>
+    <div class="cmd-row"><span class="cmd">git pull</span><span class="desc">Fetch + merge</span></div>
+    <div class="cmd-row"><span class="cmd">git pull --rebase</span><span class="desc">Fetch + rebase</span></div>
+    <div class="cmd-row"><span class="cmd">git push</span><span class="desc">Push to remote</span></div>
+    <div class="cmd-row"><span class="cmd">git push -u origin &lt;branch&gt;</span><span class="desc">Push &amp; set upstream</span></div>
+    <div class="cmd-row"><span class="cmd">git push --force-with-lease</span><span class="desc">Safe force push</span></div>
+    <div class="cmd-row"><span class="cmd">git push origin --delete &lt;b&gt;</span><span class="desc">Delete remote branch</span></div>
+  </div>
+</div>
+
+<!-- UNDOING -->
+<div class="section s-undo">
+  <div class="section-header">Undoing Changes</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git checkout -- &lt;file&gt;</span><span class="desc">Discard working changes</span></div>
+    <div class="cmd-row"><span class="cmd">git restore &lt;file&gt;</span><span class="desc">Discard changes (modern)</span></div>
+    <div class="cmd-row"><span class="cmd">git restore --staged &lt;file&gt;</span><span class="desc">Unstage (modern)</span></div>
+    <div class="cmd-row"><span class="cmd">git reset --soft HEAD~1</span><span class="desc">Undo commit, keep staged</span></div>
+    <div class="cmd-row"><span class="cmd">git reset --mixed HEAD~1</span><span class="desc">Undo commit, keep working</span></div>
+    <div class="cmd-row"><span class="cmd">git reset --hard HEAD~1</span><span class="desc">Undo commit, discard all</span></div>
+    <div class="cmd-row"><span class="cmd">git revert &lt;sha&gt;</span><span class="desc">Create undo commit</span></div>
+    <div class="cmd-row"><span class="cmd">git clean -fd</span><span class="desc">Remove untracked files/dirs</span></div>
+    <div class="cmd-row"><span class="cmd">git reflog</span><span class="desc">History of HEAD changes</span></div>
+  </div>
+</div>
+
+<!-- VIEWING HISTORY -->
+<div class="section s-history">
+  <div class="section-header">Viewing History</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git log</span><span class="desc">Full commit log</span></div>
+    <div class="cmd-row"><span class="cmd">git log --oneline</span><span class="desc">Compact log</span></div>
+    <div class="cmd-row"><span class="cmd">git log --oneline --graph</span><span class="desc">Log with branch graph</span></div>
+    <div class="cmd-row"><span class="cmd">git log -n 5</span><span class="desc">Last 5 commits</span></div>
+    <div class="cmd-row"><span class="cmd">git log --author="name"</span><span class="desc">Filter by author</span></div>
+    <div class="cmd-row"><span class="cmd">git log --since="2 weeks"</span><span class="desc">Filter by date</span></div>
+    <div class="cmd-row"><span class="cmd">git log -p &lt;file&gt;</span><span class="desc">File change history</span></div>
+    <div class="cmd-row"><span class="cmd">git log --stat</span><span class="desc">Log with file stats</span></div>
+    <div class="cmd-row"><span class="cmd">git show &lt;sha&gt;</span><span class="desc">Show commit details</span></div>
+    <div class="cmd-row"><span class="cmd">git blame &lt;file&gt;</span><span class="desc">Line-by-line authorship</span></div>
+    <div class="cmd-row"><span class="cmd">git shortlog -sn</span><span class="desc">Commit count by author</span></div>
+  </div>
+</div>
+
+<!-- STASHING -->
+<div class="section s-stash">
+  <div class="section-header">Stashing</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git stash</span><span class="desc">Stash working changes</span></div>
+    <div class="cmd-row"><span class="cmd">git stash -u</span><span class="desc">Stash incl. untracked</span></div>
+    <div class="cmd-row"><span class="cmd">git stash save "msg"</span><span class="desc">Stash with description</span></div>
+    <div class="cmd-row"><span class="cmd">git stash list</span><span class="desc">List stashes</span></div>
+    <div class="cmd-row"><span class="cmd">git stash pop</span><span class="desc">Apply &amp; remove latest stash</span></div>
+    <div class="cmd-row"><span class="cmd">git stash apply</span><span class="desc">Apply without removing</span></div>
+    <div class="cmd-row"><span class="cmd">git stash drop</span><span class="desc">Delete latest stash</span></div>
+    <div class="cmd-row"><span class="cmd">git stash clear</span><span class="desc">Delete all stashes</span></div>
+  </div>
+</div>
+
+<!-- TAGS -->
+<div class="section s-tag">
+  <div class="section-header">Tags</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git tag</span><span class="desc">List tags</span></div>
+    <div class="cmd-row"><span class="cmd">git tag v1.0.0</span><span class="desc">Lightweight tag</span></div>
+    <div class="cmd-row"><span class="cmd">git tag -a v1.0.0 -m "msg"</span><span class="desc">Annotated tag</span></div>
+    <div class="cmd-row"><span class="cmd">git push --tags</span><span class="desc">Push all tags</span></div>
+    <div class="cmd-row"><span class="cmd">git tag -d v1.0.0</span><span class="desc">Delete local tag</span></div>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div class="section s-config">
+  <div class="section-header">Configuration</div>
+  <div class="section-body">
+    <div class="cmd-row"><span class="cmd">git config --global user.name "X"</span><span class="desc">Set name</span></div>
+    <div class="cmd-row"><span class="cmd">git config --global user.email "X"</span><span class="desc">Set email</span></div>
+    <div class="cmd-row"><span class="cmd">git config --list</span><span class="desc">Show all config</span></div>
+    <div class="cmd-row"><span class="cmd">git config --global alias.co checkout</span><span class="desc">Create alias</span></div>
+    <div class="cmd-row"><span class="cmd">git config --global core.editor vim</span><span class="desc">Set default editor</span></div>
+    <div class="cmd-row"><span class="cmd">git config --global init.defaultBranch main</span><span class="desc">Default branch name</span></div>
+  </div>
+</div>
+
+</div>
+
+<div class="branding"><a href="https://zerokit.dev">ZeroKit.dev</a> &mdash; Developer Cheatsheet Bundle</div>
+
+</body>
+</html>

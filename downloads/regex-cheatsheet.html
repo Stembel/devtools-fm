@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regular Expressions Cheatsheet - ZeroKit.dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 8pt;
+    line-height: 1.3;
+    color: #1a1a2e;
+    background: #fff;
+    padding: 10mm 10mm 8mm 10mm;
+  }
+
+  h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2pt;
+    color: #0f0f23;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
+    margin-bottom: 6pt;
+  }
+
+  .columns {
+    column-count: 2;
+    column-gap: 12pt;
+  }
+
+  .section {
+    break-inside: avoid;
+    margin-bottom: 6pt;
+    border: 1px solid #e0e0e0;
+    border-radius: 4pt;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 3pt 6pt;
+    font-weight: 700;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+  }
+
+  .s-char .section-header     { background: #2563eb; }
+  .s-quant .section-header    { background: #7c3aed; }
+  .s-anchor .section-header   { background: #059669; }
+  .s-group .section-header    { background: #d97706; }
+  .s-class .section-header    { background: #dc2626; }
+  .s-look .section-header     { background: #0891b2; }
+  .s-flag .section-header     { background: #4f46e5; }
+  .s-escape .section-header   { background: #475569; }
+  .s-common .section-header   { background: #be185d; }
+  .s-replace .section-header  { background: #15803d; }
+
+  .section-body { padding: 4pt 6pt; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7pt;
+  }
+
+  table td {
+    padding: 1.5pt 3pt;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+  }
+
+  table tr:last-child td { border-bottom: none; }
+
+  .pat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7pt;
+    color: #dc2626;
+    white-space: nowrap;
+    font-weight: 500;
+    min-width: 38%;
+  }
+
+  .desc { color: #555; }
+
+  .example {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 6.5pt;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 2pt;
+    padding: 3pt 5pt;
+    margin: 2pt 0;
+    line-height: 1.4;
+  }
+
+  .match {
+    background: #fef08a;
+    border-radius: 1pt;
+    padding: 0 1pt;
+    font-weight: 500;
+  }
+
+  .example-label {
+    font-size: 6.5pt;
+    color: #888;
+    font-weight: 600;
+    margin-top: 3pt;
+    text-transform: uppercase;
+  }
+
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7pt;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 2pt;
+    padding: 3pt 5pt;
+    margin: 2pt 0;
+    white-space: pre-wrap;
+    color: #1e293b;
+    line-height: 1.4;
+  }
+
+  .branding {
+    text-align: center;
+    margin-top: 5pt;
+    font-size: 7pt;
+    color: #999;
+  }
+  .branding a { color: #999; text-decoration: none; }
+
+  @media print {
+    body { padding: 8mm 8mm 5mm 8mm; }
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Regular Expressions Cheatsheet</h1>
+<p class="subtitle">Pattern syntax, common patterns, and quick examples</p>
+
+<div class="columns">
+
+<!-- CHARACTER CLASSES -->
+<div class="section s-char">
+  <div class="section-header">Character Classes</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">.</td><td class="desc">Any character except newline</td></tr>
+      <tr><td class="pat">\d</td><td class="desc">Digit [0-9]</td></tr>
+      <tr><td class="pat">\D</td><td class="desc">Non-digit [^0-9]</td></tr>
+      <tr><td class="pat">\w</td><td class="desc">Word char [a-zA-Z0-9_]</td></tr>
+      <tr><td class="pat">\W</td><td class="desc">Non-word char</td></tr>
+      <tr><td class="pat">\s</td><td class="desc">Whitespace [ \t\n\r\f\v]</td></tr>
+      <tr><td class="pat">\S</td><td class="desc">Non-whitespace</td></tr>
+      <tr><td class="pat">[abc]</td><td class="desc">Any of a, b, or c</td></tr>
+      <tr><td class="pat">[^abc]</td><td class="desc">Not a, b, or c</td></tr>
+      <tr><td class="pat">[a-z]</td><td class="desc">Range: a through z</td></tr>
+      <tr><td class="pat">[a-zA-Z0-9]</td><td class="desc">Alphanumeric</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- QUANTIFIERS -->
+<div class="section s-quant">
+  <div class="section-header">Quantifiers</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">*</td><td class="desc">0 or more (greedy)</td></tr>
+      <tr><td class="pat">+</td><td class="desc">1 or more (greedy)</td></tr>
+      <tr><td class="pat">?</td><td class="desc">0 or 1 (optional)</td></tr>
+      <tr><td class="pat">{3}</td><td class="desc">Exactly 3</td></tr>
+      <tr><td class="pat">{3,}</td><td class="desc">3 or more</td></tr>
+      <tr><td class="pat">{3,5}</td><td class="desc">Between 3 and 5</td></tr>
+      <tr><td class="pat">*?</td><td class="desc">0 or more (lazy)</td></tr>
+      <tr><td class="pat">+?</td><td class="desc">1 or more (lazy)</td></tr>
+      <tr><td class="pat">??</td><td class="desc">0 or 1 (lazy)</td></tr>
+    </table>
+    <div class="example-label">Greedy vs Lazy</div>
+    <div class="example">Input: &lt;b&gt;bold&lt;/b&gt;text&lt;b&gt;more&lt;/b&gt;
+&lt;.+&gt;  matches: <span class="match">&lt;b&gt;bold&lt;/b&gt;text&lt;b&gt;more&lt;/b&gt;</span>
+&lt;.+?&gt; matches: <span class="match">&lt;b&gt;</span>bold<span class="match">&lt;/b&gt;</span>text<span class="match">&lt;b&gt;</span>more<span class="match">&lt;/b&gt;</span></div>
+  </div>
+</div>
+
+<!-- ANCHORS -->
+<div class="section s-anchor">
+  <div class="section-header">Anchors &amp; Boundaries</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">^</td><td class="desc">Start of string (or line with m flag)</td></tr>
+      <tr><td class="pat">$</td><td class="desc">End of string (or line with m flag)</td></tr>
+      <tr><td class="pat">\b</td><td class="desc">Word boundary</td></tr>
+      <tr><td class="pat">\B</td><td class="desc">Non-word boundary</td></tr>
+      <tr><td class="pat">\A</td><td class="desc">Start of string (always)</td></tr>
+      <tr><td class="pat">\Z</td><td class="desc">End of string (always)</td></tr>
+    </table>
+    <div class="example-label">Word boundary example</div>
+    <div class="example">\bcat\b in "concatenate a cat"
+matches: concatenate a <span class="match">cat</span></div>
+  </div>
+</div>
+
+<!-- GROUPS & ALTERNATION -->
+<div class="section s-group">
+  <div class="section-header">Groups &amp; Alternation</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">(abc)</td><td class="desc">Capture group</td></tr>
+      <tr><td class="pat">(?:abc)</td><td class="desc">Non-capturing group</td></tr>
+      <tr><td class="pat">(?&lt;name&gt;abc)</td><td class="desc">Named capture group</td></tr>
+      <tr><td class="pat">\1</td><td class="desc">Backreference to group 1</td></tr>
+      <tr><td class="pat">\k&lt;name&gt;</td><td class="desc">Backreference by name</td></tr>
+      <tr><td class="pat">a|b</td><td class="desc">Alternation: a or b</td></tr>
+      <tr><td class="pat">(a|b)c</td><td class="desc">ac or bc</td></tr>
+    </table>
+    <div class="example-label">Backreference example</div>
+    <div class="example">(\w+)\s+\1 in "the the quick"
+matches: <span class="match">the the</span> quick</div>
+  </div>
+</div>
+
+<!-- LOOKAHEAD / LOOKBEHIND -->
+<div class="section s-look">
+  <div class="section-header">Lookahead &amp; Lookbehind</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">(?=abc)</td><td class="desc">Positive lookahead</td></tr>
+      <tr><td class="pat">(?!abc)</td><td class="desc">Negative lookahead</td></tr>
+      <tr><td class="pat">(?&lt;=abc)</td><td class="desc">Positive lookbehind</td></tr>
+      <tr><td class="pat">(?&lt;!abc)</td><td class="desc">Negative lookbehind</td></tr>
+    </table>
+    <div class="example-label">Examples</div>
+    <div class="example">\d+(?= dollars) in "100 dollars"
+matches: <span class="match">100</span> dollars
+
+(?&lt;=\$)\d+ in "price $50"
+matches: price $<span class="match">50</span>
+
+\b\w+(?!ing\b) in "running fast"
+matches: running <span class="match">fast</span></div>
+  </div>
+</div>
+
+<!-- SPECIAL CHARACTERS -->
+<div class="section s-escape">
+  <div class="section-header">Special / Escaped Characters</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">\n</td><td class="desc">Newline</td></tr>
+      <tr><td class="pat">\t</td><td class="desc">Tab</td></tr>
+      <tr><td class="pat">\r</td><td class="desc">Carriage return</td></tr>
+      <tr><td class="pat">\\</td><td class="desc">Literal backslash</td></tr>
+      <tr><td class="pat">\.</td><td class="desc">Literal dot</td></tr>
+      <tr><td class="pat">\*  \+  \?</td><td class="desc">Literal *, +, ?</td></tr>
+      <tr><td class="pat">\(  \)</td><td class="desc">Literal parentheses</td></tr>
+      <tr><td class="pat">\[  \]</td><td class="desc">Literal brackets</td></tr>
+      <tr><td class="pat">\{  \}</td><td class="desc">Literal braces</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- FLAGS -->
+<div class="section s-flag">
+  <div class="section-header">Flags / Modifiers</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">g</td><td class="desc">Global -- all matches, not just first</td></tr>
+      <tr><td class="pat">i</td><td class="desc">Case-insensitive</td></tr>
+      <tr><td class="pat">m</td><td class="desc">Multiline -- ^ and $ match line boundaries</td></tr>
+      <tr><td class="pat">s</td><td class="desc">Dotall -- . matches newline too</td></tr>
+      <tr><td class="pat">u</td><td class="desc">Unicode support</td></tr>
+      <tr><td class="pat">x</td><td class="desc">Extended -- ignore whitespace, allow comments</td></tr>
+    </table>
+    <div class="example-label">Usage (JavaScript)</div>
+    <div class="example">/pattern/gi
+new RegExp('pattern', 'gi')</div>
+  </div>
+</div>
+
+<!-- POSIX CLASSES -->
+<div class="section s-class">
+  <div class="section-header">POSIX Classes (in [ ])</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">[:alpha:]</td><td class="desc">Letters [a-zA-Z]</td></tr>
+      <tr><td class="pat">[:digit:]</td><td class="desc">Digits [0-9]</td></tr>
+      <tr><td class="pat">[:alnum:]</td><td class="desc">Alphanumeric</td></tr>
+      <tr><td class="pat">[:space:]</td><td class="desc">Whitespace</td></tr>
+      <tr><td class="pat">[:upper:]</td><td class="desc">Uppercase [A-Z]</td></tr>
+      <tr><td class="pat">[:lower:]</td><td class="desc">Lowercase [a-z]</td></tr>
+      <tr><td class="pat">[:punct:]</td><td class="desc">Punctuation</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- REPLACEMENT -->
+<div class="section s-replace">
+  <div class="section-header">Replacement Patterns</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="pat">$0 or $&amp;</td><td class="desc">Entire match</td></tr>
+      <tr><td class="pat">$1, $2 ...</td><td class="desc">Capture group 1, 2 ...</td></tr>
+      <tr><td class="pat">${name}</td><td class="desc">Named group</td></tr>
+      <tr><td class="pat">$`</td><td class="desc">Before match</td></tr>
+      <tr><td class="pat">$'</td><td class="desc">After match</td></tr>
+    </table>
+    <div class="example-label">Example</div>
+    <div class="example">Search:  (\w+), (\w+)
+Replace: $2 $1
+"Doe, John" => "John Doe"</div>
+  </div>
+</div>
+
+<!-- COMMON PATTERNS -->
+<div class="section s-common">
+  <div class="section-header">Common Patterns</div>
+  <div class="section-body">
+<pre style="font-size:6.5pt;line-height:1.45"><b>Email (simplified)</b>
+[\w.+-]+@[\w-]+\.[\w.]+
+
+<b>URL</b>
+https?:\/\/[\w\-._~:/?#\[\]@!$&'()*+,;=%]+
+
+<b>IPv4 Address</b>
+\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b
+
+<b>Phone (US)</b>
+\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}
+
+<b>Date (YYYY-MM-DD)</b>
+\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])
+
+<b>Time (HH:MM, 24h)</b>
+([01]\d|2[0-3]):[0-5]\d
+
+<b>Hex Color</b>
+#([0-9a-fA-F]{3}){1,2}\b
+
+<b>HTML Tag</b>
+&lt;([a-z]+)([^&lt;]*?)(?:&gt;(.*?)&lt;\/\1&gt;|\s*\/&gt;)
+
+<b>Slug (URL-safe)</b>
+^[a-z0-9]+(?:-[a-z0-9]+)*$
+
+<b>Strong Password</b>
+(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}
+
+<b>Username (3-16 chars)</b>
+^[a-zA-Z0-9_-]{3,16}$
+
+<b>Credit Card (basic)</b>
+\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b</pre>
+  </div>
+</div>
+
+</div>
+
+<div class="branding"><a href="https://zerokit.dev">ZeroKit.dev</a> &mdash; Developer Cheatsheet Bundle</div>
+
+</body>
+</html>

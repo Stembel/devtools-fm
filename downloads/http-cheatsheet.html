@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTP Status Codes &amp; Methods Reference - ZeroKit.dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 8pt;
+    line-height: 1.3;
+    color: #1a1a2e;
+    background: #fff;
+    padding: 10mm 10mm 8mm 10mm;
+  }
+
+  h1 {
+    font-size: 15pt;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2pt;
+    color: #0f0f23;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
+    margin-bottom: 6pt;
+  }
+
+  .columns {
+    column-count: 2;
+    column-gap: 12pt;
+  }
+
+  .section {
+    break-inside: avoid;
+    margin-bottom: 6pt;
+    border: 1px solid #e0e0e0;
+    border-radius: 4pt;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 3pt 6pt;
+    font-weight: 700;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+  }
+
+  .s-1xx .section-header { background: #6b7280; }
+  .s-2xx .section-header { background: #059669; }
+  .s-3xx .section-header { background: #2563eb; }
+  .s-4xx .section-header { background: #d97706; }
+  .s-5xx .section-header { background: #dc2626; }
+  .s-methods .section-header { background: #7c3aed; }
+  .s-headers .section-header { background: #0891b2; }
+  .s-reqh .section-header { background: #4f46e5; }
+  .s-resh .section-header { background: #be185d; }
+  .s-cache .section-header { background: #15803d; }
+  .s-cors .section-header { background: #b45309; }
+  .s-mime .section-header { background: #475569; }
+
+  .section-body { padding: 4pt 6pt; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7pt;
+  }
+
+  table td {
+    padding: 1.5pt 3pt;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+  }
+
+  table tr:last-child td { border-bottom: none; }
+
+  .code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7pt;
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 25%;
+  }
+
+  .c-1xx { color: #6b7280; }
+  .c-2xx { color: #059669; }
+  .c-3xx { color: #2563eb; }
+  .c-4xx { color: #d97706; }
+  .c-5xx { color: #dc2626; }
+
+  .desc { color: #555; }
+
+  .star { color: #d97706; font-weight: 700; }
+
+  .method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7pt;
+    font-weight: 600;
+    color: #7c3aed;
+    white-space: nowrap;
+    min-width: 22%;
+  }
+
+  .hdr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 6.5pt;
+    color: #0e7490;
+    white-space: nowrap;
+    min-width: 38%;
+  }
+
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 6.5pt;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 2pt;
+    padding: 3pt 5pt;
+    margin: 2pt 0;
+    white-space: pre-wrap;
+    color: #1e293b;
+    line-height: 1.35;
+  }
+
+  .legend {
+    font-size: 6.5pt;
+    color: #888;
+    margin-top: 2pt;
+  }
+
+  .branding {
+    text-align: center;
+    margin-top: 5pt;
+    font-size: 7pt;
+    color: #999;
+  }
+  .branding a { color: #999; text-decoration: none; }
+
+  @media print {
+    body { padding: 8mm 8mm 5mm 8mm; }
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>HTTP Status Codes &amp; Methods Reference</h1>
+<p class="subtitle">Complete reference for status codes, methods, headers, and CORS &nbsp;<span class="star">&#9733;</span> = most common</p>
+
+<div class="columns">
+
+<!-- 1xx -->
+<div class="section s-1xx">
+  <div class="section-header">1xx -- Informational</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="code c-1xx">100</td><td class="desc">Continue -- server received headers, send body</td></tr>
+      <tr><td class="code c-1xx">101</td><td class="desc">Switching Protocols -- upgrading (e.g. to WebSocket)</td></tr>
+      <tr><td class="code c-1xx">102</td><td class="desc">Processing -- request received, still working (WebDAV)</td></tr>
+      <tr><td class="code c-1xx">103</td><td class="desc">Early Hints -- preload resources before final response</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 2xx -->
+<div class="section s-2xx">
+  <div class="section-header">2xx -- Success</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="code c-2xx">200 <span class="star">&#9733;</span></td><td class="desc">OK -- standard success response</td></tr>
+      <tr><td class="code c-2xx">201 <span class="star">&#9733;</span></td><td class="desc">Created -- resource created (POST success)</td></tr>
+      <tr><td class="code c-2xx">202</td><td class="desc">Accepted -- request accepted, processing async</td></tr>
+      <tr><td class="code c-2xx">203</td><td class="desc">Non-Authoritative Info -- modified by proxy</td></tr>
+      <tr><td class="code c-2xx">204 <span class="star">&#9733;</span></td><td class="desc">No Content -- success, no body (DELETE response)</td></tr>
+      <tr><td class="code c-2xx">205</td><td class="desc">Reset Content -- clear the form</td></tr>
+      <tr><td class="code c-2xx">206</td><td class="desc">Partial Content -- range request (video streaming)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 3xx -->
+<div class="section s-3xx">
+  <div class="section-header">3xx -- Redirection</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="code c-3xx">300</td><td class="desc">Multiple Choices -- multiple options available</td></tr>
+      <tr><td class="code c-3xx">301 <span class="star">&#9733;</span></td><td class="desc">Moved Permanently -- URL changed forever (SEO)</td></tr>
+      <tr><td class="code c-3xx">302 <span class="star">&#9733;</span></td><td class="desc">Found -- temporary redirect (keeps POST as GET)</td></tr>
+      <tr><td class="code c-3xx">303</td><td class="desc">See Other -- redirect with GET after POST</td></tr>
+      <tr><td class="code c-3xx">304 <span class="star">&#9733;</span></td><td class="desc">Not Modified -- use cached version</td></tr>
+      <tr><td class="code c-3xx">307</td><td class="desc">Temporary Redirect -- like 302, preserves method</td></tr>
+      <tr><td class="code c-3xx">308</td><td class="desc">Permanent Redirect -- like 301, preserves method</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 4xx -->
+<div class="section s-4xx">
+  <div class="section-header">4xx -- Client Errors</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="code c-4xx">400 <span class="star">&#9733;</span></td><td class="desc">Bad Request -- malformed syntax / invalid data</td></tr>
+      <tr><td class="code c-4xx">401 <span class="star">&#9733;</span></td><td class="desc">Unauthorized -- auth required (no/bad credentials)</td></tr>
+      <tr><td class="code c-4xx">402</td><td class="desc">Payment Required -- reserved for future use</td></tr>
+      <tr><td class="code c-4xx">403 <span class="star">&#9733;</span></td><td class="desc">Forbidden -- authenticated but not allowed</td></tr>
+      <tr><td class="code c-4xx">404 <span class="star">&#9733;</span></td><td class="desc">Not Found -- resource doesn't exist</td></tr>
+      <tr><td class="code c-4xx">405</td><td class="desc">Method Not Allowed -- wrong HTTP method</td></tr>
+      <tr><td class="code c-4xx">406</td><td class="desc">Not Acceptable -- can't match Accept header</td></tr>
+      <tr><td class="code c-4xx">407</td><td class="desc">Proxy Auth Required</td></tr>
+      <tr><td class="code c-4xx">408</td><td class="desc">Request Timeout -- client too slow</td></tr>
+      <tr><td class="code c-4xx">409 <span class="star">&#9733;</span></td><td class="desc">Conflict -- resource state conflict (e.g. duplicate)</td></tr>
+      <tr><td class="code c-4xx">410</td><td class="desc">Gone -- resource permanently deleted</td></tr>
+      <tr><td class="code c-4xx">411</td><td class="desc">Length Required -- Content-Length missing</td></tr>
+      <tr><td class="code c-4xx">412</td><td class="desc">Precondition Failed -- conditional header failed</td></tr>
+      <tr><td class="code c-4xx">413</td><td class="desc">Payload Too Large -- body exceeds limit</td></tr>
+      <tr><td class="code c-4xx">414</td><td class="desc">URI Too Long</td></tr>
+      <tr><td class="code c-4xx">415</td><td class="desc">Unsupported Media Type -- wrong Content-Type</td></tr>
+      <tr><td class="code c-4xx">416</td><td class="desc">Range Not Satisfiable</td></tr>
+      <tr><td class="code c-4xx">418</td><td class="desc">I'm a Teapot -- (RFC 2324, April Fools)</td></tr>
+      <tr><td class="code c-4xx">422 <span class="star">&#9733;</span></td><td class="desc">Unprocessable Entity -- validation error</td></tr>
+      <tr><td class="code c-4xx">429 <span class="star">&#9733;</span></td><td class="desc">Too Many Requests -- rate limited</td></tr>
+      <tr><td class="code c-4xx">451</td><td class="desc">Unavailable for Legal Reasons</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 5xx -->
+<div class="section s-5xx">
+  <div class="section-header">5xx -- Server Errors</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="code c-5xx">500 <span class="star">&#9733;</span></td><td class="desc">Internal Server Error -- generic server failure</td></tr>
+      <tr><td class="code c-5xx">501</td><td class="desc">Not Implemented -- method not supported</td></tr>
+      <tr><td class="code c-5xx">502 <span class="star">&#9733;</span></td><td class="desc">Bad Gateway -- upstream server sent bad response</td></tr>
+      <tr><td class="code c-5xx">503 <span class="star">&#9733;</span></td><td class="desc">Service Unavailable -- overloaded / maintenance</td></tr>
+      <tr><td class="code c-5xx">504</td><td class="desc">Gateway Timeout -- upstream server timed out</td></tr>
+      <tr><td class="code c-5xx">505</td><td class="desc">HTTP Version Not Supported</td></tr>
+      <tr><td class="code c-5xx">507</td><td class="desc">Insufficient Storage (WebDAV)</td></tr>
+      <tr><td class="code c-5xx">508</td><td class="desc">Loop Detected (WebDAV)</td></tr>
+      <tr><td class="code c-5xx">511</td><td class="desc">Network Authentication Required (captive portal)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- METHODS -->
+<div class="section s-methods">
+  <div class="section-header">HTTP Methods</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="method">GET</td><td class="desc">Retrieve resource. No body. Safe, idempotent, cacheable.</td></tr>
+      <tr><td class="method">POST</td><td class="desc">Create resource / submit data. Has body. Not idempotent.</td></tr>
+      <tr><td class="method">PUT</td><td class="desc">Replace entire resource. Idempotent. Has body.</td></tr>
+      <tr><td class="method">PATCH</td><td class="desc">Partial update. Has body. Not necessarily idempotent.</td></tr>
+      <tr><td class="method">DELETE</td><td class="desc">Remove resource. Idempotent. Usually no body.</td></tr>
+      <tr><td class="method">HEAD</td><td class="desc">Like GET but no response body. Check existence/headers.</td></tr>
+      <tr><td class="method">OPTIONS</td><td class="desc">Describe communication options. Used in CORS preflight.</td></tr>
+      <tr><td class="method">TRACE</td><td class="desc">Echo request back. Debugging. Usually disabled.</td></tr>
+      <tr><td class="method">CONNECT</td><td class="desc">Establish tunnel (HTTPS through proxy).</td></tr>
+    </table>
+    <pre><b>REST API Conventions:</b>
+GET    /users      List all users
+GET    /users/42   Get user 42
+POST   /users      Create new user
+PUT    /users/42   Replace user 42
+PATCH  /users/42   Update user 42 partially
+DELETE /users/42   Delete user 42</pre>
+  </div>
+</div>
+
+<!-- REQUEST HEADERS -->
+<div class="section s-reqh">
+  <div class="section-header">Common Request Headers</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="hdr">Accept</td><td class="desc">Media types client accepts (application/json)</td></tr>
+      <tr><td class="hdr">Authorization</td><td class="desc">Credentials (Bearer &lt;token&gt;, Basic ...)</td></tr>
+      <tr><td class="hdr">Content-Type</td><td class="desc">Body format (application/json, multipart/form-data)</td></tr>
+      <tr><td class="hdr">Content-Length</td><td class="desc">Size of request body in bytes</td></tr>
+      <tr><td class="hdr">Cookie</td><td class="desc">Send stored cookies</td></tr>
+      <tr><td class="hdr">User-Agent</td><td class="desc">Client software identifier</td></tr>
+      <tr><td class="hdr">Accept-Encoding</td><td class="desc">Supported compression (gzip, br, deflate)</td></tr>
+      <tr><td class="hdr">Accept-Language</td><td class="desc">Preferred languages (en-US,en;q=0.9)</td></tr>
+      <tr><td class="hdr">If-None-Match</td><td class="desc">ETag for conditional request (caching)</td></tr>
+      <tr><td class="hdr">If-Modified-Since</td><td class="desc">Date for conditional request (caching)</td></tr>
+      <tr><td class="hdr">Referer</td><td class="desc">URL of referring page</td></tr>
+      <tr><td class="hdr">X-Requested-With</td><td class="desc">XMLHttpRequest (AJAX identifier)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- RESPONSE HEADERS -->
+<div class="section s-resh">
+  <div class="section-header">Common Response Headers</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="hdr">Content-Type</td><td class="desc">Response body format</td></tr>
+      <tr><td class="hdr">Set-Cookie</td><td class="desc">Set a cookie on the client</td></tr>
+      <tr><td class="hdr">Location</td><td class="desc">Redirect URL (with 3xx)</td></tr>
+      <tr><td class="hdr">ETag</td><td class="desc">Resource version identifier (caching)</td></tr>
+      <tr><td class="hdr">Last-Modified</td><td class="desc">When resource was last changed</td></tr>
+      <tr><td class="hdr">WWW-Authenticate</td><td class="desc">Auth method required (with 401)</td></tr>
+      <tr><td class="hdr">Retry-After</td><td class="desc">Seconds to wait (with 429 / 503)</td></tr>
+      <tr><td class="hdr">X-RateLimit-*</td><td class="desc">Rate limit info (Limit, Remaining, Reset)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- CACHE -->
+<div class="section s-cache">
+  <div class="section-header">Cache-Control Directives</div>
+  <div class="section-body">
+    <pre>Cache-Control: public, max-age=31536000
+Cache-Control: private, no-cache
+Cache-Control: no-store
+
+<b>public</b>       Any cache can store
+<b>private</b>      Only browser cache
+<b>no-cache</b>     Must revalidate with server
+<b>no-store</b>     Never cache (sensitive data)
+<b>max-age=N</b>    Fresh for N seconds
+<b>s-maxage=N</b>   CDN/proxy max age
+<b>immutable</b>    Never changes (versioned assets)
+<b>must-revalidate</b>  Stale = must check server</pre>
+  </div>
+</div>
+
+<!-- CORS -->
+<div class="section s-cors">
+  <div class="section-header">CORS Headers</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="hdr">Access-Control-Allow-Origin</td><td class="desc">Allowed origin (* or specific)</td></tr>
+      <tr><td class="hdr">Access-Control-Allow-Methods</td><td class="desc">Allowed HTTP methods</td></tr>
+      <tr><td class="hdr">Access-Control-Allow-Headers</td><td class="desc">Allowed request headers</td></tr>
+      <tr><td class="hdr">Access-Control-Max-Age</td><td class="desc">Preflight cache duration (sec)</td></tr>
+      <tr><td class="hdr">Access-Control-Allow-Credentials</td><td class="desc">Allow cookies cross-origin</td></tr>
+    </table>
+    <pre><b>Preflight flow (OPTIONS):</b>
+1. Browser sends OPTIONS with Origin header
+2. Server responds with Access-Control-* headers
+3. If allowed, browser sends actual request</pre>
+  </div>
+</div>
+
+<!-- CONTENT TYPES -->
+<div class="section s-mime">
+  <div class="section-header">Common Content Types (MIME)</div>
+  <div class="section-body">
+    <table>
+      <tr><td class="hdr">application/json</td><td class="desc">JSON data</td></tr>
+      <tr><td class="hdr">application/xml</td><td class="desc">XML data</td></tr>
+      <tr><td class="hdr">text/html</td><td class="desc">HTML document</td></tr>
+      <tr><td class="hdr">text/plain</td><td class="desc">Plain text</td></tr>
+      <tr><td class="hdr">text/css</td><td class="desc">CSS stylesheet</td></tr>
+      <tr><td class="hdr">application/javascript</td><td class="desc">JavaScript</td></tr>
+      <tr><td class="hdr">multipart/form-data</td><td class="desc">File uploads</td></tr>
+      <tr><td class="hdr">application/x-www-form-urlencoded</td><td class="desc">Form data</td></tr>
+      <tr><td class="hdr">application/octet-stream</td><td class="desc">Binary data</td></tr>
+      <tr><td class="hdr">image/png, image/jpeg</td><td class="desc">Images</td></tr>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<div class="branding"><a href="https://zerokit.dev">ZeroKit.dev</a> &mdash; Developer Cheatsheet Bundle</div>
+
+</body>
+</html>

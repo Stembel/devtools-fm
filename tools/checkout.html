@@ -9,63 +9,304 @@
 <link rel="stylesheet" href="../css/style.css">
 <script src="../js/cookie-consent.js"></script>
 <style>
-  .checkout-box { max-width: 500px; margin: 40px auto; padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
-  .checkout-box h2 { margin: 0 0 8px; font-size: 1.3rem; }
-  .checkout-box .plan-name { color: var(--accent); font-size: 0.9rem; margin-bottom: 20px; }
-  .checkout-box .price { font-size: 2rem; font-weight: 800; color: var(--text); margin: 16px 0; }
-  .checkout-box .price span { font-size: 0.9rem; font-weight: 400; color: var(--text-muted); }
+  /* ─── Layout ─── */
+  .checkout-wrapper { max-width: 960px; margin: 40px auto; display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
+  @media (max-width: 800px) { .checkout-wrapper { grid-template-columns: 1fr; } }
+
+  /* ─── Plan Cards (Price Anchoring: most expensive first) ─── */
+  .plan-cards { display: grid; gap: 14px; margin-bottom: 24px; }
+  .plan-card {
+    position: relative;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .plan-card:hover { border-color: var(--accent); }
+  .plan-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 24px rgba(99,102,241,0.12); }
+  .plan-card input[type="radio"] { display: none; }
+  .plan-card-header { display: flex; justify-content: space-between; align-items: center; }
+  .plan-card-name { font-weight: 700; font-size: 1rem; color: var(--text); }
+  .plan-card-price { font-weight: 800; font-size: 1.15rem; color: var(--text); }
+  .plan-card-price .period { font-weight: 400; font-size: 0.8rem; color: var(--text-muted); }
+  .plan-card-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+  .plan-card-features { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+  .plan-card-features li { font-size: 0.8rem; color: var(--text-muted); }
+  .plan-card-features li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+
+  /* ─── Best Value Badge ─── */
+  .badge-best { position: absolute; top: -11px; right: 16px; background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* ─── Anchoring: original price ─── */
+  .plan-card-price .was { font-size: 0.85rem; font-weight: 400; color: var(--text-muted); text-decoration: line-through; margin-right: 6px; }
+  .plan-card-price .savings { display: inline-block; font-size: 0.7rem; font-weight: 600; color: var(--success); background: rgba(34,197,94,0.12); padding: 2px 7px; border-radius: 4px; margin-left: 6px; }
+
+  /* ─── Launch Banner (Urgency) ─── */
+  .launch-banner {
+    background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(34,197,94,0.08) 100%);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+  .launch-banner strong { color: var(--accent); }
+
+  /* ─── Order Form ─── */
+  .checkout-box { padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  .checkout-box h2 { margin: 0 0 4px; font-size: 1.3rem; }
+  .checkout-box .section-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
   .form-group { margin-bottom: 16px; }
   .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
-  .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 0.95rem; font-family: var(--font); }
-  .form-group input:focus, .form-group select:focus { border-color: var(--accent); outline: none; }
-  .checkout-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-size: 1rem; font-weight: 700; cursor: pointer; font-family: var(--font); margin-top: 8px; }
-  .checkout-btn:hover { opacity: 0.9; }
-  .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .payment-info { margin-top: 20px; padding: 16px; background: var(--bg); border-radius: var(--radius); font-size: 0.85rem; color: var(--text-muted); }
+  .form-group input { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 0.95rem; font-family: var(--font); }
+  .form-group input:focus { border-color: var(--accent); outline: none; }
+
+  /* ─── CTA Button ─── */
+  .checkout-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font);
+    margin-top: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.2px;
+  }
+  .checkout-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .checkout-btn:active { transform: translateY(0); }
+  .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ─── Reassurance below button ─── */
+  .btn-reassurance { text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; }
+
+  /* ─── Trust Signals ─── */
+  .trust-row { display: flex; justify-content: center; gap: 20px; margin-top: 18px; flex-wrap: wrap; }
+  .trust-item { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--text-muted); }
+  .trust-item svg { width: 14px; height: 14px; fill: var(--text-muted); flex-shrink: 0; }
+
+  /* ─── Sidebar ─── */
+  .checkout-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ─── Social Proof ─── */
+  .social-proof-box {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .social-proof-box h4 { font-size: 0.9rem; color: var(--text); margin-bottom: 12px; }
+  .social-stat { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .social-stat .num { font-size: 1.4rem; font-weight: 800; color: var(--accent); min-width: 55px; }
+  .social-stat .label { font-size: 0.82rem; color: var(--text-muted); }
+
+  /* ─── Guarantee Box (Risk Reversal) ─── */
+  .guarantee-box {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+  }
+  .guarantee-box .shield { font-size: 1.8rem; margin-bottom: 8px; }
+  .guarantee-box h4 { font-size: 0.95rem; color: var(--text); margin-bottom: 6px; }
+  .guarantee-box p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* ─── Loss Aversion ─── */
+  .loss-box {
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 100%);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+  }
+  .loss-box h4 { font-size: 0.88rem; color: var(--error); margin-bottom: 6px; }
+  .loss-box p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* ─── Comparison Anchor ─── */
+  .compare-note { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 14px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  .compare-note strong { color: var(--text); }
+
+  /* ─── Success ─── */
   .success-box { text-align: center; padding: 40px 20px; }
   .success-box h2 { color: #10b981; margin-bottom: 12px; }
   .success-box .order-id { font-family: var(--mono); background: var(--bg); padding: 8px 16px; border-radius: var(--radius); display: inline-block; margin: 12px 0; }
-  .features { list-style: none; padding: 0; margin: 16px 0; }
-  .features li { padding: 6px 0; font-size: 0.9rem; color: var(--text-muted); }
-  .features li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+
+  /* ─── Selected plan summary in form ─── */
+  .selected-summary { display: none; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; }
+  .selected-summary.visible { display: block; }
+  .selected-summary .sum-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+  .selected-summary .sum-price { font-size: 1.6rem; font-weight: 800; color: var(--text); margin: 4px 0; }
+  .selected-summary .sum-price .period { font-size: 0.85rem; font-weight: 400; color: var(--text-muted); }
 </style>
 </head>
 <body>
 <header><div class="container"><a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a><nav><a href="../">Tools</a><a href="../blog/">Blog</a><a href="../pricing.html">Pricing</a></nav></div></header>
 
 <main class="container">
-  <div class="checkout-box" id="checkout-form">
-    <h2>Complete Your Order</h2>
-    <div class="plan-name" id="plan-label">Select a plan</div>
 
-    <div class="form-group">
-      <label>Plan</label>
-      <select id="plan" onchange="updatePlan()">
-        <option value="">Choose a plan...</option>
-        <option value="audit">Website Audit Report — $19 (one-time)</option>
-        <option value="starter">API Starter — $9/month</option>
-        <option value="pro">API Pro — $29/month</option>
-        <option value="uptimepulse">UptimePulse Pro — $5/month</option>
-      </select>
+  <!-- ─── Main Checkout (form + sidebar) ─── -->
+  <div class="checkout-wrapper" id="checkout-form">
+    <div>
+      <h2 style="margin-bottom: 4px; font-size: 1.5rem;">Choose Your Plan</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Pick the plan that fits your workflow. Upgrade or cancel anytime.</p>
+
+      <!-- Urgency: Launch Pricing Banner -->
+      <div class="launch-banner">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span><strong>Launch pricing</strong> — introductory rates for early adopters. Lock in your price today.</span>
+      </div>
+
+      <!-- Plan Cards (Price Anchoring: Pro first = most expensive) -->
+      <div class="plan-cards">
+
+        <label class="plan-card" id="card-pro" onclick="selectPlan('pro')">
+          <input type="radio" name="plan" value="pro">
+          <span class="badge-best">Best Value</span>
+          <div class="plan-card-header">
+            <span class="plan-card-name">API Pro</span>
+            <span class="plan-card-price">$29 <span class="period">/month</span></span>
+          </div>
+          <div class="plan-card-desc">For teams and production apps that need high throughput.</div>
+          <ul class="plan-card-features">
+            <li>10,000 API requests/day</li>
+            <li>All 9 endpoints + bulk</li>
+            <li>Personal API key</li>
+            <li>Priority support</li>
+          </ul>
+        </label>
+
+        <label class="plan-card" id="card-audit" onclick="selectPlan('audit')">
+          <input type="radio" name="plan" value="audit">
+          <div class="plan-card-header">
+            <span class="plan-card-name">Website Audit Report</span>
+            <span class="plan-card-price"><span class="was">$29</span>$19 <span class="period">one-time</span> <span class="savings">Save 34%</span></span>
+          </div>
+          <div class="plan-card-desc">Comprehensive analysis of your website's performance, security, and SEO.</div>
+          <ul class="plan-card-features">
+            <li>Full website audit report</li>
+            <li>Performance &amp; security analysis</li>
+            <li>Actionable recommendations</li>
+            <li>Printable PDF format</li>
+          </ul>
+        </label>
+
+        <label class="plan-card" id="card-starter" onclick="selectPlan('starter')">
+          <input type="radio" name="plan" value="starter">
+          <div class="plan-card-header">
+            <span class="plan-card-name">API Starter</span>
+            <span class="plan-card-price">$9 <span class="period">/month</span></span>
+          </div>
+          <div class="plan-card-desc">Perfect for personal projects and small integrations.</div>
+          <ul class="plan-card-features">
+            <li>1,000 API requests/day</li>
+            <li>All 9 endpoints</li>
+            <li>Personal API key</li>
+            <li>Email support</li>
+          </ul>
+        </label>
+
+        <label class="plan-card" id="card-uptimepulse" onclick="selectPlan('uptimepulse')">
+          <input type="radio" name="plan" value="uptimepulse">
+          <div class="plan-card-header">
+            <span class="plan-card-name">UptimePulse Pro</span>
+            <span class="plan-card-price">$5 <span class="period">/month</span></span>
+          </div>
+          <div class="plan-card-desc">Real-time uptime monitoring with instant alerts.</div>
+          <ul class="plan-card-features">
+            <li>Unlimited monitors</li>
+            <li>1-minute check intervals</li>
+            <li>Email alerts</li>
+            <li>Custom status pages</li>
+          </ul>
+        </label>
+
+      </div>
+
+      <!-- Competitor Price Anchor -->
+      <div class="compare-note">
+        Comparable audit services charge <strong>$200+</strong> per report. ZeroKit gives you the same depth at a fraction of the cost.
+      </div>
     </div>
 
-    <div class="price" id="price-display">$—</div>
+    <!-- ─── Sidebar ─── -->
+    <div class="checkout-sidebar">
 
-    <ul class="features" id="features-list"></ul>
+      <!-- Order Form -->
+      <div class="checkout-box">
+        <h2>Complete Your Order</h2>
+        <p class="section-sub">Just your email — we handle the rest.</p>
 
-    <div class="form-group">
-      <label>Email address</label>
-      <input type="email" id="email" placeholder="you@example.com" required>
-    </div>
+        <div class="selected-summary" id="selected-summary">
+          <div class="sum-name" id="sum-name">—</div>
+          <div class="sum-price" id="sum-price">—</div>
+        </div>
 
-    <button class="checkout-btn" id="submit-btn" onclick="submitOrder()" disabled>Place Order</button>
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+        </div>
 
-    <div class="payment-info">
-      You will be redirected to a secure Stripe checkout. Your API key will be activated instantly after payment.
+        <button class="checkout-btn" id="submit-btn" onclick="submitOrder()" disabled>Select a plan to continue</button>
+
+        <div class="btn-reassurance">You will be redirected to Stripe's secure checkout. No card details are stored on our servers.</div>
+
+        <!-- Trust Signals -->
+        <div class="trust-row">
+          <div class="trust-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>
+            Secure via Stripe
+          </div>
+          <div class="trust-item">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+            Instant delivery
+          </div>
+          <div class="trust-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l5.59-5.59L18 10l-7 7z"/></svg>
+            30-day guarantee
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Proof -->
+      <div class="social-proof-box">
+        <h4>Trusted by Developers</h4>
+        <div class="social-stat">
+          <span class="num">500+</span>
+          <span class="label">developers use ZeroKit tools every month</span>
+        </div>
+        <div class="social-stat">
+          <span class="num">80+</span>
+          <span class="label">free tools available — no signup required</span>
+        </div>
+      </div>
+
+      <!-- Risk Reversal / Guarantee -->
+      <div class="guarantee-box">
+        <div class="shield">&#128737;</div>
+        <h4>30-Day Money-Back Guarantee</h4>
+        <p>Not satisfied? Get a full refund, no questions asked. We stand behind every report and API plan we deliver.</p>
+      </div>
+
+      <!-- Loss Aversion -->
+      <div class="loss-box">
+        <h4>What poor scores really cost you</h4>
+        <p>Slow load times, weak security headers, and SEO issues silently drive visitors away. A single audit pays for itself by revealing the fixes that matter most.</p>
+      </div>
     </div>
   </div>
 
-  <div class="checkout-box success-box" id="success-box" style="display:none;">
+  <!-- ─── Success State ─── -->
+  <div class="checkout-box success-box" id="success-box" style="display:none; max-width: 500px; margin: 40px auto;">
     <h2>Order Placed!</h2>
     <p>Your order has been received.</p>
     <div class="order-id" id="order-id-display"></div>
@@ -80,27 +321,41 @@
 <script src="../js/monetization.js"></script>
 <script>
 const plans = {
-  audit: { price: "$19", period: "one-time", features: ["Full website audit report", "Performance, security, SSL, SEO analysis", "Actionable recommendations", "Printable PDF format"] },
-  starter: { price: "$9", period: "/month", features: ["1,000 API requests/day", "All 9 endpoints", "Personal API key", "Email support"] },
-  pro: { price: "$29", period: "/month", features: ["10,000 API requests/day", "All 9 endpoints + bulk", "Personal API key", "Priority support"] },
-  uptimepulse: { price: "$5", period: "/month", features: ["Unlimited monitors", "1-minute check intervals", "Email alerts", "Custom status pages"] }
+  audit: { price: "$19", period: "one-time", label: "Website Audit Report", features: ["Full website audit report", "Performance, security, SSL, SEO analysis", "Actionable recommendations", "Printable PDF format"] },
+  starter: { price: "$9", period: "/month", label: "API Starter", features: ["1,000 API requests/day", "All 9 endpoints", "Personal API key", "Email support"] },
+  pro: { price: "$29", period: "/month", label: "API Pro", features: ["10,000 API requests/day", "All 9 endpoints + bulk", "Personal API key", "Priority support"] },
+  uptimepulse: { price: "$5", period: "/month", label: "UptimePulse Pro", features: ["Unlimited monitors", "1-minute check intervals", "Email alerts", "Custom status pages"] }
 };
 
-function updatePlan() {
-  const plan = document.getElementById("plan").value;
+let currentPlan = null;
+
+function selectPlan(planKey) {
+  currentPlan = planKey;
+  const p = plans[planKey];
   const btn = document.getElementById("submit-btn");
-  if (!plan) { btn.disabled = true; return; }
-  const p = plans[plan];
-  document.getElementById("price-display").innerHTML = p.price + " <span>" + p.period + "</span>";
-  document.getElementById("plan-label").textContent = plan.charAt(0).toUpperCase() + plan.slice(1) + " Plan";
-  document.getElementById("features-list").innerHTML = p.features.map(f => "<li>" + f + "</li>").join("");
+
+  // Update card selection
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-' + planKey).classList.add('selected');
+
+  // Update summary
+  const summary = document.getElementById('selected-summary');
+  summary.classList.add('visible');
+  document.getElementById('sum-name').textContent = p.label;
+  document.getElementById('sum-price').innerHTML = p.price + ' <span class="period">' + p.period + '</span>';
+
+  // Enable button
   btn.disabled = false;
+  btn.textContent = "Continue to Secure Checkout";
 }
 
 function submitOrder() {
   const email = document.getElementById("email").value.trim();
-  const plan = document.getElementById("plan").value;
-  if (!email || !plan) return;
+  const plan = currentPlan;
+  if (!email || !plan) {
+    if (!email) document.getElementById("email").focus();
+    return;
+  }
 
   const btn = document.getElementById("submit-btn");
   btn.disabled = true;
@@ -113,18 +368,18 @@ function submitOrder() {
   })
   .then(r => r.json())
   .then(d => {
-    if (d.error) { alert(d.error); btn.disabled = false; btn.textContent = "Place Order"; return; }
+    if (d.error) { alert(d.error); btn.disabled = false; btn.textContent = "Continue to Secure Checkout"; return; }
     if (d.checkout_url) { window.location.href = d.checkout_url; }
     else { document.getElementById("checkout-form").style.display = "none";
     document.getElementById("success-box").style.display = "block";
     document.getElementById("order-id-display").textContent = d.error || "Processing..."; }
   })
-  .catch(e => { alert("Error: " + e.message); btn.disabled = false; btn.textContent = "Place Order"; });
+  .catch(e => { alert("Error: " + e.message); btn.disabled = false; btn.textContent = "Continue to Secure Checkout"; });
 }
 
 // Auto-select plan from URL param
 const urlPlan = new URLSearchParams(location.search).get("plan");
-if (urlPlan && plans[urlPlan]) { document.getElementById("plan").value = urlPlan; updatePlan(); }
+if (urlPlan && plans[urlPlan]) { selectPlan(urlPlan); }
 </script>
 </body>
 </html>

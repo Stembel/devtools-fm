@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Quick Reference - ZeroKit.dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 8pt;
+    line-height: 1.3;
+    color: #1a1a2e;
+    background: #fff;
+    padding: 10mm 10mm 8mm 10mm;
+  }
+
+  h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2pt;
+    color: #0f0f23;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
+    margin-bottom: 6pt;
+  }
+
+  .columns {
+    column-count: 2;
+    column-gap: 12pt;
+  }
+
+  .section {
+    break-inside: avoid;
+    margin-bottom: 6pt;
+    border: 1px solid #e0e0e0;
+    border-radius: 4pt;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 3pt 6pt;
+    font-weight: 700;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+  }
+
+  .s-select .section-header   { background: #2563eb; }
+  .s-filter .section-header   { background: #0891b2; }
+  .s-insert .section-header   { background: #059669; }
+  .s-update .section-header   { background: #d97706; }
+  .s-delete .section-header   { background: #dc2626; }
+  .s-join .section-header     { background: #7c3aed; }
+  .s-agg .section-header      { background: #4f46e5; }
+  .s-sub .section-header      { background: #0e7490; }
+  .s-window .section-header   { background: #b45309; }
+  .s-cte .section-header      { background: #7e22ce; }
+  .s-ddl .section-header      { background: #475569; }
+  .s-diff .section-header     { background: #be185d; }
+  .s-idx .section-header      { background: #15803d; }
+
+  .section-body { padding: 4pt 6pt; }
+
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7pt;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 2pt;
+    padding: 3pt 5pt;
+    margin: 2pt 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #1e293b;
+    line-height: 1.35;
+  }
+
+  .kw { color: #2563eb; font-weight: 600; }
+  .fn { color: #7c3aed; }
+  .cm { color: #6b7280; font-style: italic; }
+  .st { color: #059669; }
+
+  .note {
+    font-size: 6.5pt;
+    color: #777;
+    margin-top: 1pt;
+    padding-left: 2pt;
+  }
+
+  .label {
+    font-weight: 600;
+    font-size: 7pt;
+    color: #374151;
+    margin: 3pt 0 1pt 0;
+  }
+
+  .branding {
+    text-align: center;
+    margin-top: 5pt;
+    font-size: 7pt;
+    color: #999;
+  }
+  .branding a { color: #999; text-decoration: none; }
+
+  @media print {
+    body { padding: 8mm 8mm 5mm 8mm; }
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>SQL Quick Reference</h1>
+<p class="subtitle">Essential SQL syntax with MySQL / PostgreSQL differences noted</p>
+
+<div class="columns">
+
+<!-- SELECT -->
+<div class="section s-select">
+  <div class="section-header">Select Queries</div>
+  <div class="section-body">
+    <pre><span class="kw">SELECT</span> col1, col2 <span class="kw">FROM</span> table_name;
+<span class="kw">SELECT DISTINCT</span> col <span class="kw">FROM</span> table_name;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> age &gt; 18;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">ORDER BY</span> name <span class="kw">ASC</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">LIMIT</span> 10 <span class="kw">OFFSET</span> 20;
+<span class="kw">SELECT</span> col <span class="kw">AS</span> alias_name <span class="kw">FROM</span> t;</pre>
+  </div>
+</div>
+
+<!-- FILTERING -->
+<div class="section s-filter">
+  <div class="section-header">Filtering &amp; Conditions</div>
+  <div class="section-body">
+    <pre><span class="kw">WHERE</span> col = <span class="st">'value'</span>
+<span class="kw">WHERE</span> col <span class="kw">IN</span> (<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>)
+<span class="kw">WHERE</span> col <span class="kw">BETWEEN</span> 10 <span class="kw">AND</span> 50
+<span class="kw">WHERE</span> col <span class="kw">LIKE</span> <span class="st">'%pattern%'</span>
+<span class="kw">WHERE</span> col <span class="kw">IS NULL</span> / <span class="kw">IS NOT NULL</span>
+<span class="kw">WHERE</span> a = 1 <span class="kw">AND</span> (b = 2 <span class="kw">OR</span> c = 3)
+<span class="kw">WHERE</span> col <span class="kw">REGEXP</span> <span class="st">'^[A-Z]'</span>  <span class="cm">-- MySQL</span>
+<span class="kw">WHERE</span> col ~ <span class="st">'^[A-Z]'</span>       <span class="cm">-- PostgreSQL</span></pre>
+  </div>
+</div>
+
+<!-- INSERT -->
+<div class="section s-insert">
+  <div class="section-header">Insert</div>
+  <div class="section-body">
+    <pre><span class="kw">INSERT INTO</span> users (name, email)
+<span class="kw">VALUES</span> (<span class="st">'Alice'</span>, <span class="st">'a@b.com'</span>);
+
+<span class="cm">-- Multiple rows</span>
+<span class="kw">INSERT INTO</span> users (name, email) <span class="kw">VALUES</span>
+  (<span class="st">'Alice'</span>, <span class="st">'a@b.com'</span>),
+  (<span class="st">'Bob'</span>, <span class="st">'b@b.com'</span>);
+
+<span class="cm">-- Insert from select</span>
+<span class="kw">INSERT INTO</span> archive <span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> created &lt; <span class="st">'2024-01-01'</span>;
+
+<span class="cm">-- Upsert (PostgreSQL)</span>
+<span class="kw">INSERT INTO</span> t (id, val) <span class="kw">VALUES</span> (1, <span class="st">'x'</span>)
+<span class="kw">ON CONFLICT</span> (id) <span class="kw">DO UPDATE SET</span> val = <span class="st">'x'</span>;
+
+<span class="cm">-- Upsert (MySQL)</span>
+<span class="kw">INSERT INTO</span> t (id, val) <span class="kw">VALUES</span> (1, <span class="st">'x'</span>)
+<span class="kw">ON DUPLICATE KEY UPDATE</span> val = <span class="st">'x'</span>;</pre>
+  </div>
+</div>
+
+<!-- UPDATE -->
+<div class="section s-update">
+  <div class="section-header">Update</div>
+  <div class="section-body">
+    <pre><span class="kw">UPDATE</span> users <span class="kw">SET</span> email = <span class="st">'new@b.com'</span>
+<span class="kw">WHERE</span> id = 1;
+
+<span class="kw">UPDATE</span> users <span class="kw">SET</span>
+  name = <span class="st">'Alice'</span>,
+  age = age + 1
+<span class="kw">WHERE</span> active = <span class="kw">TRUE</span>;</pre>
+  </div>
+</div>
+
+<!-- DELETE -->
+<div class="section s-delete">
+  <div class="section-header">Delete</div>
+  <div class="section-body">
+    <pre><span class="kw">DELETE FROM</span> users <span class="kw">WHERE</span> id = 1;
+<span class="kw">DELETE FROM</span> users <span class="kw">WHERE</span> active = <span class="kw">FALSE</span>;
+<span class="kw">TRUNCATE TABLE</span> users;  <span class="cm">-- fast, no WHERE</span></pre>
+  </div>
+</div>
+
+<!-- JOINS -->
+<div class="section s-join">
+  <div class="section-header">Joins</div>
+  <div class="section-body">
+    <pre><span class="cm">-- INNER JOIN (matching rows only)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders o
+<span class="kw">INNER JOIN</span> users u <span class="kw">ON</span> o.user_id = u.id;
+
+<span class="cm">-- LEFT JOIN (all left + matching right)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users u
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id;
+
+<span class="cm">-- RIGHT JOIN (all right + matching left)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders o
+<span class="kw">RIGHT JOIN</span> users u <span class="kw">ON</span> o.user_id = u.id;
+
+<span class="cm">-- FULL OUTER JOIN (all from both)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> a
+<span class="kw">FULL OUTER JOIN</span> b <span class="kw">ON</span> a.id = b.a_id;
+
+<span class="cm">-- CROSS JOIN (cartesian product)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> colors <span class="kw">CROSS JOIN</span> sizes;
+
+<span class="cm">-- Self join</span>
+<span class="kw">SELECT</span> e.name, m.name <span class="kw">AS</span> manager
+<span class="kw">FROM</span> employees e
+<span class="kw">JOIN</span> employees m <span class="kw">ON</span> e.mgr_id = m.id;</pre>
+  </div>
+</div>
+
+<!-- AGGREGATION -->
+<div class="section s-agg">
+  <div class="section-header">Aggregations</div>
+  <div class="section-body">
+    <pre><span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> users;
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> country) <span class="kw">FROM</span> users;
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(amount), <span class="fn">AVG</span>(amount),
+       <span class="fn">MIN</span>(amount), <span class="fn">MAX</span>(amount)
+<span class="kw">FROM</span> orders;
+
+<span class="kw">SELECT</span> country, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt
+<span class="kw">FROM</span> users
+<span class="kw">GROUP BY</span> country
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; 5
+<span class="kw">ORDER BY</span> cnt <span class="kw">DESC</span>;</pre>
+  </div>
+</div>
+
+<!-- SUBQUERIES -->
+<div class="section s-sub">
+  <div class="section-header">Subqueries</div>
+  <div class="section-body">
+    <pre><span class="cm">-- Scalar subquery</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> age &gt; (<span class="kw">SELECT</span> <span class="fn">AVG</span>(age) <span class="kw">FROM</span> users);
+
+<span class="cm">-- IN subquery</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (
+  <span class="kw">SELECT</span> user_id <span class="kw">FROM</span> orders
+  <span class="kw">WHERE</span> amount &gt; 100
+);
+
+<span class="cm">-- EXISTS</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users u
+<span class="kw">WHERE EXISTS</span> (
+  <span class="kw">SELECT</span> 1 <span class="kw">FROM</span> orders o
+  <span class="kw">WHERE</span> o.user_id = u.id
+);
+
+<span class="cm">-- Derived table</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> dept, <span class="fn">AVG</span>(sal) <span class="kw">AS</span> avg_sal
+  <span class="kw">FROM</span> employees <span class="kw">GROUP BY</span> dept
+) <span class="kw">AS</span> t <span class="kw">WHERE</span> avg_sal &gt; 50000;</pre>
+  </div>
+</div>
+
+<!-- WINDOW FUNCTIONS -->
+<div class="section s-window">
+  <div class="section-header">Window Functions</div>
+  <div class="section-body">
+    <pre><span class="kw">SELECT</span> name, dept, salary,
+  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> dept <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>
+  ) <span class="kw">AS</span> rn
+<span class="kw">FROM</span> employees;
+
+<span class="cm">-- Ranking</span>
+<span class="fn">RANK</span>() <span class="kw">OVER</span> (...)       <span class="cm">-- gaps on ties</span>
+<span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (...) <span class="cm">-- no gaps</span>
+<span class="fn">NTILE</span>(4) <span class="kw">OVER</span> (...)     <span class="cm">-- quartiles</span>
+
+<span class="cm">-- Aggregates as windows</span>
+<span class="fn">SUM</span>(amount) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> date) <span class="cm">-- running total</span>
+<span class="fn">AVG</span>(amount) <span class="kw">OVER</span> (
+  <span class="kw">ORDER BY</span> date <span class="kw">ROWS BETWEEN</span>
+  2 <span class="kw">PRECEDING AND CURRENT ROW</span>
+) <span class="cm">-- 3-row moving average</span>
+
+<span class="cm">-- Offset functions</span>
+<span class="fn">LAG</span>(col, 1) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> date)
+<span class="fn">LEAD</span>(col, 1) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> date)
+<span class="fn">FIRST_VALUE</span>(col) <span class="kw">OVER</span> (...)</pre>
+  </div>
+</div>
+
+<!-- CTEs -->
+<div class="section s-cte">
+  <div class="section-header">Common Table Expressions (CTEs)</div>
+  <div class="section-body">
+    <pre><span class="kw">WITH</span> active_users <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> active = <span class="kw">TRUE</span>
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> active_users <span class="kw">WHERE</span> age &gt; 25;
+
+<span class="cm">-- Recursive CTE</span>
+<span class="kw">WITH RECURSIVE</span> tree <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, name, parent_id, 0 <span class="kw">AS</span> depth
+  <span class="kw">FROM</span> categories <span class="kw">WHERE</span> parent_id <span class="kw">IS NULL</span>
+  <span class="kw">UNION ALL</span>
+  <span class="kw">SELECT</span> c.id, c.name, c.parent_id, t.depth+1
+  <span class="kw">FROM</span> categories c <span class="kw">JOIN</span> tree t
+  <span class="kw">ON</span> c.parent_id = t.id
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> tree;</pre>
+  </div>
+</div>
+
+<!-- DDL -->
+<div class="section s-ddl">
+  <div class="section-header">Table Operations (DDL)</div>
+  <div class="section-body">
+    <pre><span class="kw">CREATE TABLE</span> users (
+  id <span class="kw">SERIAL PRIMARY KEY</span>,   <span class="cm">-- PG</span>
+  id <span class="kw">INT AUTO_INCREMENT</span>,    <span class="cm">-- MySQL</span>
+  name <span class="kw">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+  email <span class="kw">VARCHAR</span>(255) <span class="kw">UNIQUE</span>,
+  created <span class="kw">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="kw">ALTER TABLE</span> users <span class="kw">ADD COLUMN</span> age <span class="kw">INT</span>;
+<span class="kw">ALTER TABLE</span> users <span class="kw">DROP COLUMN</span> age;
+<span class="kw">ALTER TABLE</span> users <span class="kw">RENAME COLUMN</span> a <span class="kw">TO</span> b;
+<span class="kw">DROP TABLE IF EXISTS</span> users;</pre>
+  </div>
+</div>
+
+<!-- INDEXES -->
+<div class="section s-idx">
+  <div class="section-header">Indexes</div>
+  <div class="section-body">
+    <pre><span class="kw">CREATE INDEX</span> idx_email <span class="kw">ON</span> users(email);
+<span class="kw">CREATE UNIQUE INDEX</span> idx_u <span class="kw">ON</span> users(email);
+<span class="kw">DROP INDEX</span> idx_email;              <span class="cm">-- PG</span>
+<span class="kw">DROP INDEX</span> idx_email <span class="kw">ON</span> users;     <span class="cm">-- MySQL</span></pre>
+  </div>
+</div>
+
+<!-- DIFFERENCES -->
+<div class="section s-diff">
+  <div class="section-header">MySQL vs PostgreSQL</div>
+  <div class="section-body">
+    <pre><span class="cm">-- Auto-increment</span>
+MySQL:  <span class="kw">INT AUTO_INCREMENT</span>
+PG:     <span class="kw">SERIAL</span> or <span class="kw">GENERATED ALWAYS AS IDENTITY</span>
+
+<span class="cm">-- String concat</span>
+MySQL:  <span class="fn">CONCAT</span>(a, b)
+PG:     a <span class="kw">||</span> b
+
+<span class="cm">-- Current time</span>
+MySQL:  <span class="fn">NOW</span>()
+PG:     <span class="fn">NOW</span>() or <span class="kw">CURRENT_TIMESTAMP</span>
+
+<span class="cm">-- LIMIT</span>
+MySQL:  <span class="kw">LIMIT</span> 10, 20  <span class="cm">-- offset, limit</span>
+PG:     <span class="kw">LIMIT</span> 20 <span class="kw">OFFSET</span> 10
+
+<span class="cm">-- Boolean</span>
+MySQL:  <span class="kw">TINYINT</span>(1)
+PG:     <span class="kw">BOOLEAN</span>
+
+<span class="cm">-- JSON</span>
+Both:   col-&gt;&gt;<span class="st">'key'</span>  <span class="cm">-- extract as text</span></pre>
+  </div>
+</div>
+
+</div>
+
+<div class="branding"><a href="https://zerokit.dev">ZeroKit.dev</a> &mdash; Developer Cheatsheet Bundle</div>
+
+</body>
+</html>

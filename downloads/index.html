@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Developer Cheatsheet Bundle - ZeroKit.dev</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .dl-hero {
+    text-align: center;
+    padding: 60px 20px 40px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .dl-hero h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #00d4ff, #7b2ff7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dl-hero .tagline {
+    font-size: 1.15rem;
+    color: #94a3b8;
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+
+  .price-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(123, 47, 247, 0.1);
+    border: 1px solid rgba(123, 47, 247, 0.3);
+    border-radius: 12px;
+    padding: 12px 28px;
+    margin-bottom: 40px;
+  }
+
+  .price-badge .price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #7b2ff7;
+  }
+
+  .price-badge .price-info {
+    text-align: left;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #7b2ff7, #00d4ff);
+    color: #fff;
+    text-decoration: none;
+    padding: 16px 48px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(123, 47, 247, 0.4);
+  }
+
+  .cta-sub {
+    display: block;
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 8px;
+  }
+
+  .cheatsheets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto 50px;
+    padding: 0 20px;
+  }
+
+  @media (max-width: 640px) {
+    .cheatsheets-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .cs-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: left;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .cs-card:hover {
+    border-color: rgba(123, 47, 247, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .cs-card .cs-icon {
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .cs-card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+  }
+
+  .cs-card p {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .cs-card .cs-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+
+  .cs-card .cs-tag {
+    font-size: 0.68rem;
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .cs-card .preview-link {
+    font-size: 0.8rem;
+    color: #7b2ff7;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .cs-card .preview-link:hover {
+    color: #00d4ff;
+  }
+
+  .features {
+    max-width: 700px;
+    margin: 0 auto 50px;
+    padding: 0 20px;
+  }
+
+  .features h2 {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 24px;
+  }
+
+  .features-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 500px) {
+    .features-list { grid-template-columns: 1fr; }
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+
+  .feature-item .fi-check {
+    color: #059669;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .bottom-cta {
+    text-align: center;
+    padding: 40px 20px 60px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .bottom-cta p {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .dl-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.75rem;
+    color: #475569;
+  }
+
+  .dl-footer a {
+    color: #7b2ff7;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="dl-hero">
+  <h1>Developer Cheatsheet Bundle</h1>
+  <p class="tagline">
+    4 print-ready reference sheets for your desk. Git, SQL, Regex, and HTTP
+    -- everything a developer looks up daily, on one page each.
+  </p>
+
+  <div class="price-badge">
+    <span class="price">$9</span>
+    <span class="price-info">All 4 cheatsheets<br>Print-ready HTML/PDF</span>
+  </div>
+
+  <br>
+
+  <a href="/tools/checkout.html?plan=cheatsheets" class="cta-btn">Buy Now -- $9</a>
+  <span class="cta-sub">Instant access. Print unlimited copies. Free updates.</span>
+</div>
+
+<div class="cheatsheets-grid">
+
+  <div class="cs-card">
+    <span class="cs-icon">&#x1F4BB;</span>
+    <h3>Git Command Cheatsheet</h3>
+    <p>60+ essential Git commands organized by workflow. Setup, branching, staging, committing, remote sync, undoing mistakes, history, stashing, tags, and config.</p>
+    <div class="cs-tags">
+      <span class="cs-tag">branching</span>
+      <span class="cs-tag">merging</span>
+      <span class="cs-tag">rebasing</span>
+      <span class="cs-tag">stashing</span>
+      <span class="cs-tag">undoing</span>
+    </div>
+    <a href="git-cheatsheet.html" class="preview-link" target="_blank">Preview &rarr;</a>
+  </div>
+
+  <div class="cs-card">
+    <span class="cs-icon">&#x1F5C4;</span>
+    <h3>SQL Quick Reference</h3>
+    <p>Complete SQL syntax with examples. SELECT, INSERT, UPDATE, DELETE, all JOIN types, aggregations, subqueries, window functions, CTEs, and MySQL vs PostgreSQL differences.</p>
+    <div class="cs-tags">
+      <span class="cs-tag">joins</span>
+      <span class="cs-tag">window functions</span>
+      <span class="cs-tag">CTEs</span>
+      <span class="cs-tag">MySQL</span>
+      <span class="cs-tag">PostgreSQL</span>
+    </div>
+    <a href="sql-cheatsheet.html" class="preview-link" target="_blank">Preview &rarr;</a>
+  </div>
+
+  <div class="cs-card">
+    <span class="cs-icon">&#x1F50D;</span>
+    <h3>Regular Expressions Cheatsheet</h3>
+    <p>Character classes, quantifiers, anchors, groups, lookaheads, lookbehinds, flags, POSIX classes, replacement patterns, and 12 battle-tested common patterns.</p>
+    <div class="cs-tags">
+      <span class="cs-tag">lookahead</span>
+      <span class="cs-tag">groups</span>
+      <span class="cs-tag">quantifiers</span>
+      <span class="cs-tag">common patterns</span>
+    </div>
+    <a href="regex-cheatsheet.html" class="preview-link" target="_blank">Preview &rarr;</a>
+  </div>
+
+  <div class="cs-card">
+    <span class="cs-icon">&#x1F310;</span>
+    <h3>HTTP Status Codes &amp; Methods</h3>
+    <p>Every status code (1xx-5xx) with clear descriptions, all HTTP methods with REST conventions, request/response headers, caching, CORS, and MIME types.</p>
+    <div class="cs-tags">
+      <span class="cs-tag">status codes</span>
+      <span class="cs-tag">REST</span>
+      <span class="cs-tag">headers</span>
+      <span class="cs-tag">CORS</span>
+      <span class="cs-tag">caching</span>
+    </div>
+    <a href="http-cheatsheet.html" class="preview-link" target="_blank">Preview &rarr;</a>
+  </div>
+
+</div>
+
+<div class="features">
+  <h2>What You Get</h2>
+  <div class="features-list">
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>Print-optimized layout (Ctrl+P to PDF)</span>
+    </div>
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>Dense, scannable 2-column design</span>
+    </div>
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>Professional Inter + JetBrains Mono fonts</span>
+    </div>
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>Color-coded sections for quick lookup</span>
+    </div>
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>Real syntax examples, not just theory</span>
+    </div>
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>MySQL vs PostgreSQL differences noted</span>
+    </div>
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>12 ready-to-use regex patterns</span>
+    </div>
+    <div class="feature-item">
+      <span class="fi-check">&#10003;</span>
+      <span>Free updates when we add more</span>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-cta">
+  <p>
+    The cheatsheets are freely previewable above. Buying the bundle supports
+    ZeroKit.dev and helps us build more free developer tools.
+  </p>
+  <a href="/tools/checkout.html?plan=cheatsheets" class="cta-btn">Get the Bundle -- $9</a>
+</div>
+
+<div class="dl-footer">
+  <a href="https://zerokit.dev">&larr; Back to ZeroKit.dev</a>
+</div>
+
+<script src="../js/monetization.js"></script>
+</body>
+</html>
