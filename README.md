@@ -1,6 +1,7 @@
 # ZeroKit.dev
 
 ![Uptime](https://65-109-129-230.sslip.io/pulse/api/monitors/d0bab9028fa7/badge)
+[![Website Grade](https://img.shields.io/badge/Website%20Grade-A-brightgreen)](https://zerokit.dev/tools/grader.html)
 
 **117 free developer tools. No signup. No tracking. No cookies.**
 
