@@ -15,7 +15,7 @@
       sidebar: ''      // Ad slot ID for sidebar
     },
     showSupportBanner: true,
-    githubRepo: 'https://github.com/Stembel/devtools-fm'
+    githubRepo: 'https://github.com/Stembel/zerokit.dev'
   };
 
   // === SUPPORT BANNER ===
