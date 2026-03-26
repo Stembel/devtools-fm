@@ -1,0 +1,566 @@
+{
+  "generated_at": "2026-03-26T06:39:04.534006",
+  "total_sites": 20,
+  "results": [
+    {
+      "url": "https://github.com",
+      "grade": "A",
+      "score": 94,
+      "categories": {
+        "performance": {
+          "grade": "A+",
+          "score": 100
+        },
+        "security": {
+          "grade": "B",
+          "score": 86
+        },
+        "ssl": {
+          "grade": "A",
+          "score": 95
+        },
+        "seo": {
+          "grade": "A",
+          "score": 93
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 1
+    },
+    {
+      "url": "https://vercel.com",
+      "grade": "A-",
+      "score": 92,
+      "categories": {
+        "performance": {
+          "grade": "A+",
+          "score": 100
+        },
+        "security": {
+          "grade": "B",
+          "score": 86
+        },
+        "ssl": {
+          "grade": "A",
+          "score": 95
+        },
+        "seo": {
+          "grade": "B",
+          "score": 85
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 2
+    },
+    {
+      "url": "https://wordpress.com",
+      "grade": "B+",
+      "score": 89,
+      "categories": {
+        "performance": {
+          "grade": "A+",
+          "score": 100
+        },
+        "security": {
+          "grade": "F",
+          "score": 57
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "A+",
+          "score": 97
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 4
+    },
+    {
+      "url": "https://cloudflare.com",
+      "grade": "B+",
+      "score": 88,
+      "categories": {
+        "performance": {
+          "grade": "C",
+          "score": 75
+        },
+        "security": {
+          "grade": "B",
+          "score": 86
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "B",
+          "score": 85
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 2
+    },
+    {
+      "url": "https://dev.to",
+      "grade": "B+",
+      "score": 88,
+      "categories": {
+        "performance": {
+          "grade": "A+",
+          "score": 100
+        },
+        "security": {
+          "grade": "C-",
+          "score": 71
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "C+",
+          "score": 77
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 5
+    },
+    {
+      "url": "https://stripe.com",
+      "grade": "B",
+      "score": 86,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "C-",
+          "score": 71
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "C+",
+          "score": 78
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 3
+    },
+    {
+      "url": "https://producthunt.com",
+      "grade": "B",
+      "score": 83,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "F",
+          "score": 57
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "C+",
+          "score": 78
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 4
+    },
+    {
+      "url": "https://linkedin.com",
+      "grade": "B-",
+      "score": 82,
+      "categories": {
+        "performance": {
+          "grade": "C",
+          "score": 75
+        },
+        "security": {
+          "grade": "F",
+          "score": 57
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "B+",
+          "score": 89
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 3
+    },
+    {
+      "url": "https://shopify.com",
+      "grade": "B-",
+      "score": 80,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "F",
+          "score": 29
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "A+",
+          "score": 100
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 4
+    },
+    {
+      "url": "https://stackoverflow.com",
+      "grade": "C+",
+      "score": 79,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "F",
+          "score": 43
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "C",
+          "score": 75
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 5
+    },
+    {
+      "url": "https://facebook.com",
+      "grade": "C+",
+      "score": 79,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "B",
+          "score": 86
+        },
+        "ssl": {
+          "grade": "B-",
+          "score": 80
+        },
+        "seo": {
+          "grade": "F",
+          "score": 43
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 7
+    },
+    {
+      "url": "https://hackernews.com",
+      "grade": "C+",
+      "score": 78,
+      "categories": {
+        "performance": {
+          "grade": "C",
+          "score": 75
+        },
+        "security": {
+          "grade": "B",
+          "score": 86
+        },
+        "ssl": {
+          "grade": "A",
+          "score": 95
+        },
+        "seo": {
+          "grade": "F",
+          "score": 35
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 6
+    },
+    {
+      "url": "https://twitter.com",
+      "grade": "C+",
+      "score": 77,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "C-",
+          "score": 71
+        },
+        "ssl": {
+          "grade": "B-",
+          "score": 80
+        },
+        "seo": {
+          "grade": "F",
+          "score": 50
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 7
+    },
+    {
+      "url": "https://digitalocean.com",
+      "grade": "C+",
+      "score": 77,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "F",
+          "score": 29
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "B",
+          "score": 85
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 6
+    },
+    {
+      "url": "https://netflix.com",
+      "grade": "C",
+      "score": 75,
+      "categories": {
+        "performance": {
+          "grade": "D-",
+          "score": 60
+        },
+        "security": {
+          "grade": "F",
+          "score": 57
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "C-",
+          "score": 70
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 7
+    },
+    {
+      "url": "https://medium.com",
+      "grade": "C-",
+      "score": 72,
+      "categories": {
+        "performance": {
+          "grade": "A+",
+          "score": 100
+        },
+        "security": {
+          "grade": "C-",
+          "score": 71
+        },
+        "ssl": {
+          "grade": "A+",
+          "score": 100
+        },
+        "seo": {
+          "grade": "F",
+          "score": 50
+        },
+        "availability": {
+          "grade": "F",
+          "score": 30
+        }
+      },
+      "recommendations_count": 5
+    },
+    {
+      "url": "https://wikipedia.org",
+      "grade": "D+",
+      "score": 68,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "F",
+          "score": 14
+        },
+        "ssl": {
+          "grade": "A",
+          "score": 95
+        },
+        "seo": {
+          "grade": "D-",
+          "score": 61
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 9
+    },
+    {
+      "url": "https://google.com",
+      "grade": "D",
+      "score": 65,
+      "categories": {
+        "performance": {
+          "grade": "A+",
+          "score": 100
+        },
+        "security": {
+          "grade": "F",
+          "score": 29
+        },
+        "ssl": {
+          "grade": "B-",
+          "score": 80
+        },
+        "seo": {
+          "grade": "F",
+          "score": 33
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 12
+    },
+    {
+      "url": "https://reddit.com",
+      "grade": "D-",
+      "score": 61,
+      "categories": {
+        "performance": {
+          "grade": "A+",
+          "score": 100
+        },
+        "security": {
+          "grade": "F",
+          "score": 57
+        },
+        "ssl": {
+          "grade": "A",
+          "score": 95
+        },
+        "seo": {
+          "grade": "F",
+          "score": 15
+        },
+        "availability": {
+          "grade": "F",
+          "score": 30
+        }
+      },
+      "recommendations_count": 10
+    },
+    {
+      "url": "https://amazon.com",
+      "grade": "F",
+      "score": 55,
+      "categories": {
+        "performance": {
+          "grade": "A-",
+          "score": 90
+        },
+        "security": {
+          "grade": "F",
+          "score": 0
+        },
+        "ssl": {
+          "grade": "A",
+          "score": 95
+        },
+        "seo": {
+          "grade": "F",
+          "score": 15
+        },
+        "availability": {
+          "grade": "A+",
+          "score": 100
+        }
+      },
+      "recommendations_count": 13
+    }
+  ]
+}
