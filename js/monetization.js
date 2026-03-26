@@ -1,5 +1,5 @@
 /**
- * DevTools.fm Monetization Infrastructure
+ * ZeroKit.dev Monetization Infrastructure
  * Manages ad slots, support banners, and analytics preparation.
  * Configure ADSENSE_PUB_ID when account is approved.
  */
@@ -31,7 +31,7 @@
       <div class="container" style="max-width:1200px;margin:0 auto;padding:0 24px;">
         <div style="background:#141416;border:1px solid #2a2a30;border-radius:8px;padding:20px 24px;text-align:center;margin:0 auto;max-width:700px;">
           <p style="color:#e4e4e7;font-size:0.95rem;margin:0 0 12px;font-family:'Inter',sans-serif;">
-            <strong>Like DevTools.fm?</strong> Help us keep it free and ad-free.
+            <strong>Like ZeroKit.dev?</strong> Help us keep it free and ad-free.
           </p>
           <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
             <a href="${CONFIG.githubRepo}" target="_blank" rel="noopener"
@@ -341,11 +341,11 @@
     cta.style.cssText = 'max-width:700px;margin:0 auto;padding:32px 24px 0;text-align:center;';
     cta.innerHTML = `
       <div style="background:linear-gradient(135deg,#141416 0%,#1a1a2e 100%);border:1px solid #2a2a30;border-radius:12px;padding:32px 24px;">
-        <h3 style="font-size:1.1rem;font-weight:700;color:#e4e4e7;margin-bottom:8px;font-family:'Inter',sans-serif;">Sponsor DevTools.fm</h3>
+        <h3 style="font-size:1.1rem;font-weight:700;color:#e4e4e7;margin-bottom:8px;font-family:'Inter',sans-serif;">Sponsor ZeroKit.dev</h3>
         <p style="color:#8b8b94;font-size:0.9rem;margin-bottom:20px;font-family:'Inter',sans-serif;">
           Reach 1000s of developers. Your brand on every tool page.
         </p>
-        <a href="mailto:marcel.detemple@icloud.com?subject=DevTools.fm%20Sponsorship&body=Hi%2C%20I%27m%20interested%20in%20sponsoring%20DevTools.fm."
+        <a href="mailto:hello@zerokit.dev?subject=ZeroKit.dev%20Sponsorship&body=Hi%2C%20I%27m%20interested%20in%20sponsoring%20ZeroKit.dev."
            style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:8px;background:#6366f1;border:1px solid #6366f1;color:white;font-size:0.9rem;text-decoration:none;font-family:'Inter',sans-serif;transition:background 0.2s;"
            onmouseover="this.style.background='#818cf8'" onmouseout="this.style.background='#6366f1'">
           Get in Touch
@@ -359,7 +359,7 @@
   function injectStructuredData() {
     // Tool pages: WebApplication schema
     if (document.querySelector('.tool-page')) {
-      const title = document.title.replace(' - DevTools.fm', '');
+      const title = document.title.replace(' - ZeroKit.dev', '');
       const descMeta = document.querySelector('meta[name="description"]');
       const description = descMeta ? descMeta.getAttribute('content') : '';
       const canonical = document.querySelector('link[rel="canonical"]');
@@ -381,7 +381,7 @@
         },
         'author': {
           '@type': 'Organization',
-          'name': 'DevTools.fm',
+          'name': 'ZeroKit.dev',
           'url': 'https://zerokit.dev/'
         }
       };
@@ -398,7 +398,7 @@
       {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        'name': 'DevTools.fm',
+        'name': 'ZeroKit.dev',
         'url': 'https://zerokit.dev/',
         'description': 'Free online developer tools. 100+ tools including JSON formatter, Base64 encoder, hash generator, regex tester, DNS lookup, and more.',
         'potentialAction': {

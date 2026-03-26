@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 302 Found - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 302 Found is a temporary redirect. Learn when to use 302 vs 301, how browsers handle temporary redirects, and how to configure them properly in your server.">
+  <link rel="canonical" href="https://zerokit.dev/http/302.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #facc15; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "When should I use 302 instead of 301?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use 302 Found when the redirect is temporary and you want search engines to keep the original URL in their index. Common use cases include: A/B testing redirects, geo-based content serving, redirecting users during maintenance, login redirects (redirecting to a login page then back after authentication), and seasonal or promotional redirects that will be removed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does a 302 redirect pass SEO value?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Historically, 302 redirects did not pass link equity. However, Google has stated that 302 redirects do pass PageRank similarly to 301 redirects. The key difference is that Google keeps the original URL in its index with a 302, whereas a 301 causes Google to index the destination URL instead. If you accidentally use 302 for a permanent move, Google may eventually treat it as a 301 if it persists long enough."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between 302 and 307?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Both are temporary redirects, but they differ in how they handle the HTTP method. A 302 allows the browser to change a POST request to a GET when following the redirect (and most browsers do). A 307 Temporary Redirect guarantees that the method and body are preserved, so a POST stays a POST. Use 307 when you need to redirect form submissions or API calls while preserving the request method."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 302 Found
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">302</div>
+      <div class="status-name-big">Found</div>
+      <div class="status-category">3xx Redirection</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 302 Found Mean?</h2>
+      <p>HTTP 302 Found (originally called "Moved Temporarily") indicates that the requested resource is temporarily located at a different URL, provided in the <code>Location</code> header. Unlike a 301, the client should continue using the original URL for future requests because the redirect is not permanent.</p>
+      <p>Browsers follow 302 redirects automatically but do not cache them as aggressively as 301s. Search engines keep the original URL in their index rather than replacing it with the redirect target.</p>
+      <p>Historically, many browsers converted POST requests to GET when following a 302 redirect. This behavior was technically incorrect according to the original HTTP spec. The 303 See Other and 307 Temporary Redirect codes were introduced to address this ambiguity.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Login redirects:</strong> A user hits a protected page, gets 302 redirected to <code>/login?redirect=/dashboard</code>, then after authentication gets 302 redirected back to the originally requested page.</li>
+        <li><strong>A/B testing and experiments:</strong> A percentage of traffic is temporarily redirected to variant pages. The original URL must remain canonical since the experiment will end.</li>
+        <li><strong>Geo-based content serving:</strong> A global URL like <code>/store</code> temporarily redirects to <code>/store/de</code> or <code>/store/us</code> based on the user's location. The base URL is still the canonical reference point.</li>
+        <li><strong>Maintenance mode:</strong> The site temporarily redirects all requests to a maintenance page while updates are being deployed. This is temporary and should not affect search engine indexing.</li>
+        <li><strong>Language negotiation:</strong> A root URL redirects to a language-specific version based on the <code>Accept-Language</code> header. The redirect target may vary per user.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Configure 302 Redirects</h2>
+
+      <h3>Nginx</h3>
+      <div class="code-block">
+# Temporary redirect during maintenance
+location /api {
+    return 302 /maintenance.html;
+}
+
+# Geo-based redirect
+location = /store {
+    if ($geoip_country_code = "DE") {
+        return 302 /store/de;
+    }
+    return 302 /store/us;
+}
+      </div>
+
+      <h3>Apache (.htaccess)</h3>
+      <div class="code-block">
+# Temporary redirect
+Redirect 302 /old-promo https://example.com/current-promo
+
+# Using RewriteRule
+RewriteEngine On
+RewriteRule ^sale$ /summer-sale [R=302,L]
+      </div>
+
+      <h3>Express.js (Node.js)</h3>
+      <div class="code-block">
+// Login redirect pattern
+app.get('/dashboard', requireAuth, (req, res) => {
+  // requireAuth middleware handles the 302 if not logged in:
+  // res.redirect(302, `/login?redirect=${req.originalUrl}`);
+  res.render('dashboard');
+});
+
+// After successful login
+app.post('/login', (req, res) => {
+  // ...authenticate...
+  const redirectUrl = req.query.redirect || '/dashboard';
+  res.redirect(302, redirectUrl);
+});
+      </div>
+
+      <h3>Verifying with curl</h3>
+      <div class="code-block">
+$ curl -I https://example.com/old-promo
+
+HTTP/1.1 302 Found
+Location: https://example.com/current-promo
+Cache-Control: no-cache
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>302 vs 301: Choosing the Right Redirect</h2>
+      <p>The wrong redirect code can hurt your SEO or cause unexpected caching behavior:</p>
+      <ul>
+        <li><strong>Use 301</strong> when the URL change is permanent: domain migrations, URL restructuring, HTTP-to-HTTPS.</li>
+        <li><strong>Use 302</strong> when the redirect is temporary: maintenance, A/B tests, login flows, seasonal content.</li>
+        <li><strong>Common mistake:</strong> Using 302 for permanent URL changes. Google will keep the old URL indexed and may not transfer link equity. If you see a 302 that has been in place for months, it should probably be a 301.</li>
+        <li><strong>Use 307</strong> when you need a temporary redirect that preserves the HTTP method (POST stays POST).</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">When should I use 302 instead of 301?</div>
+        <div class="faq-a">Use 302 when the redirect is temporary and the original URL should remain canonical. Common examples: login flows that redirect to a login page and then back, A/B tests where variants change, geo-redirects that vary by user, and maintenance pages. If the change is permanent, always use 301.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does a 302 redirect pass SEO value?</div>
+        <div class="faq-a">Google has confirmed that 302 redirects do pass PageRank, similarly to 301s. However, the critical difference is indexing: Google keeps the original URL indexed with a 302, but replaces it with the destination URL for a 301. If a 302 persists for a very long time, Google may eventually treat it as a de facto 301.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 302 and 307?</div>
+        <div class="faq-a">Both are temporary redirects. The difference is method preservation. With 302, browsers are allowed to change POST to GET when following the redirect (and most do). With 307, the browser must use the same HTTP method for the redirected request. Use 307 when redirecting form submissions or API POST requests to ensure the data is re-sent correctly.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="301.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">301</div>
+          <div class="rcc-name">Moved Permanently &mdash; Permanent redirect</div>
+        </a>
+        <a href="304.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">304</div>
+          <div class="rcc-name">Not Modified &mdash; Cache still valid</div>
+        </a>
+        <a href="200.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">200</div>
+          <div class="rcc-name">OK &mdash; Final destination response</div>
+        </a>
+        <a href="403.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">403</div>
+          <div class="rcc-name">Forbidden &mdash; Access denied without redirect</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/url.html" class="tool-link">URL Parser</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

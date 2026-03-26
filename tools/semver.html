@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semver Calculator - Semantic Versioning Tool | ZeroKit.dev</title>
+  <meta name="description" content="Parse, compare, and validate semantic versions. Check NPM range satisfaction, increment versions, and explore semver range syntax. Free, runs locally.">
+  <link rel="canonical" href="https://zerokit.dev/tools/semver.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .semver-sections { display: flex; flex-direction: column; gap: 24px; }
+
+    .semver-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-body { padding: 16px; }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .input-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .input-group input {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input-group input:focus { border-color: var(--accent); }
+    .input-group input.input-valid { border-color: var(--success); }
+    .input-group input.input-invalid { border-color: var(--error); }
+
+    .result-box {
+      margin-top: 12px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.8;
+      min-height: 40px;
+    }
+
+    .result-box .label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: var(--font);
+      font-weight: 600;
+    }
+
+    .result-box .value { color: var(--text); }
+    .result-box .accent { color: var(--accent); }
+    .result-box .success { color: var(--success); }
+    .result-box .error { color: var(--error); }
+
+    .parsed-parts {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .parsed-part {
+      background: var(--surface-2);
+      border-radius: 4px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .parsed-part .part-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .parsed-part .part-value {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .parsed-part .part-value.empty { color: var(--text-muted); font-style: italic; font-size: 0.8rem; }
+
+    .compare-result {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 16px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 1.1rem;
+    }
+
+    .compare-op {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .increment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .increment-item {
+      background: var(--surface-2);
+      border-radius: 4px;
+      padding: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .increment-item:hover { background: var(--border); }
+
+    .increment-item .inc-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .increment-item .inc-value {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .range-examples {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .range-example {
+      background: var(--surface-2);
+      padding: 10px 14px;
+    }
+
+    .range-example .re-syntax {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+
+    .range-example .re-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .range-example .re-expanded {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    .satisfaction-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .satisfaction-badge.satisfies {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success);
+    }
+
+    .satisfaction-badge.fails {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    .reference-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .reference-table th {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .reference-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .reference-table td:first-child {
+      font-family: var(--mono);
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .reference-table td:last-child { color: var(--text-muted); }
+    .reference-table tr:last-child td { border-bottom: none; }
+
+    @media (max-width: 768px) {
+      .range-examples { grid-template-columns: 1fr; }
+      .input-row { flex-direction: column; }
+      .input-group { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Semver Calculator</h1>
+    <p class="description">Parse, compare, and validate semantic versions. Check NPM range satisfaction and explore version increments. Everything runs locally in your browser.</p>
+
+    <div class="semver-sections">
+
+      <!-- Parse Section -->
+      <div class="semver-section">
+        <div class="section-header">Parse Version</div>
+        <div class="section-body">
+          <div class="input-group">
+            <label>Version String</label>
+            <input type="text" id="parseInput" placeholder="e.g. 1.2.3-beta.1+build.456" spellcheck="false">
+          </div>
+          <div class="parsed-parts" id="parsedParts">
+            <div class="parsed-part"><div class="part-label">Major</div><div class="part-value empty">-</div></div>
+            <div class="parsed-part"><div class="part-label">Minor</div><div class="part-value empty">-</div></div>
+            <div class="parsed-part"><div class="part-label">Patch</div><div class="part-value empty">-</div></div>
+            <div class="parsed-part"><div class="part-label">Pre-release</div><div class="part-value empty">-</div></div>
+            <div class="parsed-part"><div class="part-label">Build</div><div class="part-value empty">-</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compare Section -->
+      <div class="semver-section">
+        <div class="section-header">Compare Versions</div>
+        <div class="section-body">
+          <div class="input-row">
+            <div class="input-group">
+              <label>Version A</label>
+              <input type="text" id="compareA" placeholder="e.g. 1.2.3" spellcheck="false">
+            </div>
+            <div class="input-group">
+              <label>Version B</label>
+              <input type="text" id="compareB" placeholder="e.g. 2.0.0" spellcheck="false">
+            </div>
+          </div>
+          <div class="compare-result" id="compareResult">
+            <span class="value" style="color: var(--text-muted)">Enter two versions to compare</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Range Checker Section -->
+      <div class="semver-section">
+        <div class="section-header">
+          Range Checker
+          <span id="rangeStatus"></span>
+        </div>
+        <div class="section-body">
+          <div class="input-row">
+            <div class="input-group">
+              <label>Version</label>
+              <input type="text" id="rangeVersion" placeholder="e.g. 1.5.2" spellcheck="false">
+            </div>
+            <div class="input-group">
+              <label>Range</label>
+              <input type="text" id="rangeInput" placeholder="e.g. ^1.2.3 or >=1.0.0 <2.0.0" spellcheck="false">
+            </div>
+          </div>
+          <div class="result-box" id="rangeResult">
+            <span class="label">Result: </span><span class="value" style="color: var(--text-muted)">Enter a version and range to check</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Increment Section -->
+      <div class="semver-section">
+        <div class="section-header">Increment Calculator</div>
+        <div class="section-body">
+          <div class="input-group">
+            <label>Current Version</label>
+            <input type="text" id="incrementInput" placeholder="e.g. 1.2.3" spellcheck="false">
+          </div>
+          <div class="increment-grid" id="incrementGrid">
+            <div class="increment-item"><div class="inc-label">Next Major</div><div class="inc-value" style="color: var(--text-muted)">-</div></div>
+            <div class="increment-item"><div class="inc-label">Next Minor</div><div class="inc-value" style="color: var(--text-muted)">-</div></div>
+            <div class="increment-item"><div class="inc-label">Next Patch</div><div class="inc-value" style="color: var(--text-muted)">-</div></div>
+            <div class="increment-item"><div class="inc-label">Next Pre-major</div><div class="inc-value" style="color: var(--text-muted)">-</div></div>
+            <div class="increment-item"><div class="inc-label">Next Pre-minor</div><div class="inc-value" style="color: var(--text-muted)">-</div></div>
+            <div class="increment-item"><div class="inc-label">Next Pre-patch</div><div class="inc-value" style="color: var(--text-muted)">-</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NPM Range Reference Section -->
+      <div class="semver-section">
+        <div class="section-header">NPM Range Syntax Reference</div>
+        <div class="section-body">
+          <table class="reference-table">
+            <thead>
+              <tr><th>Syntax</th><th>Example</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>^</td><td>^1.2.3</td><td>Compatible with version: >=1.2.3 &lt;2.0.0. Allows changes that do not modify the left-most non-zero digit.</td></tr>
+              <tr><td>~</td><td>~1.2.3</td><td>Approximately equivalent: >=1.2.3 &lt;1.3.0. Allows patch-level changes.</td></tr>
+              <tr><td>>=</td><td>>=1.0.0</td><td>Greater than or equal to the specified version.</td></tr>
+              <tr><td><=</td><td><=2.0.0</td><td>Less than or equal to the specified version.</td></tr>
+              <tr><td>></td><td>>1.0.0</td><td>Strictly greater than the specified version.</td></tr>
+              <tr><td>&lt;</td><td>&lt;2.0.0</td><td>Strictly less than the specified version.</td></tr>
+              <tr><td>=</td><td>=1.2.3</td><td>Exactly equal to the specified version.</td></tr>
+              <tr><td>-</td><td>1.0.0 - 2.0.0</td><td>Hyphen range: >=1.0.0 &lt;=2.0.0 (inclusive on both sides).</td></tr>
+              <tr><td>||</td><td>^1.0.0 || ^2.0.0</td><td>Union: satisfies either range.</td></tr>
+              <tr><td>*</td><td>*</td><td>Matches any version.</td></tr>
+              <tr><td>x</td><td>1.x or 1.2.x</td><td>Wildcard: 1.x = >=1.0.0 &lt;2.0.0, 1.2.x = >=1.2.0 &lt;1.3.0</td></tr>
+            </tbody>
+          </table>
+
+          <h3 style="margin-top: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px;">Common Range Examples</h3>
+          <div class="range-examples">
+            <div class="range-example">
+              <div class="re-syntax">^1.2.3</div>
+              <div class="re-expanded">>=1.2.3 &lt;2.0.0</div>
+              <div class="re-desc">Caret: minor + patch updates OK</div>
+            </div>
+            <div class="range-example">
+              <div class="re-syntax">^0.2.3</div>
+              <div class="re-expanded">>=0.2.3 &lt;0.3.0</div>
+              <div class="re-desc">Caret on 0.x: only patch updates</div>
+            </div>
+            <div class="range-example">
+              <div class="re-syntax">~1.2.3</div>
+              <div class="re-expanded">>=1.2.3 &lt;1.3.0</div>
+              <div class="re-desc">Tilde: only patch updates</div>
+            </div>
+            <div class="range-example">
+              <div class="re-syntax">~0.2.3</div>
+              <div class="re-expanded">>=0.2.3 &lt;0.3.0</div>
+              <div class="re-desc">Tilde on 0.x: only patch updates</div>
+            </div>
+            <div class="range-example">
+              <div class="re-syntax">>=1.0.0 &lt;2.0.0</div>
+              <div class="re-expanded">1.0.0 through 1.x.x</div>
+              <div class="re-desc">Explicit range with comparators</div>
+            </div>
+            <div class="range-example">
+              <div class="re-syntax">1.0.0 - 2.0.0</div>
+              <div class="re-expanded">>=1.0.0 &lt;=2.0.0</div>
+              <div class="re-desc">Hyphen range, inclusive</div>
+            </div>
+            <div class="range-example">
+              <div class="re-syntax">^1.0.0 || ^2.0.0</div>
+              <div class="re-expanded">1.x.x or 2.x.x</div>
+              <div class="re-desc">Union of two caret ranges</div>
+            </div>
+            <div class="range-example">
+              <div class="re-syntax">*</div>
+              <div class="re-expanded">>=0.0.0</div>
+              <div class="re-desc">Any version</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer><div class="container">ZeroKit.dev &mdash; Free developer tools.</div></footer>
+
+  <script>
+    // ========================================
+    // Semver Parsing & Comparison Engine
+    // ========================================
+
+    const SEMVER_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-([\da-zA-Z\-]+(?:\.[\da-zA-Z\-]+)*))?(?:\+([\da-zA-Z\-]+(?:\.[\da-zA-Z\-]+)*))?$/;
+
+    function parseSemver(str) {
+      if (!str) return null;
+      const m = str.trim().match(SEMVER_RE);
+      if (!m) return null;
+      return {
+        major: parseInt(m[1], 10),
+        minor: parseInt(m[2], 10),
+        patch: parseInt(m[3], 10),
+        prerelease: m[4] || '',
+        build: m[5] || '',
+        raw: str.trim()
+      };
+    }
+
+    function comparePre(a, b) {
+      // No prerelease on both => equal
+      if (!a && !b) return 0;
+      // Having a prerelease is lower precedence than not having one
+      if (!a) return 1;
+      if (!b) return -1;
+
+      const aParts = a.split('.');
+      const bParts = b.split('.');
+      const len = Math.max(aParts.length, bParts.length);
+
+      for (let i = 0; i < len; i++) {
+        if (i >= aParts.length) return -1;
+        if (i >= bParts.length) return 1;
+
+        const aNum = /^\d+$/.test(aParts[i]);
+        const bNum = /^\d+$/.test(bParts[i]);
+
+        if (aNum && bNum) {
+          const diff = parseInt(aParts[i], 10) - parseInt(bParts[i], 10);
+          if (diff !== 0) return diff > 0 ? 1 : -1;
+        } else if (aNum !== bNum) {
+          // Numeric < string
+          return aNum ? -1 : 1;
+        } else {
+          // Both strings
+          if (aParts[i] < bParts[i]) return -1;
+          if (aParts[i] > bParts[i]) return 1;
+        }
+      }
+      return 0;
+    }
+
+    function compareVersions(a, b) {
+      // Returns -1 if a < b, 0 if equal, 1 if a > b
+      if (a.major !== b.major) return a.major > b.major ? 1 : -1;
+      if (a.minor !== b.minor) return a.minor > b.minor ? 1 : -1;
+      if (a.patch !== b.patch) return a.patch > b.patch ? 1 : -1;
+      return comparePre(a.prerelease, b.prerelease);
+    }
+
+    function versionStr(v) {
+      let s = `${v.major}.${v.minor}.${v.patch}`;
+      if (v.prerelease) s += `-${v.prerelease}`;
+      if (v.build) s += `+${v.build}`;
+      return s;
+    }
+
+    // ========================================
+    // Range Satisfaction Engine
+    // ========================================
+
+    function expandRange(range) {
+      range = range.trim();
+      if (!range || range === '*' || range === 'x' || range === 'X') {
+        return () => true;
+      }
+
+      // Handle || (union)
+      if (range.includes('||')) {
+        const parts = range.split('||').map(r => expandRange(r.trim()));
+        return (v) => parts.some(fn => fn(v));
+      }
+
+      // Handle hyphen range: A - B
+      const hyphenMatch = range.match(/^([\d]+(?:\.[\d]+)?(?:\.[\d]+)?(?:-[^\s]+)?)\s+-\s+([\d]+(?:\.[\d]+)?(?:\.[\d]+)?(?:-[^\s]+)?)$/);
+      if (hyphenMatch) {
+        const low = padVersion(hyphenMatch[1]);
+        const high = padVersion(hyphenMatch[2]);
+        const lo = parseSemver(low);
+        const hi = parseSemver(high);
+        if (!lo || !hi) return () => false;
+        // If high is partial (e.g. 2 or 2.0), it's inclusive up to next
+        const highPartCount = hyphenMatch[2].split('.').length;
+        if (highPartCount < 3) {
+          // <(major+1).0.0 or <major.(minor+1).0
+          return (v) => compareVersions(v, lo) >= 0 && (highPartCount === 1
+            ? v.major <= hi.major
+            : (v.major < hi.major || (v.major === hi.major && v.minor <= hi.minor)));
+        }
+        return (v) => compareVersions(v, lo) >= 0 && compareVersions(v, hi) <= 0;
+      }
+
+      // Handle space-separated comparators (intersection)
+      const comparators = range.split(/\s+/).filter(Boolean);
+      if (comparators.length > 1) {
+        // Check if it's truly multiple comparators vs a single token
+        const fns = comparators.map(c => expandRange(c));
+        return (v) => fns.every(fn => fn(v));
+      }
+
+      // Single comparator
+      const single = range.trim();
+
+      // Caret ^
+      if (single.startsWith('^')) {
+        const base = padVersion(single.slice(1));
+        const b = parseSemver(base);
+        if (!b) return () => false;
+        return (v) => {
+          if (compareVersions(v, b) < 0) return false;
+          if (b.major !== 0) return v.major === b.major;
+          if (b.minor !== 0) return v.major === 0 && v.minor === b.minor;
+          return v.major === 0 && v.minor === 0 && v.patch === b.patch;
+        };
+      }
+
+      // Tilde ~
+      if (single.startsWith('~')) {
+        const base = padVersion(single.slice(1));
+        const b = parseSemver(base);
+        if (!b) return () => false;
+        return (v) => {
+          if (compareVersions(v, b) < 0) return false;
+          return v.major === b.major && v.minor === b.minor;
+        };
+      }
+
+      // Comparator operators: >=, <=, >, <, =
+      const opMatch = single.match(/^(>=|<=|>|<|=)\s*([\d].*)$/);
+      if (opMatch) {
+        const op = opMatch[1];
+        const base = padVersion(opMatch[2]);
+        const b = parseSemver(base);
+        if (!b) return () => false;
+        return (v) => {
+          const cmp = compareVersions(v, b);
+          switch (op) {
+            case '>=': return cmp >= 0;
+            case '<=': return cmp <= 0;
+            case '>':  return cmp > 0;
+            case '<':  return cmp < 0;
+            case '=':  return cmp === 0;
+          }
+          return false;
+        };
+      }
+
+      // x-range: 1.x, 1.2.x, 1.x.x
+      if (/[xX*]/.test(single) || /^\d+$/.test(single) || /^\d+\.\d+$/.test(single)) {
+        const parts = single.replace(/[xX*]/g, '').split('.').filter(Boolean);
+        if (parts.length === 0) return () => true;
+        if (parts.length === 1) {
+          const maj = parseInt(parts[0], 10);
+          return (v) => v.major === maj;
+        }
+        if (parts.length === 2) {
+          const maj = parseInt(parts[0], 10);
+          const min = parseInt(parts[1], 10);
+          return (v) => v.major === maj && v.minor === min;
+        }
+      }
+
+      // Exact version
+      const exact = parseSemver(padVersion(single));
+      if (exact) {
+        return (v) => compareVersions(v, exact) === 0;
+      }
+
+      return () => false;
+    }
+
+    function padVersion(str) {
+      str = str.trim().replace(/^v/, '');
+      // Preserve prerelease/build
+      let pre = '';
+      let build = '';
+      let core = str;
+      const plusIdx = core.indexOf('+');
+      if (plusIdx !== -1) {
+        build = core.slice(plusIdx);
+        core = core.slice(0, plusIdx);
+      }
+      const dashIdx = core.indexOf('-');
+      if (dashIdx !== -1) {
+        pre = core.slice(dashIdx);
+        core = core.slice(0, dashIdx);
+      }
+      const parts = core.split('.');
+      while (parts.length < 3) parts.push('0');
+      return parts.join('.') + pre + build;
+    }
+
+    // ========================================
+    // UI Logic
+    // ========================================
+
+    // Parse Section
+    const $parseInput = document.getElementById('parseInput');
+    const $parsedParts = document.getElementById('parsedParts');
+
+    function updateParse() {
+      const v = parseSemver($parseInput.value);
+      if (!$parseInput.value.trim()) {
+        $parseInput.classList.remove('input-valid', 'input-invalid');
+        $parsedParts.innerHTML = renderParsedParts(null);
+        return;
+      }
+      if (v) {
+        $parseInput.classList.add('input-valid');
+        $parseInput.classList.remove('input-invalid');
+        $parsedParts.innerHTML = renderParsedParts(v);
+      } else {
+        $parseInput.classList.add('input-invalid');
+        $parseInput.classList.remove('input-valid');
+        $parsedParts.innerHTML = '<div class="result-box"><span class="error">Invalid semver string. Expected format: major.minor.patch[-prerelease][+build]</span></div>';
+      }
+    }
+
+    function renderParsedParts(v) {
+      if (!v) {
+        return ['Major', 'Minor', 'Patch', 'Pre-release', 'Build'].map(label =>
+          `<div class="parsed-part"><div class="part-label">${label}</div><div class="part-value empty">-</div></div>`
+        ).join('');
+      }
+      return `
+        <div class="parsed-part"><div class="part-label">Major</div><div class="part-value">${v.major}</div></div>
+        <div class="parsed-part"><div class="part-label">Minor</div><div class="part-value">${v.minor}</div></div>
+        <div class="parsed-part"><div class="part-label">Patch</div><div class="part-value">${v.patch}</div></div>
+        <div class="parsed-part"><div class="part-label">Pre-release</div><div class="part-value${v.prerelease ? '' : ' empty'}">${v.prerelease || 'none'}</div></div>
+        <div class="parsed-part"><div class="part-label">Build</div><div class="part-value${v.build ? '' : ' empty'}">${v.build || 'none'}</div></div>
+      `;
+    }
+
+    $parseInput.addEventListener('input', updateParse);
+
+    // Compare Section
+    const $compareA = document.getElementById('compareA');
+    const $compareB = document.getElementById('compareB');
+    const $compareResult = document.getElementById('compareResult');
+
+    function updateCompare() {
+      const aStr = $compareA.value.trim();
+      const bStr = $compareB.value.trim();
+
+      if (!aStr || !bStr) {
+        $compareResult.innerHTML = '<span class="value" style="color: var(--text-muted)">Enter two versions to compare</span>';
+        $compareA.classList.remove('input-valid', 'input-invalid');
+        $compareB.classList.remove('input-valid', 'input-invalid');
+        if (aStr) { $compareA.classList.add(parseSemver(aStr) ? 'input-valid' : 'input-invalid'); }
+        if (bStr) { $compareB.classList.add(parseSemver(bStr) ? 'input-valid' : 'input-invalid'); }
+        return;
+      }
+
+      const a = parseSemver(aStr);
+      const b = parseSemver(bStr);
+
+      $compareA.classList.toggle('input-valid', !!a);
+      $compareA.classList.toggle('input-invalid', !a);
+      $compareB.classList.toggle('input-valid', !!b);
+      $compareB.classList.toggle('input-invalid', !b);
+
+      if (!a || !b) {
+        const errors = [];
+        if (!a) errors.push('Version A is invalid');
+        if (!b) errors.push('Version B is invalid');
+        $compareResult.innerHTML = `<span class="error">${errors.join('. ')}</span>`;
+        return;
+      }
+
+      const cmp = compareVersions(a, b);
+      let op, desc;
+      if (cmp < 0) {
+        op = '&lt;';
+        desc = `${versionStr(a)} is lower than ${versionStr(b)}`;
+      } else if (cmp > 0) {
+        op = '&gt;';
+        desc = `${versionStr(a)} is higher than ${versionStr(b)}`;
+      } else {
+        op = '=';
+        desc = 'Both versions are equal';
+      }
+
+      $compareResult.innerHTML = `
+        <span class="value">${escHtml(versionStr(a))}</span>
+        <span class="compare-op">${op}</span>
+        <span class="value">${escHtml(versionStr(b))}</span>
+        <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 8px">${desc}</span>
+      `;
+    }
+
+    $compareA.addEventListener('input', updateCompare);
+    $compareB.addEventListener('input', updateCompare);
+
+    // Range Checker Section
+    const $rangeVersion = document.getElementById('rangeVersion');
+    const $rangeInput = document.getElementById('rangeInput');
+    const $rangeResult = document.getElementById('rangeResult');
+    const $rangeStatus = document.getElementById('rangeStatus');
+
+    function updateRange() {
+      const verStr = $rangeVersion.value.trim();
+      const rangeStr = $rangeInput.value.trim();
+
+      if (!verStr || !rangeStr) {
+        $rangeResult.innerHTML = '<span class="label">Result: </span><span class="value" style="color: var(--text-muted)">Enter a version and range to check</span>';
+        $rangeStatus.textContent = '';
+        $rangeStatus.className = '';
+        $rangeVersion.classList.remove('input-valid', 'input-invalid');
+        $rangeInput.classList.remove('input-valid', 'input-invalid');
+        if (verStr) { $rangeVersion.classList.add(parseSemver(verStr) ? 'input-valid' : 'input-invalid'); }
+        return;
+      }
+
+      const v = parseSemver(verStr);
+      if (!v) {
+        $rangeVersion.classList.add('input-invalid');
+        $rangeVersion.classList.remove('input-valid');
+        $rangeResult.innerHTML = '<span class="label">Result: </span><span class="error">Invalid version format</span>';
+        $rangeStatus.textContent = '';
+        return;
+      }
+
+      $rangeVersion.classList.add('input-valid');
+      $rangeVersion.classList.remove('input-invalid');
+
+      try {
+        const checker = expandRange(rangeStr);
+        const satisfies = checker(v);
+
+        $rangeInput.classList.add('input-valid');
+        $rangeInput.classList.remove('input-invalid');
+
+        if (satisfies) {
+          $rangeResult.innerHTML = `
+            <span class="satisfaction-badge satisfies">SATISFIES</span>
+            <span style="margin-left: 8px; color: var(--text-muted);">${escHtml(verStr)} matches range ${escHtml(rangeStr)}</span>
+          `;
+          $rangeStatus.textContent = 'Satisfies';
+          $rangeStatus.className = 'status status-success';
+        } else {
+          $rangeResult.innerHTML = `
+            <span class="satisfaction-badge fails">DOES NOT SATISFY</span>
+            <span style="margin-left: 8px; color: var(--text-muted);">${escHtml(verStr)} does not match range ${escHtml(rangeStr)}</span>
+          `;
+          $rangeStatus.textContent = 'Does not satisfy';
+          $rangeStatus.className = 'status status-error';
+        }
+      } catch (e) {
+        $rangeInput.classList.add('input-invalid');
+        $rangeInput.classList.remove('input-valid');
+        $rangeResult.innerHTML = `<span class="label">Result: </span><span class="error">Could not parse range: ${escHtml(e.message)}</span>`;
+        $rangeStatus.textContent = '';
+      }
+    }
+
+    $rangeVersion.addEventListener('input', updateRange);
+    $rangeInput.addEventListener('input', updateRange);
+
+    // Increment Section
+    const $incrementInput = document.getElementById('incrementInput');
+    const $incrementGrid = document.getElementById('incrementGrid');
+
+    function updateIncrement() {
+      const v = parseSemver($incrementInput.value);
+
+      if (!$incrementInput.value.trim()) {
+        $incrementInput.classList.remove('input-valid', 'input-invalid');
+        $incrementGrid.innerHTML = renderIncrements(null);
+        return;
+      }
+
+      if (!v) {
+        $incrementInput.classList.add('input-invalid');
+        $incrementInput.classList.remove('input-valid');
+        $incrementGrid.innerHTML = '<div class="result-box"><span class="error">Invalid version. Enter a valid semver string.</span></div>';
+        return;
+      }
+
+      $incrementInput.classList.add('input-valid');
+      $incrementInput.classList.remove('input-invalid');
+
+      const increments = [
+        { label: 'Next Major', value: `${v.major + 1}.0.0` },
+        { label: 'Next Minor', value: `${v.major}.${v.minor + 1}.0` },
+        { label: 'Next Patch', value: `${v.major}.${v.minor}.${v.patch + 1}` },
+        { label: 'Next Pre-major', value: `${v.major + 1}.0.0-0` },
+        { label: 'Next Pre-minor', value: `${v.major}.${v.minor + 1}.0-0` },
+        { label: 'Next Pre-patch', value: `${v.major}.${v.minor}.${v.patch + 1}-0` },
+      ];
+
+      $incrementGrid.innerHTML = increments.map(inc => `
+        <div class="increment-item" onclick="copyToClipboard('${inc.value}', this)" title="Click to copy">
+          <div class="inc-label">${inc.label}</div>
+          <div class="inc-value">${inc.value}</div>
+        </div>
+      `).join('');
+    }
+
+    $incrementInput.addEventListener('input', updateIncrement);
+
+    function renderIncrements(v) {
+      const labels = ['Next Major', 'Next Minor', 'Next Patch', 'Next Pre-major', 'Next Pre-minor', 'Next Pre-patch'];
+      return labels.map(label =>
+        `<div class="increment-item"><div class="inc-label">${label}</div><div class="inc-value" style="color: var(--text-muted)">-</div></div>`
+      ).join('');
+    }
+
+    // Utility
+    function escHtml(str) {
+      const el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
+
+    function copyToClipboard(text, el) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = el.querySelector('.inc-value').textContent;
+        el.querySelector('.inc-value').textContent = 'Copied!';
+        el.querySelector('.inc-value').style.color = 'var(--success)';
+        setTimeout(() => {
+          el.querySelector('.inc-value').textContent = orig;
+          el.querySelector('.inc-value').style.color = '';
+        }, 1000);
+      });
+    }
+  </script>
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 301 Moved Permanently - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 301 Moved Permanently means a URL has permanently changed. Learn how to set up 301 redirects correctly, SEO implications, and common configuration mistakes.">
+  <link rel="canonical" href="https://zerokit.dev/http/301.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #facc15; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between 301 and 302 redirects?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 301 redirect is permanent, meaning search engines transfer SEO value (link equity) to the new URL and update their index. A 302 redirect is temporary, so search engines keep the original URL in their index. Use 301 when a page has permanently moved; use 302 for temporary situations like maintenance or A/B testing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does a 301 redirect affect SEO?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 301 redirect passes approximately 90-99% of link equity (ranking power) to the new URL. Google treats 301 redirects as a signal to drop the old URL from its index and replace it with the new one. It is the recommended way to handle URL changes, domain migrations, and HTTP-to-HTTPS transitions for preserving search rankings."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 301 redirect loop?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A redirect loop occurs when URL A redirects to URL B, which redirects back to URL A. To fix it: 1) Map out the full redirect chain using curl -L or a redirect checker tool. 2) Ensure each URL redirects directly to the final destination. 3) Check for conflicting redirect rules in your .htaccess, nginx config, or application code. 4) Verify that HTTP-to-HTTPS and www-to-non-www rules do not contradict each other."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 301 Moved Permanently
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">301</div>
+      <div class="status-name-big">Moved Permanently</div>
+      <div class="status-category">3xx Redirection</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 301 Moved Permanently Mean?</h2>
+      <p>HTTP 301 tells the client that the requested resource has been permanently moved to a new URL. The server includes the new URL in the <code>Location</code> response header. Browsers automatically follow the redirect, and search engines update their index to use the new URL.</p>
+      <p>This is the most important redirect code for SEO. It signals that all link equity, bookmarks, and references should be transferred to the new URL. Browsers cache 301 redirects aggressively, which means once a user encounters a 301, future requests go directly to the new URL without hitting the old one again.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Domain migration:</strong> Moving from <code>oldsite.com</code> to <code>newsite.com</code>. Every page on the old domain should 301 redirect to its counterpart on the new domain.</li>
+        <li><strong>HTTP to HTTPS migration:</strong> Upgrading to HTTPS requires 301 redirecting all HTTP URLs to their HTTPS equivalents to preserve SEO and ensure security.</li>
+        <li><strong>URL structure changes:</strong> Changing from <code>/blog/2024/my-post</code> to <code>/articles/my-post</code> requires 301 redirects so old links and bookmarks still work.</li>
+        <li><strong>www to non-www (or vice versa):</strong> Canonicalizing your domain to use either <code>www.example.com</code> or <code>example.com</code> consistently uses 301 redirects.</li>
+        <li><strong>Trailing slash normalization:</strong> Deciding whether URLs end with <code>/</code> or not and redirecting the non-canonical form to the canonical one.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Set Up 301 Redirects</h2>
+
+      <h3>Apache (.htaccess)</h3>
+      <div class="code-block">
+# Single page redirect
+Redirect 301 /old-page.html https://example.com/new-page.html
+
+# Redirect entire domain (HTTP to HTTPS)
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Redirect www to non-www
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+      </div>
+
+      <h3>Nginx</h3>
+      <div class="code-block">
+# Single page redirect
+location = /old-page.html {
+    return 301 https://example.com/new-page.html;
+}
+
+# HTTP to HTTPS
+server {
+    listen 80;
+    server_name example.com;
+    return 301 https://$server_name$request_uri;
+}
+
+# www to non-www
+server {
+    listen 443 ssl;
+    server_name www.example.com;
+    return 301 https://example.com$request_uri;
+}
+      </div>
+
+      <h3>Express.js (Node.js)</h3>
+      <div class="code-block">
+// Single route redirect
+app.get('/old-page', (req, res) => {
+  res.redirect(301, '/new-page');
+});
+
+// Force HTTPS middleware
+app.use((req, res, next) => {
+  if (req.header('x-forwarded-proto') !== 'https') {
+    return res.redirect(301, `https://${req.header('host')}${req.url}`);
+  }
+  next();
+});
+      </div>
+
+      <h3>Verifying a 301 with curl</h3>
+      <div class="code-block">
+$ curl -I http://example.com/old-page
+
+HTTP/1.1 301 Moved Permanently
+Location: https://example.com/new-page
+Content-Length: 0
+
+$ curl -L -I http://example.com/old-page   # Follow redirects
+HTTP/1.1 301 Moved Permanently
+Location: https://example.com/new-page
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Mistakes to Avoid</h2>
+      <ul>
+        <li><strong>Redirect chains:</strong> A redirects to B which redirects to C. Each hop adds latency and may lose SEO value. Always redirect directly to the final destination.</li>
+        <li><strong>Redirect loops:</strong> A redirects to B, B redirects back to A. Browsers will stop after a few hops and show an error. Test all redirects thoroughly.</li>
+        <li><strong>Using 301 for temporary moves:</strong> If the URL will change back (seasonal pages, A/B tests), use 302 instead. 301 tells search engines and browsers the move is final.</li>
+        <li><strong>Not preserving query parameters:</strong> When redirecting, make sure to pass along query strings if they are relevant to the new URL.</li>
+        <li><strong>Forgetting to update internal links:</strong> Even with 301s in place, update links within your site to point directly to the new URLs. Redirects add a round trip of latency.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 301 and 302 redirects?</div>
+        <div class="faq-a">A 301 is permanent &mdash; search engines transfer link equity to the new URL and drop the old URL from their index. A 302 is temporary &mdash; search engines keep the old URL indexed. Use 301 for domain changes, URL restructuring, or HTTPS migration. Use 302 for A/B tests, maintenance pages, or geo-based redirects.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does a 301 redirect affect SEO?</div>
+        <div class="faq-a">A 301 passes approximately 90-99% of link equity to the destination URL. Google has confirmed that 301 redirects consolidate ranking signals. It is the recommended method for preserving search rankings during URL changes, domain migrations, and protocol upgrades (HTTP to HTTPS).</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix a 301 redirect loop?</div>
+        <div class="faq-a">First, trace the full redirect chain with <code>curl -L -I &lt;url&gt;</code> to see where it loops. Common causes: conflicting rules in .htaccess (both www and non-www rules active), CDN redirect settings fighting with server-side rules, or a CMS like WordPress forcing a redirect that conflicts with server config. Remove conflicting rules and ensure each URL has exactly one redirect target.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="302.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">302</div>
+          <div class="rcc-name">Found &mdash; Temporary redirect</div>
+        </a>
+        <a href="304.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">304</div>
+          <div class="rcc-name">Not Modified &mdash; Cache is still valid</div>
+        </a>
+        <a href="404.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">404</div>
+          <div class="rcc-name">Not Found &mdash; When you forget to redirect</div>
+        </a>
+        <a href="200.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">200</div>
+          <div class="rcc-name">OK &mdash; The final destination response</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/url.html" class="tool-link">URL Parser</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 400 Bad Request - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 400 Bad Request means the server cannot process your request due to malformed syntax. Learn the most common causes, how to debug 400 errors, and fix them in APIs and web apps.">
+  <link rel="canonical" href="https://zerokit.dev/http/400.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #fb923c; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What causes a 400 Bad Request error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 400 Bad Request is caused by the client sending a request the server cannot understand. Common causes include: malformed JSON in the request body, invalid or missing required query parameters, a URL that is too long, corrupted cookies, invalid Content-Type headers, or request headers that exceed server limits."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 400 Bad Request error as a user?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "As a user, try these steps: 1) Clear your browser cookies and cache for the affected site. 2) Check the URL for typos or special characters. 3) Try a different browser or incognito mode. 4) Disable browser extensions that modify requests. 5) If submitting a form, reduce file upload sizes. The error is client-side, meaning something about your request is malformed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between 400 and 422 errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "400 Bad Request means the server cannot parse the request at all — the syntax is broken (e.g., invalid JSON). 422 Unprocessable Entity means the request is syntactically correct but semantically invalid (e.g., valid JSON but an email field contains 'not-an-email'). Use 400 for malformed requests and 422 for validation errors on well-formed requests."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 400 Bad Request
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">400</div>
+      <div class="status-name-big">Bad Request</div>
+      <div class="status-category">4xx Client Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 400 Bad Request Mean?</h2>
+      <p>HTTP 400 Bad Request indicates that the server cannot or will not process the request due to something that the server perceives as a client error. The request itself is malformed &mdash; the server cannot even begin to understand what the client wants.</p>
+      <p>Unlike 401 (authentication) or 403 (authorization), a 400 error means the request structure or data is fundamentally broken. The server is saying: "I cannot make sense of what you sent me." This is one of the most common HTTP errors encountered by both developers and regular users.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Malformed JSON body:</strong> Missing commas, unclosed brackets, or trailing commas in JSON payloads. Servers parse the Content-Type and reject bodies that do not match. Even a single misplaced character can trigger this.</li>
+        <li><strong>Invalid or missing required parameters:</strong> The API expects certain query parameters or form fields that are absent, misspelled, or have wrong data types (sending a string where an integer is expected).</li>
+        <li><strong>URL too long or contains invalid characters:</strong> Some servers cap URL length at 2,048 or 8,192 characters. Unencoded special characters in the URL (spaces, brackets, unicode) also cause 400 errors.</li>
+        <li><strong>Corrupted or oversized cookies:</strong> Browsers send cookies automatically. If a cookie becomes corrupted or the total cookie header exceeds the server's limit (typically 4-8 KB), the server rejects the entire request.</li>
+        <li><strong>Mismatched Content-Type header:</strong> Sending a JSON body with <code>Content-Type: text/plain</code>, or sending form data with <code>Content-Type: application/json</code>. The server tries to parse the body according to the declared type and fails.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Fix It</h2>
+      <h3>For Developers</h3>
+      <ul>
+        <li><strong>Validate JSON before sending:</strong> Use <code>JSON.parse()</code> in a try-catch to verify your payload is valid JSON before making the request. Tools like our <a href="../tools/json.html">JSON Formatter</a> can help identify syntax errors.</li>
+        <li><strong>Check Content-Type matches the body:</strong> If you are sending JSON, set <code>Content-Type: application/json</code>. For form data, use <code>application/x-www-form-urlencoded</code> or <code>multipart/form-data</code>.</li>
+        <li><strong>URL-encode query parameters:</strong> Use <code>encodeURIComponent()</code> for values that may contain special characters. Never pass raw user input directly into URLs.</li>
+        <li><strong>Read the response body:</strong> Good APIs include error details in the 400 response body: which field failed, what was expected, and what was received. Always log and inspect 400 response bodies.</li>
+        <li><strong>Check request size limits:</strong> Nginx defaults to 1MB for <code>client_max_body_size</code>. If your request body exceeds the server's limit, you may get 400 (or 413 Payload Too Large).</li>
+      </ul>
+
+      <h3>For Regular Users</h3>
+      <ul>
+        <li><strong>Clear cookies for the site:</strong> Go to browser settings, find the site, and clear its cookies. Corrupted cookies are a common cause.</li>
+        <li><strong>Check the URL:</strong> Make sure the URL does not contain unusual characters or is not excessively long. Re-type it manually if you copied it from somewhere.</li>
+        <li><strong>Try incognito mode:</strong> This disables extensions and uses no cookies, isolating whether the issue is browser-specific.</li>
+        <li><strong>Reduce file upload size:</strong> If you are uploading a file, try a smaller one. The server may reject files exceeding its size limit.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Code Examples</h2>
+      <h3>Common API 400 Response</h3>
+      <div class="code-block">
+$ curl -i -X POST https://api.example.com/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Jane", "email": "not-valid"}'
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "error": "validation_error",
+  "details": [
+    {"field": "email", "message": "Invalid email format"}
+  ]
+}
+      </div>
+
+      <h3>Malformed JSON Causing 400</h3>
+      <div class="code-block">
+# Trailing comma makes this invalid JSON
+$ curl -i -X POST https://api.example.com/data \
+  -H "Content-Type: application/json" \
+  -d '{"key": "value",}'
+
+HTTP/1.1 400 Bad Request
+{"error": "Malformed JSON in request body"}
+      </div>
+
+      <h3>Returning 400 in Express.js</h3>
+      <div class="code-block">
+app.post('/api/users', (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({
+      error: 'Missing required fields',
+      required: ['name', 'email'],
+      received: Object.keys(req.body)
+    });
+  }
+
+  // ... create user
+});
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What causes a 400 Bad Request error?</div>
+        <div class="faq-a">A 400 error is caused by the client sending a request the server cannot process. The most common triggers: malformed JSON or XML in the request body, missing required fields or parameters, URL containing invalid characters, corrupted browser cookies, or a Content-Type header that does not match the actual body format.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix a 400 Bad Request as a regular user?</div>
+        <div class="faq-a">Try these steps in order: 1) Clear your cookies and cache for the specific website. 2) Double-check the URL for typos. 3) Try the page in an incognito/private window. 4) Disable browser extensions. 5) Try a different browser. If the problem persists across browsers and devices, the issue is likely on the server side and you should contact the site owner.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 400 and 422 errors?</div>
+        <div class="faq-a">400 Bad Request means the request is syntactically broken &mdash; the server cannot even parse it (e.g., invalid JSON). 422 Unprocessable Entity (from WebDAV, commonly used in REST APIs) means the request is syntactically correct but contains semantic errors (e.g., valid JSON but <code>"age": -5"</code> fails business logic validation). Use 400 for parse errors, 422 for validation errors.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="401.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">401</div>
+          <div class="rcc-name">Unauthorized &mdash; Authentication required</div>
+        </a>
+        <a href="403.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">403</div>
+          <div class="rcc-name">Forbidden &mdash; Authenticated but no permission</div>
+        </a>
+        <a href="404.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">404</div>
+          <div class="rcc-name">Not Found &mdash; Resource does not exist</div>
+        </a>
+        <a href="405.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">405</div>
+          <div class="rcc-name">Method Not Allowed &mdash; Wrong HTTP method</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/json.html" class="tool-link">JSON Formatter & Validator</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/url.html" class="tool-link">URL Encoder/Decoder</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

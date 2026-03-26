@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 201 Created - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 201 Created means a new resource was successfully created. Learn when to return 201 vs 200, how to use Location headers, and REST API best practices.">
+  <link rel="canonical" href="https://zerokit.dev/http/201.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #4ade80; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "When should I return HTTP 201 instead of 200?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Return 201 Created when a request results in a new resource being created on the server, typically after POST requests. Use 200 OK for general success responses like fetching data (GET) or updating existing resources (PUT/PATCH). The 201 should include a Location header with the URL of the newly created resource."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should HTTP 201 include a response body?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, it is best practice to return the created resource in the response body along with a Location header. This saves the client from making an additional GET request. The response body should include at minimum the resource's ID, the canonical URL, and any server-generated fields like timestamps."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can PUT requests return 201?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. If a PUT request targets a resource that does not yet exist and the server creates it (upsert behavior), 201 Created is the correct response. If the PUT updates an existing resource, return 200 OK or 204 No Content instead."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 201 Created
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">201</div>
+      <div class="status-name-big">Created</div>
+      <div class="status-category">2xx Success</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 201 Created Mean?</h2>
+      <p>HTTP 201 Created indicates that the request has been fulfilled and has resulted in one or more new resources being created. This is the standard response for a successful POST request that creates a new entity &mdash; whether it is a new user account, a database record, a file upload, or any other resource.</p>
+      <p>The 201 response should include a <code>Location</code> header that provides the URI of the primary resource created. The response body typically contains a representation of the newly created resource, including any server-generated fields such as an ID, creation timestamp, or default values.</p>
+      <p>Unlike 200 OK which is a generic success code, 201 carries specific semantic meaning: something new exists on the server that did not exist before this request.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>POST request creating a new resource:</strong> The most common scenario. A client submits data (e.g., a user registration form or an API call to create a record), and the server stores it and returns 201.</li>
+        <li><strong>PUT to a non-existing resource (upsert):</strong> If your API supports creating resources via PUT when the target URI does not yet exist, the server should return 201 (not 200) to indicate creation rather than update.</li>
+        <li><strong>File upload completed:</strong> When a file is uploaded and stored on the server, 201 is returned along with the URL where the file can be accessed.</li>
+        <li><strong>Batch or nested creation:</strong> Some APIs create multiple related resources in a single request (e.g., an order with line items). A 201 indicates the primary resource and its children were all created.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Best Practices for Returning 201</h2>
+      <ul>
+        <li><strong>Always include a Location header:</strong> This tells the client exactly where to find the newly created resource. Example: <code>Location: /api/users/42</code>.</li>
+        <li><strong>Return the created resource in the body:</strong> This avoids forcing the client to make a follow-up GET request. Include all fields, especially server-generated ones like <code>id</code>, <code>created_at</code>, and computed defaults.</li>
+        <li><strong>Use 201 only when creation happens synchronously:</strong> If creation is queued for later processing, use 202 Accepted instead. 201 means the resource exists right now.</li>
+        <li><strong>Validate idempotency for retries:</strong> If a client retries a POST and the resource already exists, consider returning 200 or 409 Conflict instead of creating a duplicate.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Code Examples</h2>
+      <h3>Curl Request/Response</h3>
+      <div class="code-block">
+$ curl -i -X POST https://api.example.com/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Jane Doe", "email": "jane@example.com"}'
+
+HTTP/1.1 201 Created
+Location: /api/users/42
+Content-Type: application/json
+
+{"id": 42, "name": "Jane Doe", "email": "jane@example.com", "created_at": "2025-01-15T10:30:00Z"}
+      </div>
+
+      <h3>Express.js (Node.js)</h3>
+      <div class="code-block">
+app.post('/api/users', async (req, res) => {
+  const user = await User.create(req.body);
+  res.status(201)
+     .location(`/api/users/${user.id}`)
+     .json(user);
+});
+      </div>
+
+      <h3>Django REST Framework (Python)</h3>
+      <div class="code-block">
+from rest_framework import status
+from rest_framework.response import Response
+
+class UserViewSet(viewsets.ModelViewSet):
+    def create(self, request):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        headers = {'Location': f'/api/users/{user.pk}'}
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">When should I return HTTP 201 instead of 200?</div>
+        <div class="faq-a">Return 201 Created whenever a request results in a new resource being stored on the server. This is most commonly used for POST requests that insert new records. Use 200 OK for general success, such as GET requests that fetch data or PUT/PATCH requests that update existing resources. The distinction helps API consumers understand exactly what happened.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Should HTTP 201 include a response body?</div>
+        <div class="faq-a">Yes, best practice is to include the created resource in the response body. This saves the client from making a separate GET request to retrieve the new resource. Include all fields, especially server-generated values like the ID, creation timestamp, and any computed defaults. Also include a <code>Location</code> header pointing to the canonical URL.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can PUT requests return 201?</div>
+        <div class="faq-a">Yes. When a PUT targets a resource that does not exist yet and the server creates it (upsert), 201 is the correct response. If the PUT updates an existing resource, use 200 OK or 204 No Content. This is defined in RFC 9110, Section 9.3.4.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="200.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">200</div>
+          <div class="rcc-name">OK &mdash; Generic success response</div>
+        </a>
+        <a href="400.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">400</div>
+          <div class="rcc-name">Bad Request &mdash; When creation data is invalid</div>
+        </a>
+        <a href="403.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">403</div>
+          <div class="rcc-name">Forbidden &mdash; Not authorized to create</div>
+        </a>
+        <a href="500.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">500</div>
+          <div class="rcc-name">Internal Server Error &mdash; Creation failed</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/json.html" class="tool-link">JSON Formatter</a>
+        <a href="../tools/curl.html" class="tool-link">cURL Command Builder</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

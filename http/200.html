@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 200 OK - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 200 OK is the standard success response. Learn what it means, when servers return it, how to handle it in your code, and common pitfalls developers encounter.">
+  <link rel="canonical" href="https://zerokit.dev/http/200.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #4ade80; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does HTTP 200 OK mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HTTP 200 OK is the standard response for successful HTTP requests. The actual response depends on the request method: for GET requests, the resource is returned in the message body; for POST requests, the result of the action is described or contained in the body."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is HTTP 200 always a success?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "While HTTP 200 technically means the server processed the request successfully, API responses with a 200 status can still contain application-level errors in the body. Some poorly designed APIs return 200 with an error message in the JSON body instead of using proper 4xx/5xx codes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between 200 OK and 201 Created?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "200 OK indicates a generic success, typically used for GET requests that return data. 201 Created specifically indicates that a new resource was created as a result of the request, typically returned after a successful POST. The 201 response usually includes a Location header pointing to the newly created resource."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 200 OK
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">200</div>
+      <div class="status-name-big">OK</div>
+      <div class="status-category">2xx Success</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 200 OK Mean?</h2>
+      <p>HTTP 200 is the most common HTTP status code. It tells the client that its request was received, understood, and processed successfully. The meaning of "success" varies by HTTP method:</p>
+      <ul>
+        <li><strong>GET</strong> &mdash; The requested resource has been fetched and is transmitted in the message body.</li>
+        <li><strong>POST</strong> &mdash; The result of the action is described or contained in the response body.</li>
+        <li><strong>PUT/PATCH</strong> &mdash; The resource was successfully updated and the current state may be in the body.</li>
+        <li><strong>DELETE</strong> &mdash; The resource was successfully deleted (though 204 No Content is often preferred).</li>
+        <li><strong>HEAD</strong> &mdash; The headers that would be returned for a GET are sent, but without a body.</li>
+      </ul>
+      <p>A 200 response is always cacheable by default unless explicitly overridden by cache-control headers.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>When Your Application Returns 200</h2>
+      <p>While 200 means success at the HTTP level, watch out for these common pitfalls that can mislead developers:</p>
+      <ul>
+        <li><strong>Soft errors hidden behind 200:</strong> Some APIs return <code>{"status": "error", "message": "Invalid token"}</code> with a 200 status. This is an anti-pattern &mdash; always use proper HTTP status codes (401 for auth failures, 422 for validation errors).</li>
+        <li><strong>Empty 200 responses:</strong> A 200 with no body on a GET request usually indicates a bug. Consider using 204 No Content if there is genuinely nothing to return.</li>
+        <li><strong>200 on POST creates:</strong> When a POST creates a new resource, return 201 Created instead of 200 to follow HTTP semantics. Include the <code>Location</code> header pointing to the new resource.</li>
+        <li><strong>200 on cached responses:</strong> If you are returning content from cache, 200 is correct for a full response. Use 304 Not Modified when the client already has the current version.</li>
+        <li><strong>Returning 200 for partial failures:</strong> In batch operations, if some items succeed and some fail, consider 207 Multi-Status (WebDAV) or include an error summary in the response body.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Code Examples</h2>
+      <h3>Curl Request/Response</h3>
+      <div class="code-block">
+$ curl -i https://api.example.com/users/42
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: max-age=3600
+Content-Length: 127
+
+{"id": 42, "name": "Jane Doe", "email": "jane@example.com"}
+      </div>
+
+      <h3>Express.js (Node.js)</h3>
+      <div class="code-block">
+app.get('/api/users/:id', async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  res.status(200).json(user);  // 200 is the default, but being explicit is fine
+});
+      </div>
+
+      <h3>Python (Flask)</h3>
+      <div class="code-block">
+@app.route('/api/users/&lt;int:user_id&gt;')
+def get_user(user_id):
+    user = User.query.get_or_404(user_id)
+    return jsonify(user.to_dict()), 200
+      </div>
+
+      <h3>Nginx Configuration</h3>
+      <div class="code-block">
+# Health check endpoint that always returns 200
+location /health {
+    access_log off;
+    return 200 'OK';
+    add_header Content-Type text/plain;
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What does HTTP 200 OK mean?</div>
+        <div class="faq-a">HTTP 200 OK is the standard response for successful HTTP requests. It means the server received your request, understood it, and processed it without errors. For GET requests, the requested data is included in the response body. For POST requests, the result of the operation is returned.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is HTTP 200 always a success?</div>
+        <div class="faq-a">At the HTTP protocol level, yes &mdash; 200 means the server handled the request successfully. However, some APIs use 200 for everything and put error details in the response body. This is considered bad practice. Always check the response body for application-level errors, especially when consuming third-party APIs.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 200 OK and 201 Created?</div>
+        <div class="faq-a">200 OK is a general-purpose success code, while 201 Created specifically indicates that a new resource was created as a result of the request. 201 is typically used after POST requests that create new records. The 201 response should include a <code>Location</code> header with the URL of the newly created resource.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="201.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">201</div>
+          <div class="rcc-name">Created &mdash; A new resource was created</div>
+        </a>
+        <a href="204.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">204</div>
+          <div class="rcc-name">No Content &mdash; Success with no body</div>
+        </a>
+        <a href="304.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">304</div>
+          <div class="rcc-name">Not Modified &mdash; Cached version is current</div>
+        </a>
+        <a href="400.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">400</div>
+          <div class="rcc-name">Bad Request &mdash; Invalid request syntax</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/curl.html" class="tool-link">cURL Command Builder</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

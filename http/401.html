@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 401 Unauthorized - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 401 Unauthorized means authentication is required. Learn the difference between 401 and 403, how to handle auth tokens, and fix unauthorized errors in APIs and browsers.">
+  <link rel="canonical" href="https://zerokit.dev/http/401.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #fb923c; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between 401 Unauthorized and 403 Forbidden?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "401 Unauthorized means the client has not authenticated at all — no credentials were provided, or the credentials are invalid. The server is saying 'I don't know who you are.' 403 Forbidden means the server knows who you are (you are authenticated) but you do not have permission to access the resource. Think of 401 as 'please log in' and 403 as 'you are logged in but you cannot access this.'"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 401 error when calling an API?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Check these in order: 1) Verify your API key or token is correct and has not expired. 2) Ensure the Authorization header format is correct (e.g., 'Bearer <token>' not just '<token>'). 3) Check if your token has the required scopes/permissions. 4) Verify the token is being sent to the correct API endpoint and domain. 5) If using OAuth, your refresh token may have expired, requiring re-authentication."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does my browser show 401 Unauthorized?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Browsers show 401 when the server requires HTTP authentication (Basic or Digest). The browser typically displays a native login popup. If the popup does not appear, the server may be using a non-standard authentication scheme. Common fixes: clear browser credentials for the site, check if a VPN or proxy is stripping auth headers, or verify the credentials with the server administrator."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 401 Unauthorized
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">401</div>
+      <div class="status-name-big">Unauthorized</div>
+      <div class="status-category">4xx Client Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 401 Unauthorized Mean?</h2>
+      <p>HTTP 401 Unauthorized indicates that the request lacks valid authentication credentials for the target resource. The server is telling the client: "You need to authenticate before I can give you what you asked for."</p>
+      <p>Despite being named "Unauthorized," this status code actually means <strong>unauthenticated</strong>. The client either did not provide credentials at all, or the credentials it provided are invalid (wrong password, expired token, etc.). For permission issues where the user is authenticated but lacks access rights, the correct code is 403 Forbidden.</p>
+      <p>The 401 response must include a <code>WWW-Authenticate</code> header that tells the client what authentication scheme the server accepts (e.g., Basic, Bearer, Digest). This lets the client know how to authenticate on the next attempt.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Missing Authorization header:</strong> The API requires a token or API key in the request headers, but the client did not include it. This happens when code paths skip the authentication middleware or when a request is accidentally sent without headers.</li>
+        <li><strong>Expired JWT or session token:</strong> Access tokens (JWTs, session cookies) have expiration times. Once expired, the server rejects them with 401. The client needs to refresh the token or re-authenticate.</li>
+        <li><strong>Wrong Authorization header format:</strong> Common mistake: sending <code>Authorization: abc123</code> instead of <code>Authorization: Bearer abc123</code>. The scheme prefix (Basic, Bearer, etc.) is required.</li>
+        <li><strong>API key revoked or rotated:</strong> If API keys were rotated (common during security incidents), the old key no longer works. Check the API provider's dashboard for your current key.</li>
+        <li><strong>CORS stripping the Authorization header:</strong> In browser-based requests, CORS preflight failures can cause the browser to strip the Authorization header from the actual request, resulting in a 401.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Fix It</h2>
+      <h3>For API Developers</h3>
+      <ul>
+        <li><strong>Validate token presence before parsing:</strong> Check if the Authorization header exists before attempting to decode it. Return a clear error message: <code>{"error": "No authorization token provided"}</code>.</li>
+        <li><strong>Include WWW-Authenticate header:</strong> Per the HTTP spec, 401 responses must include this header. Example: <code>WWW-Authenticate: Bearer realm="api", error="invalid_token"</code>.</li>
+        <li><strong>Distinguish between missing and invalid tokens:</strong> "No token provided" vs "Token expired" vs "Invalid signature" helps the client fix the issue faster.</li>
+        <li><strong>Implement token refresh flows:</strong> Do not force users to re-login every time their access token expires. Provide a refresh token mechanism that lets clients obtain new access tokens.</li>
+      </ul>
+
+      <h3>For API Consumers</h3>
+      <ul>
+        <li><strong>Check the Authorization header format:</strong> It must be <code>Authorization: Bearer &lt;token&gt;</code> (note the space after "Bearer"). Some APIs use <code>Authorization: Basic &lt;base64&gt;</code> or custom schemes.</li>
+        <li><strong>Verify the token is not expired:</strong> For JWTs, decode the payload at <a href="https://jwt.io">jwt.io</a> and check the <code>exp</code> claim. If expired, refresh or re-authenticate.</li>
+        <li><strong>Check API key scopes:</strong> Some APIs require specific scopes. A read-only token used for a write operation may return 401 rather than 403.</li>
+        <li><strong>Inspect the response body:</strong> The 401 response often includes details about what went wrong. Log the full response, not just the status code.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Code Examples</h2>
+      <h3>401 Response from an API</h3>
+      <div class="code-block">
+$ curl -i https://api.example.com/user/profile
+
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="api"
+Content-Type: application/json
+
+{"error": "authentication_required", "message": "No access token provided"}
+      </div>
+
+      <h3>Successful Authentication</h3>
+      <div class="code-block">
+$ curl -i https://api.example.com/user/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"id": 1, "name": "Jane Doe", "email": "jane@example.com"}
+      </div>
+
+      <h3>Express.js Auth Middleware</h3>
+      <div class="code-block">
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401)
+      .set('WWW-Authenticate', 'Bearer realm="api"')
+      .json({ error: 'No authorization token provided' });
+  }
+
+  const [scheme, token] = authHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return res.status(401)
+      .set('WWW-Authenticate', 'Bearer error="invalid_request"')
+      .json({ error: 'Invalid authorization format. Use: Bearer &lt;token&gt;' });
+  }
+
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (err) {
+    return res.status(401)
+      .set('WWW-Authenticate', 'Bearer error="invalid_token"')
+      .json({ error: 'Token expired or invalid' });
+  }
+};
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 401 and 403?</div>
+        <div class="faq-a"><strong>401 = unauthenticated</strong> (who are you?). <strong>403 = unauthorized</strong> (I know who you are, but you cannot access this). If no credentials were sent or the credentials are invalid, use 401. If the user is logged in but lacks permission for this specific resource, use 403. The naming is confusing because 401 is called "Unauthorized" but actually means "Unauthenticated."</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix a 401 error when calling an API?</div>
+        <div class="faq-a">Checklist: 1) Confirm your API key or token is correct &mdash; copy it fresh from the dashboard. 2) Check the header format: <code>Authorization: Bearer &lt;token&gt;</code> with the space. 3) Verify the token has not expired. 4) Ensure you are hitting the right environment (production vs staging keys). 5) Check if your IP is allowlisted if the API uses IP restrictions.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Why does my browser show a 401 popup?</div>
+        <div class="faq-a">When a server returns 401 with <code>WWW-Authenticate: Basic</code>, browsers display a native username/password dialog. This is HTTP Basic Authentication. If the popup keeps appearing, your credentials are wrong. If you want to avoid the popup in your web app, use token-based auth (Bearer) instead of Basic auth, or handle 401 in JavaScript with <code>fetch()</code> and show a custom login form.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="403.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">403</div>
+          <div class="rcc-name">Forbidden &mdash; Authenticated but no permission</div>
+        </a>
+        <a href="400.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">400</div>
+          <div class="rcc-name">Bad Request &mdash; Malformed request</div>
+        </a>
+        <a href="404.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">404</div>
+          <div class="rcc-name">Not Found &mdash; Resource does not exist</div>
+        </a>
+        <a href="429.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">429</div>
+          <div class="rcc-name">Too Many Requests &mdash; Rate limited</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/jwt.html" class="tool-link">JWT Decoder</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

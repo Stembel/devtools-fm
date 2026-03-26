@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 304 Not Modified - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 304 Not Modified tells the client its cached version is still valid. Learn how conditional requests work, ETag and Last-Modified headers, and how to debug caching issues.">
+  <link rel="canonical" href="https://zerokit.dev/http/304.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #facc15; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What triggers a 304 Not Modified response?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 304 is triggered when the client sends a conditional request using either an If-None-Match header (with an ETag value) or an If-Modified-Since header (with a date). The server compares these against the current resource state. If nothing has changed, it returns 304 with no body, saving bandwidth. The browser then uses its cached copy."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why am I getting 304 instead of 200 with fresh content?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "If the server returns 304 when the content has actually changed, the issue is usually with ETag generation or Last-Modified timestamps. Check that your server correctly updates ETags when content changes (weak ETags based on file size alone can miss content changes). Also verify that your deployment process updates file modification timestamps. Try a hard refresh (Ctrl+Shift+R) to bypass the cache and confirm the new content exists."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is 304 Not Modified an error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No, 304 Not Modified is not an error. It is a successful response that saves bandwidth by telling the client its cached version is still current. The server confirms the resource has not changed without resending the entire response body. This is a normal and desirable part of HTTP caching."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 304 Not Modified
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">304</div>
+      <div class="status-name-big">Not Modified</div>
+      <div class="status-category">3xx Redirection</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 304 Not Modified Mean?</h2>
+      <p>HTTP 304 Not Modified is a response to a conditional request. It tells the client that the resource has not been modified since the last time it was fetched, so the cached version can be reused. The server sends only headers &mdash; no body &mdash; saving bandwidth and improving load times.</p>
+      <p>This status code is a cornerstone of HTTP caching. It works through two mechanisms:</p>
+      <ul>
+        <li><strong>ETag + If-None-Match:</strong> The server assigns a unique fingerprint (ETag) to each version of a resource. On subsequent requests, the browser sends <code>If-None-Match: "etag-value"</code>. If the ETag still matches, the server returns 304.</li>
+        <li><strong>Last-Modified + If-Modified-Since:</strong> The server reports when the resource was last changed. The browser sends <code>If-Modified-Since: Thu, 15 Jan 2025 10:30:00 GMT</code>. If the resource has not changed since that date, the server returns 304.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Browser revalidation:</strong> When a cached resource's <code>max-age</code> expires, the browser sends a conditional request to check if the cache is still valid rather than downloading the full resource again.</li>
+        <li><strong>CDN cache validation:</strong> CDN edge nodes send conditional requests to origin servers to revalidate their cached copies, minimizing origin load and bandwidth.</li>
+        <li><strong>API polling:</strong> Applications that poll an API endpoint for changes can use conditional requests to avoid processing unchanged data. This is common with feeds, notifications, and sync endpoints.</li>
+        <li><strong>Static asset serving:</strong> CSS, JavaScript, and image files commonly trigger 304 responses since they change infrequently. The server checks the ETag or file modification time before responding.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How Conditional Requests Work</h2>
+      <h3>ETag-based flow</h3>
+      <div class="code-block">
+# First request - server provides ETag
+$ curl -I https://example.com/style.css
+HTTP/1.1 200 OK
+ETag: "abc123"
+Content-Type: text/css
+Content-Length: 45230
+
+# Second request - browser sends If-None-Match
+$ curl -I -H 'If-None-Match: "abc123"' https://example.com/style.css
+HTTP/1.1 304 Not Modified
+ETag: "abc123"
+# No body sent - browser uses cached version
+      </div>
+
+      <h3>Last-Modified flow</h3>
+      <div class="code-block">
+# First request
+$ curl -I https://example.com/data.json
+HTTP/1.1 200 OK
+Last-Modified: Wed, 15 Jan 2025 10:00:00 GMT
+Content-Type: application/json
+
+# Second request - browser sends If-Modified-Since
+$ curl -I -H 'If-Modified-Since: Wed, 15 Jan 2025 10:00:00 GMT' \
+  https://example.com/data.json
+HTTP/1.1 304 Not Modified
+# Cached version is still current
+      </div>
+
+      <h3>Nginx ETag Configuration</h3>
+      <div class="code-block">
+# ETags are enabled by default in Nginx for static files
+# To explicitly control it:
+location /static/ {
+    etag on;                    # Enable ETags (default)
+    if_modified_since exact;    # Exact timestamp matching
+    expires 1h;                 # Cache for 1 hour, then revalidate
+}
+
+# To disable ETags (e.g., behind a load balancer where
+# different servers generate different ETags):
+location /api/ {
+    etag off;
+    add_header Cache-Control "no-cache";
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Debugging 304 Issues</h2>
+      <ul>
+        <li><strong>Getting 304 when content changed:</strong> Check that your server regenerates ETags when content updates. File-based ETags use inode+size+mtime; if your deployment does not update timestamps (e.g., rsync with <code>--times</code>), ETags may not change.</li>
+        <li><strong>Never getting 304 (always 200):</strong> Verify the server sends ETag or Last-Modified headers. Some frameworks strip caching headers. Also check that no middleware adds <code>Cache-Control: no-store</code>.</li>
+        <li><strong>Load balancer ETag mismatches:</strong> If multiple servers generate different ETags for the same file (because ETags include the inode number), requests alternating between servers will never match. Either disable inode-based ETags or use a content-based hash.</li>
+        <li><strong>Force-bypassing cache:</strong> Use <code>curl -H "Cache-Control: no-cache"</code> or hard-refresh in browser (Ctrl+Shift+R) to skip conditional requests entirely.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What triggers a 304 Not Modified response?</div>
+        <div class="faq-a">A 304 is triggered when the browser sends a conditional request with <code>If-None-Match</code> (ETag) or <code>If-Modified-Since</code> (timestamp), and the server confirms the resource has not changed. The browser then uses its cached copy. This is automatic &mdash; browsers handle conditional requests transparently based on caching headers from previous responses.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Why am I getting 304 when content has changed?</div>
+        <div class="faq-a">This usually means ETags or Last-Modified timestamps are not updating when content changes. Common causes: deployment scripts that preserve file timestamps, weak ETags based on file size (if size did not change), or CDN caching stale ETags. Fix by ensuring your build pipeline generates new fingerprints, or add cache-busting query strings to asset URLs.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is 304 Not Modified an error?</div>
+        <div class="faq-a">No. 304 is a success response that optimizes performance. It means your cache is working correctly. The server validated the cached resource and confirmed it is still current, saving the bandwidth of re-transmitting the full response body.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="200.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">200</div>
+          <div class="rcc-name">OK &mdash; Full response with body</div>
+        </a>
+        <a href="301.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">301</div>
+          <div class="rcc-name">Moved Permanently &mdash; URL changed forever</div>
+        </a>
+        <a href="302.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">302</div>
+          <div class="rcc-name">Found &mdash; Temporary redirect</div>
+        </a>
+        <a href="404.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">404</div>
+          <div class="rcc-name">Not Found &mdash; Resource does not exist</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

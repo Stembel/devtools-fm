@@ -10,6 +10,12 @@ build/
 # Server-side API code (deployed separately, not public)
 api/
 
+# Legal/personal pages (deployed but not in public repo)
+impressum.html
+privacy.html
+sponsor.html
+about.html
+
 # Environment and secrets
 .env
 .env.*
