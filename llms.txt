@@ -1,0 +1,64 @@
+# ZeroKit.dev
+
+> Free online developer tools and website analysis. 117 browser-based tools for developers including JSON formatter, regex tester, hash generator, CSS generators, and 8 server-side network analysis tools (DNS, SSL, WHOIS, tech detection). No signup required. All client-side tools process data locally in the browser.
+
+ZeroKit.dev provides instant-use developer utilities organized into categories: formatters, encoders, generators, converters, CSS/design tools, color tools, text tools, network tools, DevOps/config generators, SEO tools, reference guides, and finance calculators. The site also features a Website Grader that scores any website on performance, security, SSL, SEO, and availability with an A+ to F grade.
+
+## Tools
+
+- [JSON Formatter](https://zerokit.dev/tools/json.html): Format, validate, and minify JSON
+- [Regex Tester](https://zerokit.dev/tools/regex.html): Test regular expressions with live matching
+- [Base64 Encoder](https://zerokit.dev/tools/base64.html): Encode and decode Base64 strings
+- [Hash Generator](https://zerokit.dev/tools/hash.html): Generate MD5, SHA-1, SHA-256, SHA-512 hashes
+- [JWT Decoder](https://zerokit.dev/tools/jwt.html): Decode and inspect JWT payloads
+- [UUID Generator](https://zerokit.dev/tools/uuid.html): Generate v4 UUIDs
+- [Password Generator](https://zerokit.dev/tools/password.html): Create strong passwords
+- [QR Code Generator](https://zerokit.dev/tools/qrcode.html): Generate QR codes from text or URLs
+- [Color Converter](https://zerokit.dev/tools/color.html): Convert between HEX, RGB, HSL
+- [CSS Flexbox Generator](https://zerokit.dev/tools/flexbox.html): Visual Flexbox layout builder
+- [CSS Grid Generator](https://zerokit.dev/tools/cssgrid.html): Visual CSS Grid builder
+- [Gradient Builder](https://zerokit.dev/tools/gradient.html): Design CSS gradients visually
+- [Website Grader](https://zerokit.dev/tools/grader.html): Score any website on performance, security, SSL, SEO
+- [XML Formatter](https://zerokit.dev/tools/xml.html): Format, validate, and minify XML
+- [Markdown to HTML](https://zerokit.dev/tools/md2html.html): Convert Markdown to HTML
+- [cURL to Code](https://zerokit.dev/tools/curl2code.html): Convert cURL commands to code
+
+## Network Analysis Tools (Server-Side)
+
+- [DNS Lookup](https://zerokit.dev/tools/dns-lookup.html): Resolve A, AAAA, MX, PTR records
+- [SSL Checker](https://zerokit.dev/tools/ssl-checker.html): Verify SSL certificates and expiry
+- [HTTP Headers](https://zerokit.dev/tools/http-headers.html): Inspect HTTP response headers
+- [WHOIS Lookup](https://zerokit.dev/tools/whois.html): Domain registration information
+- [Website Status](https://zerokit.dev/tools/status-checker.html): Check if a website is up
+- [Email Validator](https://zerokit.dev/tools/email-validate.html): Validate email via MX records
+- [Tech Detector](https://zerokit.dev/tools/tech-detect.html): Detect website technology stack
+- [Redirect Checker](https://zerokit.dev/tools/redirect-checker.html): Trace redirect chains
+
+## Finance Calculators
+
+- [Mortgage Calculator](https://zerokit.dev/tools/mortgage.html): Monthly payments with amortization
+- [Compound Interest](https://zerokit.dev/tools/compound.html): Investment growth calculator
+- [Salary Calculator](https://zerokit.dev/tools/salary.html): Annual/monthly/hourly conversion
+- [Tax Estimator](https://zerokit.dev/tools/tax.html): US federal income tax brackets
+- [ROI Calculator](https://zerokit.dev/tools/roi.html): Return on investment
+- [BMI Calculator](https://zerokit.dev/tools/bmi.html): Body Mass Index with WHO categories
+
+## Blog
+
+- [How to Format JSON](https://zerokit.dev/blog/how-to-format-json.html): Guide to pretty-printing and validating JSON
+- [What is Base64](https://zerokit.dev/blog/what-is-base64-encoding.html): Base64 encoding explained
+- [JWT Tokens Explained](https://zerokit.dev/blog/jwt-token-explained.html): Understanding JSON Web Tokens
+- [CSS Flexbox Guide](https://zerokit.dev/blog/css-flexbox-guide.html): Practical Flexbox tutorial
+- [DNS Lookup Explained](https://zerokit.dev/blog/dns-lookup-explained.html): How DNS works
+- [Regex Tutorial](https://zerokit.dev/blog/regex-tutorial-beginners.html): Regular expressions for beginners
+- [SSL Certificates](https://zerokit.dev/blog/ssl-certificate-check.html): How to check SSL certificates
+- [Hash Functions](https://zerokit.dev/blog/hash-functions-explained.html): MD5 vs SHA-256 explained
+
+## HTTP Status Code Reference
+
+- [HTTP 404](https://zerokit.dev/http/404.html): Not Found - causes and fixes
+- [HTTP 500](https://zerokit.dev/http/500.html): Internal Server Error - troubleshooting
+- [HTTP 502](https://zerokit.dev/http/502.html): Bad Gateway - causes and solutions
+- [HTTP 503](https://zerokit.dev/http/503.html): Service Unavailable - what to do
+- [HTTP 301](https://zerokit.dev/http/301.html): Moved Permanently - redirect guide
+- [All HTTP Status Codes](https://zerokit.dev/http/index.html): Complete reference
