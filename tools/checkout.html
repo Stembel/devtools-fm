@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout - ZeroKit.dev</title>
+<link rel="canonical" href="https://zerokit.dev/tools/checkout.html">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/cookie-consent.js"></script>
+<style>
+  .checkout-box { max-width: 500px; margin: 40px auto; padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  .checkout-box h2 { margin: 0 0 8px; font-size: 1.3rem; }
+  .checkout-box .plan-name { color: var(--accent); font-size: 0.9rem; margin-bottom: 20px; }
+  .checkout-box .price { font-size: 2rem; font-weight: 800; color: var(--text); margin: 16px 0; }
+  .checkout-box .price span { font-size: 0.9rem; font-weight: 400; color: var(--text-muted); }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+  .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 0.95rem; font-family: var(--font); }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); outline: none; }
+  .checkout-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-size: 1rem; font-weight: 700; cursor: pointer; font-family: var(--font); margin-top: 8px; }
+  .checkout-btn:hover { opacity: 0.9; }
+  .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .payment-info { margin-top: 20px; padding: 16px; background: var(--bg); border-radius: var(--radius); font-size: 0.85rem; color: var(--text-muted); }
+  .success-box { text-align: center; padding: 40px 20px; }
+  .success-box h2 { color: #10b981; margin-bottom: 12px; }
+  .success-box .order-id { font-family: var(--mono); background: var(--bg); padding: 8px 16px; border-radius: var(--radius); display: inline-block; margin: 12px 0; }
+  .features { list-style: none; padding: 0; margin: 16px 0; }
+  .features li { padding: 6px 0; font-size: 0.9rem; color: var(--text-muted); }
+  .features li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+<header><div class="container"><a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a><nav><a href="../">Tools</a><a href="../blog/">Blog</a><a href="../pricing.html">Pricing</a></nav></div></header>
+
+<main class="container">
+  <div class="checkout-box" id="checkout-form">
+    <h2>Complete Your Order</h2>
+    <div class="plan-name" id="plan-label">Select a plan</div>
+
+    <div class="form-group">
+      <label>Plan</label>
+      <select id="plan" onchange="updatePlan()">
+        <option value="">Choose a plan...</option>
+        <option value="audit">Website Audit Report — $19 (one-time)</option>
+        <option value="starter">API Starter — $9/month</option>
+        <option value="pro">API Pro — $29/month</option>
+        <option value="uptimepulse">UptimePulse Pro — $5/month</option>
+      </select>
+    </div>
+
+    <div class="price" id="price-display">$—</div>
+
+    <ul class="features" id="features-list"></ul>
+
+    <div class="form-group">
+      <label>Email address</label>
+      <input type="email" id="email" placeholder="you@example.com" required>
+    </div>
+
+    <button class="checkout-btn" id="submit-btn" onclick="submitOrder()" disabled>Place Order</button>
+
+    <div class="payment-info">
+      You will be redirected to a secure Stripe checkout. Your API key will be activated instantly after payment.
+    </div>
+  </div>
+
+  <div class="checkout-box success-box" id="success-box" style="display:none;">
+    <h2>Order Placed!</h2>
+    <p>Your order has been received.</p>
+    <div class="order-id" id="order-id-display"></div>
+    <p style="margin-top:16px;color:var(--text-muted);font-size:0.9rem;">
+      We will send payment instructions to your email shortly. Your API key will be activated within minutes of payment confirmation.
+    </p>
+    <a href="../pricing.html" style="color:var(--accent);font-size:0.9rem;">Back to Pricing</a>
+  </div>
+</main>
+
+<footer><div class="container"><div>ZeroKit.dev — Free developer tools.</div></div></footer>
+<script src="../js/monetization.js"></script>
+<script>
+const plans = {
+  audit: { price: "$19", period: "one-time", features: ["Full website audit report", "Performance, security, SSL, SEO analysis", "Actionable recommendations", "Printable PDF format"] },
+  starter: { price: "$9", period: "/month", features: ["1,000 API requests/day", "All 9 endpoints", "Personal API key", "Email support"] },
+  pro: { price: "$29", period: "/month", features: ["10,000 API requests/day", "All 9 endpoints + bulk", "Personal API key", "Priority support"] },
+  uptimepulse: { price: "$5", period: "/month", features: ["Unlimited monitors", "1-minute check intervals", "Email alerts", "Custom status pages"] }
+};
+
+function updatePlan() {
+  const plan = document.getElementById("plan").value;
+  const btn = document.getElementById("submit-btn");
+  if (!plan) { btn.disabled = true; return; }
+  const p = plans[plan];
+  document.getElementById("price-display").innerHTML = p.price + " <span>" + p.period + "</span>";
+  document.getElementById("plan-label").textContent = plan.charAt(0).toUpperCase() + plan.slice(1) + " Plan";
+  document.getElementById("features-list").innerHTML = p.features.map(f => "<li>" + f + "</li>").join("");
+  btn.disabled = false;
+}
+
+function submitOrder() {
+  const email = document.getElementById("email").value.trim();
+  const plan = document.getElementById("plan").value;
+  if (!email || !plan) return;
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Processing...";
+
+  fetch("https://65-109-129-230.sslip.io/api/stripe/checkout", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({email, plan})
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.error) { alert(d.error); btn.disabled = false; btn.textContent = "Place Order"; return; }
+    if (d.checkout_url) { window.location.href = d.checkout_url; }
+    else { document.getElementById("checkout-form").style.display = "none";
+    document.getElementById("success-box").style.display = "block";
+    document.getElementById("order-id-display").textContent = d.error || "Processing..."; }
+  })
+  .catch(e => { alert("Error: " + e.message); btn.disabled = false; btn.textContent = "Place Order"; });
+}
+
+// Auto-select plan from URL param
+const urlPlan = new URLSearchParams(location.search).get("plan");
+if (urlPlan && plans[urlPlan]) { document.getElementById("plan").value = urlPlan; updatePlan(); }
+</script>
+</body>
+</html>
