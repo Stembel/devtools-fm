@@ -62,3 +62,23 @@ ZeroKit.dev provides instant-use developer utilities organized into categories: 
 - [HTTP 503](https://zerokit.dev/http/503.html): Service Unavailable - what to do
 - [HTTP 301](https://zerokit.dev/http/301.html): Moved Permanently - redirect guide
 - [All HTTP Status Codes](https://zerokit.dev/http/index.html): Complete reference
+
+## CSS Reference Guides
+
+- [CSS Flexbox](https://zerokit.dev/css-ref/flexbox.html): Complete flexbox layout guide with examples
+- [CSS Grid](https://zerokit.dev/css-ref/grid.html): CSS Grid layout reference
+- [CSS Position](https://zerokit.dev/css-ref/position.html): relative, absolute, fixed, sticky explained
+- [CSS Media Queries](https://zerokit.dev/css-ref/media-queries.html): Responsive breakpoints guide
+- [CSS Variables](https://zerokit.dev/css-ref/variables.html): Custom properties tutorial
+- [CSS Transitions](https://zerokit.dev/css-ref/transitions.html): Animation transitions reference
+- [CSS Selectors](https://zerokit.dev/css-ref/selectors.html): Selectors cheatsheet
+- [CSS Units](https://zerokit.dev/css-ref/units.html): px, em, rem, vh, vw comparison
+- [All CSS Guides](https://zerokit.dev/css-ref/index.html): Complete CSS reference hub
+
+## Website Security Report
+
+- [2026 Website Security Report](https://zerokit.dev/blog/website-security-report-2026.html): We graded 20 major websites. Amazon got an F, Google a D, GitHub an A.
+
+## UptimePulse - Free Website Monitoring
+
+- [UptimePulse](https://65-109-129-230.sslip.io/pulse/): Free uptime monitoring with status pages and alerts
