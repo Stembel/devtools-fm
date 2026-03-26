@@ -1057,7 +1057,20 @@
         <ul class="rec-list" id="rec-list"></ul>
       </div>
 
-      <!-- Share & Email -->
+      
+      <!-- Pro Audit Upsell -->
+      <div class='result-section' id='upsell-section' style='display:none;margin-top:24px;'>
+        <div style='background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:2px solid #6366f1;border-radius:12px;padding:28px;text-align:center;'>
+          <h3 style='color:#e4e4e7;font-size:1.2rem;margin:0 0 8px;'>Want the Full Audit?</h3>
+          <p style='color:#8b8b94;margin:0 0 16px;font-size:0.9rem;'>Get a detailed, printable PDF report with prioritized fixes and implementation guides.</p>
+          <div style='display:flex;gap:12px;justify-content:center;flex-wrap:wrap;'>
+            <a href='checkout.html?plan=audit' style='display:inline-block;padding:12px 28px;background:#6366f1;color:white;text-decoration:none;border-radius:8px;font-weight:700;font-size:0.95rem;'>Get Pro Audit — \</a>
+            <a id='report-link' href='#' target='_blank' style='display:inline-block;padding:12px 28px;border:1px solid #2a2a30;color:#8b8b94;text-decoration:none;border-radius:8px;font-size:0.9rem;'>View Sample Report</a>
+          </div>
+        </div>
+      </div>
+
+<!-- Share & Email -->
       <div class="actions-section">
         <div class="action-card">
           <h3>
@@ -1389,6 +1402,8 @@
 
       // Recommendations
       renderRecommendations(data.recommendations || []);
+      document.getElementById('upsell-section').style.display = 'block';
+      document.getElementById('report-link').href = 'report-template.html?url=' + encodeURIComponent(url);
 
       // Share text
       const shareText = 'My website ' + (data.hostname || '') + ' scored ' + data.score + '/100 (' + data.grade + ') on ZeroKit.dev Website Grader! Check yours: https://zerokit.dev/tools/grader.html';
