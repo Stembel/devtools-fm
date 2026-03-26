@@ -1,6 +1,8 @@
 # ZeroKit.dev
 
-**100 free developer tools. No signup. No tracking. No cookies.**
+![Uptime](https://65-109-129-230.sslip.io/pulse/api/monitors/d0bab9028fa7/badge)
+
+**117 free developer tools. No signup. No tracking. No cookies.**
 
 92 tools run entirely client-side in your browser — your data never leaves your machine. 8 server-side network tools provide DNS, SSL, WHOIS, and more via a dedicated API.
 
@@ -185,7 +187,7 @@
 ## Contributing
 
 - **Star the repo** if you find it useful
-- **Suggest a tool** by [opening an issue](https://github.com/Stembel/devtools-fm/issues)
+- **Suggest a tool** by [opening an issue](https://github.com/Stembel/zerokit.dev/issues)
 - **Report bugs** with steps to reproduce
 - **Submit a PR** — one HTML file per tool in `tools/`
 
