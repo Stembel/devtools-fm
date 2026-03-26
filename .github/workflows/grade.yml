@@ -1,0 +1,16 @@
+name: Website Grade
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6am
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Grade ZeroKit.dev
+        uses: Stembel/website-grader-action@main
+        with:
+          url: 'https://zerokit.dev'
+          fail-below: 60
