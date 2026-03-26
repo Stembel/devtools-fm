@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 500 Internal Server Error - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 500 Internal Server Error means something went wrong on the server. Learn the most common causes, how to debug 500 errors using logs, and practical fixes for developers and users.">
+  <link rel="canonical" href="https://zerokit.dev/http/500.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #f87171; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What causes a 500 Internal Server Error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 500 error is a generic catch-all for unhandled server-side failures. Common causes include: unhandled exceptions or errors in application code, database connection failures, misconfigured server settings (.htaccess syntax errors, missing PHP modules), out-of-memory conditions, file permission issues preventing the application from reading config files, and broken dependencies after a deployment."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 500 Internal Server Error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For developers: 1) Check server error logs (Apache: /var/log/apache2/error.log, Nginx: /var/log/nginx/error.log, application logs). The log will contain the actual error message and stack trace. 2) If it happened after a deployment, try rolling back. 3) Check database connectivity. 4) Verify file permissions. 5) Check for syntax errors in configuration files. For users: refresh the page, try again later, clear your cache, or contact the site owner."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is a 500 error the user's fault?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No, a 500 error is a server-side problem. The client's request may have been perfectly valid — the server failed to process it. Unlike 4xx errors which indicate client mistakes, 5xx errors indicate that the server encountered an unexpected condition that prevented it from fulfilling the request. Users cannot fix 500 errors; only the server administrator can resolve them."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 500 Internal Server Error
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">500</div>
+      <div class="status-name-big">Internal Server Error</div>
+      <div class="status-category">5xx Server Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 500 Internal Server Error Mean?</h2>
+      <p>HTTP 500 is the most generic server error code. It means something went wrong on the server while processing the request, but the server cannot be more specific about what the problem is. This is the server-side equivalent of "something broke, and I do not know how to tell you what."</p>
+      <p>A 500 error is never the client's fault. The request may have been perfectly valid &mdash; the server simply encountered an unexpected condition that prevented it from fulfilling it. However, certain request payloads can trigger server-side bugs that produce 500 errors (e.g., edge cases in input validation that cause unhandled exceptions).</p>
+      <p>The 500 status is deliberately vague in HTTP responses to avoid leaking internal implementation details to clients. The real cause is always in the server's error logs.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Unhandled exception in application code:</strong> A null pointer dereference, division by zero, missing import, or any runtime error that is not caught by a try/catch block. The framework's default error handler converts it to a 500.</li>
+        <li><strong>Database connection failure:</strong> The application cannot reach the database &mdash; wrong credentials, connection pool exhausted, database server down, or network timeout. This is one of the most common causes of 500 errors in production.</li>
+        <li><strong>.htaccess syntax error (Apache):</strong> A single typo in <code>.htaccess</code> (like a mistyped RewriteRule or referencing a module that is not loaded) causes Apache to return 500 for every request to that directory.</li>
+        <li><strong>Out of memory or disk space:</strong> The server ran out of RAM (OOM killer terminates the process) or disk space (temporary files, logs, or database files filled the disk). PHP's <code>memory_limit</code> being too low is a frequent cause.</li>
+        <li><strong>Broken deployment:</strong> Missing configuration files, missing environment variables, incompatible dependency versions, or code that references deleted modules after an update.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Debug and Fix It</h2>
+      <h3>Step 1: Check Error Logs</h3>
+      <div class="code-block">
+# Apache error log
+tail -100 /var/log/apache2/error.log
+
+# Nginx error log
+tail -100 /var/log/nginx/error.log
+
+# PHP-FPM log
+tail -100 /var/log/php-fpm/error.log
+
+# Node.js / PM2
+pm2 logs --err --lines 100
+
+# Docker container logs
+docker logs --tail 100 my-container
+
+# Systemd service logs
+journalctl -u myapp.service --since "5 minutes ago"
+      </div>
+
+      <h3>Step 2: Common Fixes by Cause</h3>
+      <div class="code-block">
+# Fix .htaccess (Apache) - check syntax
+apachectl configtest
+
+# Fix file permissions
+chmod 644 .htaccess
+chmod -R 755 /var/www/html
+
+# Fix PHP memory limit (php.ini)
+memory_limit = 256M
+
+# Fix database connection - test manually
+mysql -u appuser -p -h localhost dbname
+
+# Rollback a broken deployment
+git log --oneline -5          # Find the last good commit
+git revert HEAD               # Revert the bad commit
+# OR
+git checkout &lt;last-good-hash&gt;  # Switch to the last good state
+      </div>
+
+      <h3>Proper Error Handling (Prevention)</h3>
+      <div class="code-block">
+// Express.js - Global error handler
+// This prevents unhandled errors from leaking stack traces
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.stack);
+
+  // Log details internally, send generic message externally
+  res.status(500).json({
+    error: 'Internal server error',
+    request_id: req.id  // For correlating with server logs
+  });
+});
+
+// Always wrap async routes
+app.get('/api/data', async (req, res, next) => {
+  try {
+    const data = await db.query('SELECT * FROM items');
+    res.json(data);
+  } catch (err) {
+    next(err);  // Pass to error handler instead of crashing
+  }
+});
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>For Regular Users</h2>
+      <ul>
+        <li><strong>Wait and retry:</strong> 500 errors are often temporary. The server may be restarting, deploying, or experiencing a brief overload. Wait 30 seconds and refresh.</li>
+        <li><strong>Clear browser cache:</strong> In rare cases, a cached script or resource conflicts with server-side changes. Try Ctrl+Shift+R (hard refresh) or clear the cache entirely.</li>
+        <li><strong>Try a different page:</strong> If only one page returns 500, the issue may be specific to that page's data or code. Other pages may work fine.</li>
+        <li><strong>Contact the site owner:</strong> If the error persists, report it. Include the URL, the time it happened, and what you were doing. This helps the developer find the relevant log entries.</li>
+        <li><strong>Check status pages:</strong> Major services have status pages (e.g., status.github.com, status.aws.amazon.com). Check if the service is experiencing an outage.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What causes a 500 Internal Server Error?</div>
+        <div class="faq-a">A 500 error is a catch-all for unhandled server-side failures. The most common causes: unhandled exceptions in application code, database connection problems, .htaccess syntax errors (Apache), exhausted memory or disk space, missing configuration after deployment, and PHP fatal errors. The specific cause is always in the server's error log.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix a 500 Internal Server Error?</div>
+        <div class="faq-a">As a developer: always start with the error logs (Apache, Nginx, application logs). The log entry will contain the exact error and stack trace. If it happened after a deployment, roll back. Check database connectivity, file permissions, and configuration files. As a user: refresh the page, try again later, clear your cache, or contact the site owner.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is a 500 error the user's fault?</div>
+        <div class="faq-a">No. A 500 error is always a server-side problem. The client's request may have been perfectly valid. Unlike 4xx errors (client errors), 5xx errors indicate the server failed to handle a request it should have been able to process. Users cannot fix 500 errors &mdash; only the server administrator or developer can resolve the underlying issue.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="502.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">502</div>
+          <div class="rcc-name">Bad Gateway &mdash; Upstream server error</div>
+        </a>
+        <a href="503.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">503</div>
+          <div class="rcc-name">Service Unavailable &mdash; Server overloaded</div>
+        </a>
+        <a href="504.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">504</div>
+          <div class="rcc-name">Gateway Timeout &mdash; Upstream timed out</div>
+        </a>
+        <a href="400.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">400</div>
+          <div class="rcc-name">Bad Request &mdash; Client-side error instead</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/json.html" class="tool-link">JSON Formatter</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

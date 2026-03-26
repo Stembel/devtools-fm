@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 503 Service Unavailable - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 503 Service Unavailable means the server is temporarily unable to handle requests. Learn about maintenance mode, overload protection, Retry-After headers, and how to fix 503 errors.">
+  <link rel="canonical" href="https://zerokit.dev/http/503.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #f87171; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What causes a 503 Service Unavailable error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 503 error is caused by the server being temporarily unable to handle requests. Common causes: the server is undergoing planned maintenance, the server is overloaded with too many requests, a deployment is in progress, the application is restarting after a crash, or resource limits have been reached (CPU, memory, connection pool, database connections)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does a 503 error last?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "503 errors are temporary by definition. The duration depends on the cause: maintenance windows typically last minutes to hours, overload situations resolve once traffic decreases or the server scales up, and deployment restarts usually take seconds to minutes. Check the Retry-After header in the response — it tells you exactly when the server expects to be available again."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between 502 and 503?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "502 Bad Gateway means a proxy received an invalid response from the upstream server — the backend is broken or unreachable. 503 Service Unavailable means the server is intentionally not accepting requests right now, typically due to maintenance or overload. Think of 502 as 'the backend is broken' and 503 as 'the server is busy, try again later.' 503 often includes a Retry-After header."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 503 Service Unavailable
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">503</div>
+      <div class="status-name-big">Service Unavailable</div>
+      <div class="status-category">5xx Server Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 503 Service Unavailable Mean?</h2>
+      <p>HTTP 503 indicates that the server is temporarily unable to handle the request. Unlike 500 (something broke unexpectedly), 503 is often an intentional response &mdash; the server knows it cannot process requests right now and is telling you to come back later.</p>
+      <p>The 503 response should include a <code>Retry-After</code> header with either a number of seconds or a specific date/time when the client should try again. This helps clients implement polite retry logic instead of hammering the server during its recovery.</p>
+      <p>503 is the correct status code for planned maintenance, overload protection (shedding load to prevent a complete crash), and deployment windows. It is also what search engines want to see during maintenance &mdash; it tells crawlers that the downtime is temporary and they should not remove the page from their index.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Planned maintenance:</strong> The server is intentionally offline for updates, database migrations, or infrastructure changes. A proper maintenance page returns 503 with a Retry-After header, not a 200 with a "we'll be back" page.</li>
+        <li><strong>Server overload:</strong> Too many concurrent requests have exhausted the server's resources (CPU maxed, memory full, all worker threads busy). The server starts rejecting new requests with 503 to protect existing connections.</li>
+        <li><strong>Application restart during deployment:</strong> During zero-downtime deployments, the old process is being replaced by the new one. If the transition is not seamless (e.g., no rolling restart), there is a brief window where requests get 503.</li>
+        <li><strong>Database or dependency unavailable:</strong> The application is running but cannot complete any request because a critical dependency (database, cache, external API) is down. The application returns 503 to signal temporary unavailability.</li>
+        <li><strong>Auto-scaling lag:</strong> A traffic spike hits before auto-scaling can provision new instances. The existing servers are overwhelmed and return 503 until new capacity comes online.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Implement and Fix 503</h2>
+      <h3>Nginx Maintenance Mode</h3>
+      <div class="code-block">
+# Method 1: File-based maintenance mode
+# Create /var/www/maintenance.html, then:
+
+server {
+    # Check for maintenance file
+    if (-f /var/www/maintenance_on) {
+        return 503;
+    }
+
+    error_page 503 @maintenance;
+    location @maintenance {
+        root /var/www;
+        rewrite ^(.*)$ /maintenance.html break;
+        add_header Retry-After 3600;  # Come back in 1 hour
+    }
+}
+
+# Enable maintenance:  touch /var/www/maintenance_on
+# Disable maintenance: rm /var/www/maintenance_on
+      </div>
+
+      <h3>Express.js Circuit Breaker</h3>
+      <div class="code-block">
+// Health-aware middleware that returns 503 when dependencies are down
+let dbHealthy = true;
+
+// Monitor database health
+setInterval(async () => {
+  try {
+    await db.query('SELECT 1');
+    dbHealthy = true;
+  } catch {
+    dbHealthy = false;
+  }
+}, 5000);
+
+app.use((req, res, next) => {
+  if (!dbHealthy) {
+    return res.status(503)
+      .set('Retry-After', '30')
+      .json({
+        error: 'Service temporarily unavailable',
+        message: 'The service is experiencing issues. Please try again in 30 seconds.'
+      });
+  }
+  next();
+});
+      </div>
+
+      <h3>Kubernetes Readiness Probes</h3>
+      <div class="code-block">
+# Kubernetes uses readiness probes to decide when to send traffic.
+# When a pod fails its readiness probe, Kubernetes removes it
+# from the service load balancer, effectively producing 503 for
+# that pod's portion of traffic.
+
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3    # 3 failures = remove from service
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      </div>
+
+      <h3>Load Shedding Implementation</h3>
+      <div class="code-block">
+// Shed load when the server is too busy
+const os = require('os');
+
+app.use((req, res, next) => {
+  const loadAvg = os.loadavg()[0];  // 1-minute load average
+  const cpuCount = os.cpus().length;
+
+  // If load is above 80% of CPU capacity, start shedding
+  if (loadAvg > cpuCount * 0.8) {
+    return res.status(503)
+      .set('Retry-After', '10')
+      .json({ error: 'Server is under heavy load. Please retry.' });
+  }
+  next();
+});
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>503 and SEO</h2>
+      <p>503 is the correct HTTP status for temporary downtime. Here is why it matters for SEO:</p>
+      <ul>
+        <li><strong>Google will retry:</strong> When Googlebot encounters a 503, it understands the page is temporarily unavailable and will try again later. It does not remove the page from the index.</li>
+        <li><strong>Do not return 200 for maintenance:</strong> Showing a maintenance page with a 200 status can cause Google to index the maintenance page content instead of the actual page content.</li>
+        <li><strong>Include Retry-After:</strong> Googlebot respects the Retry-After header and will wait the specified time before retrying.</li>
+        <li><strong>Keep downtime short:</strong> Extended 503 periods (days) may eventually cause Google to temporarily drop pages from the index. Keep planned maintenance under a few hours.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What causes a 503 Service Unavailable error?</div>
+        <div class="faq-a">503 is caused by the server being temporarily unable to handle requests. This could be planned maintenance, server overload from too many simultaneous users, a deployment in progress, a critical dependency (database, cache) being down, or auto-scaling not yet catching up with a traffic spike. It is always temporary by definition.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How long does a 503 error last?</div>
+        <div class="faq-a">It depends on the cause. Deployment restarts: seconds. Maintenance windows: minutes to hours. Overload: until traffic decreases or capacity increases. Check the <code>Retry-After</code> header in the response &mdash; it tells you when the server expects to be back. If there is no Retry-After header, try again in 30-60 seconds.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 502 and 503?</div>
+        <div class="faq-a"><strong>502 = backend is broken.</strong> The proxy received an invalid or no response from the upstream server. <strong>503 = server is busy or in maintenance.</strong> The server itself is choosing not to handle requests right now. 502 is usually unexpected (crash), while 503 is often intentional (maintenance, overload protection). 503 typically includes a Retry-After header; 502 rarely does.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="500.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">500</div>
+          <div class="rcc-name">Internal Server Error &mdash; Unexpected failure</div>
+        </a>
+        <a href="502.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">502</div>
+          <div class="rcc-name">Bad Gateway &mdash; Backend is broken</div>
+        </a>
+        <a href="504.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">504</div>
+          <div class="rcc-name">Gateway Timeout &mdash; Backend too slow</div>
+        </a>
+        <a href="429.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">429</div>
+          <div class="rcc-name">Too Many Requests &mdash; Rate limited</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/timestamp.html" class="tool-link">Unix Timestamp Converter</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

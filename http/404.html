@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 404 Not Found - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 404 Not Found means the server cannot find the requested resource. Learn what causes 404 errors, how to fix broken links, set up custom 404 pages, and handle missing resources in APIs.">
+  <link rel="canonical" href="https://zerokit.dev/http/404.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #fb923c; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does a 404 error mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 404 Not Found error means the server is working but cannot find the page or resource you requested. The URL you entered does not match any content on the server. This can happen because the page was deleted, the URL was typed incorrectly, or a link pointing to the page is outdated."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 404 error on my website?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To fix 404 errors: 1) Check Google Search Console for crawl errors to find broken URLs. 2) Set up 301 redirects from old URLs to new ones. 3) Fix internal links pointing to deleted pages. 4) Create a custom 404 page with helpful navigation. 5) Submit an updated sitemap to search engines. For URLs you intentionally removed, return 410 Gone instead of 404."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does a 404 error hurt SEO?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A few 404 errors are normal and do not directly harm SEO. However, many 404 errors can indicate quality issues. If important pages with backlinks return 404, you lose the link equity those pages accumulated. Google recommends using 301 redirects to preserve link equity when pages move. Excessive 404 errors also waste your crawl budget as Googlebot spends time on non-existent pages."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 404 Not Found
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">404</div>
+      <div class="status-name-big">Not Found</div>
+      <div class="status-category">4xx Client Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 404 Not Found Mean?</h2>
+      <p>HTTP 404 is the most recognizable error on the internet. It means the server is running and reachable, but the specific resource the client requested does not exist at the given URL. The server could not find a page, file, API endpoint, or any other resource matching the requested path.</p>
+      <p>A 404 does not tell you <em>why</em> the resource is missing. It could be a typo in the URL, a deleted page, a moved resource without a redirect, or a link that was never valid. The server makes no distinction between these cases &mdash; it simply reports that nothing exists at that address.</p>
+      <p>Importantly, 404 is different from a connection error. If you get a 404, the server itself is working fine. The issue is specifically that the URL does not correspond to any content.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Typo in the URL:</strong> A single mistyped character (<code>/aricles/</code> instead of <code>/articles/</code>) leads to a 404. This is the most common cause for regular users.</li>
+        <li><strong>Page was deleted without a redirect:</strong> Content was removed but no 301 redirect was set up to send traffic to a replacement page. Old bookmarks and external links now point to nothing.</li>
+        <li><strong>URL structure changed:</strong> A site redesign changed URLs from <code>/blog/2024/my-post</code> to <code>/posts/my-post</code> without setting up redirect rules for the old format.</li>
+        <li><strong>Case-sensitive file systems:</strong> Linux servers treat <code>/About.html</code> and <code>/about.html</code> as different files. A link using the wrong case hits a 404 even though the file exists.</li>
+        <li><strong>Broken internal links or hardcoded paths:</strong> Templates or navigation menus reference pages that were renamed or reorganized. These broken internal links create a poor user experience and waste crawl budget.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Fix It</h2>
+      <h3>For Website Owners</h3>
+      <ul>
+        <li><strong>Audit and fix broken links:</strong> Use Google Search Console's "Pages" report or crawl tools like Screaming Frog to find all URLs returning 404. Fix internal links and set up 301 redirects for important external links.</li>
+        <li><strong>Set up 301 redirects for moved content:</strong> If a page moved to a new URL, add a <a href="301.html">301 redirect</a> so old links automatically resolve to the new location.</li>
+        <li><strong>Create a helpful custom 404 page:</strong> A good 404 page includes a search bar, links to popular pages, and clear navigation. Do not just show "Page Not Found" &mdash; help the user find what they were looking for.</li>
+        <li><strong>Use 410 Gone for permanently removed content:</strong> If you intentionally deleted a page and it will never return, use 410 instead of 404. This tells search engines to remove it from their index faster.</li>
+        <li><strong>Monitor and fix regularly:</strong> Set up alerts for new 404 errors, especially after deployments or content reorganizations.</li>
+      </ul>
+
+      <h3>For Regular Users</h3>
+      <ul>
+        <li><strong>Double-check the URL:</strong> Look for typos, extra characters, or missing path segments. Try removing everything after the domain to reach the homepage.</li>
+        <li><strong>Search the site:</strong> Use the site's search function or try <code>site:example.com your search terms</code> in Google to find the content.</li>
+        <li><strong>Try the Wayback Machine:</strong> If the page was deleted, <a href="https://web.archive.org" rel="noopener">web.archive.org</a> may have a cached copy.</li>
+        <li><strong>Check if the entire site is down:</strong> If every page returns 404, the site may be misconfigured. Check back later or contact the site owner.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Code Examples</h2>
+      <h3>Custom 404 Page in Nginx</h3>
+      <div class="code-block">
+server {
+    listen 443 ssl;
+    server_name example.com;
+
+    # Custom 404 page
+    error_page 404 /404.html;
+    location = /404.html {
+        root /var/www/html;
+        internal;
+    }
+}
+      </div>
+
+      <h3>Express.js 404 Handler</h3>
+      <div class="code-block">
+// API: Return JSON 404
+app.use('/api', (req, res) => {
+  res.status(404).json({
+    error: 'not_found',
+    message: `No resource found at ${req.originalUrl}`,
+    suggestion: 'Check the API documentation at /api/docs'
+  });
+});
+
+// Web: Render 404 page (must be the LAST route)
+app.use((req, res) => {
+  res.status(404).render('404', {
+    url: req.originalUrl,
+    searchUrl: `/search?q=${encodeURIComponent(req.path)}`
+  });
+});
+      </div>
+
+      <h3>Apache .htaccess</h3>
+      <div class="code-block">
+# Custom 404 page
+ErrorDocument 404 /404.html
+
+# Redirect old URLs to new ones to prevent 404s
+Redirect 301 /old-page.html /new-page.html
+RedirectMatch 301 ^/blog/(\d{4})/(.*)$ /posts/$2
+      </div>
+
+      <h3>Detecting 404 with curl</h3>
+      <div class="code-block">
+$ curl -o /dev/null -s -w "%{http_code}" https://example.com/missing-page
+404
+
+# Get the full response
+$ curl -i https://example.com/missing-page
+HTTP/1.1 404 Not Found
+Content-Type: text/html
+Content-Length: 1245
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What does a 404 error mean?</div>
+        <div class="faq-a">A 404 error means the web server is running normally, but the specific URL you requested does not match any page or resource on the server. It is not a server outage &mdash; the server is responding. It simply cannot find anything at the address you specified. Common reasons: the page was deleted, the URL has a typo, or a link you followed is outdated.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix 404 errors on my website?</div>
+        <div class="faq-a">Start by finding all your 404 errors &mdash; check Google Search Console or run a crawl with Screaming Frog. For each broken URL: if the content moved, add a 301 redirect to the new URL. If the content was deleted intentionally, consider returning 410 Gone. Fix internal links that point to non-existent pages. Set up a helpful custom 404 page as a safety net. After fixing, submit a fresh sitemap.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does a 404 error hurt SEO?</div>
+        <div class="faq-a">A small number of 404 errors is normal and will not hurt your rankings. However, if important pages with backlinks return 404, you lose the link equity those pages accumulated. Use 301 redirects to preserve link value. Excessive 404 errors also waste crawl budget. Google's guidance: 404s are fine for truly removed content, but use redirects when pages move to new URLs.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="301.html" class="related-code-card">
+          <div class="rcc-code" style="color: #facc15;">301</div>
+          <div class="rcc-name">Moved Permanently &mdash; Redirect to prevent 404</div>
+        </a>
+        <a href="403.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">403</div>
+          <div class="rcc-name">Forbidden &mdash; Resource exists but access denied</div>
+        </a>
+        <a href="400.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">400</div>
+          <div class="rcc-name">Bad Request &mdash; Malformed request syntax</div>
+        </a>
+        <a href="500.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">500</div>
+          <div class="rcc-name">Internal Server Error &mdash; Server-side failure</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/url.html" class="tool-link">URL Parser</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

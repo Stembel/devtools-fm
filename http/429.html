@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 429 Too Many Requests - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 429 Too Many Requests means you have been rate limited. Learn how rate limiting works, how to implement retry logic with exponential backoff, and how to stay within API rate limits.">
+  <link rel="canonical" href="https://zerokit.dev/http/429.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #fb923c; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does HTTP 429 Too Many Requests mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HTTP 429 means the client has sent too many requests in a given time period and has been rate limited. The server includes a Retry-After header indicating how long to wait before sending the next request. Rate limiting protects servers from being overwhelmed and ensures fair resource distribution among all users."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I handle 429 errors in my code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Implement exponential backoff with jitter: on the first 429, wait 1 second before retrying. On the second, wait 2 seconds. Then 4, 8, 16, up to a maximum. Add random jitter (±20%) to prevent all clients from retrying simultaneously. Always check the Retry-After header first — if present, wait that exact duration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I implement rate limiting on my API?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Common approaches: 1) Token bucket algorithm — each user gets a bucket of tokens that refills at a fixed rate. Each request consumes a token. 2) Sliding window — track requests per user in a time window. 3) Use a reverse proxy like Nginx with limit_req or a library like express-rate-limit. Always include X-RateLimit-Limit, X-RateLimit-Remaining, and Retry-After headers in your responses."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 429 Too Many Requests
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">429</div>
+      <div class="status-name-big">Too Many Requests</div>
+      <div class="status-category">4xx Client Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 429 Too Many Requests Mean?</h2>
+      <p>HTTP 429 indicates that the user has sent too many requests in a given amount of time ("rate limiting"). The server is protecting itself from being overwhelmed and is asking the client to slow down.</p>
+      <p>The response should include a <code>Retry-After</code> header indicating how many seconds the client should wait before making a new request. Many APIs also include custom headers showing rate limit details:</p>
+      <ul>
+        <li><code>X-RateLimit-Limit</code> &mdash; The maximum number of requests allowed per window</li>
+        <li><code>X-RateLimit-Remaining</code> &mdash; How many requests you have left in the current window</li>
+        <li><code>X-RateLimit-Reset</code> &mdash; Unix timestamp when the rate limit window resets</li>
+      </ul>
+      <p>Rate limiting is not punishment &mdash; it is a necessary mechanism to ensure fair access for all API users and protect the server from abuse or accidental overload.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>API rate limit exceeded:</strong> Most APIs enforce per-user rate limits. GitHub allows 5,000 requests/hour for authenticated users. Twitter (X) has tier-based limits. Exceeding these triggers 429.</li>
+        <li><strong>Aggressive scraping or crawling:</strong> Sending hundreds of requests per second to a website will trigger its rate limiter, even if no formal API rate limit is documented.</li>
+        <li><strong>Missing request throttling in client code:</strong> A loop that fires API calls as fast as possible without delays. Especially common in data migration scripts and batch processing jobs.</li>
+        <li><strong>Shared API keys or IP addresses:</strong> Multiple applications or users sharing the same API key or IP (e.g., behind a corporate proxy) collectively hit the limit even though individual usage seems moderate.</li>
+        <li><strong>Retry storms:</strong> A bug causes failed requests to retry immediately without backoff, creating a cascade of requests that overwhelm the server. This is especially dangerous when multiple clients do it simultaneously.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Handle 429 Errors</h2>
+      <h3>Exponential Backoff with Jitter (JavaScript)</h3>
+      <div class="code-block">
+async function fetchWithRetry(url, options = {}, maxRetries = 5) {
+  for (let attempt = 0; attempt &lt; maxRetries; attempt++) {
+    const response = await fetch(url, options);
+
+    if (response.status !== 429) return response;
+
+    // Check Retry-After header first
+    const retryAfter = response.headers.get('Retry-After');
+    let delay;
+
+    if (retryAfter) {
+      delay = parseInt(retryAfter, 10) * 1000;  // seconds to ms
+    } else {
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+      delay = Math.pow(2, attempt) * 1000;
+    }
+
+    // Add jitter (±20%) to prevent thundering herd
+    delay += delay * (Math.random() * 0.4 - 0.2);
+
+    console.log(`Rate limited. Retrying in ${Math.round(delay/1000)}s...`);
+    await new Promise(r => setTimeout(r, delay));
+  }
+
+  throw new Error('Max retries exceeded');
+}
+      </div>
+
+      <h3>Python with requests</h3>
+      <div class="code-block">
+import time, random, requests
+
+def fetch_with_retry(url, max_retries=5):
+    for attempt in range(max_retries):
+        response = requests.get(url)
+
+        if response.status_code != 429:
+            return response
+
+        retry_after = response.headers.get('Retry-After')
+        if retry_after:
+            delay = int(retry_after)
+        else:
+            delay = (2 ** attempt) + random.uniform(0, 1)
+
+        print(f"Rate limited. Waiting {delay:.1f}s before retry {attempt + 1}...")
+        time.sleep(delay)
+
+    raise Exception("Max retries exceeded")
+      </div>
+
+      <h3>Proactive Rate Limit Management</h3>
+      <div class="code-block">
+// Track your rate limit budget proactively
+class RateLimitedClient {
+  constructor(requestsPerSecond) {
+    this.interval = 1000 / requestsPerSecond;
+    this.lastRequest = 0;
+  }
+
+  async request(url, options) {
+    const now = Date.now();
+    const elapsed = now - this.lastRequest;
+
+    if (elapsed &lt; this.interval) {
+      await new Promise(r =&gt; setTimeout(r, this.interval - elapsed));
+    }
+
+    this.lastRequest = Date.now();
+    return fetch(url, options);
+  }
+}
+
+// Use: max 10 requests/second
+const client = new RateLimitedClient(10);
+await client.request('https://api.example.com/data');
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Implementing Rate Limiting (Server Side)</h2>
+      <h3>Nginx</h3>
+      <div class="code-block">
+# Rate limit: 10 requests/second per IP
+http {
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+
+    server {
+        location /api/ {
+            limit_req zone=api burst=20 nodelay;
+            limit_req_status 429;
+
+            # Include rate limit headers
+            add_header X-RateLimit-Limit 10;
+            proxy_pass http://backend;
+        }
+    }
+}
+      </div>
+
+      <h3>Express.js with express-rate-limit</h3>
+      <div class="code-block">
+const rateLimit = require('express-rate-limit');
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minutes
+  max: 100,                   // 100 requests per window
+  standardHeaders: true,      // Return X-RateLimit-* headers
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: 'Too many requests',
+      retry_after: Math.ceil(req.rateLimit.resetTime / 1000)
+    });
+  }
+});
+
+app.use('/api/', apiLimiter);
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What does HTTP 429 Too Many Requests mean?</div>
+        <div class="faq-a">It means you have exceeded the server's rate limit &mdash; you sent too many requests in too short a time. The server is asking you to slow down and try again later. Check the <code>Retry-After</code> header for how long to wait, and look for <code>X-RateLimit-*</code> headers to understand your limits.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I handle 429 errors in my code?</div>
+        <div class="faq-a">Use exponential backoff with jitter: wait 1s, then 2s, 4s, 8s between retries, adding random jitter to prevent all clients from retrying at the same time. Always respect the <code>Retry-After</code> header if present. Proactively throttle your requests to stay under the limit rather than hitting 429 and retrying.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I implement rate limiting on my API?</div>
+        <div class="faq-a">Use the token bucket or sliding window algorithm. Libraries like <code>express-rate-limit</code> (Node.js), <code>django-ratelimit</code> (Python), or Nginx's <code>limit_req</code> module handle this. Always return <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, and <code>Retry-After</code> headers so clients can self-throttle. Store rate limit state in Redis for multi-server deployments.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="403.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">403</div>
+          <div class="rcc-name">Forbidden &mdash; Access denied (permanent)</div>
+        </a>
+        <a href="503.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">503</div>
+          <div class="rcc-name">Service Unavailable &mdash; Server overloaded</div>
+        </a>
+        <a href="401.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">401</div>
+          <div class="rcc-name">Unauthorized &mdash; Auth required</div>
+        </a>
+        <a href="200.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">200</div>
+          <div class="rcc-name">OK &mdash; Successful when within limits</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/timestamp.html" class="tool-link">Unix Timestamp Converter</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

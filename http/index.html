@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP Status Codes Reference - Complete Guide for Developers | ZeroKit.dev</title>
+  <meta name="description" content="Complete HTTP status codes reference. Detailed guides for every status code: 200, 301, 302, 400, 401, 403, 404, 429, 500, 502, 503, 504. Common causes, fixes, and code examples.">
+  <link rel="canonical" href="https://zerokit.dev/http/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .hub-hero {
+      text-align: center;
+      padding: 48px 0 40px;
+    }
+    .hub-hero h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .hub-hero p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .category-section {
+      margin-bottom: 48px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .category-header h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .category-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .cat-1xx .category-badge { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .cat-2xx .category-badge { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-3xx .category-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .cat-4xx .category-badge { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .cat-5xx .category-badge { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    .cat-1xx .category-header { border-bottom-color: rgba(59, 130, 246, 0.3); }
+    .cat-2xx .category-header { border-bottom-color: rgba(34, 197, 94, 0.3); }
+    .cat-3xx .category-header { border-bottom-color: rgba(234, 179, 8, 0.3); }
+    .cat-4xx .category-header { border-bottom-color: rgba(249, 115, 22, 0.3); }
+    .cat-5xx .category-header { border-bottom-color: rgba(239, 68, 68, 0.3); }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s;
+      display: block;
+    }
+    .status-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .status-card .sc-code {
+      font-family: var(--mono);
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .status-card .sc-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+    .status-card .sc-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+    .status-card .sc-link {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .cat-2xx .sc-code { color: #4ade80; }
+    .cat-3xx .sc-code { color: #facc15; }
+    .cat-4xx .sc-code { color: #fb923c; }
+    .cat-5xx .sc-code { color: #f87171; }
+
+    .full-reference {
+      text-align: center;
+      padding: 40px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 32px;
+    }
+    .full-reference h3 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+    .full-reference p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .full-reference a {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .full-reference a:hover {
+      background: var(--accent-hover);
+    }
+
+    @media (max-width: 768px) {
+      .hub-hero h1 { font-size: 1.6rem; }
+      .status-grid { grid-template-columns: 1fr; }
+      .status-card .sc-code { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb" style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">
+      <a href="../" style="color:var(--accent);text-decoration:none;">Home</a> &rsaquo; HTTP Status Codes
+    </div>
+
+    <div class="hub-hero">
+      <h1>HTTP Status Codes Reference</h1>
+      <p>In-depth guides for the most common HTTP status codes. Each page explains what the code means, common causes, practical troubleshooting steps, code examples, and related tools.</p>
+    </div>
+
+    <!-- 2xx Success -->
+    <div class="category-section cat-2xx">
+      <div class="category-header">
+        <span class="category-badge">2xx</span>
+        <h2>Success</h2>
+      </div>
+      <p class="category-desc">Success responses indicate that the client's request was received, understood, and accepted.</p>
+      <div class="status-grid">
+        <a href="200.html" class="status-card">
+          <div class="sc-code">200</div>
+          <div class="sc-name">OK</div>
+          <div class="sc-desc">The standard success response. The request has succeeded and the server returned the requested resource or result.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="201.html" class="status-card">
+          <div class="sc-code">201</div>
+          <div class="sc-name">Created</div>
+          <div class="sc-desc">A new resource was successfully created. Typically returned after POST requests with a Location header pointing to the new resource.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 3xx Redirection -->
+    <div class="category-section cat-3xx">
+      <div class="category-header">
+        <span class="category-badge">3xx</span>
+        <h2>Redirection</h2>
+      </div>
+      <p class="category-desc">Redirection responses tell the client it needs to take additional action to complete the request, usually following a URL in the Location header.</p>
+      <div class="status-grid">
+        <a href="301.html" class="status-card">
+          <div class="sc-code">301</div>
+          <div class="sc-name">Moved Permanently</div>
+          <div class="sc-desc">The URL has permanently changed. Search engines transfer link equity to the new URL. Essential for domain migrations and HTTPS upgrades.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="302.html" class="status-card">
+          <div class="sc-code">302</div>
+          <div class="sc-name">Found</div>
+          <div class="sc-desc">Temporary redirect. The original URL remains canonical. Used for A/B tests, login flows, and geo-based routing.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="304.html" class="status-card">
+          <div class="sc-code">304</div>
+          <div class="sc-name">Not Modified</div>
+          <div class="sc-desc">The cached version is still valid. Saves bandwidth by telling the client to reuse its cached copy via ETag or Last-Modified validation.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 4xx Client Errors -->
+    <div class="category-section cat-4xx">
+      <div class="category-header">
+        <span class="category-badge">4xx</span>
+        <h2>Client Errors</h2>
+      </div>
+      <p class="category-desc">Client error responses indicate that the request contains bad syntax, invalid credentials, or otherwise cannot be fulfilled by the server.</p>
+      <div class="status-grid">
+        <a href="400.html" class="status-card">
+          <div class="sc-code">400</div>
+          <div class="sc-name">Bad Request</div>
+          <div class="sc-desc">The server cannot process the request due to malformed syntax. Common with invalid JSON, missing parameters, or corrupt cookies.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="401.html" class="status-card">
+          <div class="sc-code">401</div>
+          <div class="sc-name">Unauthorized</div>
+          <div class="sc-desc">Authentication is required. The request lacks valid credentials &mdash; token missing, expired, or invalid. Not to be confused with 403.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="403.html" class="status-card">
+          <div class="sc-code">403</div>
+          <div class="sc-name">Forbidden</div>
+          <div class="sc-desc">Access denied. The server knows who you are but you do not have permission. Often caused by file permissions, WAF rules, or role restrictions.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="404.html" class="status-card">
+          <div class="sc-code">404</div>
+          <div class="sc-name">Not Found</div>
+          <div class="sc-desc">The most recognized HTTP error. The URL does not match any resource on the server. Often fixable with 301 redirects for moved pages.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="405.html" class="status-card">
+          <div class="sc-code">405</div>
+          <div class="sc-name">Method Not Allowed</div>
+          <div class="sc-desc">Wrong HTTP method for this resource. You sent POST when only GET is supported, or DELETE when the resource is read-only.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="429.html" class="status-card">
+          <div class="sc-code">429</div>
+          <div class="sc-name">Too Many Requests</div>
+          <div class="sc-desc">Rate limited. You sent too many requests too quickly. Handle with exponential backoff and respect the Retry-After header.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 5xx Server Errors -->
+    <div class="category-section cat-5xx">
+      <div class="category-header">
+        <span class="category-badge">5xx</span>
+        <h2>Server Errors</h2>
+      </div>
+      <p class="category-desc">Server error responses indicate that the server failed to fulfill a valid request. The problem is on the server side, not the client.</p>
+      <div class="status-grid">
+        <a href="500.html" class="status-card">
+          <div class="sc-code">500</div>
+          <div class="sc-name">Internal Server Error</div>
+          <div class="sc-desc">Generic server failure. Something went wrong but the server cannot be specific. Debug via error logs &mdash; the answer is always there.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="502.html" class="status-card">
+          <div class="sc-code">502</div>
+          <div class="sc-name">Bad Gateway</div>
+          <div class="sc-desc">The proxy/gateway received an invalid response from the upstream server. Usually means the backend crashed or is not running.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="503.html" class="status-card">
+          <div class="sc-code">503</div>
+          <div class="sc-name">Service Unavailable</div>
+          <div class="sc-desc">The server is temporarily unable to handle requests. Used during maintenance, overload, or deployment. Always temporary.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+        <a href="504.html" class="status-card">
+          <div class="sc-code">504</div>
+          <div class="sc-name">Gateway Timeout</div>
+          <div class="sc-desc">The upstream server did not respond in time. Caused by slow queries, long-running operations, or network issues between servers.</div>
+          <span class="sc-link">Read full guide &rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="full-reference">
+      <h3>Need All Status Codes?</h3>
+      <p>Our complete reference covers every HTTP status code from 100 to 599, with search, filtering, and detailed explanations.</p>
+      <a href="../tools/httpstatus.html">View Complete Reference</a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+</body>
+</html>

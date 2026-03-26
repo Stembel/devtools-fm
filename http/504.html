@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 504 Gateway Timeout - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 504 Gateway Timeout means the upstream server did not respond in time. Learn how to troubleshoot timeout issues in Nginx, AWS ALB, Cloudflare, and optimize slow backends.">
+  <link rel="canonical" href="https://zerokit.dev/http/504.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #f87171; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What causes a 504 Gateway Timeout?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 504 Gateway Timeout occurs when a proxy or gateway server does not receive a timely response from the upstream server. Common causes: slow database queries taking longer than the proxy timeout, long-running API calls or data processing, network latency between proxy and backend, DNS resolution failures to the upstream server, or the upstream server being completely unresponsive due to a deadlock or infinite loop."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 504 Gateway Timeout?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For quick fixes: 1) Increase proxy timeout settings (Nginx proxy_read_timeout, AWS ALB idle timeout). 2) Optimize slow database queries (add indexes, rewrite queries). 3) Move long-running tasks to background jobs. For structural fixes: implement pagination for large data sets, add caching layers (Redis/Memcached), set up database connection pooling, and use async processing with webhooks for operations that take more than 30 seconds."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between 502 and 504 errors?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "502 Bad Gateway means the proxy received an invalid or no response — the upstream server responded but with something broken (like a crash mid-response). 504 Gateway Timeout means the proxy waited for a response but the upstream server never responded within the timeout period. 502 = got a bad answer. 504 = got no answer at all."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 504 Gateway Timeout
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">504</div>
+      <div class="status-name-big">Gateway Timeout</div>
+      <div class="status-category">5xx Server Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 504 Gateway Timeout Mean?</h2>
+      <p>HTTP 504 Gateway Timeout means a server acting as a gateway or proxy did not receive a timely response from the upstream server it needed to complete the request. The proxy waited for a response, the timeout expired, and it gave up.</p>
+      <p>This is different from a regular timeout (where the browser times out waiting for the server). With 504, the client's request reached the proxy server successfully, but the proxy could not get the backend to respond in time. The bottleneck is between the proxy and the upstream server, not between the client and the proxy.</p>
+      <p>Every layer in the request chain has its own timeout: CDN (e.g., Cloudflare: 100s), load balancer (e.g., AWS ALB: 60s), reverse proxy (e.g., Nginx: 60s). A 504 occurs when the shortest timeout in the chain expires before the backend responds.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Slow database queries:</strong> An unoptimized query scanning millions of rows, a missing index on a WHERE clause, or a deadlocked transaction can cause the application to hang while waiting for the database, exceeding the proxy's timeout.</li>
+        <li><strong>Long-running synchronous operations:</strong> Generating large reports, processing file uploads, running complex computations, or calling slow third-party APIs synchronously. These operations should be moved to background workers.</li>
+        <li><strong>Upstream server deadlock or infinite loop:</strong> A bug in the application code causes a thread to hang indefinitely. The process accepts the connection but never sends a response.</li>
+        <li><strong>DNS resolution failure to upstream:</strong> If the proxy resolves the upstream hostname via DNS and the DNS server is slow or down, the proxy cannot even establish a connection within its timeout.</li>
+        <li><strong>Network issues between proxy and backend:</strong> Firewall rules blocking or throttling traffic, packet loss on the internal network, or a congested network link causing extreme latency between the proxy and backend server.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Fix It</h2>
+      <h3>Quick Fix: Increase Timeout (Symptom, Not Cure)</h3>
+      <div class="code-block">
+# Nginx - Increase proxy timeouts
+location /api/ {
+    proxy_pass http://backend;
+    proxy_connect_timeout 10s;     # Time to establish connection
+    proxy_send_timeout 60s;        # Time to send request to upstream
+    proxy_read_timeout 120s;       # Time to wait for response (increase this)
+}
+
+# AWS ALB - Increase idle timeout (via Console or CLI)
+aws elbv2 modify-load-balancer-attributes \
+  --load-balancer-arn arn:aws:... \
+  --attributes Key=idle_timeout.timeout_seconds,Value=120
+
+# Cloudflare - Enterprise plan allows custom origin timeouts
+# Free/Pro plans: fixed at 100 seconds
+      </div>
+
+      <h3>Real Fix: Optimize the Slow Backend</h3>
+      <div class="code-block">
+# Find slow queries (MySQL)
+# Enable slow query log
+SET GLOBAL slow_query_log = 'ON';
+SET GLOBAL long_query_time = 2;  -- Log queries over 2 seconds
+
+# Check the slow query log
+mysqldumpslow /var/log/mysql/slow-query.log
+
+# Add missing indexes
+EXPLAIN SELECT * FROM orders WHERE user_id = 42;
+-- If you see "type: ALL" (full table scan), add an index:
+ALTER TABLE orders ADD INDEX idx_user_id (user_id);
+      </div>
+
+      <h3>Move to Background Processing</h3>
+      <div class="code-block">
+// BEFORE: Synchronous (causes 504 on large reports)
+app.get('/api/report', async (req, res) => {
+  const data = await generateHugeReport(req.query); // Takes 5 minutes
+  res.json(data);  // Timeout before this runs
+});
+
+// AFTER: Async with polling
+app.post('/api/report', async (req, res) => {
+  const jobId = await queue.add('generate-report', req.query);
+  res.status(202).json({
+    job_id: jobId,
+    status_url: `/api/report/status/${jobId}`
+  });
+});
+
+app.get('/api/report/status/:id', async (req, res) => {
+  const job = await queue.getJob(req.params.id);
+  if (job.isCompleted()) {
+    res.json({ status: 'complete', download_url: job.result });
+  } else {
+    res.json({ status: 'processing', progress: job.progress });
+  }
+});
+      </div>
+
+      <h3>Add Caching to Prevent Repeated Slow Queries</h3>
+      <div class="code-block">
+const redis = require('redis').createClient();
+
+app.get('/api/dashboard', async (req, res) => {
+  const cacheKey = `dashboard:${req.user.id}`;
+
+  // Try cache first
+  const cached = await redis.get(cacheKey);
+  if (cached) return res.json(JSON.parse(cached));
+
+  // Slow query only runs once per cache period
+  const data = await slowDashboardQuery(req.user.id);
+  await redis.setEx(cacheKey, 300, JSON.stringify(data)); // Cache 5 min
+  res.json(data);
+});
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Debugging Timeout Chains</h2>
+      <p>When you see a 504, you need to identify which layer timed out. Check timeouts from outside in:</p>
+      <ul>
+        <li><strong>CDN layer (Cloudflare, CloudFront):</strong> Check if the CDN's error page appears. Cloudflare shows its branded 504 page if its 100-second timeout expires. CloudFront shows its own error page with a request ID.</li>
+        <li><strong>Load balancer (ALB, ELB, HAProxy):</strong> Check ALB access logs for the <code>target_processing_time</code> field. If it equals the idle timeout, the backend did not respond in time.</li>
+        <li><strong>Reverse proxy (Nginx, Apache):</strong> Check error logs for "upstream timed out" messages. Nginx logs the upstream address and the timeout duration.</li>
+        <li><strong>Application server:</strong> Add request timing logs. If the application itself does not log the request at all, the connection to it failed. If it logs receiving the request but no response, the bottleneck is inside the application (database, external API call).</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What causes a 504 Gateway Timeout?</div>
+        <div class="faq-a">A 504 occurs when a proxy or gateway does not receive a response from the backend server within its configured timeout. The most common causes: slow database queries (missing indexes, large result sets), long-running synchronous operations (report generation, bulk processing), upstream server deadlocks, DNS resolution issues, or network problems between the proxy and backend.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix a 504 Gateway Timeout?</div>
+        <div class="faq-a">Start by identifying the bottleneck: check Nginx/proxy error logs, enable slow query logging in your database, add timing to your application logs. Quick fix: increase <code>proxy_read_timeout</code> in Nginx. Real fix: optimize slow queries (add indexes), move long-running tasks to background jobs, add caching layers, and implement pagination for large data sets.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 502 and 504 errors?</div>
+        <div class="faq-a"><strong>502 = bad response.</strong> The proxy connected to the upstream but got an invalid, incomplete, or refused response (usually a crash). <strong>504 = no response.</strong> The proxy waited but the upstream never responded within the timeout. 502 suggests the backend is broken or down. 504 suggests the backend is too slow or stuck.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="502.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">502</div>
+          <div class="rcc-name">Bad Gateway &mdash; Upstream responded badly</div>
+        </a>
+        <a href="500.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">500</div>
+          <div class="rcc-name">Internal Server Error &mdash; Generic failure</div>
+        </a>
+        <a href="503.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">503</div>
+          <div class="rcc-name">Service Unavailable &mdash; Server overloaded</div>
+        </a>
+        <a href="408.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">408</div>
+          <div class="rcc-name">Request Timeout &mdash; Client was too slow</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/dns.html" class="tool-link">DNS Lookup</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

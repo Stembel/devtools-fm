@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 502 Bad Gateway - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 502 Bad Gateway means a proxy or gateway received an invalid response from the upstream server. Learn how to troubleshoot 502 errors in Nginx, load balancers, and CDNs.">
+  <link rel="canonical" href="https://zerokit.dev/http/502.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #f87171; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What causes a 502 Bad Gateway error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 502 Bad Gateway occurs when a proxy server (like Nginx, a load balancer, or a CDN) receives an invalid or no response from the upstream backend server. Common causes: the backend application crashed or is not running, the backend is listening on the wrong port or socket, the upstream server returned a malformed response, PHP-FPM or Node.js process died due to memory limits, or network issues between the proxy and backend."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 502 Bad Gateway error?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Check in this order: 1) Is the backend application running? (systemctl status, pm2 status, docker ps). 2) Can the proxy reach the backend? (curl localhost:3000 from the proxy server). 3) Check Nginx error logs for specific messages like 'connect() failed' or 'upstream prematurely closed connection'. 4) Verify the proxy_pass URL and port match the backend's listening address. 5) Check if the backend crashed due to OOM — look at dmesg or journalctl."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between 502 and 504?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "502 Bad Gateway means the proxy received an invalid response from the upstream server (or the connection was refused/reset). 504 Gateway Timeout means the proxy did not receive any response within its configured timeout period. In short: 502 = upstream responded with garbage or refused the connection. 504 = upstream did not respond at all within the time limit."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 502 Bad Gateway
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">502</div>
+      <div class="status-name-big">Bad Gateway</div>
+      <div class="status-category">5xx Server Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 502 Bad Gateway Mean?</h2>
+      <p>HTTP 502 Bad Gateway means a server acting as a gateway or proxy received an invalid response from an upstream server. This is not a problem with your request or your connection &mdash; it is a communication failure between two servers.</p>
+      <p>In modern web architecture, requests often flow through multiple layers: CDN (Cloudflare, CloudFront) &rarr; Load Balancer (ALB, Nginx) &rarr; Application Server (Node.js, PHP-FPM, Gunicorn). A 502 means one of these intermediate layers could not get a valid response from the next layer in the chain.</p>
+      <p>The key distinction from other 5xx errors: 502 specifically involves two servers, where the front-facing server (gateway) blames the backend server for the problem.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>Backend application crashed:</strong> The Node.js, Python, PHP, or Java application server has crashed, been killed by OOM (Out of Memory), or is in the process of restarting. Nginx or the load balancer cannot connect to it at all.</li>
+        <li><strong>PHP-FPM not running or overloaded:</strong> Nginx proxies PHP requests to PHP-FPM. If the FPM process pool is exhausted (all workers busy) or the service is stopped, Nginx returns 502. Check with <code>systemctl status php-fpm</code>.</li>
+        <li><strong>Wrong proxy_pass address or port:</strong> Nginx is configured to forward to <code>localhost:3000</code> but the app is listening on port <code>8080</code>. Or the socket file does not exist: <code>proxy_pass unix:/tmp/app.sock</code> but the file is missing.</li>
+        <li><strong>Backend returned invalid HTTP:</strong> The upstream server sent a response that is not valid HTTP &mdash; malformed headers, incomplete response, or binary data where HTTP was expected. This can happen with misconfigured backends or protocol mismatches.</li>
+        <li><strong>Upstream connection reset:</strong> The backend accepted the connection but then crashed mid-response, resetting the TCP connection. The proxy received a partial response that it cannot relay to the client.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Debug and Fix 502 Errors</h2>
+      <h3>Step 1: Check if the Backend is Running</h3>
+      <div class="code-block">
+# Check process status
+systemctl status myapp        # systemd service
+pm2 status                    # PM2 managed Node.js
+docker ps                     # Docker containers
+supervisorctl status          # Supervisor managed processes
+
+# Check if the port is listening
+ss -tlnp | grep 3000          # Is anything listening on port 3000?
+lsof -i :3000                 # What process is on port 3000?
+
+# Try connecting directly to the backend
+curl -v http://localhost:3000/health
+      </div>
+
+      <h3>Step 2: Check Nginx Error Logs</h3>
+      <div class="code-block">
+# Common Nginx 502 error messages:
+
+# Backend is not running:
+# "connect() failed (111: Connection refused) while connecting to upstream"
+
+# Backend socket missing:
+# "connect() failed (2: No such file or directory) while connecting to upstream"
+
+# Backend crashed mid-response:
+# "upstream prematurely closed connection while reading response header"
+
+# Backend sent invalid response:
+# "upstream sent invalid header while reading response header"
+
+tail -50 /var/log/nginx/error.log
+      </div>
+
+      <h3>Step 3: Common Fixes</h3>
+      <div class="code-block">
+# Restart the backend application
+systemctl restart myapp
+pm2 restart all
+docker restart my-container
+
+# Fix Nginx proxy_pass configuration
+# Verify the port matches the application
+upstream backend {
+    server 127.0.0.1:3000;  # Must match app's listening port
+    keepalive 32;
+}
+
+server {
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# Increase PHP-FPM workers if pool is exhausted
+# /etc/php/8.2/fpm/pool.d/www.conf
+pm = dynamic
+pm.max_children = 50         # Increase from default 5
+pm.start_servers = 10
+pm.min_spare_servers = 5
+pm.max_spare_servers = 20
+
+# Fix buffer size issues (Nginx)
+proxy_buffer_size 128k;
+proxy_buffers 4 256k;
+proxy_busy_buffers_size 256k;
+      </div>
+
+      <h3>Cloudflare-Specific 502</h3>
+      <div class="code-block">
+# If Cloudflare shows its own 502 error page:
+# The issue is between Cloudflare and your origin server.
+
+# Check that your origin server is reachable:
+curl -v --resolve example.com:443:YOUR_ORIGIN_IP https://example.com
+
+# Temporarily bypass Cloudflare (DNS only mode, orange cloud off)
+# to test if the origin itself works
+
+# Check Cloudflare system status: https://www.cloudflarestatus.com
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>For Regular Users</h2>
+      <ul>
+        <li><strong>Refresh the page:</strong> 502 errors are often temporary, lasting only seconds during a server restart or deployment. Wait 10-30 seconds and try again.</li>
+        <li><strong>Check if the site is down for everyone:</strong> Use a tool like downforeveryoneorjustme.com to see if others are also experiencing the issue.</li>
+        <li><strong>Try a different browser or device:</strong> If the issue persists, try accessing from your phone's mobile data (different network) to rule out local network issues.</li>
+        <li><strong>Clear DNS cache:</strong> On rare occasions, a stale DNS entry can cause your requests to go to the wrong server. Flush your DNS cache and try again.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What causes a 502 Bad Gateway error?</div>
+        <div class="faq-a">A 502 occurs when a proxy/gateway server (Nginx, load balancer, CDN) tries to forward your request to a backend server but receives an invalid response or no response at all. The most common cause is the backend application being down &mdash; it crashed, ran out of memory, or is not running. Other causes: wrong port configuration, PHP-FPM pool exhausted, or network issues between proxy and backend.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix a 502 Bad Gateway error?</div>
+        <div class="faq-a">Check if the backend service is running (<code>systemctl status</code>, <code>pm2 status</code>, <code>docker ps</code>). If it is down, restart it. Check Nginx error logs for the specific error message &mdash; it will tell you exactly why (connection refused, socket missing, premature close). Verify that the <code>proxy_pass</code> port matches the application's listening port. If PHP: check PHP-FPM status and increase worker count if needed.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between 502 and 504?</div>
+        <div class="faq-a"><strong>502 = bad response.</strong> The proxy connected to the upstream but got an invalid, incomplete, or no response (connection refused or reset). <strong>504 = timeout.</strong> The proxy connected but the upstream took too long to respond. 502 is often about crashes or connection issues; 504 is about slow responses or hung processes.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="500.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">500</div>
+          <div class="rcc-name">Internal Server Error &mdash; Generic server failure</div>
+        </a>
+        <a href="503.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">503</div>
+          <div class="rcc-name">Service Unavailable &mdash; Server overloaded</div>
+        </a>
+        <a href="504.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">504</div>
+          <div class="rcc-name">Gateway Timeout &mdash; Upstream timed out</div>
+        </a>
+        <a href="200.html" class="related-code-card">
+          <div class="rcc-code" style="color: #4ade80;">200</div>
+          <div class="rcc-name">OK &mdash; Everything working normally</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+        <a href="../tools/dns.html" class="tool-link">DNS Lookup</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

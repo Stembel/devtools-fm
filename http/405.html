@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTP 405 Method Not Allowed - What It Means and How to Fix It | ZeroKit.dev</title>
+  <meta name="description" content="HTTP 405 Method Not Allowed means you used the wrong HTTP method (GET, POST, PUT, DELETE) for a resource. Learn how to debug and fix 405 errors in REST APIs and web servers.">
+  <link rel="canonical" href="https://zerokit.dev/http/405.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .status-hero { text-align: center; padding: 48px 0 32px; }
+    .status-code-big { font-family: var(--mono); font-size: 4.5rem; font-weight: 800; color: #fb923c; line-height: 1; }
+    .status-name-big { font-size: 1.5rem; font-weight: 700; margin-top: 8px; }
+    .status-category { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 12px; background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .related-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .related-code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.2s; }
+    .related-code-card:hover { border-color: var(--accent); }
+    .related-code-card .rcc-code { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+    .related-code-card .rcc-name { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does HTTP 405 Method Not Allowed mean?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HTTP 405 means the server recognizes the URL but the HTTP method used (GET, POST, PUT, DELETE, PATCH) is not supported for that endpoint. For example, trying to POST to a read-only resource or sending DELETE to an endpoint that only accepts GET. The response includes an Allow header listing which methods are supported."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I fix a 405 error in a REST API?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Check the Allow header in the 405 response to see which methods are supported. Verify you are using the correct HTTP method for the operation: GET for reading, POST for creating, PUT/PATCH for updating, DELETE for removing. If the method should be supported, check your server route definitions — the route may be registered with a different method than intended."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do I get 405 when submitting a form?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "HTML forms only support GET and POST methods. If your form's action URL only has a GET handler but the form uses method='POST' (or vice versa), you will get a 405. Check the form's method attribute and ensure the server has a matching handler. Also check for trailing slash mismatches — /submit and /submit/ may route differently."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="../tools/httpstatus.html">HTTP Status Codes</a> &rsaquo; 405 Method Not Allowed
+    </div>
+
+    <div class="status-hero">
+      <div class="status-code-big">405</div>
+      <div class="status-name-big">Method Not Allowed</div>
+      <div class="status-category">4xx Client Error</div>
+    </div>
+
+    <div class="content-section">
+      <h2>What Does HTTP 405 Method Not Allowed Mean?</h2>
+      <p>HTTP 405 indicates that the server knows about the target resource and the URL is valid, but the HTTP method used in the request (GET, POST, PUT, DELETE, PATCH, etc.) is not supported for that resource. The resource exists, but you are trying to interact with it in a way it does not support.</p>
+      <p>The server must include an <code>Allow</code> header in the 405 response that lists the HTTP methods the resource does support. For example: <code>Allow: GET, HEAD, OPTIONS</code>. This tells the client exactly which methods to use instead.</p>
+      <p>This is different from 404 (resource does not exist) and 501 (server does not support the method at all). With 405, the resource is there and the server knows the method &mdash; it just will not let you use that method on this particular resource.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Causes</h2>
+      <ul>
+        <li><strong>POST to a GET-only endpoint:</strong> Trying to send data to a resource that only supports reading. Example: <code>POST /api/status</code> when <code>/api/status</code> only accepts GET.</li>
+        <li><strong>DELETE on a non-deletable resource:</strong> Some resources are immutable. Trying to DELETE an audit log entry or a system-generated record returns 405 because deletion is not a valid operation.</li>
+        <li><strong>Trailing slash mismatch:</strong> <code>POST /api/users</code> may be defined, but <code>POST /api/users/</code> (with trailing slash) routes to a different handler that only accepts GET. Many frameworks treat these as different routes.</li>
+        <li><strong>CORS preflight confusion:</strong> An OPTIONS request succeeds (CORS preflight) but the actual POST or PUT fails with 405 because the route handler does not accept that method. This can happen when CORS is configured globally but routes are defined narrowly.</li>
+        <li><strong>Static file server blocking methods:</strong> Trying to POST, PUT, or DELETE on a static file server that only serves files via GET. Nginx and Apache return 405 when you try to use unsupported methods on static content.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>How to Fix It</h2>
+      <h3>Step 1: Check the Allow Header</h3>
+      <div class="code-block">
+$ curl -i -X DELETE https://api.example.com/users
+
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, POST
+Content-Type: application/json
+
+{"error": "DELETE is not supported on /users. Use DELETE /users/:id instead."}
+      </div>
+
+      <h3>Step 2: Check Your Route Definitions</h3>
+      <div class="code-block">
+// Express.js - Make sure methods match
+
+// WRONG: Only GET is defined, POST will return 405
+app.get('/api/contact', (req, res) => { ... });
+
+// RIGHT: Define both GET and POST
+app.get('/api/contact', (req, res) => {
+  res.json({ message: 'Contact form endpoint' });
+});
+app.post('/api/contact', (req, res) => {
+  // Handle form submission
+  res.status(201).json({ message: 'Message sent' });
+});
+      </div>
+
+      <h3>Django REST Framework</h3>
+      <div class="code-block">
+from rest_framework.views import APIView
+
+class UserListView(APIView):
+    # These are the only methods this view supports
+    # Any other method automatically returns 405 with Allow header
+
+    def get(self, request):
+        """List users - GET is allowed"""
+        return Response(UserSerializer(User.objects.all(), many=True).data)
+
+    def post(self, request):
+        """Create user - POST is allowed"""
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=201)
+
+    # DELETE, PUT, PATCH are not defined → 405 Method Not Allowed
+      </div>
+
+      <h3>Nginx: Allow POST on Static Files</h3>
+      <div class="code-block">
+# If you need to accept POST on a location served by Nginx
+# (e.g., forwarding to a backend)
+location /api/ {
+    # Proxy to backend that handles POST
+    proxy_pass http://backend:3000;
+
+    # Or if you intentionally want to handle POST as GET
+    error_page 405 =200 $uri;  # Not recommended, but sometimes needed
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What does HTTP 405 Method Not Allowed mean?</div>
+        <div class="faq-a">It means the URL you are requesting exists, but the HTTP method you used (GET, POST, PUT, DELETE, etc.) is not supported for that specific resource. Check the <code>Allow</code> header in the response to see which methods the endpoint accepts, then retry with the correct method.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I fix a 405 error in a REST API?</div>
+        <div class="faq-a">First, read the <code>Allow</code> header in the 405 response. It lists the accepted methods. Common fix: you may be POSTing to a collection endpoint (<code>/users</code>) when you should be PUTing to a specific resource (<code>/users/42</code>). Also check for trailing slash differences and ensure your client library is sending the intended method.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Why do I get 405 when submitting a form?</div>
+        <div class="faq-a">HTML forms use GET or POST (set via the <code>method</code> attribute). If the server-side handler only accepts the opposite method, you get 405. Check your form's <code>method</code> attribute and match it to the server route. Also check for trailing slash mismatches &mdash; some frameworks treat <code>/submit</code> and <code>/submit/</code> as different endpoints.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Status Codes</h2>
+      <div class="related-codes">
+        <a href="400.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">400</div>
+          <div class="rcc-name">Bad Request &mdash; Malformed request</div>
+        </a>
+        <a href="404.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">404</div>
+          <div class="rcc-name">Not Found &mdash; Resource does not exist</div>
+        </a>
+        <a href="403.html" class="related-code-card">
+          <div class="rcc-code" style="color: #fb923c;">403</div>
+          <div class="rcc-name">Forbidden &mdash; Not authorized for this action</div>
+        </a>
+        <a href="500.html" class="related-code-card">
+          <div class="rcc-code" style="color: #f87171;">500</div>
+          <div class="rcc-name">Internal Server Error &mdash; Server-side failure</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/httpstatus.html" class="tool-link">HTTP Status Codes Reference</a>
+        <a href="../tools/apitester.html" class="tool-link">API Tester</a>
+        <a href="../tools/curl.html" class="tool-link">cURL Command Builder</a>
+        <a href="../tools/headers.html" class="tool-link">HTTP Headers Analyzer</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>
