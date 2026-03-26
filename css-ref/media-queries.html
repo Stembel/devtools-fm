@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Media Queries - Breakpoints Guide with Examples | ZeroKit.dev</title>
+  <meta name="description" content="CSS media queries and breakpoints explained. Learn mobile-first responsive design, common breakpoint values, prefers-color-scheme, and modern container queries.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/media-queries.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; }
+    .demo-item { background: var(--accent); color: #fff; padding: 12px 20px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600; text-align: center; }
+    .bp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+    .bp-table th, .bp-table td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+    .bp-table th { background: var(--surface); font-weight: 600; }
+    .bp-table td code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are the standard CSS breakpoints?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "There is no single standard, but the most commonly used breakpoints are: 480px (mobile), 768px (tablet), 1024px (small desktop), 1280px (desktop), and 1536px (large desktop). Tailwind CSS uses 640px, 768px, 1024px, 1280px, and 1536px. Bootstrap uses 576px, 768px, 992px, 1200px, and 1400px. Choose breakpoints based on where your layout actually breaks, not arbitrary device widths."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I use mobile-first or desktop-first media queries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Mobile-first (using min-width) is the recommended approach. You write base styles for mobile, then add complexity for larger screens with min-width media queries. This results in simpler CSS because mobile layouts are usually simpler, and it ensures the default experience works on the most constrained devices."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between @media and @container queries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "@media queries respond to the viewport size. @container queries respond to the size of a parent container element. Container queries are better for reusable components because the component adapts based on how much space it has, not how wide the entire browser window is. Container queries require setting container-type on the parent."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Media Queries
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Media Queries</h1>
+      <div class="subtitle">Breakpoints, responsive design, and modern query features</div>
+    </div>
+
+    <div class="content-section">
+      <h2>Media Query Syntax</h2>
+      <p>A media query applies CSS rules only when certain conditions are met. The most common condition is viewport width:</p>
+      <div class="code-block">
+/* Base styles (mobile) */
+.container { padding: 16px; }
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .container { padding: 32px; }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .container { padding: 48px; max-width: 1200px; margin: 0 auto; }
+}
+      </div>
+      <p>This is <strong>mobile-first</strong>: base styles target small screens, then <code>min-width</code> queries layer on styles for larger viewports.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Breakpoints</h2>
+      <table class="bp-table">
+        <thead>
+          <tr><th>Name</th><th>min-width</th><th>Targets</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Small mobile</td><td><code>480px</code></td><td>Larger phones (landscape)</td></tr>
+          <tr><td>Tablet</td><td><code>768px</code></td><td>Tablets, small laptops</td></tr>
+          <tr><td>Desktop</td><td><code>1024px</code></td><td>Laptops, desktops</td></tr>
+          <tr><td>Wide</td><td><code>1280px</code></td><td>Large monitors</td></tr>
+          <tr><td>Ultra-wide</td><td><code>1536px</code></td><td>Ultra-wide / 4K scaled</td></tr>
+        </tbody>
+      </table>
+      <p>These are guidelines, not rules. Set breakpoints where your layout actually needs to change, not at specific device widths.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Mobile-First vs Desktop-First</h2>
+      <h3>Mobile-first (recommended)</h3>
+      <div class="code-block">
+/* Default: mobile */
+.grid { display: flex; flex-direction: column; }
+
+/* Upgrade for larger screens */
+@media (min-width: 768px) {
+  .grid { flex-direction: row; }
+}
+      </div>
+
+      <h3>Desktop-first (avoid if possible)</h3>
+      <div class="code-block">
+/* Default: desktop */
+.grid { display: flex; flex-direction: row; }
+
+/* Downgrade for smaller screens */
+@media (max-width: 767px) {
+  .grid { flex-direction: column; }
+}
+      </div>
+      <p>Mobile-first works better because mobile styles are simpler. You start simple and add complexity. Desktop-first means overriding complex styles on mobile, which creates more CSS and more bugs.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Combining Conditions</h2>
+      <div class="code-block">
+/* AND: both conditions must be true */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* tablet only */
+}
+
+/* OR: either condition */
+@media (min-width: 1024px), (orientation: landscape) {
+  /* desktop OR landscape */
+}
+
+/* NOT */
+@media not print {
+  /* everything except print */
+}
+
+/* Modern range syntax (Chrome 104+, Firefox 63+, Safari 16.4+) */
+@media (768px <= width < 1024px) {
+  /* tablet range */
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Preference Queries</h2>
+      <p>Media queries are not just for screen size. You can detect user preferences:</p>
+      <div class="code-block">
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --text: #e2e8f0;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* High contrast */
+@media (prefers-contrast: high) {
+  .button { border: 2px solid currentColor; }
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Responsive Layout Example</h2>
+      <p>A real-world responsive layout using mobile-first queries:</p>
+      <div class="code-block">
+.page {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .page {
+    grid-template-columns: 250px 1fr;
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page {
+    grid-template-columns: 280px 1fr 250px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+      </div>
+      <p>Mobile: single column. Tablet: sidebar + main. Desktop: sidebar + main + aside.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Container Queries (Modern CSS)</h2>
+      <p>Container queries let components respond to their parent size instead of the viewport. Use them for reusable components that need to adapt to available space:</p>
+      <div class="code-block">
+.card-wrapper {
+  container-type: inline-size;
+}
+
+@container (min-width: 400px) {
+  .card {
+    display: flex;
+    flex-direction: row;   /* horizontal layout when there is space */
+  }
+}
+
+@container (max-width: 399px) {
+  .card {
+    display: flex;
+    flex-direction: column; /* stacked when narrow */
+  }
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What are the standard CSS breakpoints?</div>
+        <div class="faq-a">There is no universal standard. Common values: 480px, 768px, 1024px, 1280px, 1536px. Tailwind and Bootstrap use slightly different sets. The best approach: set breakpoints where your specific layout breaks, not at arbitrary device widths.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Should I use mobile-first or desktop-first?</div>
+        <div class="faq-a">Mobile-first (<code>min-width</code>) is recommended. You write simpler base styles for mobile and layer on complexity for larger screens. Desktop-first (<code>max-width</code>) requires overriding complex styles for mobile, which creates more CSS and more opportunities for bugs.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between @media and @container?</div>
+        <div class="faq-a"><code>@media</code> responds to the viewport size. <code>@container</code> responds to a parent element's size. Container queries are better for reusable components &mdash; the component adapts based on its available space, not the window width.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="grid.html" class="tool-link">CSS Grid Reference</a>
+        <a href="flexbox.html" class="tool-link">CSS Flexbox Reference</a>
+        <a href="units.html" class="tool-link">CSS Units Guide</a>
+        <a href="../tools/grid.html" class="tool-link">Grid Generator</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

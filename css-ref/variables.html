@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Custom Properties (Variables) - Complete Guide with Examples | ZeroKit.dev</title>
+  <meta name="description" content="Learn CSS custom properties (variables). Declare with --, use with var(), set fallbacks, scope to components, and build dynamic themes. Practical examples included.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/variables.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between CSS variables and Sass variables?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "CSS custom properties (variables) are live in the browser — they can be changed at runtime with JavaScript, scoped to specific elements, and respond to media queries. Sass variables are compiled away at build time — they become static values in the output CSS and cannot change dynamically. CSS variables cascade and inherit; Sass variables do not. Use CSS variables for theming and anything that needs to change at runtime. Use Sass variables for build-time constants."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can CSS variables be used in media queries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not in the media query condition itself — @media (min-width: var(--bp)) does not work. But you CAN change variable values inside media queries: @media (min-width: 768px) { :root { --spacing: 32px; } }. The variable's value updates when the condition is met, and all properties using that variable update automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I set a fallback value for a CSS variable?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use the second argument of var(): color: var(--primary, #6366f1). If --primary is not defined, it falls back to #6366f1. You can chain fallbacks: var(--a, var(--b, red)). The fallback is only used when the variable is not set at all — it does not catch invalid values."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Custom Properties
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Custom Properties (Variables)</h1>
+      <div class="subtitle">Define once, use everywhere &mdash; and change them at runtime</div>
+    </div>
+
+    <div class="content-section">
+      <h2>Declaring and Using Variables</h2>
+      <p>Declare custom properties with the <code>--</code> prefix. Use them with the <code>var()</code> function. Typically you declare global variables on <code>:root</code>:</p>
+      <div class="code-block">
+:root {
+  --primary: #6366f1;
+  --radius: 8px;
+  --spacing: 16px;
+}
+
+.button {
+  background: var(--primary);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+}
+      </div>
+      <div class="demo-box">
+        <div style="--demo-color: #6366f1; --demo-radius: 8px; background: var(--demo-color); color: #fff; padding: 12px 24px; border-radius: var(--demo-radius); display: inline-block; font-family: var(--mono); font-size: 0.85rem; font-weight: 600;">Styled with variables</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Fallback Values</h2>
+      <p>The second argument to <code>var()</code> is a fallback used when the variable is not defined:</p>
+      <div class="code-block">
+.card {
+  /* If --card-bg is not set, use #f8fafc */
+  background: var(--card-bg, #f8fafc);
+
+  /* Chained fallback */
+  color: var(--card-text, var(--text, #1e293b));
+}
+      </div>
+      <p>The fallback only triggers when the variable is completely undefined. If the variable is set to an invalid value for the property, the fallback is <em>not</em> used &mdash; the property falls back to its inherited or initial value instead.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Scoping</h2>
+      <p>Variables cascade and inherit just like regular CSS properties. You can override them on any element:</p>
+      <div class="code-block">
+:root {
+  --accent: #6366f1;     /* default purple */
+}
+
+.section-danger {
+  --accent: #ef4444;     /* override to red in this section */
+}
+
+.button {
+  background: var(--accent); /* purple by default, red inside .section-danger */
+}
+      </div>
+      <div class="demo-box" style="display: flex; gap: 12px;">
+        <div style="--btn-bg: #6366f1; background: var(--btn-bg); color: #fff; padding: 10px 20px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600;">Default</div>
+        <div style="--btn-bg: #ef4444; background: var(--btn-bg); color: #fff; padding: 10px 20px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600;">Danger Scope</div>
+        <div style="--btn-bg: #10b981; background: var(--btn-bg); color: #fff; padding: 10px 20px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600;">Success Scope</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Dark Mode Theming</h2>
+      <p>CSS variables make light/dark mode trivial. Define your color tokens once, swap them in a media query or class toggle:</p>
+      <div class="code-block">
+:root {
+  --bg: #ffffff;
+  --text: #1e293b;
+  --surface: #f8fafc;
+  --border: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --text: #e2e8f0;
+    --surface: #1e293b;
+    --border: #334155;
+  }
+}
+
+/* Or toggle with a class */
+.dark {
+  --bg: #0f172a;
+  --text: #e2e8f0;
+}
+      </div>
+      <p>Every element using these variables updates automatically. No duplicate CSS needed.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Changing Variables with JavaScript</h2>
+      <p>Unlike preprocessor variables, CSS custom properties are live. You can read and write them from JS:</p>
+      <div class="code-block">
+// Set a variable on :root
+document.documentElement.style.setProperty('--primary', '#ef4444');
+
+// Set on a specific element
+element.style.setProperty('--card-width', '300px');
+
+// Read a variable's computed value
+const value = getComputedStyle(document.documentElement)
+  .getPropertyValue('--primary');
+      </div>
+      <p>This is powerful for user-customizable themes, sliders that control spacing or colors, and animations driven by scroll position.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Practical Patterns</h2>
+      <h3>Component API</h3>
+      <div class="code-block">
+/* The component exposes these variables for customization */
+.card {
+  --card-padding: 16px;
+  --card-radius: 8px;
+  --card-bg: var(--surface);
+
+  padding: var(--card-padding);
+  border-radius: var(--card-radius);
+  background: var(--card-bg);
+}
+
+/* Consumers override without touching the component CSS */
+.compact .card {
+  --card-padding: 8px;
+  --card-radius: 4px;
+}
+      </div>
+
+      <h3>Responsive Variables</h3>
+      <div class="code-block">
+:root {
+  --container-padding: 16px;
+  --heading-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --container-padding: 32px;
+    --heading-size: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --container-padding: 48px;
+    --heading-size: 2.5rem;
+  }
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between CSS variables and Sass variables?</div>
+        <div class="faq-a">CSS variables are live in the browser &mdash; they cascade, inherit, and can be changed with JavaScript at runtime. Sass variables compile to static values at build time. Use CSS variables for theming and dynamic values. Use Sass variables for build-time constants.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can CSS variables be used in media queries?</div>
+        <div class="faq-a">Not in the condition (<code>@media (min-width: var(--bp))</code> does not work). But you can change variable values <em>inside</em> media queries: <code>@media (min-width: 768px) { :root { --spacing: 32px; } }</code>. All elements using that variable update automatically.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I set a fallback value for a CSS variable?</div>
+        <div class="faq-a">Use the second argument: <code>var(--primary, #6366f1)</code>. If <code>--primary</code> is not defined, it uses <code>#6366f1</code>. You can chain: <code>var(--a, var(--b, red))</code>.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/colors.html" class="tool-link">Color Converter</a>
+        <a href="media-queries.html" class="tool-link">Media Queries Guide</a>
+        <a href="units.html" class="tool-link">CSS Units Guide</a>
+        <a href="../tools/shadow.html" class="tool-link">Box Shadow Generator</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

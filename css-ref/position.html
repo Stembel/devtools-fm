@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Position - Relative, Absolute, Fixed, Sticky Explained | ZeroKit.dev</title>
+  <meta name="description" content="Understand CSS position values: static, relative, absolute, fixed, and sticky. Visual examples showing how each works, when to use them, and common positioning patterns.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/position.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; position: relative; }
+    .demo-item { background: var(--accent); color: #fff; padding: 10px 16px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600; }
+    .demo-ghost { border: 2px dashed var(--border); padding: 10px 16px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; color: var(--text-muted); }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+    .compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+    .compare-table th, .compare-table td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+    .compare-table th { background: var(--surface); font-weight: 600; }
+    .compare-table td code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between position relative and absolute in CSS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "position: relative positions an element relative to its normal position — it still takes up space in the document flow. position: absolute removes the element from the flow and positions it relative to its closest positioned ancestor (an ancestor with position: relative, absolute, or fixed). If no positioned ancestor exists, it positions relative to the viewport."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When should I use position sticky vs fixed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use position: sticky when you want an element to scroll normally until it reaches a threshold (like top: 0), then stick in place — it stays within its parent container. Use position: fixed when you want an element to always stay in the same viewport position regardless of scrolling, like a floating action button or a persistent header that never scrolls away."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is my position absolute not working?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The most common reason: the parent element does not have position: relative (or any position value other than static). Without a positioned ancestor, absolute elements position relative to the viewport. Add position: relative to the parent container. Also check that you have set top, right, bottom, or left values — absolute positioning needs offset properties to know where to go."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Position
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Position</h1>
+      <div class="subtitle">static, relative, absolute, fixed, sticky &mdash; when and how to use each</div>
+    </div>
+
+    <div class="content-section">
+      <h2>Position Values at a Glance</h2>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Value</th><th>In Flow?</th><th>Positioned Relative To</th><th>Use Case</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>static</code></td><td>Yes</td><td>N/A (default)</td><td>Normal flow</td></tr>
+          <tr><td><code>relative</code></td><td>Yes</td><td>Its own normal position</td><td>Nudging, anchor for absolutes</td></tr>
+          <tr><td><code>absolute</code></td><td>No</td><td>Closest positioned ancestor</td><td>Overlays, tooltips, badges</td></tr>
+          <tr><td><code>fixed</code></td><td>No</td><td>Viewport</td><td>Sticky headers, FABs</td></tr>
+          <tr><td><code>sticky</code></td><td>Yes (until stuck)</td><td>Scroll container</td><td>Scroll-aware headers, sidebars</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-section">
+      <h2>position: relative</h2>
+      <p>The element stays in normal flow but can be offset from its original position using <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code>. The space it originally occupied is preserved.</p>
+      <div class="code-block">
+.nudged {
+  position: relative;
+  top: -10px;          /* moves UP 10px from where it would be */
+  left: 20px;          /* moves RIGHT 20px */
+}
+      </div>
+      <div class="demo-box">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <div class="demo-item">Normal</div>
+          <div class="demo-item" style="position: relative; top: -8px; left: 15px; background: #7c3aed;">Relative (shifted)</div>
+          <div class="demo-ghost">Original spot</div>
+        </div>
+      </div>
+      <p>Most common use: setting <code>position: relative</code> on a parent so that absolute-positioned children reference it.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>position: absolute</h2>
+      <p>Removes the element from document flow. It positions relative to the closest ancestor that has <code>position: relative</code>, <code>absolute</code>, or <code>fixed</code>. If no positioned ancestor exists, it falls back to the viewport.</p>
+      <div class="code-block">
+.parent {
+  position: relative;  /* this becomes the reference point */
+}
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+}
+      </div>
+      <div class="demo-box" style="height: 120px;">
+        <div style="position: relative; display: inline-block;">
+          <div class="demo-item" style="padding: 24px 40px;">Card</div>
+          <div class="demo-item" style="position: absolute; top: -8px; right: -8px; padding: 4px 10px; background: #ef4444; border-radius: 12px; font-size: 0.7rem;">3</div>
+        </div>
+      </div>
+      <p><strong>Golden rule:</strong> always pair <code>position: absolute</code> on the child with <code>position: relative</code> on the parent.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>position: fixed</h2>
+      <p>Like absolute, but positioned relative to the <strong>viewport</strong>. It stays in the same spot even when scrolling. Removed from document flow.</p>
+      <div class="code-block">
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+}
+      </div>
+      <p>Use for persistent navigation, floating action buttons, and cookie banners. Remember to add padding or margin to the body so content is not hidden behind the fixed element.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>position: sticky</h2>
+      <p>A hybrid: behaves like <code>relative</code> until the user scrolls past a threshold, then it &ldquo;sticks&rdquo; like <code>fixed</code>. Unlike fixed, it stays inside its parent &mdash; when the parent scrolls out, the sticky element goes with it.</p>
+      <div class="code-block">
+.sticky-nav {
+  position: sticky;
+  top: 0;              /* sticks when it reaches the top */
+  z-index: 10;
+  background: white;
+}
+      </div>
+      <p><strong>Gotcha:</strong> sticky requires the parent to be taller than the sticky element. It will not work if the parent has <code>overflow: hidden</code> or <code>overflow: auto</code>.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Patterns</h2>
+      <h3>Overlay / Modal Backdrop</h3>
+      <div class="code-block">
+.overlay {
+  position: fixed;
+  inset: 0;            /* shorthand for top:0 right:0 bottom:0 left:0 */
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+      </div>
+
+      <h3>Tooltip Positioned Above Element</h3>
+      <div class="code-block">
+.tooltip-wrapper {
+  position: relative;
+}
+.tooltip {
+  position: absolute;
+  bottom: 100%;        /* sits directly above the wrapper */
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+      </div>
+
+      <h3>Sticky Table Header</h3>
+      <div class="code-block">
+thead th {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between relative and absolute positioning?</div>
+        <div class="faq-a"><code>relative</code> keeps the element in the document flow and offsets it from its normal spot. <code>absolute</code> removes it from the flow entirely and positions it relative to the nearest positioned ancestor. If no ancestor is positioned, it uses the viewport.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">When should I use sticky vs fixed?</div>
+        <div class="faq-a">Use <code>sticky</code> when you want an element to scroll normally, then stick at a threshold &mdash; it stays within its parent. Use <code>fixed</code> when you want the element to always be visible at the same viewport position, regardless of scrolling.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Why is my position absolute not working?</div>
+        <div class="faq-a">Most likely: the parent does not have <code>position: relative</code>. Without a positioned ancestor, absolute elements reference the viewport. Add <code>position: relative</code> to the parent and make sure you set <code>top</code>/<code>left</code>/<code>right</code>/<code>bottom</code> offsets.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="z-index.html" class="tool-link">CSS z-index Guide</a>
+        <a href="flexbox.html" class="tool-link">CSS Flexbox Reference</a>
+        <a href="grid.html" class="tool-link">CSS Grid Reference</a>
+        <a href="../tools/flexbox.html" class="tool-link">Flexbox Generator</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Overflow - Hidden, Scroll, Auto Explained | ZeroKit.dev</title>
+  <meta name="description" content="CSS overflow property explained with visual examples. Learn when to use overflow hidden, scroll, auto, clip, and visible. Fix common overflow bugs in layouts.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/overflow.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 16px 0; background: var(--surface); }
+    .demo-label { font-family: var(--mono); font-size: 0.75rem; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+    .overflow-demo-content { font-size: 0.85rem; line-height: 1.6; color: var(--text-muted); }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between overflow hidden and overflow clip?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "overflow: hidden clips content AND creates a scroll container (you can still scroll programmatically with JavaScript). overflow: clip clips content but does NOT create a scroll container — content is truly inaccessible. clip also does not create a new block formatting context. Use clip when you genuinely want to cut off content with no way to access it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does overflow hidden break position sticky?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "position: sticky sticks relative to its nearest scrolling ancestor. overflow: hidden (or auto/scroll) on a parent creates a scrolling container, which becomes the sticky reference. If that parent is not actually scrolling (because the content fits), sticky has nothing to stick to and appears broken. The fix: remove overflow from the sticky element's ancestors, or restructure so the sticky element is inside the scrolling container."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I hide the scrollbar but keep scrolling?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use scrollbar-width: none (Firefox) and ::-webkit-scrollbar { display: none } (Chrome/Safari). The element remains scrollable but the scrollbar is invisible. Keep in mind this can hurt usability — users may not realize content is scrollable. Consider using overflow: auto with a thin custom scrollbar instead."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Overflow
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Overflow</h1>
+      <div class="subtitle">Control what happens when content exceeds its container</div>
+    </div>
+
+    <div class="content-section">
+      <h2>Overflow Values</h2>
+      <p>The <code>overflow</code> property controls how content is handled when it is larger than its container. There are five values:</p>
+      <ul>
+        <li><strong>visible</strong> (default) &mdash; content spills outside the box</li>
+        <li><strong>hidden</strong> &mdash; clips content, creates a scroll container (JS can scroll it)</li>
+        <li><strong>scroll</strong> &mdash; always shows scrollbars, even if content fits</li>
+        <li><strong>auto</strong> &mdash; shows scrollbars only when content overflows</li>
+        <li><strong>clip</strong> &mdash; clips content, does NOT create a scroll container</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Visual Comparison</h2>
+      <h3>overflow: visible (default)</h3>
+      <div class="demo-box" style="height: 60px; overflow: visible; position: relative; z-index: 1; margin-bottom: 60px;">
+        <div class="overflow-demo-content">This content overflows its container because the box is only 60px tall. The text keeps going and spills out below the box boundaries. This is the default behavior.</div>
+      </div>
+
+      <h3>overflow: hidden</h3>
+      <div class="demo-box" style="height: 60px; overflow: hidden;">
+        <div class="overflow-demo-content">This content is clipped at the container boundary. You cannot see the rest. But JavaScript can still scroll this element programmatically using scrollTo(). This creates a block formatting context.</div>
+      </div>
+
+      <h3>overflow: scroll</h3>
+      <div class="demo-box" style="height: 80px; overflow: scroll;">
+        <div class="overflow-demo-content">Scrollbars always appear, even if the content fits. On macOS these may be overlay scrollbars. On Windows you will see persistent scrollbar tracks. Scroll down to see the rest of this text. This is useful when you want consistent layout regardless of content size.</div>
+      </div>
+
+      <h3>overflow: auto</h3>
+      <div class="demo-box" style="height: 80px; overflow: auto;">
+        <div class="overflow-demo-content">Scrollbars appear only when needed. If the content fits, no scrollbar. If it overflows, a scrollbar appears. This is usually the best choice for scrollable containers. Scroll down to see more content that extends below the visible area of this container.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>overflow-x and overflow-y</h2>
+      <p>Control horizontal and vertical overflow independently:</p>
+      <div class="code-block">
+.code-container {
+  overflow-x: auto;    /* horizontal scroll for wide code */
+  overflow-y: hidden;  /* no vertical scroll */
+}
+
+.sidebar {
+  overflow-x: hidden;  /* clip horizontal overflow */
+  overflow-y: auto;    /* scroll vertically when needed */
+}
+      </div>
+      <div class="demo-box" style="overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
+        <div style="font-family: var(--mono); font-size: 0.8rem; color: var(--text-muted);">const reallyLongLine = "This is a very long line of code that extends beyond the container width. You can scroll horizontally to see all of it. overflow-x: auto handles this.";</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>text-overflow: ellipsis</h2>
+      <p>Truncate overflowing text with an ellipsis. Requires three properties to work:</p>
+      <div class="code-block">
+.truncate {
+  overflow: hidden;         /* clip the text */
+  text-overflow: ellipsis;  /* show ... */
+  white-space: nowrap;      /* prevent wrapping */
+}
+
+/* Multi-line truncation */
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;   /* max 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+      </div>
+      <div class="demo-box">
+        <div class="demo-label">Single line truncation</div>
+        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; color: var(--text-muted);">This is a very long piece of text that will be truncated with an ellipsis because it exceeds the container width and cannot wrap to the next line.</div>
+      </div>
+      <div class="demo-box">
+        <div class="demo-label">Multi-line clamp (3 lines)</div>
+        <div style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. This text will be clamped to three lines. Everything beyond the third line is hidden with an ellipsis showing where the text was cut.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Hidden Scrollbar Trick</h2>
+      <p>Keep scrolling functional but hide the scrollbar visually:</p>
+      <div class="code-block">
+.scroll-no-bar {
+  overflow: auto;
+  scrollbar-width: none;          /* Firefox */
+}
+.scroll-no-bar::-webkit-scrollbar {
+  display: none;                  /* Chrome, Safari, Edge */
+}
+      </div>
+      <p>Use sparingly. Hidden scrollbars reduce discoverability &mdash; users may not realize they can scroll.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Gotchas</h2>
+      <ul>
+        <li><strong>overflow: hidden breaks sticky positioning.</strong> A hidden overflow ancestor creates a scrolling context that traps sticky elements. Move the overflow to a different wrapper or restructure your layout.</li>
+        <li><strong>overflow: hidden on the body prevents page scrolling.</strong> Use it carefully on <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code> &mdash; typically only for modal backgrounds where you want to lock scroll.</li>
+        <li><strong>Setting overflow-x: hidden but overflow-y: visible does not work as expected.</strong> If one axis is hidden/scroll/auto, the other automatically becomes auto instead of visible. This is by spec.</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between overflow hidden and clip?</div>
+        <div class="faq-a"><code>hidden</code> clips content and creates a scroll container &mdash; JS can still scroll it. <code>clip</code> clips content but does not create a scroll container. Use <code>clip</code> when you truly want content inaccessible.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Why does overflow hidden break position sticky?</div>
+        <div class="faq-a"><code>sticky</code> sticks relative to its nearest scrolling ancestor. <code>overflow: hidden</code> on a parent creates a scrolling container. If that parent is not actually scrolling, sticky has nothing to stick to. Fix: remove overflow from sticky ancestors.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I hide scrollbars but keep scrolling?</div>
+        <div class="faq-a">Use <code>scrollbar-width: none</code> for Firefox and <code>::-webkit-scrollbar { display: none }</code> for Chrome/Safari. The element remains scrollable but the scrollbar is invisible. Consider UX implications &mdash; users may not realize content is scrollable.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="position.html" class="tool-link">CSS Position Guide</a>
+        <a href="z-index.html" class="tool-link">z-index Guide</a>
+        <a href="flexbox.html" class="tool-link">CSS Flexbox Reference</a>
+        <a href="units.html" class="tool-link">CSS Units Guide</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

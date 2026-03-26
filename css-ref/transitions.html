@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Transitions - Complete Guide with Examples | ZeroKit.dev</title>
+  <meta name="description" content="CSS transitions explained with live demos. Learn transition-property, timing functions, delays, and performance tips. Copy-paste examples for hover effects, fades, and more.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/transitions.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 16px 0; display: flex; gap: 16px; flex-wrap: wrap; }
+    .demo-btn { padding: 12px 28px; border-radius: 8px; font-family: var(--mono); font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; color: #fff; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What CSS properties can be transitioned?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most properties with numeric or color values can be transitioned: opacity, transform, background-color, width, height, padding, margin, border-color, box-shadow, and many more. Properties that cannot be transitioned include display, font-family, and any property that switches between discrete values. For best performance, stick to transitioning opacity and transform — these are GPU-accelerated and avoid triggering layout recalculations."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between CSS transitions and animations?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Transitions go from state A to state B when a property changes (like on hover). They need a trigger. Animations (@keyframes) can run automatically, loop, have multiple steps, and do not need a trigger. Use transitions for simple state changes (hover, focus, active). Use animations for loading spinners, attention-grabbing effects, or anything with more than two states."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is transition all bad for performance?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "transition: all watches every single CSS property for changes. If a layout property changes (like width or height), the browser recalculates layout for the entire page, causing jank. Specifying exact properties (transition: opacity 0.2s, transform 0.2s) tells the browser exactly what to watch, enabling optimizations. It also prevents accidentally animating properties you did not intend to."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Transitions
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Transitions</h1>
+      <div class="subtitle">Smooth state changes without JavaScript or keyframes</div>
+    </div>
+
+    <div class="content-section">
+      <h2>Transition Syntax</h2>
+      <p>A transition smoothly animates a CSS property from one value to another. You define the transition on the element&rsquo;s default state, and it activates whenever that property changes (e.g., on hover).</p>
+      <div class="code-block">
+.button {
+  background: #6366f1;
+  transition: background 0.2s ease;
+}
+.button:hover {
+  background: #4f46e5;
+}
+
+/* Longhand */
+.element {
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+  transition-delay: 0s;
+}
+
+/* Shorthand: property duration timing-function delay */
+.element {
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Live Examples</h2>
+      <p>Hover over these buttons to see different transitions in action:</p>
+      <div class="demo-box">
+        <button class="demo-btn" style="background: #6366f1; transition: background 0.3s ease;" onmouseover="this.style.background='#4338ca'" onmouseout="this.style.background='#6366f1'">Color</button>
+        <button class="demo-btn" style="background: #6366f1; transition: transform 0.2s ease-out;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">Scale</button>
+        <button class="demo-btn" style="background: #6366f1; transition: opacity 0.3s ease;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">Fade</button>
+        <button class="demo-btn" style="background: #6366f1; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(99,102,241,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">Lift</button>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Timing Functions</h2>
+      <p>The timing function controls the acceleration curve. Here are the built-in options:</p>
+      <ul>
+        <li><strong>ease</strong> &mdash; starts slow, speeds up, ends slow (default)</li>
+        <li><strong>ease-in</strong> &mdash; starts slow, accelerates</li>
+        <li><strong>ease-out</strong> &mdash; starts fast, decelerates (best for enter animations)</li>
+        <li><strong>ease-in-out</strong> &mdash; slow at both ends</li>
+        <li><strong>linear</strong> &mdash; constant speed</li>
+        <li><strong>cubic-bezier(x1, y1, x2, y2)</strong> &mdash; custom curve</li>
+      </ul>
+      <div class="code-block">
+/* Material Design standard easing */
+transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+/* Bounce effect */
+transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+/* Snappy UI response */
+transition: opacity 0.15s ease-out;
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>What to Transition (and What Not To)</h2>
+      <h3>Fast (GPU-accelerated)</h3>
+      <ul>
+        <li><code>opacity</code></li>
+        <li><code>transform</code> (translate, scale, rotate)</li>
+      </ul>
+      <h3>Acceptable</h3>
+      <ul>
+        <li><code>background-color</code>, <code>color</code>, <code>border-color</code></li>
+        <li><code>box-shadow</code></li>
+      </ul>
+      <h3>Avoid transitioning</h3>
+      <ul>
+        <li><code>width</code>, <code>height</code> &mdash; trigger layout recalculations</li>
+        <li><code>top</code>, <code>left</code> &mdash; use <code>transform: translate()</code> instead</li>
+        <li><code>all</code> &mdash; watches every property, prevents optimizations</li>
+      </ul>
+      <div class="code-block">
+/* BAD: triggers layout on every frame */
+.card { transition: width 0.3s; }
+.card:hover { width: 350px; }
+
+/* GOOD: GPU-accelerated, no layout recalc */
+.card { transition: transform 0.3s; }
+.card:hover { transform: scale(1.05); }
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Patterns</h2>
+      <h3>Fade In/Out</h3>
+      <div class="code-block">
+.element {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+.element.visible {
+  opacity: 1;
+}
+      </div>
+
+      <h3>Slide Down</h3>
+      <div class="code-block">
+.dropdown {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.dropdown.open {
+  max-height: 500px;   /* larger than content */
+}
+      </div>
+
+      <h3>Card Hover Effect</h3>
+      <div class="code-block">
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+      </div>
+
+      <h3>Respect User Preferences</h3>
+      <div class="code-block">
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Transition Delay</h2>
+      <p>Add a delay before the transition starts. Useful for staggered animations on lists:</p>
+      <div class="code-block">
+.item:nth-child(1) { transition-delay: 0ms; }
+.item:nth-child(2) { transition-delay: 50ms; }
+.item:nth-child(3) { transition-delay: 100ms; }
+.item:nth-child(4) { transition-delay: 150ms; }
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What CSS properties can be transitioned?</div>
+        <div class="faq-a">Properties with numeric or color values: opacity, transform, colors, dimensions, shadows, etc. <code>display</code> and <code>font-family</code> cannot be transitioned. For performance, prefer <code>opacity</code> and <code>transform</code> &mdash; they are GPU-accelerated.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between transitions and animations?</div>
+        <div class="faq-a">Transitions need a trigger (hover, class toggle) and go from A to B. Animations (<code>@keyframes</code>) run automatically, can loop, and support multiple steps. Use transitions for state changes. Use animations for looping effects or multi-step sequences.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Why is transition: all bad for performance?</div>
+        <div class="faq-a"><code>transition: all</code> makes the browser watch every property. If a layout property changes, it recalculates layout every frame. Specifying exact properties (<code>transition: opacity 0.2s, transform 0.2s</code>) lets the browser optimize and avoids accidental animations.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/shadow.html" class="tool-link">Box Shadow Generator</a>
+        <a href="../tools/colors.html" class="tool-link">Color Converter</a>
+        <a href="variables.html" class="tool-link">CSS Variables Guide</a>
+        <a href="selectors.html" class="tool-link">CSS Selectors Reference</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

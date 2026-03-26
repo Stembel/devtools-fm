@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS z-index and Stacking Context - Complete Guide | ZeroKit.dev</title>
+  <meta name="description" content="Understand CSS z-index and stacking contexts. Learn why z-index 9999 does not always work, how stacking contexts are created, and how to manage layers properly.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/z-index.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; position: relative; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+    .layer-box { padding: 16px 20px; border-radius: 8px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600; color: #fff; position: absolute; }
+    .z-scale { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+    .z-scale th, .z-scale td { padding: 10px 16px; border: 1px solid var(--border); text-align: left; }
+    .z-scale th { background: var(--surface); font-weight: 600; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why does z-index 9999 not work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "z-index only works on positioned elements (position: relative, absolute, fixed, or sticky). If your element has position: static (the default), z-index is ignored. Even with positioning, z-index only competes within the same stacking context. If a parent element creates a stacking context with a low z-index, no child can escape it — z-index: 9999 on the child still stays below a sibling of the parent with z-index: 2."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What creates a new stacking context in CSS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A stacking context is created by: position: relative/absolute/fixed/sticky with a z-index value other than auto, opacity less than 1, transform with any value other than none, filter, perspective, clip-path, isolation: isolate, will-change: transform/opacity, and flex/grid children with z-index set. The root element (html) also creates a stacking context."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What z-index values should I use in my project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use a z-index scale with defined tiers: 1 for elevated elements, 10 for dropdowns, 100 for sticky headers, 1000 for modals/overlays, 10000 for toasts/notifications. Define these as CSS variables or design tokens. Never use arbitrary values like 9999 — they lead to z-index wars where numbers keep escalating."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; z-index
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS z-index</h1>
+      <div class="subtitle">Stacking contexts, layering, and why z-index: 9999 doesn&rsquo;t always work</div>
+    </div>
+
+    <div class="content-section">
+      <h2>How z-index Works</h2>
+      <p><code>z-index</code> controls the stacking order of elements that overlap. Higher values appear on top. But there are two critical rules most people miss:</p>
+      <ol>
+        <li><strong>z-index only works on positioned elements</strong> &mdash; the element must have <code>position: relative</code>, <code>absolute</code>, <code>fixed</code>, or <code>sticky</code>. On <code>position: static</code> (the default), z-index is completely ignored.</li>
+        <li><strong>z-index is scoped to stacking contexts</strong> &mdash; elements can only compete with siblings in the same stacking context. A child can never appear above or below elements outside its parent&rsquo;s stacking context.</li>
+      </ol>
+    </div>
+
+    <div class="content-section">
+      <h2>Basic Example</h2>
+      <div class="code-block">
+.behind {
+  position: relative;
+  z-index: 1;
+}
+.in-front {
+  position: relative;
+  z-index: 2;
+}
+      </div>
+      <div class="demo-box" style="height: 100px;">
+        <div class="layer-box" style="background: #6366f1; top: 10px; left: 10px; z-index: 1;">z-index: 1</div>
+        <div class="layer-box" style="background: #ef4444; top: 30px; left: 50px; z-index: 2;">z-index: 2</div>
+        <div class="layer-box" style="background: #10b981; top: 50px; left: 90px; z-index: 3;">z-index: 3</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Stacking Contexts Explained</h2>
+      <p>A stacking context is like a z-index scope. Elements inside a stacking context are layered relative to each other, but the entire context is treated as a single unit in the parent&rsquo;s stacking order.</p>
+      <div class="code-block">
+/* Parent A creates a stacking context with z-index: 1 */
+.parent-a { position: relative; z-index: 1; }
+.child-a  { position: relative; z-index: 999; }  /* high, but trapped inside parent-a */
+
+/* Parent B has a higher stacking context */
+.parent-b { position: relative; z-index: 2; }
+.child-b  { position: relative; z-index: 1; }    /* appears ABOVE child-a! */
+      </div>
+      <p>In this example, <code>.child-a</code> has z-index 999 but still appears below <code>.child-b</code> (z-index 1). Why? Because <code>.parent-a</code> (z-index 1) is below <code>.parent-b</code> (z-index 2). The child cannot escape its parent&rsquo;s stacking context.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>What Creates a Stacking Context</h2>
+      <p>Many CSS properties create new stacking contexts (not just z-index):</p>
+      <ul>
+        <li><code>position: relative/absolute/fixed/sticky</code> with <code>z-index</code> other than <code>auto</code></li>
+        <li><code>opacity</code> less than 1</li>
+        <li><code>transform</code> with any value other than <code>none</code></li>
+        <li><code>filter</code>, <code>backdrop-filter</code></li>
+        <li><code>perspective</code></li>
+        <li><code>clip-path</code></li>
+        <li><code>isolation: isolate</code></li>
+        <li><code>will-change: transform</code> or <code>will-change: opacity</code></li>
+        <li>Flex/grid children with <code>z-index</code> set (even without explicit positioning)</li>
+        <li><code>contain: layout</code> or <code>contain: paint</code></li>
+      </ul>
+      <p>This is why adding <code>opacity: 0.99</code> or <code>transform: translateZ(0)</code> can &ldquo;fix&rdquo; z-index issues &mdash; they create a new stacking context.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>z-index Scale for Your Project</h2>
+      <p>Define a scale and stick to it. This prevents z-index wars where numbers keep escalating to 99999:</p>
+      <div class="code-block">
+:root {
+  --z-base: 0;
+  --z-elevated: 1;       /* cards, slight lifts */
+  --z-dropdown: 10;      /* dropdowns, popovers */
+  --z-sticky: 100;       /* sticky headers */
+  --z-overlay: 1000;     /* modals, drawers */
+  --z-toast: 10000;      /* toasts, notifications (always on top) */
+}
+
+.modal     { z-index: var(--z-overlay); }
+.dropdown  { z-index: var(--z-dropdown); }
+.toast     { z-index: var(--z-toast); }
+      </div>
+      <table class="z-scale">
+        <thead><tr><th>Layer</th><th>z-index</th><th>Examples</th></tr></thead>
+        <tbody>
+          <tr><td>Base</td><td>0</td><td>Page content</td></tr>
+          <tr><td>Elevated</td><td>1</td><td>Cards, raised elements</td></tr>
+          <tr><td>Dropdown</td><td>10</td><td>Menus, popovers, tooltips</td></tr>
+          <tr><td>Sticky</td><td>100</td><td>Fixed headers, sticky sidebars</td></tr>
+          <tr><td>Overlay</td><td>1000</td><td>Modals, drawers, lightboxes</td></tr>
+          <tr><td>Toast</td><td>10000</td><td>Notifications, error banners</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-section">
+      <h2>isolation: isolate</h2>
+      <p>Creates a stacking context without any visual side effects. Use it to scope z-index within a component:</p>
+      <div class="code-block">
+.component {
+  isolation: isolate;   /* creates stacking context */
+}
+.component .layer-1 { position: relative; z-index: 1; }
+.component .layer-2 { position: relative; z-index: 2; }
+/* These z-index values cannot leak outside .component */
+      </div>
+      <p>This is the cleanest way to create a stacking context. No <code>position</code>, no <code>opacity</code> hacks.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Debugging z-index</h2>
+      <ol>
+        <li>Open DevTools, select the element, check if <code>position</code> is set</li>
+        <li>Walk up the DOM tree &mdash; find which ancestors create stacking contexts</li>
+        <li>Chrome DevTools: in the Layers panel, you can see all stacking contexts visually</li>
+        <li>If an element &ldquo;won&rsquo;t go above&rdquo; something, its parent&rsquo;s stacking context is likely too low</li>
+      </ol>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">Why does z-index 9999 not work?</div>
+        <div class="faq-a">Two common reasons: (1) The element has <code>position: static</code>, which ignores z-index. Add <code>position: relative</code>. (2) The element is inside a stacking context with a lower z-index than the element you are trying to cover. No child z-index can escape its parent&rsquo;s stacking context.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What creates a new stacking context?</div>
+        <div class="faq-a">Many things: positioned elements with z-index, <code>opacity &lt; 1</code>, <code>transform</code>, <code>filter</code>, <code>clip-path</code>, <code>isolation: isolate</code>, <code>will-change</code>, and flex/grid children with z-index. This is why adding <code>transform: translateZ(0)</code> can fix z-index issues.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What z-index values should I use?</div>
+        <div class="faq-a">Define a scale: 1 (elevated), 10 (dropdowns), 100 (sticky), 1000 (modals), 10000 (toasts). Use CSS variables. Never use arbitrary values like 9999 &mdash; they lead to escalation wars.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="position.html" class="tool-link">CSS Position Guide</a>
+        <a href="overflow.html" class="tool-link">CSS Overflow Guide</a>
+        <a href="flexbox.html" class="tool-link">CSS Flexbox Reference</a>
+        <a href="../tools/flexbox.html" class="tool-link">Flexbox Generator</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

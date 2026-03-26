@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Selectors Cheatsheet - Complete Reference | ZeroKit.dev</title>
+  <meta name="description" content="CSS selectors cheatsheet with examples. Combinators, pseudo-classes, pseudo-elements, attribute selectors, :has(), :is(), :where(), and specificity explained.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/selectors.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .sel-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+    .sel-table th, .sel-table td { padding: 10px 16px; border: 1px solid var(--border); text-align: left; }
+    .sel-table th { background: var(--surface); font-weight: 600; }
+    .sel-table td code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does CSS specificity work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Specificity is calculated as a three-part score: (IDs, Classes, Elements). An ID selector (#nav) scores (1,0,0). A class (.active) scores (0,1,0). An element (div) scores (0,0,1). Higher scores win. If equal, the last rule in source order wins. Inline styles beat all selectors. !important beats everything (but should be avoided). The :where() pseudo-class has zero specificity, while :is() takes the specificity of its most specific argument."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between :nth-child and :nth-of-type?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": ":nth-child(n) selects based on position among ALL siblings. :nth-of-type(n) selects based on position among siblings of the SAME element type. For example, p:nth-child(2) selects a <p> only if it is the 2nd child overall. p:nth-of-type(2) selects the 2nd <p> regardless of other element types between them."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the :has() selector do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": ":has() is a parent selector — it selects an element based on what it contains. For example, div:has(> img) selects any div that has a direct img child. .card:has(.badge) selects cards containing a badge. It can also work as a previous-sibling selector: h2:has(+ p) selects an h2 that is immediately followed by a p. Supported in all major browsers since December 2023."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Selectors
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Selectors Cheatsheet</h1>
+      <div class="subtitle">Every selector type with examples &mdash; from basics to :has()</div>
+    </div>
+
+    <div class="content-section">
+      <h2>Basic Selectors</h2>
+      <table class="sel-table">
+        <thead><tr><th>Selector</th><th>Example</th><th>Selects</th></tr></thead>
+        <tbody>
+          <tr><td>Element</td><td><code>p</code></td><td>All &lt;p&gt; elements</td></tr>
+          <tr><td>Class</td><td><code>.card</code></td><td>Elements with class="card"</td></tr>
+          <tr><td>ID</td><td><code>#header</code></td><td>Element with id="header"</td></tr>
+          <tr><td>Universal</td><td><code>*</code></td><td>All elements</td></tr>
+          <tr><td>Attribute</td><td><code>[type="email"]</code></td><td>Elements with type="email"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-section">
+      <h2>Combinators</h2>
+      <table class="sel-table">
+        <thead><tr><th>Combinator</th><th>Example</th><th>Selects</th></tr></thead>
+        <tbody>
+          <tr><td>Descendant (space)</td><td><code>.nav a</code></td><td>Any &lt;a&gt; inside .nav (any depth)</td></tr>
+          <tr><td>Child (&gt;)</td><td><code>.nav &gt; a</code></td><td>Direct &lt;a&gt; children of .nav only</td></tr>
+          <tr><td>Adjacent sibling (+)</td><td><code>h2 + p</code></td><td>First &lt;p&gt; immediately after &lt;h2&gt;</td></tr>
+          <tr><td>General sibling (~)</td><td><code>h2 ~ p</code></td><td>All &lt;p&gt; after &lt;h2&gt; (same parent)</td></tr>
+        </tbody>
+      </table>
+      <div class="code-block">
+/* Only direct children */
+.menu > li { list-style: none; }
+
+/* First paragraph after a heading */
+h2 + p { font-size: 1.1rem; margin-top: 8px; }
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Pseudo-Classes</h2>
+      <h3>User Action</h3>
+      <div class="code-block">
+a:hover   { color: #4f46e5; }     /* mouse over */
+a:active  { color: #3730a3; }     /* being clicked */
+a:focus   { outline: 2px solid; } /* keyboard focus */
+a:visited { color: #7c3aed; }     /* previously visited */
+input:focus-visible { outline: 2px solid #6366f1; } /* keyboard focus only */
+      </div>
+
+      <h3>Structural</h3>
+      <div class="code-block">
+li:first-child { font-weight: bold; }
+li:last-child  { border-bottom: none; }
+li:nth-child(odd)  { background: #f8fafc; }
+li:nth-child(3n)   { color: red; }         /* every 3rd */
+li:nth-child(n+4)  { opacity: 0.6; }      /* 4th and beyond */
+tr:nth-of-type(even) { background: #f1f5f9; }
+p:only-child       { margin: 0; }
+div:empty          { display: none; }
+      </div>
+
+      <h3>Form States</h3>
+      <div class="code-block">
+input:required    { border-left: 3px solid #6366f1; }
+input:disabled    { opacity: 0.5; cursor: not-allowed; }
+input:checked     { accent-color: #6366f1; }
+input:valid       { border-color: #10b981; }
+input:invalid     { border-color: #ef4444; }
+input:placeholder-shown { background: #f8fafc; }
+      </div>
+
+      <h3>Negation and Matching</h3>
+      <div class="code-block">
+/* Everything except .special */
+.item:not(.special) { opacity: 0.8; }
+
+/* Matches any of these selectors */
+:is(h1, h2, h3) { font-weight: 700; }
+
+/* Same as :is() but with zero specificity */
+:where(h1, h2, h3) { margin-top: 1em; }
+
+/* Select multiple nth-children at once */
+:nth-child(2 of .highlight) { background: yellow; }
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>The :has() Selector (Parent Selector)</h2>
+      <p>The most powerful selector addition in years. It selects elements based on their descendants:</p>
+      <div class="code-block">
+/* Card that contains an image */
+.card:has(img) {
+  padding: 0;
+}
+
+/* Form group with an invalid input */
+.form-group:has(input:invalid) {
+  border-color: #ef4444;
+}
+
+/* h2 followed by a paragraph (previous-sibling selector!) */
+h2:has(+ p) {
+  margin-bottom: 8px;
+}
+
+/* Page that has a modal open */
+body:has(.modal.open) {
+  overflow: hidden;
+}
+      </div>
+      <p>Supported in Chrome 105+, Safari 15.4+, Firefox 121+. Safe to use in production.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Pseudo-Elements</h2>
+      <div class="code-block">
+/* Insert content before/after */
+.required::before { content: "*"; color: red; }
+blockquote::before { content: "\201C"; font-size: 2rem; } /* opening quote */
+
+/* Style the first line or letter */
+p::first-line   { font-weight: 600; }
+p::first-letter  { font-size: 2rem; float: left; }
+
+/* Style text selection */
+::selection { background: #6366f1; color: white; }
+
+/* Style placeholder text */
+input::placeholder { color: #94a3b8; }
+
+/* Style scrollbar (webkit) */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Attribute Selectors</h2>
+      <table class="sel-table">
+        <thead><tr><th>Selector</th><th>Matches</th></tr></thead>
+        <tbody>
+          <tr><td><code>[href]</code></td><td>Has the attribute (any value)</td></tr>
+          <tr><td><code>[type="submit"]</code></td><td>Exact value match</td></tr>
+          <tr><td><code>[class~="card"]</code></td><td>Word in space-separated list</td></tr>
+          <tr><td><code>[href^="https"]</code></td><td>Starts with "https"</td></tr>
+          <tr><td><code>[src$=".png"]</code></td><td>Ends with ".png"</td></tr>
+          <tr><td><code>[data-type*="nav"]</code></td><td>Contains "nav" anywhere</td></tr>
+          <tr><td><code>[lang|="en"]</code></td><td>Exactly "en" or starts with "en-"</td></tr>
+        </tbody>
+      </table>
+      <div class="code-block">
+/* External links */
+a[href^="http"]:not([href*="zerokit.dev"]) {
+  &amp;::after { content: " ↗"; }
+}
+
+/* File type icons */
+a[href$=".pdf"]::before { content: "📄 "; }
+a[href$=".zip"]::before { content: "📦 "; }
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Specificity</h2>
+      <p>Specificity determines which rule wins when multiple rules target the same element. It is calculated as (IDs, Classes, Elements):</p>
+      <table class="sel-table">
+        <thead><tr><th>Selector</th><th>Specificity</th></tr></thead>
+        <tbody>
+          <tr><td><code>p</code></td><td>(0, 0, 1)</td></tr>
+          <tr><td><code>.card</code></td><td>(0, 1, 0)</td></tr>
+          <tr><td><code>#header</code></td><td>(1, 0, 0)</td></tr>
+          <tr><td><code>.card .title</code></td><td>(0, 2, 0)</td></tr>
+          <tr><td><code>#nav .link:hover</code></td><td>(1, 2, 0)</td></tr>
+          <tr><td><code>div.card > p.text</code></td><td>(0, 2, 2)</td></tr>
+        </tbody>
+      </table>
+      <p><code>:where()</code> has zero specificity &mdash; useful for defaults that are easy to override. <code>:is()</code> takes the specificity of its most specific argument.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">How does CSS specificity work?</div>
+        <div class="faq-a">Specificity is a three-part score: (IDs, Classes, Elements). <code>#nav</code> = (1,0,0). <code>.active</code> = (0,1,0). <code>div</code> = (0,0,1). Higher scores win. Equal scores: last rule in source order wins. <code>!important</code> beats everything but should be avoided. <code>:where()</code> has zero specificity.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between :nth-child and :nth-of-type?</div>
+        <div class="faq-a"><code>:nth-child(n)</code> counts among ALL siblings. <code>:nth-of-type(n)</code> counts among siblings of the same element type. <code>p:nth-child(2)</code> matches a &lt;p&gt; only if it is the 2nd child overall. <code>p:nth-of-type(2)</code> matches the 2nd &lt;p&gt; regardless of other elements.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What does :has() do?</div>
+        <div class="faq-a"><code>:has()</code> is a parent selector &mdash; it selects an element based on its contents. <code>.card:has(img)</code> selects cards with images. <code>h2:has(+ p)</code> selects h2 followed by p (previous-sibling selector). Supported in all major browsers.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="variables.html" class="tool-link">CSS Variables Guide</a>
+        <a href="transitions.html" class="tool-link">CSS Transitions Guide</a>
+        <a href="units.html" class="tool-link">CSS Units Reference</a>
+        <a href="../tools/colors.html" class="tool-link">Color Converter</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

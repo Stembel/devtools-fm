@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Grid Layout - Complete Guide with Examples | ZeroKit.dev</title>
+  <meta name="description" content="Master CSS grid layout. Learn grid-template-columns, grid-template-rows, auto-fit, minmax, grid areas, and responsive grid patterns with live demos.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/grid.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; }
+    .demo-item { background: var(--accent); color: #fff; padding: 12px 20px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600; text-align: center; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between CSS grid and flexbox?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "CSS Grid is two-dimensional — it handles rows and columns at the same time. Flexbox is one-dimensional — it handles either a row OR a column. Use grid for page-level layouts and card grids. Use flexbox for component-level layouts like navbars and button groups."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I make a responsive grid without media queries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)). This creates as many columns as fit, each at least 250px wide, and they grow equally to fill remaining space. The grid automatically reflows as the viewport changes — no breakpoints needed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does fr mean in CSS grid?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "fr stands for 'fraction of available space'. 1fr 2fr means the second column gets twice as much space as the first. It is similar to flex-grow but for grid tracks. fr units only divide the space remaining after fixed-size tracks (like px or auto) are accounted for."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Grid
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Grid Layout</h1>
+      <div class="subtitle">Two-dimensional layout &mdash; rows and columns in one declaration</div>
+    </div>
+
+    <div class="content-section">
+      <h2>How CSS Grid Works</h2>
+      <p>Grid lets you define a two-dimensional layout with rows and columns. Set <code>display: grid</code> on a container, define your track sizes, and child elements slot into cells automatically. Unlike flexbox, grid controls both dimensions at once.</p>
+      <p>Think of it as defining a spreadsheet structure: you declare how many columns and rows you want, how big they are, and then place items into that structure. Items can span multiple cells, and tracks can be fixed, flexible, or content-sized.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Basic Grid</h2>
+      <div class="code-block">
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;   /* 3 equal columns */
+  gap: 16px;
+}
+      </div>
+      <div class="demo-box" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div class="demo-item">1</div>
+        <div class="demo-item">2</div>
+        <div class="demo-item">3</div>
+        <div class="demo-item">4</div>
+        <div class="demo-item">5</div>
+        <div class="demo-item">6</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>The fr Unit</h2>
+      <p><code>fr</code> means &ldquo;fraction of remaining space.&rdquo; After fixed-size tracks take their space, <code>fr</code> divides what is left.</p>
+      <div class="code-block">
+.grid {
+  display: grid;
+  grid-template-columns: 250px 1fr;     /* fixed sidebar + fluid main */
+  gap: 16px;
+}
+      </div>
+      <div class="demo-box" style="display: grid; grid-template-columns: 120px 1fr; gap: 12px;">
+        <div class="demo-item">Sidebar</div>
+        <div class="demo-item">Main Content</div>
+      </div>
+
+      <div class="code-block">
+/* Unequal fractions */
+grid-template-columns: 1fr 2fr;        /* second column is twice as wide */
+      </div>
+      <div class="demo-box" style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+        <div class="demo-item">1fr</div>
+        <div class="demo-item">2fr</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Responsive Grid with auto-fit</h2>
+      <p>This is the most useful grid pattern. No media queries needed &mdash; columns reflow automatically:</p>
+      <div class="code-block">
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+      </div>
+      <div class="demo-box" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+        <div class="demo-item">Card 1</div>
+        <div class="demo-item">Card 2</div>
+        <div class="demo-item">Card 3</div>
+        <div class="demo-item">Card 4</div>
+        <div class="demo-item">Card 5</div>
+      </div>
+      <p>Each column is at least 200px. As the container shrinks, columns drop to the next row. As it grows, more columns appear. Resize your browser to see it.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Grid Template Areas</h2>
+      <p>Name regions of your layout and assign items to them. Great for page-level structure:</p>
+      <div class="code-block">
+.layout {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "footer footer";
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  min-height: 250px;
+}
+
+.header  { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main    { grid-area: main; }
+.footer  { grid-area: footer; }
+      </div>
+      <div class="demo-box" style="display: grid; grid-template-areas: 'header header' 'sidebar main' 'footer footer'; grid-template-columns: 120px 1fr; grid-template-rows: auto 1fr auto; gap: 8px; min-height: 200px;">
+        <div class="demo-item" style="grid-area: header;">Header</div>
+        <div class="demo-item" style="grid-area: sidebar; background: #7c3aed;">Sidebar</div>
+        <div class="demo-item" style="grid-area: main;">Main</div>
+        <div class="demo-item" style="grid-area: footer;">Footer</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Spanning Columns and Rows</h2>
+      <div class="code-block">
+.item-wide {
+  grid-column: span 2;    /* span 2 columns */
+}
+.item-tall {
+  grid-row: span 2;       /* span 2 rows */
+}
+/* Or use explicit lines: */
+.item {
+  grid-column: 1 / 3;     /* from line 1 to line 3 */
+  grid-row: 1 / 2;
+}
+      </div>
+      <div class="demo-box" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <div class="demo-item" style="grid-column: span 2;">Spans 2 cols</div>
+        <div class="demo-item">1</div>
+        <div class="demo-item">2</div>
+        <div class="demo-item">3</div>
+        <div class="demo-item">4</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Alignment in Grid</h2>
+      <p>Grid uses the same alignment properties as flexbox, plus a few extras:</p>
+      <ul>
+        <li><strong>justify-items / align-items</strong> &mdash; align all items within their cells</li>
+        <li><strong>justify-content / align-content</strong> &mdash; align the grid tracks within the container</li>
+        <li><strong>justify-self / align-self</strong> &mdash; align a single item within its cell</li>
+        <li><strong>place-items</strong> &mdash; shorthand for <code>align-items justify-items</code></li>
+      </ul>
+      <div class="code-block">
+.grid {
+  display: grid;
+  place-items: center;   /* center items in their cells */
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between CSS grid and flexbox?</div>
+        <div class="faq-a">Grid is two-dimensional (rows + columns). Flexbox is one-dimensional (row or column). Use grid for page layouts and card grids. Use flexbox for navbars, button groups, and centering. They work together well.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I make a responsive grid without media queries?</div>
+        <div class="faq-a">Use <code>grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))</code>. Columns auto-reflow as the viewport changes. Each column is at least 250px, and they grow to fill remaining space.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What does fr mean in CSS grid?</div>
+        <div class="faq-a"><code>fr</code> stands for &ldquo;fraction of available space.&rdquo; <code>1fr 2fr</code> means the second track gets twice the space of the first. It only divides space remaining after fixed tracks (px, auto) are calculated.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/grid.html" class="tool-link">Grid Generator</a>
+        <a href="../tools/flexbox.html" class="tool-link">Flexbox Generator</a>
+        <a href="flexbox.html" class="tool-link">CSS Flexbox Reference</a>
+        <a href="media-queries.html" class="tool-link">Media Queries Guide</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

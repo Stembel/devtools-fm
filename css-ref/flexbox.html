@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Flexbox - Complete Guide with Examples | ZeroKit.dev</title>
+  <meta name="description" content="Learn CSS display flex from scratch. Visual examples of flex-direction, justify-content, align-items, flex-wrap, and common flexbox layout patterns you can copy-paste.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/flexbox.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; }
+    .demo-item { background: var(--accent); color: #fff; padding: 12px 20px; border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; font-weight: 600; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the difference between justify-content and align-items in flexbox?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "justify-content controls alignment along the main axis (horizontal by default), while align-items controls alignment along the cross axis (vertical by default). If you set flex-direction: column, they swap — justify-content becomes vertical and align-items becomes horizontal."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I center a div with flexbox?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Set the parent to display: flex; justify-content: center; align-items: center; and give it a height. That centers the child both horizontally and vertically. This works for any number of children."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When should I use flexbox vs CSS grid?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use flexbox for one-dimensional layouts — a row of buttons, a navigation bar, centering content. Use CSS grid for two-dimensional layouts — page layouts with rows AND columns, card grids with precise placement. They work well together: grid for the page structure, flexbox for components inside grid cells."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Flexbox
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Flexbox</h1>
+      <div class="subtitle">display: flex &mdash; the one-dimensional layout system you will use every day</div>
+    </div>
+
+    <div class="content-section">
+      <h2>How Flexbox Works</h2>
+      <p>Flexbox is a layout model designed for distributing space along a single axis. Set <code>display: flex</code> on a container and its direct children become flex items. The container controls the direction, alignment, and spacing. Each item can grow, shrink, or stay fixed.</p>
+      <p>The key mental model: flex has a <strong>main axis</strong> (the direction items flow) and a <strong>cross axis</strong> (perpendicular to it). By default the main axis is horizontal (left to right), but <code>flex-direction: column</code> flips it to vertical.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Basic Flex Container</h2>
+      <div class="code-block">
+.container {
+  display: flex;
+  gap: 12px;           /* spacing between items */
+}
+      </div>
+      <div class="demo-box" style="display: flex; gap: 12px;">
+        <div class="demo-item">1</div>
+        <div class="demo-item">2</div>
+        <div class="demo-item">3</div>
+      </div>
+      <p>That is all you need. Items sit in a row with equal spacing. No floats, no clearfixes.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>justify-content &mdash; Main Axis Alignment</h2>
+      <p>Controls how items distribute along the main axis.</p>
+      <div class="code-block">
+.container {
+  display: flex;
+  justify-content: space-between; /* also: flex-start, flex-end, center, space-around, space-evenly */
+}
+      </div>
+      <h3>flex-start (default)</h3>
+      <div class="demo-box" style="display: flex; gap: 8px; justify-content: flex-start;">
+        <div class="demo-item">A</div><div class="demo-item">B</div><div class="demo-item">C</div>
+      </div>
+      <h3>center</h3>
+      <div class="demo-box" style="display: flex; gap: 8px; justify-content: center;">
+        <div class="demo-item">A</div><div class="demo-item">B</div><div class="demo-item">C</div>
+      </div>
+      <h3>space-between</h3>
+      <div class="demo-box" style="display: flex; justify-content: space-between;">
+        <div class="demo-item">A</div><div class="demo-item">B</div><div class="demo-item">C</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>align-items &mdash; Cross Axis Alignment</h2>
+      <div class="code-block">
+.container {
+  display: flex;
+  align-items: center; /* also: flex-start, flex-end, stretch (default), baseline */
+  height: 120px;
+}
+      </div>
+      <div class="demo-box" style="display: flex; align-items: center; height: 120px; gap: 8px;">
+        <div class="demo-item" style="padding: 8px 16px;">Short</div>
+        <div class="demo-item" style="padding: 24px 16px;">Tall</div>
+        <div class="demo-item" style="padding: 12px 16px;">Mid</div>
+      </div>
+      <p>All items vertically centered regardless of their individual heights.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Center Anything</h2>
+      <p>The most common flexbox use case. Three lines to perfectly center content:</p>
+      <div class="code-block">
+.parent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;       /* needs a defined height */
+}
+      </div>
+      <div class="demo-box" style="display: flex; justify-content: center; align-items: center; height: 150px;">
+        <div class="demo-item">Centered</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>flex-wrap &mdash; Multi-line Flex</h2>
+      <p>By default, flex items squeeze onto one line. Add <code>flex-wrap: wrap</code> to let them break into multiple rows.</p>
+      <div class="code-block">
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.item {
+  flex: 1 1 150px;    /* grow, shrink, basis */
+}
+      </div>
+      <div class="demo-box" style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <div class="demo-item" style="flex: 1 1 150px;">Item 1</div>
+        <div class="demo-item" style="flex: 1 1 150px;">Item 2</div>
+        <div class="demo-item" style="flex: 1 1 150px;">Item 3</div>
+        <div class="demo-item" style="flex: 1 1 150px;">Item 4</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>flex-grow, flex-shrink, flex-basis</h2>
+      <p>These three properties control how items resize. The shorthand <code>flex: grow shrink basis</code> is almost always what you want.</p>
+      <ul>
+        <li><strong>flex: 1</strong> &mdash; item grows to fill available space</li>
+        <li><strong>flex: 0 0 200px</strong> &mdash; fixed at 200px, no growing or shrinking</li>
+        <li><strong>flex: 2</strong> &mdash; takes twice as much space as <code>flex: 1</code> siblings</li>
+      </ul>
+      <div class="code-block">
+.sidebar { flex: 0 0 250px; }  /* fixed width sidebar */
+.main    { flex: 1; }          /* takes remaining space */
+      </div>
+      <div class="demo-box" style="display: flex; gap: 12px;">
+        <div class="demo-item" style="flex: 0 0 120px;">Sidebar</div>
+        <div class="demo-item" style="flex: 1;">Main Content</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Common Patterns</h2>
+      <h3>Navbar with logo left, links right</h3>
+      <div class="code-block">
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+      </div>
+      <div class="demo-box" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="demo-item">Logo</div>
+        <div style="display: flex; gap: 8px;">
+          <div class="demo-item">About</div>
+          <div class="demo-item">Contact</div>
+        </div>
+      </div>
+
+      <h3>Equal-height cards</h3>
+      <div class="code-block">
+.cards { display: flex; gap: 16px; }
+.card  { flex: 1; }              /* all cards same width */
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between justify-content and align-items?</div>
+        <div class="faq-a">justify-content aligns items along the main axis (horizontal by default). align-items aligns along the cross axis (vertical by default). If you switch to <code>flex-direction: column</code>, they swap roles.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I center a div with flexbox?</div>
+        <div class="faq-a">On the parent: <code>display: flex; justify-content: center; align-items: center;</code>. The parent needs a defined height (or the page body does). That is it &mdash; works for any content.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">When should I use flexbox vs CSS grid?</div>
+        <div class="faq-a">Flexbox is for one-dimensional layout (a row or a column). Grid is for two-dimensional layout (rows AND columns). Use flexbox for navbars, button groups, centering. Use grid for page layouts and card grids. They combine well together.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/flexbox.html" class="tool-link">Flexbox Generator</a>
+        <a href="../tools/grid.html" class="tool-link">Grid Generator</a>
+        <a href="grid.html" class="tool-link">CSS Grid Reference</a>
+        <a href="position.html" class="tool-link">CSS Position Guide</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

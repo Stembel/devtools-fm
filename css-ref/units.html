@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Units - px, em, rem, vh, vw Comparison Guide | ZeroKit.dev</title>
+  <meta name="description" content="CSS units compared: px, em, rem, vh, vw, %, ch, vmin, vmax. When to use each unit, how they differ, and practical recommendations for responsive design.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/units.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .content-section { margin-bottom: 40px; }
+    .content-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .content-section h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 10px; }
+    .content-section p, .content-section li { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .content-section ul, .content-section ol { padding-left: 24px; margin: 12px 0; }
+    .content-section li { margin-bottom: 8px; }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-family: var(--mono); font-size: 0.85rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; color: var(--text-muted); }
+    .demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; }
+    .unit-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+    .unit-table th, .unit-table td { padding: 10px 16px; border: 1px solid var(--border); text-align: left; }
+    .unit-table th { background: var(--surface); font-weight: 600; }
+    .unit-table td code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+    .faq-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q::after { content: '+'; font-family: var(--mono); font-size: 1.2rem; color: var(--text-muted); }
+    .faq-a { padding: 0 20px 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text-muted); display: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-item.open .faq-a { display: block; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero { text-align: center; padding: 48px 0 32px; }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; }
+    .page-hero .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 8px; }
+    .demo-bar { height: 32px; border-radius: 6px; background: var(--accent); display: flex; align-items: center; padding: 0 12px; color: #fff; font-family: var(--mono); font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Should I use px or rem for font size?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use rem for font sizes. rem is relative to the root font size, so if a user changes their browser's default font size (for accessibility), your text scales accordingly. px ignores user preferences. Set the root font size on html (usually 16px by default) and use rem everywhere else. 1rem = the root font size."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between em and rem?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "em is relative to the element's own font size (or its parent's font size for the font-size property). This means em compounds — a nested element with 1.2em inside another 1.2em becomes 1.44 times the original size. rem is always relative to the root (html) font size, so it never compounds. Use rem for consistent sizing. Use em only when you want proportional scaling relative to the current font size (like padding on a button that should scale with its text)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When should I use vh and vw units?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use vh (viewport height) for full-screen sections: min-height: 100vh. Use vw (viewport width) for elements that should scale with the browser width. Avoid vw for font sizes without a clamp() — text can become unreadably small on mobile or absurdly large on ultrawide monitors. Watch out for 100vh on mobile — it does not account for the browser's URL bar. Use 100dvh (dynamic viewport height) instead for mobile-friendly full-screen layouts."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; <a href="./">CSS Reference</a> &rsaquo; Units
+    </div>
+
+    <div class="page-hero">
+      <h1>CSS Units Comparison</h1>
+      <div class="subtitle">px, em, rem, vh, vw, % &mdash; when to use each and why</div>
+    </div>
+
+    <div class="content-section">
+      <h2>All CSS Units at a Glance</h2>
+      <table class="unit-table">
+        <thead><tr><th>Unit</th><th>Type</th><th>Relative To</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><code>px</code></td><td>Absolute</td><td>Device pixel</td><td>Borders, shadows, small fixed values</td></tr>
+          <tr><td><code>rem</code></td><td>Relative</td><td>Root font size</td><td>Font sizes, spacing, consistent scaling</td></tr>
+          <tr><td><code>em</code></td><td>Relative</td><td>Parent font size</td><td>Component-local sizing, button padding</td></tr>
+          <tr><td><code>%</code></td><td>Relative</td><td>Parent element</td><td>Widths, fluid layouts</td></tr>
+          <tr><td><code>vh</code></td><td>Viewport</td><td>Viewport height</td><td>Full-screen sections</td></tr>
+          <tr><td><code>vw</code></td><td>Viewport</td><td>Viewport width</td><td>Full-bleed elements</td></tr>
+          <tr><td><code>dvh</code></td><td>Viewport</td><td>Dynamic viewport height</td><td>Mobile full-screen (accounts for URL bar)</td></tr>
+          <tr><td><code>ch</code></td><td>Relative</td><td>Width of "0" character</td><td>Max text width (e.g., 65ch for readability)</td></tr>
+          <tr><td><code>vmin</code></td><td>Viewport</td><td>Smaller viewport dimension</td><td>Square elements relative to viewport</td></tr>
+          <tr><td><code>vmax</code></td><td>Viewport</td><td>Larger viewport dimension</td><td>Elements that fill any orientation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-section">
+      <h2>px &mdash; The Absolute Unit</h2>
+      <p>Pixels are fixed. 16px is always 16px regardless of parent size, root font size, or viewport. Use them for things that should not scale:</p>
+      <div class="code-block">
+.element {
+  border: 1px solid #e2e8f0;   /* borders */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* shadows */
+  outline-offset: 2px;          /* focus outlines */
+}
+      </div>
+      <p>Avoid px for font sizes and spacing &mdash; they do not respect user accessibility settings.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>rem &mdash; Root-Relative</h2>
+      <p><code>1rem</code> = the root element&rsquo;s font size (default 16px). It never compounds, making it predictable:</p>
+      <div class="code-block">
+html { font-size: 16px; }      /* or leave as browser default */
+
+h1 { font-size: 2rem; }        /* 32px */
+h2 { font-size: 1.5rem; }      /* 24px */
+p  { font-size: 1rem; }        /* 16px */
+
+.container {
+  padding: 1.5rem;              /* 24px */
+  gap: 1rem;                    /* 16px */
+  max-width: 75rem;             /* 1200px */
+}
+      </div>
+      <div class="demo-box">
+        <div class="demo-bar" style="width: 100%;">1rem = 16px (root)</div>
+        <div class="demo-bar" style="width: 75%; background: #7c3aed;">0.75rem = 12px</div>
+        <div class="demo-bar" style="width: 125%; max-width: 100%; background: #10b981;">1.25rem = 20px</div>
+      </div>
+      <p><strong>Use rem for:</strong> font sizes, padding, margins, gaps, max-widths. It scales when users change their browser font size setting.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>em &mdash; Parent-Relative</h2>
+      <p><code>1em</code> = the element&rsquo;s own computed font size. For the <code>font-size</code> property specifically, it is relative to the parent&rsquo;s font size. This means em compounds when nested:</p>
+      <div class="code-block">
+.parent   { font-size: 20px; }
+.child    { font-size: 1.2em; }  /* 24px (20 * 1.2) */
+.grandchild { font-size: 1.2em; } /* 28.8px (24 * 1.2) -- compounding! */
+      </div>
+      <p><strong>Good use case:</strong> padding on buttons that should scale with text size:</p>
+      <div class="code-block">
+.btn {
+  padding: 0.5em 1em;           /* scales with font-size */
+}
+.btn-sm { font-size: 0.8rem; }  /* padding shrinks proportionally */
+.btn-lg { font-size: 1.2rem; }  /* padding grows proportionally */
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>vh, vw &mdash; Viewport Units</h2>
+      <p><code>1vh</code> = 1% of viewport height. <code>1vw</code> = 1% of viewport width.</p>
+      <div class="code-block">
+/* Full-screen hero section */
+.hero {
+  min-height: 100vh;
+}
+
+/* Full-bleed background */
+.full-bleed {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+      </div>
+      <p><strong>Mobile gotcha:</strong> <code>100vh</code> on mobile includes the space behind the browser&rsquo;s URL bar, causing content to be cut off. Use <code>100dvh</code> (dynamic viewport height) instead:</p>
+      <div class="code-block">
+.hero {
+  min-height: 100dvh;          /* accounts for mobile URL bar */
+  /* Fallback for older browsers */
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>% &mdash; Parent-Relative</h2>
+      <p>Percentage is relative to the parent element. What it is relative to depends on the property:</p>
+      <ul>
+        <li><code>width: 50%</code> &mdash; 50% of parent&rsquo;s width</li>
+        <li><code>padding: 10%</code> &mdash; 10% of parent&rsquo;s <strong>width</strong> (yes, even padding-top/bottom)</li>
+        <li><code>font-size: 120%</code> &mdash; 120% of parent&rsquo;s font size (same as 1.2em)</li>
+        <li><code>height: 100%</code> &mdash; only works if parent has a defined height</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>ch &mdash; Character Width</h2>
+      <p><code>1ch</code> equals the width of the &ldquo;0&rdquo; character in the current font. Useful for readable text widths:</p>
+      <div class="code-block">
+.prose {
+  max-width: 65ch;             /* roughly 65 characters per line */
+  margin: 0 auto;
+}
+
+.code-input {
+  width: 40ch;                 /* sized for ~40 characters */
+}
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>clamp() &mdash; Fluid Sizing</h2>
+      <p>Combine units with <code>clamp(min, preferred, max)</code> for responsive values without media queries:</p>
+      <div class="code-block">
+h1 {
+  /* Min 1.5rem, preferred 4vw, max 3rem */
+  font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+.container {
+  /* Fluid padding */
+  padding: clamp(1rem, 3vw, 3rem);
+}
+
+.card-grid {
+  gap: clamp(12px, 2vw, 32px);
+}
+      </div>
+      <p><code>clamp()</code> is the best way to handle fluid typography and spacing. The value smoothly scales between the min and max based on the preferred unit.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>Quick Recommendations</h2>
+      <table class="unit-table">
+        <thead><tr><th>Property</th><th>Use</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>font-size</td><td><code>rem</code> or <code>clamp()</code></td><td>Respects user preferences, scales consistently</td></tr>
+          <tr><td>padding, margin, gap</td><td><code>rem</code></td><td>Consistent, predictable spacing</td></tr>
+          <tr><td>width</td><td><code>%</code> or <code>fr</code></td><td>Fluid layouts</td></tr>
+          <tr><td>max-width</td><td><code>rem</code> or <code>ch</code></td><td>Content-appropriate limits</td></tr>
+          <tr><td>border, outline</td><td><code>px</code></td><td>Should not scale</td></tr>
+          <tr><td>full-screen height</td><td><code>dvh</code></td><td>Works on mobile</td></tr>
+          <tr><td>button padding</td><td><code>em</code></td><td>Scales with button text size</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-q">Should I use px or rem for font size?</div>
+        <div class="faq-a">Use <code>rem</code>. It respects the user&rsquo;s browser font size setting (important for accessibility). <code>px</code> ignores user preferences. <code>1rem</code> = the root font size (typically 16px). Use <code>clamp()</code> for fluid typography.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the difference between em and rem?</div>
+        <div class="faq-a"><code>em</code> is relative to the current element&rsquo;s font size and compounds when nested. <code>rem</code> is always relative to the root font size and never compounds. Use <code>rem</code> for consistency. Use <code>em</code> when you want sizing proportional to the local font size (like button padding).</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">When should I use vh and vw?</div>
+        <div class="faq-a"><code>vh</code> for full-screen sections (<code>min-height: 100vh</code>). <code>vw</code> for full-bleed elements. Avoid <code>vw</code> for font sizes without <code>clamp()</code>. On mobile, use <code>dvh</code> instead of <code>vh</code> to account for the browser URL bar.</div>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <h2>Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/units.html" class="tool-link">CSS Units Converter</a>
+        <a href="media-queries.html" class="tool-link">Media Queries Guide</a>
+        <a href="variables.html" class="tool-link">CSS Variables Guide</a>
+        <a href="../tools/flexbox.html" class="tool-link">Flexbox Generator</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Reference - Complete Property Guides with Examples | ZeroKit.dev</title>
+  <meta name="description" content="Practical CSS reference guides with live examples. Learn flexbox, grid, positioning, media queries, custom properties, transitions, and more.">
+  <link rel="canonical" href="https://zerokit.dev/css-ref/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .hub-hero { text-align: center; padding: 48px 0 32px; }
+    .hub-hero h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 12px; }
+    .hub-hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.7; }
+    .ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin: 32px 0 48px; }
+    .ref-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-decoration: none; color: var(--text); transition: border-color 0.2s, transform 0.15s; }
+    .ref-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .ref-card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    .ref-card .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; background: rgba(99, 102, 241, 0.12); color: var(--accent); margin-bottom: 10px; }
+    .ref-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+    .breadcrumb { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .tool-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; justify-content: center; }
+    .tool-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--accent); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s; }
+    .tool-link:hover { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container tool-page">
+    <div class="breadcrumb">
+      <a href="../">Home</a> &rsaquo; CSS Reference
+    </div>
+
+    <div class="hub-hero">
+      <h1>CSS Reference Guides</h1>
+      <p>No-fluff guides to the CSS properties you actually use. Each page has live demos, copy-paste code, and practical tips.</p>
+    </div>
+
+    <div class="ref-grid">
+      <a href="flexbox.html" class="ref-card">
+        <div class="tag">Layout</div>
+        <h2>CSS Flexbox</h2>
+        <p>display: flex, alignment, direction, wrapping, and common layout patterns.</p>
+      </a>
+      <a href="grid.html" class="ref-card">
+        <div class="tag">Layout</div>
+        <h2>CSS Grid</h2>
+        <p>Grid template areas, auto-fit, minmax, and responsive grid patterns.</p>
+      </a>
+      <a href="position.html" class="ref-card">
+        <div class="tag">Layout</div>
+        <h2>CSS Position</h2>
+        <p>relative, absolute, fixed, sticky &mdash; when to use each and how they interact.</p>
+      </a>
+      <a href="media-queries.html" class="ref-card">
+        <div class="tag">Responsive</div>
+        <h2>CSS Media Queries</h2>
+        <p>Breakpoints, mobile-first vs desktop-first, and modern query features.</p>
+      </a>
+      <a href="variables.html" class="ref-card">
+        <div class="tag">Architecture</div>
+        <h2>CSS Custom Properties</h2>
+        <p>CSS variables, scoping, fallbacks, and dynamic theming with var().</p>
+      </a>
+      <a href="transitions.html" class="ref-card">
+        <div class="tag">Animation</div>
+        <h2>CSS Transitions</h2>
+        <p>Transition timing, properties, easing functions, and performance tips.</p>
+      </a>
+      <a href="overflow.html" class="ref-card">
+        <div class="tag">Box Model</div>
+        <h2>CSS Overflow</h2>
+        <p>hidden, scroll, auto, clip &mdash; controlling content that exceeds its container.</p>
+      </a>
+      <a href="z-index.html" class="ref-card">
+        <div class="tag">Layout</div>
+        <h2>CSS z-index</h2>
+        <p>Stacking contexts, z-index wars, and how to manage layering properly.</p>
+      </a>
+      <a href="selectors.html" class="ref-card">
+        <div class="tag">Fundamentals</div>
+        <h2>CSS Selectors</h2>
+        <p>Combinators, pseudo-classes, pseudo-elements, attribute selectors, and specificity.</p>
+      </a>
+      <a href="units.html" class="ref-card">
+        <div class="tag">Fundamentals</div>
+        <h2>CSS Units</h2>
+        <p>px, em, rem, vh, vw, %, ch &mdash; when to use each unit and why.</p>
+      </a>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Related Tools</h2>
+      <div class="tool-links">
+        <a href="../tools/flexbox.html" class="tool-link">Flexbox Generator</a>
+        <a href="../tools/grid.html" class="tool-link">Grid Generator</a>
+        <a href="../tools/units.html" class="tool-link">CSS Units Converter</a>
+        <a href="../tools/colors.html" class="tool-link">Color Converter</a>
+        <a href="../tools/shadow.html" class="tool-link">Box Shadow Generator</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools. All processing happens in your browser.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+</body>
+</html>
