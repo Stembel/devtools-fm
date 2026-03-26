@@ -31,19 +31,18 @@
       <div class="container" style="max-width:1200px;margin:0 auto;padding:0 24px;">
         <div style="background:#141416;border:1px solid #2a2a30;border-radius:8px;padding:20px 24px;text-align:center;margin:0 auto;max-width:700px;">
           <p style="color:#e4e4e7;font-size:0.95rem;margin:0 0 12px;font-family:'Inter',sans-serif;">
-            <strong>Like ZeroKit.dev?</strong> Help us keep it free and ad-free.
+            <strong>Level up your workflow</strong>
           </p>
           <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-            <a href="${CONFIG.githubRepo}" target="_blank" rel="noopener"
-               style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;background:#1c1c20;border:1px solid #2a2a30;color:#e4e4e7;font-size:0.85rem;text-decoration:none;font-family:'Inter',sans-serif;transition:border-color 0.2s;"
-               onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#2a2a30'">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              Star on GitHub
-            </a>
-            <a href="${CONFIG.githubRepo}/issues" target="_blank" rel="noopener"
+            <a href="${document.querySelector('.tool-page') ? '../downloads/' : 'downloads/'}"
                style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;background:#6366f1;border:1px solid #6366f1;color:white;font-size:0.85rem;text-decoration:none;font-family:'Inter',sans-serif;transition:background 0.2s;"
                onmouseover="this.style.background='#818cf8'" onmouseout="this.style.background='#6366f1'">
-              Suggest a Tool
+              Developer Cheatsheets — $9
+            </a>
+            <a href="${document.querySelector('.tool-page') ? '../tools/grader.html' : 'tools/grader.html'}"
+               style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;background:#1c1c20;border:1px solid #2a2a30;color:#e4e4e7;font-size:0.85rem;text-decoration:none;font-family:'Inter',sans-serif;transition:border-color 0.2s;"
+               onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#2a2a30'">
+              Grade Your Website — Free
             </a>
           </div>
         </div>
