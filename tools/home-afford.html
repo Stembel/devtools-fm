@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Affordability Calculator — How Much House Can You Afford? | ZeroKit.dev</title>
+  <meta name="description" content="Free home affordability calculator: find out how much house you can afford based on your income, debts, and down payment. Uses the 28/36 DTI rule used by lenders.">
+  <link rel="canonical" href="https://zerokit.dev/tools/home-afford.html">
+  <meta property="og:title" content="Home Affordability Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Find out how much house you can afford based on income, debts, and down payment. Uses the 28/36 rule lenders actually use.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much house can I afford on a $75,000 salary?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "On a $75,000 annual salary, most lenders use the 28% front-end DTI rule, which means your total housing costs should not exceed $1,750 per month. Depending on your down payment, interest rate, and local property taxes, this typically translates to a home price between $250,000 and $330,000. Use the calculator above to get a personalized estimate based on your specific financial situation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the 28/36 rule for home affordability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The 28/36 rule is a guideline used by most mortgage lenders. The front-end ratio (28%) says your total monthly housing costs — including mortgage principal, interest, property taxes, and insurance — should not exceed 28% of your gross monthly income. The back-end ratio (36%) says your total monthly debt payments, including housing costs plus car loans, student loans, and credit card minimums, should stay below 36% of your gross monthly income."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What hidden costs should I consider when buying a home?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Beyond the mortgage payment, homebuyers should budget for closing costs (2-5% of the home price), private mortgage insurance or PMI if the down payment is less than 20%, homeowner's association (HOA) fees, home maintenance and repairs (typically 1-2% of home value per year), utilities, and potential increases in property taxes and insurance premiums over time. These hidden costs can add hundreds or even thousands of dollars to your monthly housing expenses."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Home Affordability Calculator</h1>
+    <p class="description">Find out how much house you can afford based on your income, debts, and down payment using the 28/36 DTI rule.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Your Finances</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Annual Gross Income ($)</label>
+            <input type="number" id="income" value="75000" min="0" step="1000">
+          </div>
+          <div class="form-group">
+            <label>Monthly Debts ($) <small style="opacity:.7">car payments, student loans, etc.</small></label>
+            <input type="number" id="debts" value="500" min="0" step="50">
+          </div>
+          <div class="form-group">
+            <label>Down Payment ($)</label>
+            <input type="number" id="downPayment" value="40000" min="0" step="1000">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Interest Rate (%)</label>
+              <input type="number" id="rate" value="6.5" min="0" max="30" step="0.125">
+            </div>
+            <div class="form-group">
+              <label>Loan Term</label>
+              <select id="term">
+                <option value="30" selected>30 years</option>
+                <option value="20">20 years</option>
+                <option value="15">15 years</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Property Tax Rate (%/yr)</label>
+              <input type="number" id="propTax" value="1.2" min="0" max="10" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Insurance ($/yr)</label>
+              <input type="number" id="insurance" value="1200" min="0" step="100">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>HOA Fees ($/month)</label>
+            <input type="number" id="hoa" value="0" min="0" step="25">
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">How Much House You Can Afford</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="maxPrice">$0</div>
+            <div class="result-label">Maximum Home Price</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="maxPayment">$0</div>
+              <div class="label">Max Monthly Payment</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="dtiRatio">0%</div>
+              <div class="label">Debt-to-Income Ratio</div>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);">
+            <div style="font-weight:600;margin-bottom:12px;opacity:.8;">Estimated Monthly Breakdown</div>
+            <div class="result-grid">
+              <div class="result-item">
+                <div class="value" id="monthlyPI">$0</div>
+                <div class="label">Principal & Interest</div>
+              </div>
+              <div class="result-item">
+                <div class="value" id="monthlyTax">$0</div>
+                <div class="label">Property Taxes</div>
+              </div>
+              <div class="result-item">
+                <div class="value" id="monthlyIns">$0</div>
+                <div class="label">Insurance</div>
+              </div>
+              <div class="result-item">
+                <div class="value" id="monthlyHOA">$0</div>
+                <div class="label">HOA Fees</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>How Much House Can You Afford?</h2>
+      <p>Buying a home is the largest financial decision most people will ever make, and understanding how much you can truly afford is the critical first step. Lenders, financial advisors, and real estate professionals all rely on a set of established guidelines to determine a safe borrowing range. The most widely used standard is the <strong>28/36 rule</strong>, which forms the foundation of the calculations in this tool.</p>
+
+      <h3>The 28/36 Rule Explained</h3>
+      <p>The 28/36 rule establishes two key thresholds for your debt-to-income (DTI) ratio. The <strong>front-end ratio (28%)</strong> states that your total monthly housing costs should not exceed 28% of your gross monthly income. Housing costs include your mortgage principal and interest, property taxes, homeowner's insurance, and any HOA fees. This calculator uses the 28% front-end ratio to determine the maximum home price you can afford.</p>
+      <p>The <strong>back-end ratio (36%)</strong> takes a broader view. It says that your total monthly debt obligations — housing costs plus all other recurring debts like car payments, student loans, credit card minimums, and personal loans — should stay below 36% of your gross monthly income. If your existing debts are high, the back-end ratio may limit how much you can borrow even if the front-end ratio would allow more. This calculator accounts for both ratios and uses the more conservative result.</p>
+
+      <h3>Understanding Debt-to-Income Ratios</h3>
+      <p>Your DTI ratio is one of the most important factors lenders evaluate when reviewing a mortgage application. A lower DTI signals to lenders that you have a healthy balance between debt and income, making you a less risky borrower. Most conventional lenders prefer a back-end DTI of 36% or lower, though some government-backed loan programs like FHA loans may allow DTI ratios up to 43% or even 50% in certain cases. However, just because a lender will approve a higher DTI does not mean it is financially wise. A DTI above 36% leaves very little room for unexpected expenses, savings, or lifestyle changes.</p>
+
+      <h3>Hidden Costs of Homeownership</h3>
+      <p>The monthly mortgage payment is only one part of the true cost of owning a home. Many first-time buyers are caught off guard by expenses that do not show up in a basic mortgage calculation. <strong>Closing costs</strong> typically range from 2% to 5% of the home purchase price and are due at the time of sale. If your down payment is less than 20%, most lenders require <strong>private mortgage insurance (PMI)</strong>, which can add $50 to $200 or more per month. <strong>Home maintenance and repairs</strong> are an ongoing reality — a common rule of thumb is to budget 1% to 2% of your home's value each year for upkeep. A $300,000 home means $3,000 to $6,000 annually for things like HVAC servicing, roof repairs, plumbing issues, and appliance replacements. Utility bills, landscaping, and potential special assessments in HOA communities add even more.</p>
+
+      <h3>Tips for First-Time Home Buyers</h3>
+      <p><strong>Save more than the minimum down payment.</strong> While some loan programs allow down payments as low as 3% or 3.5%, a larger down payment reduces your loan amount, eliminates PMI, and lowers your monthly payment. Aim for 20% if possible. <strong>Get pre-approved, not just pre-qualified.</strong> Pre-approval involves a thorough review of your finances and gives you a concrete budget when house hunting. <strong>Do not spend up to your maximum.</strong> Just because you qualify for a $350,000 home does not mean you should buy one. Leave a buffer in your budget for savings, emergencies, and enjoying life outside of your mortgage. <strong>Factor in future changes.</strong> Consider whether your income is likely to change, whether you plan to start a family, and whether the property taxes in your area tend to increase over time. <strong>Shop around for mortgage rates.</strong> Even a quarter-point difference in your interest rate can save tens of thousands of dollars over the life of a 30-year loan. Compare offers from at least three lenders before committing.</p>
+
+      <p>This calculator provides a starting point based on widely accepted lending standards. Your actual borrowing capacity will depend on your credit score, employment history, the specific loan program you choose, and other factors that lenders evaluate on a case-by-case basis. Use the results as a guide, and consult with a qualified mortgage professional for personalized advice.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+    function calc() {
+      var income = parseFloat(document.getElementById('income').value) || 0;
+      var debts = parseFloat(document.getElementById('debts').value) || 0;
+      var downPayment = parseFloat(document.getElementById('downPayment').value) || 0;
+      var rate = parseFloat(document.getElementById('rate').value) || 0;
+      var years = parseInt(document.getElementById('term').value) || 30;
+      var propTaxRate = parseFloat(document.getElementById('propTax').value) || 0;
+      var insuranceYr = parseFloat(document.getElementById('insurance').value) || 0;
+      var hoa = parseFloat(document.getElementById('hoa').value) || 0;
+
+      var monthlyIncome = income / 12;
+
+      // 28% front-end rule: max housing payment
+      var maxHousing28 = monthlyIncome * 0.28;
+
+      // 36% back-end rule: max housing payment = 36% of income minus existing debts
+      var maxHousing36 = (monthlyIncome * 0.36) - debts;
+      if (maxHousing36 < 0) maxHousing36 = 0;
+
+      // Use the more conservative (lower) of the two
+      var maxHousingPayment = Math.min(maxHousing28, maxHousing36);
+
+      // Subtract non-mortgage housing costs to find max P&I
+      var monthlyInsurance = insuranceYr / 12;
+
+      // We need to solve for home price iteratively since property tax depends on home price
+      // maxHousingPayment = P&I + (homePrice * propTaxRate/100/12) + monthlyInsurance + hoa
+      // P&I = loan * [r(1+r)^n] / [(1+r)^n - 1]   where loan = homePrice - downPayment
+      // So: maxHousingPayment - monthlyInsurance - hoa = P&I + homePrice * propTaxRate/100/12
+
+      var n = years * 12;
+      var r = rate / 100 / 12;
+
+      var maxPrice = 0;
+      var piPayment = 0;
+      var monthlyPropTax = 0;
+
+      if (n > 0) {
+        // Calculate the mortgage factor (payment per $1 borrowed)
+        var mortgageFactor;
+        if (r > 0) {
+          mortgageFactor = (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        } else {
+          mortgageFactor = 1 / n;
+        }
+
+        // Available for P&I + property tax: maxHousingPayment - insurance - HOA
+        var availableForPIandTax = maxHousingPayment - monthlyInsurance - hoa;
+        if (availableForPIandTax < 0) availableForPIandTax = 0;
+
+        // availableForPIandTax = (homePrice - downPayment) * mortgageFactor + homePrice * (propTaxRate/100/12)
+        // availableForPIandTax = homePrice * mortgageFactor - downPayment * mortgageFactor + homePrice * monthlyTaxRate
+        // availableForPIandTax + downPayment * mortgageFactor = homePrice * (mortgageFactor + monthlyTaxRate)
+        var monthlyTaxRate = propTaxRate / 100 / 12;
+        var denominator = mortgageFactor + monthlyTaxRate;
+
+        if (denominator > 0) {
+          maxPrice = (availableForPIandTax + downPayment * mortgageFactor) / denominator;
+        }
+
+        // Ensure price is not negative and at least the down payment
+        if (maxPrice < 0) maxPrice = 0;
+
+        var loanAmount = maxPrice - downPayment;
+        if (loanAmount < 0) loanAmount = 0;
+
+        piPayment = loanAmount * mortgageFactor;
+        monthlyPropTax = maxPrice * monthlyTaxRate;
+      }
+
+      var totalMonthly = piPayment + monthlyPropTax + monthlyInsurance + hoa;
+
+      // Calculate actual DTI ratio
+      var dtiPercent = 0;
+      if (monthlyIncome > 0) {
+        dtiPercent = ((totalMonthly + debts) / monthlyIncome) * 100;
+      }
+
+      document.getElementById('maxPrice').textContent = fmt(maxPrice);
+      document.getElementById('maxPayment').textContent = fmt(totalMonthly);
+      document.getElementById('dtiRatio').textContent = dtiPercent.toFixed(1) + '%';
+      document.getElementById('monthlyPI').textContent = fmt(piPayment);
+      document.getElementById('monthlyTax').textContent = fmt(monthlyPropTax);
+      document.getElementById('monthlyIns').textContent = fmt(monthlyInsurance);
+      document.getElementById('monthlyHOA').textContent = fmt(hoa);
+    }
+
+    document.querySelectorAll('#income,#debts,#downPayment,#rate,#term,#propTax,#insurance,#hoa').forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+
+    calc();
+  })();
+  </script>
+</body>
+</html>

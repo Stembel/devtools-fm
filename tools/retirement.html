@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retirement Calculator — How Much Do You Need to Retire? | ZeroKit.dev</title>
+  <meta name="description" content="Free retirement calculator: estimate how much you need to retire comfortably. See projected savings, inflation-adjusted values, savings gaps, and a year-by-year projection table.">
+  <link rel="canonical" href="https://zerokit.dev/tools/retirement.html">
+  <meta property="og:title" content="Retirement Calculator — How Much Do You Need to Retire? | ZeroKit.dev">
+  <meta property="og:description" content="Plan your retirement with projected savings, inflation-adjusted values, and year-by-year growth projections. Free, no signup required.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much money do I need to retire?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A common rule of thumb is the 4% rule: you need 25 times your desired annual retirement income saved. For example, if you want $48,000 per year in retirement ($4,000/month), you would need approximately $1,200,000 in savings. However, factors like inflation, investment returns, Social Security, healthcare costs, and your planned retirement duration all affect the exact amount you need."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the 4% rule for retirement?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The 4% rule is a retirement planning guideline that suggests you can safely withdraw 4% of your retirement portfolio in the first year, then adjust that amount for inflation each subsequent year, and your savings should last at least 30 years. This means you need to save 25 times your desired annual spending. For example, if you need $50,000 per year, aim to save $1,250,000. While not perfect for every situation, it provides a useful starting benchmark for retirement planning."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does inflation affect my retirement savings?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Inflation erodes the purchasing power of your money over time. At a 3% annual inflation rate, $1,000,000 today would have the purchasing power of roughly $412,000 in 30 years. This means your retirement savings target needs to account for rising costs. When planning for retirement, always consider the real (inflation-adjusted) rate of return on your investments, which is your nominal return minus the inflation rate. For instance, a 7% nominal return with 3% inflation gives you about a 4% real return."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Retirement Calculator</h1>
+    <p class="description">Estimate how much you need to retire comfortably and see if you are on track.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Your Details</div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Current Age</label>
+              <input type="number" id="currentAge" value="30" min="18" max="80" step="1">
+            </div>
+            <div class="form-group">
+              <label>Retirement Age</label>
+              <input type="number" id="retireAge" value="65" min="30" max="100" step="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Current Savings ($)</label>
+            <input type="number" id="currentSavings" value="50000" min="0" step="1000">
+          </div>
+          <div class="form-group">
+            <label>Monthly Contribution ($)</label>
+            <input type="number" id="monthlyContrib" value="500" min="0" step="50">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Expected Annual Return (%)</label>
+              <input type="number" id="annualReturn" value="7" min="0" max="30" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Expected Inflation (%)</label>
+              <input type="number" id="inflation" value="3" min="0" max="20" step="0.1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Desired Monthly Income in Retirement ($)</label>
+            <input type="number" id="desiredIncome" value="4000" min="0" step="100">
+          </div>
+          <div class="form-group">
+            <label>Expected Retirement Duration (years)</label>
+            <input type="number" id="retireDuration" value="25" min="1" max="60" step="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Retirement Projection</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="projectedSavings">$0</div>
+            <div class="result-label">Projected Savings at Retirement</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="savingsNeeded">$0</div>
+              <div class="label">Savings Needed for Desired Income</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="savingsGap">$0</div>
+              <div class="label">Monthly Savings Gap</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="realValue">$0</div>
+              <div class="label">Real (Inflation-Adjusted) Value</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="totalContributions">$0</div>
+              <div class="label">Total Contributions</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="totalInterestEarned">$0</div>
+              <div class="label">Total Interest Earned</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="statusLabel" style="font-size:1rem;">--</div>
+              <div class="label">Retirement Readiness</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Year-by-Year Projection -->
+    <div class="calc-panel calc-panel-full" style="margin-top:16px;">
+      <div class="panel-header">
+        Year-by-Year Projection
+        <button class="btn" id="toggleProjection" onclick="toggleTable()">Show Projection Table</button>
+      </div>
+      <div id="projectionWrap" style="max-height:500px;overflow-y:auto;display:none;">
+        <table class="data-table">
+          <thead><tr><th>Year</th><th>Age</th><th>Balance</th></tr></thead>
+          <tbody id="projectionBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>How to Plan for Retirement</h2>
+      <p>Retirement planning is one of the most important financial exercises you will ever undertake. The earlier you start, the better your outcome will be, thanks to the extraordinary power of compound interest. Whether you are just beginning your career or approaching your final working years, understanding how your savings grow and what you will need is essential for a secure future.</p>
+
+      <h3>The Power of Compound Interest</h3>
+      <p>Compound interest is the engine that drives long-term wealth accumulation. When your investment earnings generate their own earnings, your money grows exponentially rather than linearly. For example, if you invest $500 per month at a 7% annual return starting at age 25, by age 65 you will have accumulated approximately $1,200,000. However, if you wait until age 35 to start, the same monthly contribution would grow to only about $567,000 by age 65. That ten-year delay costs you more than half your final balance, even though you only contributed $60,000 less in total. This demonstrates why starting early is the single most powerful thing you can do for your retirement.</p>
+
+      <h3>The 4% Rule Explained</h3>
+      <p>The 4% rule is a widely used guideline in retirement planning. It originates from the Trinity Study conducted in the 1990s, which analyzed historical market data and found that retirees who withdrew 4% of their portfolio in the first year of retirement, then adjusted that amount for inflation each subsequent year, had a very high probability of their savings lasting at least 30 years. In practical terms, this means you need to save 25 times your desired annual retirement income. If you want to spend $48,000 per year (or $4,000 per month) in retirement, your target nest egg is $1,200,000. While the 4% rule is not perfect for every scenario, especially in periods of very low interest rates or high inflation, it remains a solid starting benchmark for retirement planning. Some financial advisors now recommend a more conservative 3.5% or even 3% withdrawal rate for added safety, particularly for those planning early retirement.</p>
+
+      <h3>Understanding Inflation's Impact</h3>
+      <p>Inflation is often called the silent killer of retirement plans. At a modest 3% annual inflation rate, something that costs $1,000 today will cost roughly $2,430 in 30 years. This means your retirement savings need to be significantly larger than you might initially think. When evaluating your investment returns, always consider the real rate of return, which is your nominal return minus the inflation rate. If your portfolio earns 7% per year and inflation runs at 3%, your real return is approximately 4%. This calculator accounts for inflation so you can see both the nominal projected value and the real purchasing power of your future savings. Planning with inflation-adjusted numbers gives you a much more accurate picture of your retirement readiness.</p>
+
+      <h3>Why Starting Early Matters</h3>
+      <p>Time is the most valuable asset in retirement planning, and it is the one resource you cannot buy back. A 25-year-old who saves $300 per month will accumulate more by retirement than a 40-year-old who saves $800 per month, assuming the same rate of return. This is entirely because of compound interest and the additional years of growth. Every year you delay costs you disproportionately more than the last, because you lose not just one year of contributions but also all the future compound growth those contributions would have generated. If you have not started saving for retirement yet, the best time to start is right now. Even small contributions grow significantly over decades.</p>
+
+      <h3>Building Your Retirement Strategy</h3>
+      <p>A sound retirement strategy involves several key steps. First, determine your target retirement income by estimating your expected expenses, including housing, healthcare, travel, and daily living costs. Second, calculate how much you need to save using tools like this retirement calculator. Third, maximize tax-advantaged accounts such as 401(k) plans, IRAs, and Roth IRAs. Fourth, diversify your investments across stocks, bonds, and other asset classes appropriate for your age and risk tolerance. Finally, review and adjust your plan at least annually to account for changes in income, expenses, market conditions, and life circumstances. Remember that retirement planning is not a one-time event but an ongoing process that evolves throughout your working life.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) {
+      if (n < 0) return '-$' + Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return '$' + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+
+    function calc() {
+      var currentAge = parseInt(document.getElementById('currentAge').value) || 30;
+      var retireAge = parseInt(document.getElementById('retireAge').value) || 65;
+      var currentSavings = parseFloat(document.getElementById('currentSavings').value) || 0;
+      var monthlyContrib = parseFloat(document.getElementById('monthlyContrib').value) || 0;
+      var annualReturn = parseFloat(document.getElementById('annualReturn').value) || 0;
+      var inflationRate = parseFloat(document.getElementById('inflation').value) || 0;
+      var desiredIncome = parseFloat(document.getElementById('desiredIncome').value) || 0;
+      var retireDuration = parseInt(document.getElementById('retireDuration').value) || 25;
+
+      // Ensure retirement age > current age
+      var yearsToRetire = retireAge - currentAge;
+      if (yearsToRetire < 1) yearsToRetire = 1;
+
+      var monthlyRate = annualReturn / 100 / 12;
+      var totalMonths = yearsToRetire * 12;
+
+      // Calculate projected savings at retirement using future value formula
+      // FV = PV * (1 + r)^n + PMT * [((1 + r)^n - 1) / r]
+      var projectedSavings = 0;
+      if (monthlyRate > 0) {
+        projectedSavings = currentSavings * Math.pow(1 + monthlyRate, totalMonths) +
+          monthlyContrib * ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate);
+      } else {
+        projectedSavings = currentSavings + (monthlyContrib * totalMonths);
+      }
+
+      // Calculate total contributions
+      var totalContributions = currentSavings + (monthlyContrib * totalMonths);
+      var totalInterestEarned = projectedSavings - totalContributions;
+
+      // Calculate savings needed for desired income (using present value of annuity)
+      // Need to account for inflation-adjusted withdrawals during retirement
+      var realReturn = ((1 + annualReturn / 100) / (1 + inflationRate / 100)) - 1;
+      var monthlyRealReturn = realReturn / 12;
+      var retireMonths = retireDuration * 12;
+      var savingsNeeded = 0;
+
+      if (monthlyRealReturn > 0) {
+        savingsNeeded = desiredIncome * ((1 - Math.pow(1 + monthlyRealReturn, -retireMonths)) / monthlyRealReturn);
+      } else {
+        savingsNeeded = desiredIncome * retireMonths;
+      }
+
+      // Adjust savings needed for inflation to retirement date
+      var inflationMultiplier = Math.pow(1 + inflationRate / 100, yearsToRetire);
+      var savingsNeededNominal = savingsNeeded * inflationMultiplier;
+
+      // Calculate real (inflation-adjusted) value of projected savings
+      var realValue = projectedSavings / inflationMultiplier;
+
+      // Calculate monthly savings gap
+      var gap = 0;
+      if (projectedSavings < savingsNeededNominal) {
+        // How much more per month is needed to reach the target?
+        var additionalNeeded = savingsNeededNominal - projectedSavings;
+        if (monthlyRate > 0) {
+          var futureValueFactor = (Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate;
+          gap = additionalNeeded / futureValueFactor;
+        } else {
+          gap = additionalNeeded / totalMonths;
+        }
+      }
+
+      // Determine status
+      var statusEl = document.getElementById('statusLabel');
+      if (projectedSavings >= savingsNeededNominal) {
+        statusEl.textContent = 'On Track';
+        statusEl.style.color = '#22c55e';
+      } else if (projectedSavings >= savingsNeededNominal * 0.75) {
+        statusEl.textContent = 'Nearly There';
+        statusEl.style.color = '#eab308';
+      } else {
+        statusEl.textContent = 'Needs Attention';
+        statusEl.style.color = '#ef4444';
+      }
+
+      // Update display
+      document.getElementById('projectedSavings').textContent = fmt(projectedSavings);
+      document.getElementById('savingsNeeded').textContent = fmt(savingsNeededNominal);
+      document.getElementById('savingsGap').textContent = gap > 0 ? fmt(gap) + '/mo' : '$0 (on track)';
+      document.getElementById('realValue').textContent = fmt(realValue);
+      document.getElementById('totalContributions').textContent = fmt(totalContributions);
+      document.getElementById('totalInterestEarned').textContent = fmt(totalInterestEarned > 0 ? totalInterestEarned : 0);
+
+      // Build year-by-year projection table
+      var tbody = document.getElementById('projectionBody');
+      tbody.innerHTML = '';
+      var balance = currentSavings;
+      var annualContrib = monthlyContrib * 12;
+      var annReturn = annualReturn / 100;
+
+      for (var y = 0; y <= yearsToRetire; y++) {
+        var age = currentAge + y;
+        var row = '<tr><td>' + y + '</td><td>' + age + '</td><td>' + fmt(balance) + '</td></tr>';
+        tbody.innerHTML += row;
+        // Grow balance for next year
+        balance = balance * (1 + annReturn) + annualContrib;
+      }
+    }
+
+    // Attach event listeners to all inputs
+    var inputs = document.querySelectorAll('#currentAge,#retireAge,#currentSavings,#monthlyContrib,#annualReturn,#inflation,#desiredIncome,#retireDuration');
+    inputs.forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+
+    // Initial calculation
+    calc();
+  })();
+
+  function toggleTable() {
+    var w = document.getElementById('projectionWrap');
+    var b = document.getElementById('toggleProjection');
+    if (w.style.display === 'none') {
+      w.style.display = 'block';
+      b.textContent = 'Hide Projection Table';
+    } else {
+      w.style.display = 'none';
+      b.textContent = 'Show Projection Table';
+    }
+  }
+  </script>
+</body>
+</html>

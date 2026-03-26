@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Credit Card Payoff Calculator — Pay Off Debt Faster | ZeroKit.dev</title>
+  <meta name="description" content="Free credit card payoff calculator: see how long it takes to pay off your balance, how much interest you'll pay, and how extra payments can save you thousands.">
+  <link rel="canonical" href="https://zerokit.dev/tools/credit-payoff.html">
+  <meta property="og:title" content="Credit Card Payoff Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Calculate your credit card payoff timeline, total interest, and see how extra payments reduce debt faster.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How long does it take to pay off credit card debt?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The time to pay off credit card debt depends on your balance, interest rate (APR), and monthly payment. For example, a $5,000 balance at 19.99% APR with a $100 monthly payment takes about 9 years to pay off, costing over $5,800 in interest alone. Increasing your payment to $200 per month cuts the payoff time to about 2.5 years and saves over $4,000 in interest."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I pay more than the minimum payment on my credit card?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, paying only the minimum payment is the most expensive way to pay off credit card debt. Minimum payments are usually 1-3% of your balance, which means most of your payment goes toward interest rather than reducing your principal. Even an extra $50 per month can save you thousands of dollars in interest and years of payments. Use a credit card payoff calculator to see the exact impact of extra payments on your specific balance."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the best strategy to pay off credit card debt fast?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The most effective strategies include: (1) The avalanche method — pay off the card with the highest APR first to minimize total interest; (2) The snowball method — pay off the smallest balance first for psychological momentum; (3) Balance transfer — move debt to a 0% introductory APR card to pause interest; (4) Debt consolidation — combine multiple debts into one lower-interest loan; (5) Simply increasing your monthly payment amount, even by a small amount, which dramatically reduces payoff time and total interest paid."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Credit Card Payoff Calculator</h1>
+    <p class="description">See how long it takes to pay off your credit card and how extra payments can save you thousands in interest.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Card Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Current Balance ($)</label>
+            <input type="number" id="balance" value="5000" min="0" step="100">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Interest Rate / APR (%)</label>
+              <input type="number" id="apr" value="19.99" min="0" max="99.99" step="0.01">
+            </div>
+            <div class="form-group">
+              <label>Minimum Payment ($)</label>
+              <input type="number" id="minPayment" value="100" min="0" step="10">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Extra Monthly Payment ($)</label>
+            <input type="number" id="extraPayment" value="0" min="0" step="10">
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Payoff Summary</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="monthsToPayoff">0</div>
+            <div class="result-label">Months to Pay Off</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="totalInterest">$0</div>
+              <div class="label">Total Interest Paid</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="totalPaid">$0</div>
+              <div class="label">Total Amount Paid</div>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border, #333);">
+            <div class="result-label" style="margin-bottom:12px;font-weight:600;">Current Month Breakdown</div>
+            <div class="result-grid">
+              <div class="result-item">
+                <div class="value" id="monthInterest">$0</div>
+                <div class="label">Interest</div>
+              </div>
+              <div class="result-item">
+                <div class="value" id="monthPrincipal">$0</div>
+                <div class="label">Principal</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Extra Payment Comparison -->
+    <div class="calc-panel calc-panel-full" style="margin-top:16px;">
+      <div class="panel-header">What If You Paid More?</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Monthly Payment</th>
+              <th>Extra Amount</th>
+              <th>Months to Pay Off</th>
+              <th>Total Interest</th>
+              <th>Interest Saved</th>
+              <th>Time Saved</th>
+            </tr>
+          </thead>
+          <tbody id="compareBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>How Credit Card Interest Works</h2>
+
+      <p>Understanding how credit card interest works is the first step toward taking control of your debt. Unlike simple interest loans where you pay a fixed amount of interest over a set term, credit card interest compounds, meaning you pay interest on your interest if you carry a balance from month to month. This compounding effect is what makes credit card debt so expensive and difficult to escape when only making minimum payments.</p>
+
+      <h3>What Is APR and How Is It Applied?</h3>
+
+      <p>APR stands for Annual Percentage Rate, and it represents the yearly cost of borrowing money on your credit card. However, credit card companies do not charge interest once a year. Instead, they divide your APR by 365 to get a daily periodic rate, then multiply that rate by your average daily balance each day. At the end of each billing cycle (usually about 30 days), all of those daily interest charges are added together and posted to your account as a single interest charge.</p>
+
+      <p>For example, if your APR is 19.99% and your balance is $5,000, the daily periodic rate is roughly 0.0548% (19.99% divided by 365). Each day, approximately $2.74 is added in interest. Over a 30-day billing cycle, that adds up to about $82 in interest for that month alone. If your minimum payment is $100, only $18 actually goes toward reducing your principal balance. At that rate, it would take over 9 years to pay off the debt, and you would pay more in interest than the original balance.</p>
+
+      <h3>The Minimum Payment Trap</h3>
+
+      <p>Credit card issuers set minimum payments intentionally low, typically 1% to 3% of your outstanding balance or a flat dollar amount like $25, whichever is greater. While low minimum payments feel manageable, they are designed to maximize the amount of interest the issuer collects over time. When you pay only the minimum, the vast majority of your payment covers interest charges, and only a tiny fraction reduces your actual debt.</p>
+
+      <p>As your balance slowly decreases, so does your minimum payment (if it is percentage-based), which means the payoff timeline stretches even further. A $10,000 balance at 22% APR with minimum payments of 2% of the balance would take over 30 years to pay off, costing more than $24,000 in interest. That means you would pay nearly $34,000 total for $10,000 worth of purchases.</p>
+
+      <h3>How Compound Interest Accelerates Debt</h3>
+
+      <p>The real danger of credit card debt lies in compound interest. When your monthly interest charge is added to your balance and you do not pay it off, next month you are charged interest on that interest too. This creates a snowball effect where your balance can grow even while you are making payments, especially if you continue to make new purchases on the card.</p>
+
+      <p>Consider this scenario: you have a $3,000 balance at 24% APR and pay $60 per month. In the first month, about $60 goes to interest and $0 reduces your balance. You are essentially treading water. If your payment is even slightly below the monthly interest charge, your balance actually increases each month, a situation known as negative amortization.</p>
+
+      <h3>Strategies to Pay Off Credit Card Debt Faster</h3>
+
+      <p>The most powerful strategy is simply paying more than the minimum. Even an extra $50 per month can cut years off your payoff timeline and save thousands in interest. Use this calculator to see the exact impact on your specific situation.</p>
+
+      <p>The <strong>avalanche method</strong> focuses on paying off the card with the highest APR first while making minimum payments on all other cards. This approach minimizes total interest paid and is mathematically optimal. The <strong>snowball method</strong> instead targets the smallest balance first, providing quick psychological wins that help maintain motivation.</p>
+
+      <p>A <strong>balance transfer</strong> to a card with a 0% introductory APR can pause interest charges for 12 to 21 months, giving you time to pay down the principal directly. Be aware of balance transfer fees (typically 3% to 5%) and make sure you can pay off the balance before the promotional period ends, as the regular APR that kicks in afterward is often 20% or higher.</p>
+
+      <p><strong>Debt consolidation</strong> through a personal loan can replace high-interest credit card debt with a lower fixed-rate loan that has a defined payoff date. This works best when your credit score qualifies you for a rate significantly lower than your credit card APR. The fixed monthly payment and end date also remove the ambiguity of revolving credit card debt.</p>
+
+      <p>Finally, the simplest advice is often the most effective: stop adding new charges to the card while you are paying it off. Every new purchase extends your payoff timeline and increases the total interest you will pay. If you must use a credit card for daily expenses, use a different card and pay it in full each month to avoid interest entirely.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+    var fmtD = function(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+    /**
+     * Calculate credit card payoff details.
+     * Returns { months, totalInterest, totalPaid, firstMonthInterest, firstMonthPrincipal }
+     * Uses standard monthly compounding: monthly_rate = APR / 12 / 100
+     */
+    function calcPayoff(balance, apr, monthlyPayment) {
+      if (balance <= 0 || monthlyPayment <= 0) {
+        return { months: 0, totalInterest: 0, totalPaid: 0, firstMonthInterest: 0, firstMonthPrincipal: 0 };
+      }
+
+      var monthlyRate = apr / 100 / 12;
+      var firstMonthInterest = balance * monthlyRate;
+
+      // Check if payment covers at least the first month's interest
+      if (monthlyPayment <= firstMonthInterest && monthlyRate > 0) {
+        return { months: Infinity, totalInterest: Infinity, totalPaid: Infinity, firstMonthInterest: firstMonthInterest, firstMonthPrincipal: 0 };
+      }
+
+      var remaining = balance;
+      var totalPaid = 0;
+      var months = 0;
+      var maxMonths = 1200; // 100 year safety cap
+
+      while (remaining > 0.005 && months < maxMonths) {
+        var interest = remaining * monthlyRate;
+        var payment = Math.min(monthlyPayment, remaining + interest);
+        var principal = payment - interest;
+        remaining -= principal;
+        totalPaid += payment;
+        months++;
+      }
+
+      var totalInterest = totalPaid - balance;
+      var firstMonthPrincipal = monthlyPayment - firstMonthInterest;
+      if (firstMonthPrincipal < 0) firstMonthPrincipal = 0;
+      if (firstMonthPrincipal > balance) firstMonthPrincipal = balance;
+
+      return {
+        months: months,
+        totalInterest: totalInterest,
+        totalPaid: totalPaid,
+        firstMonthInterest: firstMonthInterest,
+        firstMonthPrincipal: firstMonthPrincipal
+      };
+    }
+
+    function formatMonths(m) {
+      if (m === Infinity || m >= 1200) return 'Never';
+      var years = Math.floor(m / 12);
+      var mo = m % 12;
+      if (years === 0) return m + ' mo';
+      if (mo === 0) return years + ' yr';
+      return years + ' yr ' + mo + ' mo';
+    }
+
+    function calc() {
+      var balance = parseFloat(document.getElementById('balance').value) || 0;
+      var apr = parseFloat(document.getElementById('apr').value) || 0;
+      var minPayment = parseFloat(document.getElementById('minPayment').value) || 0;
+      var extraPayment = parseFloat(document.getElementById('extraPayment').value) || 0;
+      var totalPayment = minPayment + extraPayment;
+
+      var result = calcPayoff(balance, apr, totalPayment);
+
+      // Update summary
+      if (result.months === Infinity || result.months >= 1200) {
+        document.getElementById('monthsToPayoff').textContent = 'Never';
+        document.getElementById('totalInterest').textContent = 'N/A';
+        document.getElementById('totalPaid').textContent = 'N/A';
+      } else {
+        document.getElementById('monthsToPayoff').textContent = formatMonths(result.months);
+        document.getElementById('totalInterest').textContent = fmtD(result.totalInterest);
+        document.getElementById('totalPaid').textContent = fmtD(result.totalPaid);
+      }
+
+      document.getElementById('monthInterest').textContent = fmtD(result.firstMonthInterest);
+      document.getElementById('monthPrincipal').textContent = fmtD(result.firstMonthPrincipal);
+
+      // Comparison table: baseline (minimum only) plus extra $50, $100, $200
+      var baseResult = calcPayoff(balance, apr, minPayment);
+      var extras = [0, 50, 100, 200];
+      var tbody = document.getElementById('compareBody');
+      tbody.innerHTML = '';
+
+      for (var i = 0; i < extras.length; i++) {
+        var payment = minPayment + extras[i];
+        var r = calcPayoff(balance, apr, payment);
+        var interestSaved = baseResult.totalInterest - r.totalInterest;
+        var timeSaved = baseResult.months - r.months;
+        var isNever = r.months === Infinity || r.months >= 1200;
+        var baseNever = baseResult.months === Infinity || baseResult.months >= 1200;
+
+        var isCurrent = extras[i] === extraPayment;
+        var style = isCurrent ? ' style="background:var(--accent-dim);font-weight:600;"' : '';
+
+        var monthsStr = isNever ? 'Never' : formatMonths(r.months);
+        var interestStr = isNever ? 'N/A' : fmtD(r.totalInterest);
+        var savedStr, timeSavedStr;
+
+        if (extras[i] === 0) {
+          savedStr = '&mdash;';
+          timeSavedStr = '&mdash;';
+        } else if (baseNever && !isNever) {
+          savedStr = 'Infinite';
+          timeSavedStr = 'Infinite';
+        } else if (baseNever && isNever) {
+          savedStr = '$0';
+          timeSavedStr = '0 mo';
+        } else if (isNever) {
+          savedStr = 'N/A';
+          timeSavedStr = 'N/A';
+        } else {
+          savedStr = fmtD(interestSaved);
+          timeSavedStr = formatMonths(timeSaved);
+        }
+
+        tbody.innerHTML += '<tr' + style + '>'
+          + '<td>' + fmtD(payment) + (isCurrent ? ' (yours)' : '') + '</td>'
+          + '<td>' + (extras[i] === 0 ? 'Base' : '+' + fmt(extras[i])) + '</td>'
+          + '<td>' + monthsStr + '</td>'
+          + '<td>' + interestStr + '</td>'
+          + '<td style="color:' + (interestSaved > 0 ? 'var(--accent)' : 'var(--text-muted)') + ';">' + savedStr + '</td>'
+          + '<td style="color:' + (timeSaved > 0 ? 'var(--accent)' : 'var(--text-muted)') + ';">' + timeSavedStr + '</td>'
+          + '</tr>';
+      }
+    }
+
+    document.querySelectorAll('#balance,#apr,#minPayment,#extraPayment').forEach(function(el) {
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+    calc();
+  })();
+  </script>
+</body>
+</html>

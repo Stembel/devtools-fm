@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car Insurance Calculator — Estimate Your Premium | ZeroKit.dev</title>
+  <meta name="description" content="Free car insurance calculator: estimate your monthly and annual auto insurance premium based on vehicle value, driving record, coverage type, and more.">
+  <link rel="canonical" href="https://zerokit.dev/tools/car-insurance.html">
+  <meta property="og:title" content="Car Insurance Calculator — ZeroKit.dev">
+  <meta property="og:description" content="Estimate your car insurance premium based on vehicle value, driver age, coverage type, and driving record. Free, no signup.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../js/cookie-consent.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5826340473830405" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What factors affect my car insurance premium the most?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The biggest factors affecting your car insurance premium are your driving record, age, vehicle value, coverage type, credit score, and annual mileage. Drivers with clean records and higher credit scores typically pay significantly less. Your location also plays a major role — urban areas with higher accident and theft rates generally have higher premiums than rural areas."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I lower my car insurance costs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can lower your car insurance costs by raising your deductible, maintaining a clean driving record, bundling policies (home and auto), asking about available discounts (good student, safe driver, low mileage), improving your credit score, and shopping around for quotes from multiple insurers. Choosing liability-only coverage on older vehicles can also save money if the car's value doesn't justify collision coverage."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between liability, collision, and comprehensive coverage?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Liability coverage pays for damage you cause to other people and their property in an accident — it is required by law in most states. Collision coverage pays to repair or replace your own vehicle after an accident, regardless of who is at fault. Comprehensive coverage protects your vehicle against non-collision events like theft, vandalism, hail, flooding, and animal strikes. Full coverage typically refers to a policy that includes all three types."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="../" class="logo"><span>&gt;_</span> ZeroKit.dev</a>
+      <nav><a href="../">All Tools</a></nav>
+    </div>
+  </header>
+
+  <main class="container calc-page">
+    <a href="../" class="back-link">&larr; All Tools</a>
+    <h1>Car Insurance Calculator</h1>
+    <p class="description">Estimate your monthly and annual car insurance premium based on your vehicle, driving profile, and coverage preferences.</p>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="panel-header">Driver &amp; Vehicle Details</div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Vehicle Value ($)</label>
+            <input type="number" id="vehicleValue" value="25000" min="0" step="500">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Driver Age</label>
+              <input type="number" id="driverAge" value="35" min="16" max="100" step="1">
+            </div>
+            <div class="form-group">
+              <label>Annual Mileage</label>
+              <input type="number" id="annualMileage" value="12000" min="0" step="500">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Coverage Type</label>
+              <select id="coverageType">
+                <option value="liability">Liability Only</option>
+                <option value="collision" selected>Collision + Comprehensive</option>
+                <option value="full">Full Coverage</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Deductible</label>
+              <select id="deductible">
+                <option value="250">$250</option>
+                <option value="500" selected>$500</option>
+                <option value="1000">$1,000</option>
+                <option value="2000">$2,000</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Driving Record</label>
+              <select id="drivingRecord">
+                <option value="clean" selected>Clean</option>
+                <option value="1accident">1 Accident</option>
+                <option value="2accidents">2+ Accidents</option>
+                <option value="dui">DUI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Credit Score</label>
+              <select id="creditScore">
+                <option value="excellent">Excellent</option>
+                <option value="good" selected>Good</option>
+                <option value="fair">Fair</option>
+                <option value="poor">Poor</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-panel">
+        <div class="panel-header">Estimated Premium</div>
+        <div class="panel-body">
+          <div style="text-align:center;padding:12px 0;">
+            <div class="result-value" id="monthlyPremium">$0</div>
+            <div class="result-label">per month</div>
+          </div>
+          <div class="result-grid" style="margin-top:20px;">
+            <div class="result-item">
+              <div class="value" id="annualPremium">$0</div>
+              <div class="label">Annual Premium</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="liabilityCost">$0</div>
+              <div class="label">Liability Cost</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="collisionCost">$0</div>
+              <div class="label">Collision Cost</div>
+            </div>
+            <div class="result-item">
+              <div class="value" id="potentialSavings">$0</div>
+              <div class="label">Savings w/ Higher Deductible</div>
+            </div>
+          </div>
+          <p style="margin-top:16px;font-size:0.78rem;color:#888;text-align:center;">This is an estimate. Actual premiums vary by insurer and location.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>How Car Insurance Premiums Are Calculated</h2>
+      <p>Car insurance premiums are determined by a combination of personal, vehicle, and policy-related factors. Insurance companies use complex actuarial models to assess risk, but the core principles are straightforward: the more likely you are to file a claim, and the more expensive that claim could be, the higher your premium will be. Understanding these factors can help you make informed decisions and potentially save hundreds of dollars a year.</p>
+
+      <h3>Vehicle Value and Type</h3>
+      <p>The value of your car is one of the most significant factors in determining your insurance premium, especially for collision and comprehensive coverage. A brand-new luxury SUV worth $60,000 will cost far more to insure than a ten-year-old sedan worth $8,000, because the insurer's potential payout in a total loss is much higher. Beyond the sticker price, insurers also consider the vehicle's safety ratings, theft rates, and repair costs. Cars with expensive parts, advanced electronics, or that are frequently targeted by thieves will carry higher premiums. Some models are statistically more likely to be involved in accidents, which also factors into the pricing.</p>
+
+      <h3>Driver Age and Experience</h3>
+      <p>Age is a strong predictor of driving risk. Teenage drivers and those under 25 pay the highest premiums because statistics show they are involved in accidents at a much higher rate. Premiums generally decrease as drivers move into their 30s, 40s, and 50s, reaching their lowest point for experienced drivers with clean records. After age 65, premiums may begin to rise again as reaction times slow and accident risk increases. New drivers of any age also face higher rates because they lack a proven track record behind the wheel.</p>
+
+      <h3>Driving Record</h3>
+      <p>Your driving history is perhaps the single most controllable factor in your premium. A clean driving record with no accidents or violations can qualify you for significant discounts. A single at-fault accident typically raises your premium by 20 to 40 percent, and the increase can last three to five years. Multiple accidents compound the effect. A DUI conviction is one of the most costly marks on your record, often doubling or tripling your premium and staying on your insurance record for up to ten years depending on the state. Some insurers offer accident forgiveness programs that prevent your first at-fault accident from raising your rate, but these are usually available only to long-term customers or at an additional cost.</p>
+
+      <h3>Coverage Type and Deductible</h3>
+      <p>The type of coverage you choose directly impacts your premium. Liability-only coverage, which pays for damage you cause to others, is the most affordable option and the minimum required by law in most states. Adding collision coverage protects your own vehicle in an accident, while comprehensive coverage guards against theft, weather damage, and other non-collision events. Full coverage, which combines all three, offers the most protection but comes at the highest cost. Your deductible, the amount you pay out of pocket before insurance kicks in, is an important lever. Choosing a $1,000 deductible instead of a $500 deductible can reduce your premium by 15 to 25 percent. However, you need to make sure you can comfortably afford the deductible if you need to file a claim.</p>
+
+      <h3>Credit Score</h3>
+      <p>In most states, insurers use credit-based insurance scores as part of their pricing models. Studies by the insurance industry have found a strong correlation between credit scores and claim frequency: drivers with lower credit scores tend to file more claims. If your credit score is excellent, you can expect to pay significantly less than someone with poor credit. Some states, including California, Hawaii, and Massachusetts, have banned the use of credit scores in insurance pricing. Improving your credit score is one of the most effective long-term strategies for reducing your insurance costs.</p>
+
+      <h3>Annual Mileage</h3>
+      <p>The more you drive, the more exposure you have to potential accidents. Drivers who commute long distances or put high mileage on their vehicles each year will generally pay more than those who work from home or drive infrequently. If your annual mileage is below average, typically under 7,500 miles per year, be sure to let your insurer know, as you may qualify for a low-mileage discount. Some insurers now offer pay-per-mile programs that base your premium primarily on how much you actually drive.</p>
+
+      <h3>Tips to Save on Car Insurance</h3>
+      <ul>
+        <li><strong>Shop around every year:</strong> Rates vary significantly between insurers. Getting quotes from at least three companies can help you find the best deal.</li>
+        <li><strong>Bundle your policies:</strong> Many insurers offer discounts of 10 to 25 percent when you combine auto and homeowners or renters insurance.</li>
+        <li><strong>Raise your deductible:</strong> Increasing your deductible from $250 to $1,000 can cut your collision and comprehensive premiums substantially.</li>
+        <li><strong>Ask about discounts:</strong> Safe driver, good student, anti-theft device, defensive driving course, and paperless billing discounts are commonly available but not always automatically applied.</li>
+        <li><strong>Drop collision on older cars:</strong> If your vehicle's market value is less than ten times your annual collision premium, the coverage may not be worth the cost.</li>
+        <li><strong>Maintain good credit:</strong> Paying bills on time and keeping credit utilization low can lower your insurance score and your premium over time.</li>
+        <li><strong>Drive less:</strong> If you can reduce your annual mileage, you may qualify for low-mileage or pay-per-mile discounts.</li>
+      </ul>
+    </div>
+
+    <div class="info-section">
+      <h2>Frequently Asked Questions</h2>
+
+      <h3>What factors affect my car insurance premium the most?</h3>
+      <p>The biggest factors affecting your car insurance premium are your driving record, age, vehicle value, coverage type, credit score, and annual mileage. Drivers with clean records and higher credit scores typically pay significantly less. Your location also plays a major role — urban areas with higher accident and theft rates generally have higher premiums than rural areas.</p>
+
+      <h3>How can I lower my car insurance costs?</h3>
+      <p>You can lower your car insurance costs by raising your deductible, maintaining a clean driving record, bundling policies (home and auto), asking about available discounts (good student, safe driver, low mileage), improving your credit score, and shopping around for quotes from multiple insurers. Choosing liability-only coverage on older vehicles can also save money if the car's value doesn't justify collision coverage.</p>
+
+      <h3>What is the difference between liability, collision, and comprehensive coverage?</h3>
+      <p>Liability coverage pays for damage you cause to other people and their property in an accident — it is required by law in most states. Collision coverage pays to repair or replace your own vehicle after an accident, regardless of who is at fault. Comprehensive coverage protects your vehicle against non-collision events like theft, vandalism, hail, flooding, and animal strikes. Full coverage typically refers to a policy that includes all three types.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">ZeroKit.dev &mdash; Free developer tools.</div>
+  </footer>
+
+  <script src="../js/monetization.js"></script>
+  <script>
+  (function() {
+    var fmt = function(n) { return '$' + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+    function calc() {
+      var vehicleValue = parseFloat(document.getElementById('vehicleValue').value) || 0;
+      var driverAge = parseInt(document.getElementById('driverAge').value) || 35;
+      var annualMileage = parseFloat(document.getElementById('annualMileage').value) || 0;
+      var coverageType = document.getElementById('coverageType').value;
+      var deductible = parseInt(document.getElementById('deductible').value) || 500;
+      var drivingRecord = document.getElementById('drivingRecord').value;
+      var creditScore = document.getElementById('creditScore').value;
+
+      // --- Base liability premium ---
+      // National average liability-only is roughly $500-$700/year
+      var baseLiability = 600;
+
+      // --- Age factor ---
+      // Young drivers (16-19) pay ~2.5x, 20-24 pay ~1.6x, 25-29 pay ~1.15x
+      // 30-65 is baseline (1.0), 66-75 is ~1.1x, 76+ is ~1.3x
+      var ageFactor = 1.0;
+      if (driverAge < 20) {
+        ageFactor = 2.5;
+      } else if (driverAge < 25) {
+        ageFactor = 1.6;
+      } else if (driverAge < 30) {
+        ageFactor = 1.15;
+      } else if (driverAge <= 65) {
+        ageFactor = 1.0;
+      } else if (driverAge <= 75) {
+        ageFactor = 1.1;
+      } else {
+        ageFactor = 1.3;
+      }
+
+      // --- Mileage factor ---
+      // Under 5000: 0.85, 5000-7500: 0.9, 7500-10000: 0.95, 10000-15000: 1.0
+      // 15000-20000: 1.1, 20000-30000: 1.2, 30000+: 1.35
+      var mileageFactor = 1.0;
+      if (annualMileage < 5000) {
+        mileageFactor = 0.85;
+      } else if (annualMileage < 7500) {
+        mileageFactor = 0.90;
+      } else if (annualMileage < 10000) {
+        mileageFactor = 0.95;
+      } else if (annualMileage <= 15000) {
+        mileageFactor = 1.0;
+      } else if (annualMileage <= 20000) {
+        mileageFactor = 1.10;
+      } else if (annualMileage <= 30000) {
+        mileageFactor = 1.20;
+      } else {
+        mileageFactor = 1.35;
+      }
+
+      // --- Driving record factor ---
+      var recordFactor = 1.0;
+      if (drivingRecord === 'clean') {
+        recordFactor = 1.0;
+      } else if (drivingRecord === '1accident') {
+        recordFactor = 1.35;
+      } else if (drivingRecord === '2accidents') {
+        recordFactor = 1.85;
+      } else if (drivingRecord === 'dui') {
+        recordFactor = 2.5;
+      }
+
+      // --- Credit score factor ---
+      var creditFactor = 1.0;
+      if (creditScore === 'excellent') {
+        creditFactor = 0.85;
+      } else if (creditScore === 'good') {
+        creditFactor = 1.0;
+      } else if (creditScore === 'fair') {
+        creditFactor = 1.25;
+      } else if (creditScore === 'poor') {
+        creditFactor = 1.55;
+      }
+
+      // --- Deductible factor (affects collision/comp portion) ---
+      var deductibleFactor = 1.0;
+      if (deductible === 250) {
+        deductibleFactor = 1.20;
+      } else if (deductible === 500) {
+        deductibleFactor = 1.0;
+      } else if (deductible === 1000) {
+        deductibleFactor = 0.82;
+      } else if (deductible === 2000) {
+        deductibleFactor = 0.68;
+      }
+
+      // --- Calculate liability portion ---
+      // Liability is affected by age, mileage, record, credit
+      var liabilityAnnual = baseLiability * ageFactor * mileageFactor * recordFactor * creditFactor;
+
+      // --- Calculate collision + comprehensive portion ---
+      // Based on vehicle value: roughly 3.5% of value for collision, 1.5% for comprehensive
+      // These are affected by deductible, age, mileage, record, credit
+      var collisionBase = vehicleValue * 0.035;
+      var compBase = vehicleValue * 0.015;
+      var collisionAnnual = 0;
+      var compAnnual = 0;
+
+      if (coverageType === 'collision' || coverageType === 'full') {
+        collisionAnnual = collisionBase * deductibleFactor * ageFactor * mileageFactor * recordFactor * creditFactor;
+        compAnnual = compBase * deductibleFactor * ageFactor * creditFactor;
+      }
+
+      // Full coverage adds higher liability limits (roughly 15% more on liability)
+      if (coverageType === 'full') {
+        liabilityAnnual *= 1.15;
+      }
+
+      // --- Total annual premium ---
+      var totalAnnual = liabilityAnnual + collisionAnnual + compAnnual;
+      var totalMonthly = totalAnnual / 12;
+
+      // --- Potential savings with higher deductible ---
+      // Calculate what premium would be with the next higher deductible
+      var nextDeductibleFactor = 1.0;
+      var savings = 0;
+      if (coverageType !== 'liability') {
+        if (deductible === 250) {
+          nextDeductibleFactor = 1.0; // savings going from $250 to $500
+        } else if (deductible === 500) {
+          nextDeductibleFactor = 0.82; // savings going from $500 to $1000
+        } else if (deductible === 1000) {
+          nextDeductibleFactor = 0.68; // savings going from $1000 to $2000
+        } else {
+          nextDeductibleFactor = 0.68; // already at highest
+        }
+
+        if (deductible < 2000) {
+          var currentCollComp = (collisionBase * deductibleFactor + compBase * deductibleFactor) * ageFactor * mileageFactor * recordFactor * creditFactor;
+          var nextCollComp = (collisionBase * nextDeductibleFactor + compBase * nextDeductibleFactor) * ageFactor * mileageFactor * recordFactor * creditFactor;
+          savings = currentCollComp - nextCollComp;
+          if (savings < 0) savings = 0;
+        }
+      }
+
+      // --- Update the DOM ---
+      document.getElementById('monthlyPremium').textContent = fmt(totalMonthly);
+      document.getElementById('annualPremium').textContent = fmt(totalAnnual);
+      document.getElementById('liabilityCost').textContent = fmt(liabilityAnnual);
+      document.getElementById('collisionCost').textContent = fmt(collisionAnnual + compAnnual);
+      document.getElementById('potentialSavings').textContent = savings > 0 ? fmt(savings) + '/yr' : '$0';
+    }
+
+    // Attach event listeners to all inputs
+    var ids = ['vehicleValue', 'driverAge', 'annualMileage', 'coverageType', 'deductible', 'drivingRecord', 'creditScore'];
+    ids.forEach(function(id) {
+      var el = document.getElementById(id);
+      el.addEventListener('input', calc);
+      el.addEventListener('change', calc);
+    });
+
+    // Initial calculation
+    calc();
+  })();
+  </script>
+</body>
+</html>
