@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Server-side API code (deployed separately, not public)
+api/
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+*.cert
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Node
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+*.bak
